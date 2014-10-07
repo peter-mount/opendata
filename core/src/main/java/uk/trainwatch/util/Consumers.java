@@ -205,6 +205,98 @@ public final class Consumers
     }
 
     /**
+     * Similar to {@link #andThen(java.util.function.Consumer...)} this will return a composed {@link Consumer} that
+     * performs in sequence each operation passed in {@code consumers}. Unlike the other method each consumer will be
+     * guarded, so that if one fails it does not cause processing to stop and subsequent consumers will still be
+     * executed.
+     * <p>
+     * Note: If no consumers are passed then this will return a sink consumer. If just 1 consumer is passed then we will
+     * return just that consumer.
+     * <p>
+     * @param <T>       Type
+     * @param consumers one or more Consumers
+     * <p>
+     * @return
+     */
+    public static <T> Consumer<T> andThenGuarded( Consumer<T>... consumers )
+    {
+        return andThenGuarded( LOG, consumers );
+    }
+
+    /**
+     * Similar to {@link #andThen(java.util.function.Consumer...)} this will return a composed {@link Consumer} that
+     * performs in sequence each operation passed in {@code consumers}. Unlike the other method each consumer will be
+     * guarded, so that if one fails it does not cause processing to stop and subsequent consumers will still be
+     * executed.
+     * <p>
+     * Note: If no consumers are passed then this will return a sink consumer. If just 1 consumer is passed then we will
+     * return just that consumer.
+     * <p>
+     * @param <T>       Type
+     * @param log       Logger to log any Throwable's
+     * @param consumers one or more Consumers
+     * <p>
+     * @return
+     */
+    public static <T> Consumer<T> andThenGuarded( Logger log, Consumer<T>... consumers )
+    {
+        Objects.requireNonNull( log );
+        if( consumers == null || consumers.length == 0 )
+        {
+            return sink();
+        }
+
+        Consumer<T> c = consumers[0];
+        for( int i = 1; i < consumers.length; i++ )
+        {
+            c = c.andThen( guard( log, consumers[i] ) );
+        }
+        return c;
+    }
+
+    /**
+     * Similar to {@link #andThen(java.util.function.Consumer...)} this will return a composed {@link Consumer} that
+     * performs in sequence each operation passed in {@code consumers}. Unlike the other method each consumer will be
+     * guarded, so that if one fails it does not cause processing to stop and subsequent consumers will still be
+     * executed.
+     * <p>
+     * Note: If no consumers are passed then this will return a sink consumer. If just 1 consumer is passed then we will
+     * return just that consumer.
+     * <p>
+     * @param <T>       Type
+     * @param name      Logger to log any Throwable's
+     * @param consumers one or more Consumers
+     * <p>
+     * @return
+     */
+    public static <T> Consumer<T> andThenGuarded( String name, Consumer<T>... consumers )
+    {
+        Objects.requireNonNull( name );
+        return andThenGuarded( Logger.getLogger( name ), consumers );
+    }
+
+    /**
+     * Similar to {@link #andThen(java.util.function.Consumer...)} this will return a composed {@link Consumer} that
+     * performs in sequence each operation passed in {@code consumers}. Unlike the other method each consumer will be
+     * guarded, so that if one fails it does not cause processing to stop and subsequent consumers will still be
+     * executed.
+     * <p>
+     * Note: If no consumers are passed then this will return a sink consumer. If just 1 consumer is passed then we will
+     * return just that consumer.
+     * <p>
+     * @param <T>       Type
+     * @param clazz     Logger to log any Throwable's
+     * @param consumers one or more Consumers
+     * <p>
+     * @return
+     */
+    public static <T> Consumer<T> andThenGuarded( Class clazz, Consumer<T>... consumers )
+    {
+        Objects.requireNonNull( clazz );
+        return andThenGuarded( clazz.getName(), consumers );
+    }
+
+    /**
      * Wraps a consumer with a guard so that any {@link Throwable} thrown is caught and logged but not passed up to the
      * caller.
      * <p>

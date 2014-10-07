@@ -8,6 +8,7 @@ package uk.trainwatch.util;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -145,7 +146,7 @@ public class Streams
      */
     public static <T> Consumer<T> consumerStream( Consumer<Stream<T>> factory )
     {
-        return consumerStream( new BlockingSupplier<>(), factory );
+        return consumerStream( new BlockingSupplierConsumer<>(), factory );
     }
 
     /**
@@ -181,28 +182,59 @@ public class Streams
      */
     public static <T> Consumer<T> consumerStream( int maxSize, Consumer<Stream<T>> factory )
     {
-        return consumerStream( new BlockingSupplier<>( maxSize ), factory );
+        return consumerStream( new BlockingSupplierConsumer<>( maxSize ), factory );
     }
 
-    private static <T> Consumer<T> consumerStream( final BlockingSupplier<T> supplier, Consumer<Stream<T>> factory )
+    private static <T> Consumer<T> consumerStream( final BlockingSupplierConsumer<T> supplier, Consumer<Stream<T>> factory )
     {
-        // Create the stream and run the factory in a background thread so that we don't block the caller.
-        DaemonThreadFactory.INSTANCE.newThread( () ->
-        {
-            Stream<T> s = Stream.generate( supplier );
-            try
-            {
-                factory.accept( s );
-            }
-            finally
-            {
-                supplier.setInvalid();
-            }
-        } ).
-                start();
+        supplierStream( supplier, factory );
 
         // wrap the supplier so no one can actually get at the underlying BlockingSupplier
         return t -> supplier.accept( t );
     }
 
+    /**
+     * Creates a stream in a background thread which will be passed entries from the given {@link Supplier}.
+     * <p>
+     * The factory consumer will handle the configuration and operation of the stream. This is called once from a
+     * background thread, the passed stream being fed by the final consumer.
+     * <p>
+     * The returned Consumer will then offer the object to the stream by means of a backing queue.
+     * <p>
+     * Note: This stream is infinite so you cannot do most operations. Ones that are safe are:
+     * <p>
+     * {@link Stream#filter(java.util.function.Predicate)},
+     * {@link Stream#forEach(java.util.function.Consumer)},
+     * {@link Stream#map(java.util.function.Function)},
+     * {@link Stream#mapToDouble(java.util.function.ToDoubleFunction)},
+     * {@link Stream#mapToInt(java.util.function.ToIntFunction)},
+     * {@link Stream#mapToLong(java.util.function.ToLongFunction)},
+     * {@link Stream#peek(java.util.function.Consumer)}.
+     * <p>
+     * If you want a proper stream, then in the {@link Stream#forEach(java.util.function.Consumer)} consumer create a
+     * new stream based on the data within that individual "message" and then use
+     * {@link Stream#flatMap(java.util.function.Function)}.
+     * <p>
+     * Once you have done that, this stream then returns to get the next element and the stream you are working on is
+     * that of the flattened stream so will be safe to use any method.
+     * <p>
+     * @param <T>     Type of the stream
+     * @param supplier Supplier that will provide 
+     * @param factory Consumer that will configure and run the stream
+     * <p>
+     * @return Consumer
+     */
+    public static <T> void supplierStream( BlockingSupplier<T> supplier, Consumer<Stream<T>> factory )
+    {
+        Thread t = DaemonThreadFactory.INSTANCE.newThread( () ->
+        {
+            Stream<T> s = Stream.generate( supplier );
+            try {
+                factory.accept( s );
+            }finally {
+                supplier.setInvalid();
+            }
+        } );
+        t.start();
+    }
 }

@@ -53,6 +53,11 @@ public class JsonUtils
     public static final Function<String, JsonArray> parseJsonArray = parseJson.andThen( getArray );
 
     /**
+     * Function to convert a {@link JsonStructure} into a String
+     */
+    public static final Function<? super JsonStructure, String> toString = JsonUtils::encode;
+
+    /**
      * Obtain a {@link JsonStructure} from a String.
      * <p>
      * @param s String
