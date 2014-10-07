@@ -223,7 +223,7 @@ public final class Consumers
      * caller.
      * <p>
      * @param <T> object type
-     * @param log Logger
+     * @param log Logger to log any Throwable's
      * @param c   Consumer to guard
      * <p>
      * @return new Consumer
@@ -246,6 +246,38 @@ public final class Consumers
     }
 
     /**
+     * Wraps a consumer with a guard so that any {@link Throwable} thrown is caught and logged but not passed up to the
+     * caller.
+     * <p>
+     * @param <T>  object type
+     * @param name Logger to log any Throwable's
+     * @param c    Consumer to guard
+     * <p>
+     * @return new Consumer
+     */
+    public static <T> Consumer<T> guard( String name, Consumer<T> c )
+    {
+        Objects.requireNonNull( name );
+        return guard( Logger.getLogger( name ), c );
+    }
+
+    /**
+     * Wraps a consumer with a guard so that any {@link Throwable} thrown is caught and logged but not passed up to the
+     * caller.
+     * <p>
+     * @param <T>   object type
+     * @param clazz Logger to log any Throwable's
+     * @param c     Consumer to guard
+     * <p>
+     * @return new Consumer
+     */
+    public static <T> Consumer<T> guard( Class clazz, Consumer<T> c )
+    {
+        Objects.requireNonNull( clazz );
+        return guard( clazz.getName(), c );
+    }
+
+    /**
      * Wraps a {@link Consumer} so that it's run within an {@link Executor}.
      * <p>
      * @param <T> Type of consumed object
@@ -254,14 +286,15 @@ public final class Consumers
      * <p>
      * @return Consumer
      */
-    public static <T> Consumer<T> threadedConsumer( Executor e, Consumer<T> c )
+    public static <T> Consumer<T> fork( Executor e, Consumer<T> c )
     {
         return t -> e.execute( () -> c.accept( t ) );
     }
 
     /**
-     * Wraps a {@link Consumer} so that it's run within an cached thread pool. This pool is unique to this single
-     * consumer.
+     * Wraps a {@link Consumer} so that it's run within the main cached thread pool.
+     * <p>
+     * Use this for normal use. For intensive work use {@link #forkWorker(java.util.function.Consumer)} instead.
      * <p>
      * @param <T> Type of consumed object
      * @param c   Consumer to wrap
@@ -270,24 +303,28 @@ public final class Consumers
      * <p>
      * @see Executors#newCachedThreadPool()
      */
-    public static <T> Consumer<T> cachedThreadPoolConsumer( Consumer<T> c )
+    public static <T> Consumer<T> fork( Consumer<T> c )
     {
-        return threadedConsumer( Executors.newCachedThreadPool( DaemonThreadFactory.INSTANCE ), c );
+        return Consumers.fork( DaemonThreadFactory.INSTANCE.getCachedExecutor(), c );
     }
 
     /**
-     * Wraps a {@link Consumer} so that it's run within a a single thread.
+     * Wraps a {@link Consumer} so that it's run within the main work-stealing thread pool which is limited to the
+     * number of processors on the system.
+     * <p>
+     * Use this for intensive work as it will keep CPU load to reasonable amounts as it bases it's thread pool size to
+     * the number of processors on the system.
      * <p>
      * @param <T> Type of consumed object
-     * @param e   Executor to use
      * @param c   Consumer to wrap
      * <p>
      * @return Consumer
      * <p>
-     * @see Executors#newSingleThreadExecutor()
+     * @see Executors#newCachedThreadPool()
      */
-    public static <T> Consumer<T> singleThreadConsumer( Consumer<T> c )
+    public static <T> Consumer<T> forkWorker( Consumer<T> c )
     {
-        return threadedConsumer( Executors.newSingleThreadExecutor( DaemonThreadFactory.INSTANCE ), c );
+        return Consumers.fork( DaemonThreadFactory.INSTANCE.getWorkExecutor(), c );
     }
+
 }
