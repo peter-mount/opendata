@@ -73,6 +73,18 @@ public class FileRecorder<T>
     }
 
     /**
+     * Create a consumer that will append the given String to a file.
+     * <p>
+     * @param pathMapper mapping function to determine the path based on the type
+     * <p>
+     * @return consumer
+     */
+    public static Consumer<String> recordTo( final Function<String, Path> pathMapper )
+    {
+        return recordTo( pathMapper, Function.identity() );
+    }
+
+    /**
      * Construct a FileRecorder that will create the file if it does not exist, otherwise it will append to it.
      * <p>
      * @param pathMapper mapping function that can generate a Path based on the value being passed

@@ -1,2 +1,6 @@
-/feeder/src/main/java/uk/trainwatch/feeder/Main.java
 /rabbitmq/target/
+/nrod-core/target/
+/nrod-trust/target/
+/trainwatch/src/main/java/uk/trainwatch/trainwatch/Main.java
+/analysis/target/
+/archiver/target/

@@ -7,12 +7,12 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <groupId>uk.trainwatch.apps</groupId>
-    <artifactId>nrod-feeder</artifactId>
+    <artifactId>archiver</artifactId>
     <packaging>jar</packaging>
     
-    <name>Open Data Network Rail Feed Application</name>
+    <name>Open Data Archiver Application</name>
     
-    <description>Standalone application to connect to Network Rail</description>
+    <description>Archives raw data as received from Network Rail for backup purposes</description>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -40,7 +40,7 @@
             <artifactId>opendata-rabbitmq</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-    
+        
     </dependencies>
 
     <build>
@@ -55,7 +55,7 @@
                         <index>true</index>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>uk.trainwatch.feeder.Main</mainClass>
+                            <mainClass>uk.trainwatch.archiver.Main</mainClass>
                         </manifest>
                         <manifestEntries>
                             <mode>development</mode>
@@ -85,5 +85,5 @@
             </plugin>
         </plugins>
     </build>
-    
+
 </project>

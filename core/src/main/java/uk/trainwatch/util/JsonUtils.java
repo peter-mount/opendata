@@ -8,6 +8,10 @@ package uk.trainwatch.util;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigInteger;
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -303,6 +307,87 @@ public class JsonUtils
                 return defaultValue;
             default:
                 return Boolean.parseBoolean( v.toString() );
+        }
+    }
+
+    public static Date getDate( JsonValue v )
+    {
+        if( v == null )
+        {
+            return null;
+        }
+        switch( v.getValueType() )
+        {
+            case NUMBER:
+                return new Date( ((JsonNumber) v).longValue() );
+            case STRING:
+                return Date.valueOf( ((JsonString) v).getString() );
+            case TRUE:
+            case FALSE:
+            case NULL:
+                return null;
+            default:
+                return Date.valueOf( v.toString() );
+        }
+    }
+
+    public static Date getDate( JsonObject map, String key )
+    {
+        return getDate( map.get( key ) );
+    }
+
+    public static Time getTime( JsonValue v )
+    {
+        if( v == null )
+        {
+            return null;
+        }
+        switch( v.getValueType() )
+        {
+            case NUMBER:
+                return new Time( ((JsonNumber) v).longValue() );
+            case STRING:
+                return Time.valueOf( ((JsonString) v).getString() );
+            case TRUE:
+            case FALSE:
+            case NULL:
+                return null;
+            default:
+                return Time.valueOf( v.toString() );
+        }
+    }
+
+    public static Time getTime( JsonObject map, String key )
+    {
+        return getTime( map.get( key ) );
+    }
+
+    public static Timestamp getTimestamp( JsonObject map, String key )
+    {
+        String dt = getString( map, key );
+        if( dt == null || dt.isEmpty() )
+        {
+            return null;
+        }
+
+        try
+        {
+            return new Timestamp( Long.parseLong( dt ) );
+        }
+        catch( NumberFormatException nfe )
+        {
+            // The database can send us time with a timezone offset so strip it out
+            // FIXME later account for this or better still implement proper timestamp handling
+            int i = dt.indexOf( "+" );
+            if( i == -1 )
+            {
+                i = dt.indexOf( "-" );
+            }
+            if( i > -1 )
+            {
+                dt = dt.substring( 0, i );
+            }
+            return Timestamp.valueOf( dt );
         }
     }
 

@@ -9,11 +9,15 @@
     <name>Open Data Parent</name>
     
     <modules>
+        <module>analysis</module>
         <module>apachemq</module>
+        <module>archiver</module>
         <module>core</module>
         <module>nrod-rtppm</module>
         <module>feeder</module>
         <module>rabbitmq</module>
+        <module>nrod-trust</module>
+        <module>nrod-core</module>
     </modules>
     
     <properties>

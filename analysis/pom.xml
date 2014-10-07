@@ -7,12 +7,12 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <groupId>uk.trainwatch.apps</groupId>
-    <artifactId>nrod-feeder</artifactId>
+    <artifactId>analysis</artifactId>
     <packaging>jar</packaging>
     
-    <name>Open Data Network Rail Feed Application</name>
+    <name>Open Data Analysis Application</name>
     
-    <description>Standalone application to connect to Network Rail</description>
+    <description>Processes information from Open Data sources and provides realtime Network Rail Feed Application</description>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -40,7 +40,19 @@
             <artifactId>opendata-rabbitmq</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-    
+        
+        <dependency>
+            <groupId>uk.trainwatch.nrod</groupId>
+            <artifactId>nrod-rtppm</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>uk.trainwatch.nrod</groupId>
+            <artifactId>nrod-trust</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        
     </dependencies>
 
     <build>
@@ -85,5 +97,5 @@
             </plugin>
         </plugins>
     </build>
-    
+
 </project>
