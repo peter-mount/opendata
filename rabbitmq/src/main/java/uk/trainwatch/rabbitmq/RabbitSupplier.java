@@ -169,19 +169,9 @@ public class RabbitSupplier
     {
         if( channel != null )
         {
-            try
-            {
-                LOG.log( Level.INFO, () -> "Closing channel " + queueName );
-                channel.close();
-            }
-            catch( IOException ex )
-            {
-                // ignore
-            }
-            finally
-            {
-                channel = null;
-            }
+            LOG.log( Level.INFO, () -> "Closing channel " + queueName );
+            connection.close( this, channel );
+            channel = null;
         }
     }
 
@@ -191,6 +181,8 @@ public class RabbitSupplier
         LOG.log( Level.INFO, () -> "Connecting to " + queueName );
 
         channel = connection.getChannel( this );
+
+        LOG.log( Level.INFO, () -> "Creating " + queueName );
 
         // When declaring the queue, if we are durable then don't auto-delete, but auto-delete when we're not
         channel.queueDeclare( queueName, durable, false, !durable, queueProperties );
@@ -259,4 +251,32 @@ public class RabbitSupplier
         return supplier.get();
     }
 
+    @Override
+    public int hashCode()
+    {
+        int hash = 3;
+        hash = 17 * hash + Objects.hashCode( this.queueName );
+        return hash;
+    }
+
+    @Override
+    public boolean equals( Object obj )
+    {
+        if( obj == null )
+        {
+            return false;
+        }
+        if( getClass() != obj.getClass() )
+        {
+            return false;
+        }
+        final RabbitSupplier other = (RabbitSupplier) obj;
+        if( !Objects.equals( this.queueName, other.queueName ) )
+        {
+            return false;
+        }
+        return true;
+    }
+
+    
 }

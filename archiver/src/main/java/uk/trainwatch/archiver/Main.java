@@ -24,6 +24,7 @@ import uk.trainwatch.io.DatePathMapper;
 import uk.trainwatch.io.FileRecorder;
 import uk.trainwatch.rabbitmq.RabbitConnection;
 import uk.trainwatch.rabbitmq.RabbitMQ;
+import uk.trainwatch.util.Consumers;
 import uk.trainwatch.util.app.Application;
 import static uk.trainwatch.util.app.Application.loadProperties;
 
@@ -72,14 +73,14 @@ public class Main
         Function<String, Path> trustmapper = new DatePathMapper( "/usr/local/networkrail", "trust/raw", true );
         RabbitMQ.queueDurableStream( rabbitmq, "nrod.trust.archiver", "nr.trust.mvtall",
                                      s -> s.map( RabbitMQ.toString ).
-                                     forEach( FileRecorder.recordTo( trustmapper ) )
+                                     forEach( Consumers.guard( LOG, FileRecorder.recordTo( trustmapper ) ) )
         );
 
         // Record raw data to disk - mvtall
         Function<String, Path> rtppmMapper = new DatePathMapper( "/usr/local/networkrail", "rtppm/raw" );
         RabbitMQ.queueDurableStream( rabbitmq, "nrod.rtppm.archiver", "nr.rtppm",
                                      s -> s.map( RabbitMQ.toString ).
-                                     forEach( FileRecorder.recordTo( rtppmMapper ) )
+                                     forEach( Consumers.guard( LOG, FileRecorder.recordTo( rtppmMapper ) ) )
         );
     }
 

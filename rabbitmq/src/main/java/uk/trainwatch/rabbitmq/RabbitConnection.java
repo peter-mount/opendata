@@ -13,6 +13,8 @@ import java.io.UncheckedIOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A representation of a connection to RabbitMQ
@@ -22,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RabbitConnection
 {
 
+    private static final Logger LOG = Logger.getLogger( RabbitConnection.class.getName() );
     private final String username;
     private final String password;
     private final String virtualHost;
@@ -115,6 +118,7 @@ public class RabbitConnection
             close();
         }
 
+        LOG.log( Level.INFO, "building connection" );
         ConnectionFactory factory = new ConnectionFactory();
         factory.setUsername( username );
         factory.setPassword( password );
@@ -129,6 +133,8 @@ public class RabbitConnection
         }
 
         channels.clear();
+
+        LOG.log( Level.INFO, "creating connection" );
         connection = factory.newConnection();
     }
 
@@ -142,20 +148,52 @@ public class RabbitConnection
      * <p>
      * @return Channel for this key, can change over time
      */
-    public Channel getChannel( Object key )
+    public synchronized Channel getChannel( Object key )
     {
-        return channels.computeIfAbsent( key, k ->
-                                 {
-                                     try
-                                     {
-                                         return getConnection().
-                                                 createChannel();
-                                     }
-                                     catch( IOException ex )
-                                     {
-                                         throw new UncheckedIOException( ex );
-                                     }
-        } );
+        Channel channel = null;
+        do
+        {
+            channel = channels.computeIfAbsent( key, k ->
+                                        {
+                                            try
+                                            {
+                                                LOG.log( Level.INFO, "creating channel" );
+                                                return getConnection().
+                                                        createChannel();
+                                            }
+                                            catch( IOException ex )
+                                            {
+                                                throw new UncheckedIOException( ex );
+                                            }
+            } );
+            if( channel != null && !channel.isOpen() )
+            {
+                LOG.log( Level.INFO, "discarding dead channel" );
+
+                channels.remove( key );
+                channel = null;
+            }
+        }
+        while( channel == null );
+        LOG.log( Level.INFO, "returned channel " + channel );
+
+        return channel;
+    }
+
+    public void close( Object key, Channel channel )
+    {
+        if( channels.remove( key, channel ) )
+        {
+            try
+            {
+                channel.close();
+            }
+            catch( IOException ex )
+            {
+                Logger.getLogger( RabbitConnection.class.getName() ).
+                        log( Level.SEVERE, null, ex );
+            }
+        }
     }
 
     /**
@@ -163,6 +201,7 @@ public class RabbitConnection
      */
     public synchronized void close()
     {
+        LOG.log( Level.INFO, "closing connection" );
         try
         {
             try

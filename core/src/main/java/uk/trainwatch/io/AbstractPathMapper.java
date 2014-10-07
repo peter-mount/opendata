@@ -63,7 +63,7 @@ public abstract class AbstractPathMapper<T>
     protected final File getFile( final LocalDateTime dateTime, final boolean hours )
     {
         File dir = getDir( dateTime, hours );
-        int id = hours ? dateTime.getMinute() : dateTime.getHour();
+        int id = hours ? dateTime.getMinute() : dateTime.getDayOfMonth();
         return new File( dir, id + suffix );
     }
 
