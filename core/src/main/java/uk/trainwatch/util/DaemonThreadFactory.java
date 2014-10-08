@@ -5,9 +5,13 @@
  */
 package uk.trainwatch.util;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -34,6 +38,7 @@ public enum DaemonThreadFactory
      * Work stealing pool which will use all available processors
      */
     private final Executor workExecutor = Executors.newWorkStealingPool();
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool( 4, this );
 
     /**
      * Returns the main Executor.
@@ -54,6 +59,26 @@ public enum DaemonThreadFactory
     public Executor getWorkExecutor()
     {
         return workExecutor;
+    }
+
+    public ScheduledFuture<?> schedule( Runnable command, long delay, TimeUnit unit )
+    {
+        return scheduler.schedule( command, delay, unit );
+    }
+
+    public <V> ScheduledFuture<V> schedule( Callable<V> callable, long delay, TimeUnit unit )
+    {
+        return scheduler.schedule( callable, delay, unit );
+    }
+
+    public ScheduledFuture<?> scheduleAtFixedRate( Runnable command, long initialDelay, long period, TimeUnit unit )
+    {
+        return scheduler.scheduleAtFixedRate( command, initialDelay, period, unit );
+    }
+
+    public ScheduledFuture<?> scheduleWithFixedDelay( Runnable command, long initialDelay, long delay, TimeUnit unit )
+    {
+        return scheduler.scheduleWithFixedDelay( command, initialDelay, delay, unit );
     }
 
     @Override

@@ -18,6 +18,7 @@ package uk.trainwatch.archiver;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Properties;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import uk.trainwatch.io.DatePathMapper;
@@ -27,6 +28,7 @@ import uk.trainwatch.rabbitmq.RabbitMQ;
 import uk.trainwatch.util.Consumers;
 import uk.trainwatch.util.app.Application;
 import static uk.trainwatch.util.app.Application.loadProperties;
+import uk.trainwatch.util.counter.RateMonitor;
 
 /**
  *
@@ -69,19 +71,9 @@ public class Main
     protected void setupApplication()
             throws IOException
     {
-        // Record raw data to disk - mvtall
-        Function<String, Path> trustmapper = new DatePathMapper( "/usr/local/networkrail", "trust/raw", true );
-        RabbitMQ.queueDurableStream( rabbitmq, "nrod.trust.archiver", "nr.trust.mvtall",
-                                     s -> s.map( RabbitMQ.toString ).
-                                     forEach( Consumers.guard( LOG, FileRecorder.recordTo( trustmapper ) ) )
-        );
-
-        // Record raw data to disk - mvtall
-        Function<String, Path> rtppmMapper = new DatePathMapper( "/usr/local/networkrail", "rtppm/raw" );
-        RabbitMQ.queueDurableStream( rabbitmq, "nrod.rtppm.archiver", "nr.rtppm",
-                                     s -> s.map( RabbitMQ.toString ).
-                                     forEach( Consumers.guard( LOG, FileRecorder.recordTo( rtppmMapper ) ) )
-        );
+        TrustMvtAllArchiver.setup( rabbitmq );
+        RTPPMArchiver.setup( rabbitmq );
+        ReportArchiver.setup( rabbitmq );
     }
 
 }

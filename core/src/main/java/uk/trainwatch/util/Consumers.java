@@ -134,6 +134,19 @@ public final class Consumers
     }
 
     /**
+     * Ensures that you don't have a null consumer.
+     * <p>
+     * @param <T> data type
+     * @param c   Consumer
+     * <p>
+     * @return c or a sink if c is null
+     */
+    public static <T> Consumer<T> ensureNotNull( Consumer<T> c )
+    {
+        return c == null ? sink() : c;
+    }
+
+    /**
      * Consumer which will log the String passed to it
      * <p>
      * @param logger Logger

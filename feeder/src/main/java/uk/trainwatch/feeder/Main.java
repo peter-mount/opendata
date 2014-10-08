@@ -18,10 +18,11 @@ package uk.trainwatch.feeder;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.stream.Stream;
-import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonStructure;
 import uk.trainwatch.apachemq.RemoteActiveMQConnection;
 import uk.trainwatch.rabbitmq.RabbitConnection;
 import uk.trainwatch.rabbitmq.RabbitMQ;
@@ -29,6 +30,7 @@ import uk.trainwatch.util.Consumers;
 import uk.trainwatch.util.JMS;
 import uk.trainwatch.util.JsonUtils;
 import uk.trainwatch.util.app.Application;
+import uk.trainwatch.util.counter.RateMonitor;
 
 /**
  * Simple standalone application that acts as a bridge between Network Rail and RabbitMQ
@@ -89,26 +91,34 @@ public class Main
             throws IOException
     {
         // RTPPM is received and submitted as is to RabbitMQ
+        Consumer<String> rtppmMonitor = RateMonitor.log( LOG, "record nr.trust.mvtall" );
+        Consumer<String> rtppmPublisher = RabbitMQ.stringConsumer( rabbitmq, "nr.rtppm" );
         activemq.registerTopicConsumer( "RTPPM_ALL", Consumers.guard( msg -> Stream.of( msg ).
                                         map( JMS.toText ).
                                         filter( Objects::nonNull ).
-                                        forEach( RabbitMQ.stringConsumer( rabbitmq, "nr.rtppm" ) )
+                                        peek( rtppmMonitor ).
+                                        forEach( rtppmPublisher )
                                 ) );
 
         // Trust movements - here we simply push everything to rabbit, once for the raw message and then we
         // split the message into it's individual components
+        Consumer<String> rawMonitor = RateMonitor.log( LOG, "recieve nr.trust.mvt raw" );
+        Consumer<String> rawPublisher = RabbitMQ.stringConsumer( rabbitmq, "nr.trust.mvtall" );
+        Consumer<JsonObject> mvtMonitor = RateMonitor.log( LOG, "recieve nr.trust.mvt movement" );
+        Consumer<? super JsonStructure> mvtPublisher = RabbitMQ.jsonConsumer( rabbitmq, "nr.trust.mvt" );
         activemq.registerTopicConsumer( "TRAIN_MVT_ALL_TOC", Consumers.guard( msg -> Stream.of( msg ).
                                         map( JMS.toText ).
                                         filter( Objects::nonNull ).
                                         // peek will submit the raw text to rabbit
-                                        peek( RabbitMQ.stringConsumer( rabbitmq, "nr.trust.mvtall" ) ).
+                                        peek( rawMonitor ).
+                                        peek( rawPublisher ).
                                         // Parse and then unbatch
                                         map( JsonUtils.parseJsonArray ).
-                                        filter( Objects::nonNull ).
-                                        flatMap( JsonArray::stream ).
+                                        flatMap( JsonUtils::stream ).
                                         map( JsonObject.class::cast ).
                                         // Pass to the main route
-                                        forEach( RabbitMQ.jsonConsumer( rabbitmq, "nr.trust.mvt" ) )
+                                        peek( mvtMonitor ).
+                                        forEach( mvtPublisher )
                                 ) );
     }
 

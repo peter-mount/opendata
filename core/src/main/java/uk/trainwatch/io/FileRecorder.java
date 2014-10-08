@@ -113,16 +113,23 @@ public class FileRecorder<T>
     @Override
     public void accept( T t )
     {
-        try
+        if( t != null )
         {
-            final Path path = fileNameMapper.apply( t );
-            final String record = encoder.apply( t );
+            try
+            {
+                final Path path = fileNameMapper.apply( t );
+                final String record = encoder.apply( t );
 
-            Files.write( path, record.getBytes( Charset.defaultCharset() ), options );
-        }
-        catch( IOException ex )
-        {
-            LOG.log( Level.SEVERE, null, ex );
+                if( path != null && encoder != null )
+                {
+                    LOG.log( Level.FINE, () -> "Writing to " + path );
+                    Files.write( path, record.getBytes( Charset.defaultCharset() ), options );
+                }
+            }
+            catch( IOException ex )
+            {
+                LOG.log( Level.SEVERE, null, ex );
+            }
         }
     }
 

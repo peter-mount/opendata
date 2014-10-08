@@ -38,17 +38,17 @@ public abstract class AbstractPathMapper<T>
         this.suffix = suffix == null ? "" : suffix;
     }
 
-    protected final LocalDateTime getLocalDateTime()
+    public static final LocalDateTime getLocalDateTime()
     {
         return getLocalDateTime( Instant.now() );
     }
 
-    protected final LocalDateTime getLocalDateTime( final long timestamp )
+    public static final LocalDateTime getLocalDateTime( final long timestamp )
     {
         return getLocalDateTime( Instant.ofEpochMilli( timestamp ) );
     }
 
-    protected final LocalDateTime getLocalDateTime( final Instant instant )
+    public static final LocalDateTime getLocalDateTime( final Instant instant )
     {
         Clock clock = Clock.fixed( instant, ZoneId.of( "UTC" ) );
         return LocalDateTime.now( clock );

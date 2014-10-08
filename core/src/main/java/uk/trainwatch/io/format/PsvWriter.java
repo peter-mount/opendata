@@ -18,6 +18,7 @@ package uk.trainwatch.io.format;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -155,5 +156,12 @@ public class PsvWriter<T extends PsvWritable>
             lines.forEach( pw::println );
         }
         return this;
+    }
+
+    public String write()
+    {
+        StringWriter w = new StringWriter();
+        write( w );
+        return w.toString();
     }
 }

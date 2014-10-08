@@ -1,8 +1,5 @@
 package uk.trainwatch.nrod.trust.model;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Map;
 import java.util.function.Function;
 import javax.json.JsonObject;
 import uk.trainwatch.util.JsonUtils;

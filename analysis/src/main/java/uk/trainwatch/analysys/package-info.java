@@ -13,23 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.trainwatch.archiver;
-
-import java.util.function.Function;
-import javafx.scene.shape.Path;
-
 /**
- * Maps trust message to 
- * @author Peter T Mount
+ * Simple application to connect to Network Rail and feed data back to RabbitMQ
  */
-public class TrustRawPathMapper
-        implements Function<String, Path>
-{
-
-    @Override
-    public Path apply( String t )
-    {
-        throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
-    }
-
-}
+package uk.trainwatch.analysys;

@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.trainwatch.trainwatch;
+package uk.trainwatch.analysys;
 
 import java.io.IOException;
 import java.util.Properties;
 import java.util.logging.Level;
 import uk.trainwatch.rabbitmq.RabbitConnection;
-import uk.trainwatch.rabbitmq.RabbitMQ;
 import uk.trainwatch.util.app.Application;
 import static uk.trainwatch.util.app.Application.loadProperties;
 
@@ -47,10 +46,10 @@ public class Main
             throws IOException
     {
         Properties p = loadProperties( "rabbit.properties" );
+
         rabbitmq = new RabbitConnection( p.getProperty( "username" ),
                                          p.getProperty( "password" ),
-                                         p.getProperty( "host" )
-        );
+                                         p.getProperty( "host" ) );
     }
 
     @Override
@@ -64,12 +63,8 @@ public class Main
     protected void setupApplication()
             throws IOException
     {
-
-        // Record raw data to disk - mvtall
-        RabbitMQ.queueStream( rabbitmq, "nrod.trust.recorder", "nr.trust.mvt",
-                              s -> s.map( RabbitMQ.toString ).
-                              forEach( v -> System.out.printf( "==============================\n%s\n", v ) )
-        );
+        TocPerformance.setup( rabbitmq );
+        TrustDispatcher.setup( rabbitmq );
     }
 
 }

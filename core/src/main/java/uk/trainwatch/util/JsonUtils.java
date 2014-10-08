@@ -60,6 +60,7 @@ public class JsonUtils
      * Function to convert a {@link JsonStructure} into a String
      */
     public static final Function<? super JsonStructure, String> toString = JsonUtils::encode;
+    public static final Function<JsonObject, String> jsonObjectToString = JsonUtils::encode;
 
     /**
      * Obtain a {@link JsonStructure} from a String.
@@ -178,7 +179,14 @@ public class JsonUtils
                 return jn.intValue();
             case STRING:
                 JsonString s = (JsonString) v;
-                return Integer.parseInt( s.getString() );
+                try
+                {
+                    return Integer.parseInt( s.getString() );
+                }
+                catch( NumberFormatException ex )
+                {
+                    return 0;
+                }
             case TRUE:
                 return 1;
             case FALSE:
@@ -209,7 +217,14 @@ public class JsonUtils
                 return jn.longValue();
             case STRING:
                 JsonString s = (JsonString) v;
-                return Long.parseLong( s.getString() );
+                try
+                {
+                    return Long.parseLong( s.getString() );
+                }
+                catch( NumberFormatException ex )
+                {
+                    return 0L;
+                }
             case TRUE:
                 return 1L;
             case FALSE:
@@ -235,7 +250,14 @@ public class JsonUtils
                 return jn.doubleValue();
             case STRING:
                 JsonString s = (JsonString) v;
-                return Double.parseDouble( s.getString() );
+                try
+                {
+                    return Double.parseDouble( s.getString() );
+                }
+                catch( NumberFormatException ex )
+                {
+                    return 0.0;
+                }
             case TRUE:
                 return 1.0;
             case FALSE:

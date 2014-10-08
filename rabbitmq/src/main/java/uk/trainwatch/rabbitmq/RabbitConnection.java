@@ -118,7 +118,7 @@ public class RabbitConnection
             close();
         }
 
-        LOG.log( Level.INFO, "building connection" );
+        LOG.log( Level.FINE, "building connection" );
         ConnectionFactory factory = new ConnectionFactory();
         factory.setUsername( username );
         factory.setPassword( password );
@@ -134,7 +134,7 @@ public class RabbitConnection
 
         channels.clear();
 
-        LOG.log( Level.INFO, "creating connection" );
+        LOG.log( Level.FINE, "creating connection" );
         connection = factory.newConnection();
     }
 
@@ -157,7 +157,7 @@ public class RabbitConnection
                                         {
                                             try
                                             {
-                                                LOG.log( Level.INFO, "creating channel" );
+                                                LOG.log( Level.FINE, "creating channel" );
                                                 return getConnection().
                                                         createChannel();
                                             }
@@ -168,15 +168,14 @@ public class RabbitConnection
             } );
             if( channel != null && !channel.isOpen() )
             {
-                LOG.log( Level.INFO, "discarding dead channel" );
+                LOG.log( Level.FINE, "discarding dead channel" );
 
                 channels.remove( key );
                 channel = null;
             }
         }
         while( channel == null );
-        LOG.log( Level.INFO, "returned channel " + channel );
-
+        
         return channel;
     }
 
@@ -201,7 +200,7 @@ public class RabbitConnection
      */
     public synchronized void close()
     {
-        LOG.log( Level.INFO, "closing connection" );
+        LOG.log( Level.FINE, "closing connection" );
         try
         {
             try

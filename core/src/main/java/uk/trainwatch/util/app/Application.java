@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,6 +25,19 @@ public abstract class Application
     private static final Semaphore SEMAPHORE = new Semaphore( 0 );
     private static final File homeDir = new File( System.getProperty( "user.home" ) );
     private static final File confDir = new File( homeDir, ".networkrail" );
+
+    private static final String appUid = UUID.randomUUID().
+            toString().
+            substring( 0, 6 );
+
+    /**
+     * A Random ID that can be used to make queue names unique
+     * @return 
+     */
+    public static String getAppId()
+    {
+        return appUid;
+    }
 
     protected void run()
             throws IOException,
