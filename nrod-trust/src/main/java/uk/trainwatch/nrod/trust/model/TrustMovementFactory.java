@@ -17,13 +17,13 @@ import uk.trainwatch.util.JsonUtils;
  * @author Peter T Mount
  */
 public enum TrustMovementFactory
-        implements Function<JsonObject, Object>
+        implements Function<JsonObject, TrustMovement>
 {
 
     INSTANCE;
 
     @Override
-    public Object apply( JsonObject t )
+    public TrustMovement apply( JsonObject t )
     {
         if( t == null )
         {

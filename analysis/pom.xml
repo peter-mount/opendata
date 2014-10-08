@@ -67,7 +67,7 @@
                         <index>true</index>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>uk.trainwatch.feeder.Main</mainClass>
+                            <mainClass>uk.trainwatch.analysis.Main</mainClass>
                         </manifest>
                         <manifestEntries>
                             <mode>development</mode>

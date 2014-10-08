@@ -16,4 +16,4 @@
 /**
  * Simple application to connect to Network Rail and feed data back to RabbitMQ
  */
-package uk.trainwatch.analysys;
+package uk.trainwatch.analysis;

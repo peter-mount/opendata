@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.trainwatch.analysys;
+package uk.trainwatch.analysis;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -65,6 +65,7 @@ public class Main
     {
         TocPerformance.setup( rabbitmq );
         TrustDispatcher.setup( rabbitmq );
+        TrainMovementLogger.setup( rabbitmq );
     }
 
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.trainwatch.analysys.performance;
+package uk.trainwatch.analysis.performance;
 
 import java.time.LocalDateTime;
 import java.util.LongSummaryStatistics;
@@ -58,7 +58,7 @@ public class TocStanoxAllClassDelayAnalyzer
     @Override
     protected LongSummaryStatistics getStatistic( TrainMovement mvt )
     {
-        return stats.computeIfAbsent( mvt.getToc_id(), ConcurrentHashMap::new ).
+        return stats.computeIfAbsent( mvt.getToc_id(), toc -> new ConcurrentHashMap<>() ).
                 computeIfAbsent( mvt.getReporting_stanox(), stanox -> new LongSummaryStatistics() );
     }
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.trainwatch.analysys;
+package uk.trainwatch.analysis;
 
 import java.util.Map;
 import java.util.Objects;

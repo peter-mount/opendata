@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.trainwatch.analysys.performance;
+package uk.trainwatch.analysis.performance;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;

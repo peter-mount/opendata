@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.trainwatch.analysys;
+package uk.trainwatch.analysis;
 
 import java.util.Objects;
 import java.util.function.Consumer;
-import uk.trainwatch.analysys.performance.TocStanoxAllClassDelayAnalyzer;
-import uk.trainwatch.analysys.performance.TocStanoxClassDelayAnalyzer;
+import uk.trainwatch.analysis.performance.TocStanoxAllClassDelayAnalyzer;
+import uk.trainwatch.analysis.performance.TocStanoxClassDelayAnalyzer;
 import uk.trainwatch.nrod.trust.model.TrainMovement;
 import uk.trainwatch.nrod.trust.model.TrustMovementFactory;
 import uk.trainwatch.rabbitmq.RabbitConnection;

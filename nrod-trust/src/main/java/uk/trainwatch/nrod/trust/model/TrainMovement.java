@@ -18,6 +18,7 @@ import uk.trainwatch.nrod.util.TrainTime;
  * @author peter
  */
 public class TrainMovement
+        extends TrustMovement
         implements Comparable<TrainMovement>
 {
 
@@ -387,4 +388,11 @@ public class TrainMovement
     {
         return "TrainMovement{" + "event_type=" + event_type + ", gbtt_timestamp=" + gbtt_timestamp + ", current_train_id=" + current_train_id + ", delay_monitoring_point=" + delay_monitoring_point + ", reporting_stanox=" + reporting_stanox + ", actual_timestamp=" + actual_timestamp + ", platform=" + platform + ", train_terminated=" + train_terminated + ", offroute_ind=" + offroute_ind + ", train_service_code=" + train_service_code + ", toc_id=" + toc_id + ", loc_stanox=" + loc_stanox + '}';
     }
+
+    @Override
+    public void accept( TrustMovementVisitor v )
+    {
+        v.visit( this );
+    }
+    
 }

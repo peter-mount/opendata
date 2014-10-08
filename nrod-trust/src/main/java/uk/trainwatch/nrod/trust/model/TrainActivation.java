@@ -4,11 +4,7 @@
  */
 package uk.trainwatch.nrod.trust.model;
 
-import java.io.Serializable;
 import java.util.Date;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
 import uk.trainwatch.nrod.util.TrainDate;
 import uk.trainwatch.nrod.util.TrainId;
 
@@ -17,14 +13,11 @@ import uk.trainwatch.nrod.util.TrainId;
  * <p/>
  * @author peter
  */
-@XmlRootElement( name = "activation" )
-@XmlAccessorType( XmlAccessType.FIELD )
 public class TrainActivation
-        implements Serializable,
-                   Comparable<TrainActivation>
+        extends TrustMovement
+        implements Comparable<TrainActivation>
 {
 
-    private static final long serialVersionUID = -2358185935042140248L;
     private int id;
     private String schedule_source;
     private String train_file_address;
@@ -349,4 +342,11 @@ public class TrainActivation
         }
         return r;
     }
+
+    @Override
+    public void accept( TrustMovementVisitor v )
+    {
+        v.visit( this );
+    }
+    
 }
