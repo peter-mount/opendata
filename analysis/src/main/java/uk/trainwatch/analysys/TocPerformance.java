@@ -18,6 +18,7 @@ package uk.trainwatch.analysys;
 import java.util.Objects;
 import java.util.function.Consumer;
 import uk.trainwatch.analysys.performance.TocStanoxAllClassDelayAnalyzer;
+import uk.trainwatch.analysys.performance.TocStanoxClassDelayAnalyzer;
 import uk.trainwatch.nrod.trust.model.TrainMovement;
 import uk.trainwatch.nrod.trust.model.TrustMovementFactory;
 import uk.trainwatch.rabbitmq.RabbitConnection;
@@ -46,10 +47,14 @@ public class TocPerformance
      */
     private static void toc_stanox_all( RabbitConnection rabbitmq )
     {
-        // TOC/Stanox all classes
         Consumer<TrainMovement> tocStanoxAllClasses = new TocStanoxAllClassDelayAnalyzer(
                 RabbitMQ.jsonConsumer( rabbitmq, "report.perf.toc.stanox" ),
                 RabbitMQ.jsonConsumer( rabbitmq, "rt.perf.toc.stanox.all" )
+        );
+
+        Consumer<TrainMovement> tocStanoxByClasses = new TocStanoxClassDelayAnalyzer(
+                RabbitMQ.jsonConsumer( rabbitmq, "report.perf.toc.stanox.class" ),
+                RabbitMQ.jsonConsumer( rabbitmq, "rt.perf.toc.stanox.class" )
         );
 
         Consumer<TrainMovement> statisticRecorder = RateMonitor.log( TocStanoxAllClassDelayAnalyzer.class,
@@ -58,6 +63,7 @@ public class TocPerformance
         // Now link it all up & start listening for movement messages type 0003
         Consumer<TrainMovement> consumer = Consumers.andThenGuarded(
                 tocStanoxAllClasses,
+                tocStanoxByClasses,
                 statisticRecorder
         );
 
