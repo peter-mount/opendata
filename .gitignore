@@ -4,3 +4,9 @@
 /trainwatch/src/main/java/uk/trainwatch/trainwatch/Main.java
 /analysis/target/
 /archiver/target/
+/nrod/nrod-td/target/
+/brokers/apachemq/target/
+/brokers/rabbitmq/target/
+/applications/networkrail/target/
+/applications/archiver/target/
+/applications/analysis/target/

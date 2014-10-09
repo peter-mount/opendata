@@ -2,18 +2,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>uk.trainwatch</groupId>
-        <artifactId>opendata-parent</artifactId>
+        <groupId>uk.trainwatch.nrod</groupId>
+        <artifactId>nrod-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     
     <groupId>uk.trainwatch.nrod</groupId>
-    <artifactId>nrod-core</artifactId>
+    <artifactId>nrod-rtppm</artifactId>
     <packaging>jar</packaging>
     
-    <name>Open Data Network Core</name>
+    <name>Network Rail Open Data RTPPM</name>
     
-    <description>Common components like location, date &amp; time</description>
+    <description>Handles the processing of the NR RTPPM feed</description>
     
     <dependencies>
         
@@ -36,5 +36,4 @@
         </dependency>
         
     </dependencies>
-    
 </project>
