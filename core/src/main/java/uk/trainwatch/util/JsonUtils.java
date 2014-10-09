@@ -11,15 +11,18 @@ import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.Map;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.JsonString;
 import javax.json.JsonStructure;
@@ -33,6 +36,8 @@ import javax.json.JsonWriter;
  */
 public class JsonUtils
 {
+
+    private static final Logger LOG = Logger.getLogger( JsonUtils.class.getName() );
 
     /**
      * Function to convert a {@link JsonValue} to a {@link JsonArray} or null if it's not valid
@@ -401,15 +406,30 @@ public class JsonUtils
             // The database can send us time with a timezone offset so strip it out
             // FIXME later account for this or better still implement proper timestamp handling
             int i = dt.indexOf( "+" );
-            if( i == -1 )
-            {
-                i = dt.indexOf( "-" );
-            }
+//            if( i == -1 )
+//            {
+//                i = dt.lastIndexOf( "-" );
+//            }
             if( i > -1 )
             {
                 dt = dt.substring( 0, i );
             }
-            return Timestamp.valueOf( dt );
+
+            // We need a time
+            if( !dt.contains( " " ) || !dt.contains( ":" ) )
+            {
+                dt = dt + " 00:00:00";
+            }
+
+            try
+            {
+                return Timestamp.valueOf( dt );
+            }
+            catch( Exception e )
+            {
+                LOG.log( Level.SEVERE, "Timestamp " + dt, e );
+                return null;
+            }
         }
     }
 
@@ -471,4 +491,33 @@ public class JsonUtils
     {
         return computeIfPresent( o.getJsonObject( n ), s );
     }
+
+    /**
+     * Creates a {@link JsonObjectBuilder} based on the values of an existing {@link JsonObject}
+     * <p>
+     * @param o object to copy
+     * <p>
+     * @return builder populated from o
+     */
+    public static JsonObjectBuilder createObjectBuilder( JsonObject o )
+    {
+        return merge( Json.createObjectBuilder(), o );
+    }
+
+    /**
+     * Merges an existing JsonObject into a JsonBuilder
+     * <p>
+     * @param b builder to add to
+     * @param o object to merge
+     * <p>
+     * @return b
+     */
+    public static JsonObjectBuilder merge( JsonObjectBuilder b, JsonObject o )
+    {
+        Objects.requireNonNull( b );
+        Objects.requireNonNull( o );
+        o.forEach( (k, v) -> b.add( k, v ) );
+        return b;
+    }
+    
 }

@@ -30,21 +30,41 @@ public enum TrustMovementFactory
             return null;
         }
 
+        // Figure out if this is a Trust object or our own format
         JsonObject header = t.getJsonObject( "header" );
-        JsonObject body = t.getJsonObject( "body" );
-
-        if( header == null || body == null )
+        boolean trustSource = header != null;
+        JsonObject body = trustSource ? t.getJsonObject( "body" ) : t;
+        if( body == null )
         {
             return null;
         }
 
-        switch( JsonUtils.getString( header, "msg_type", "INVD" ) )
+        // Decode msg_type
+        final TrustMovementType type = TrustMovementType.getType(
+                JsonUtils.getString( trustSource ? header : body, "msg_type" ) );
+        if( type == null )
         {
-            case "0003":
-                return TrainMovementFactory.INSTANCE.apply( body );
-            default:
-                return null;
+            // Unsupported type?
+            return null;
         }
+
+        // Apply any special manipulation between the two formats?
+        if( trustSource )
+        {
+            if( type == TrustMovementType.CANCELLATION )
+            {
+                // We also take a field from the header as it determines the type of cancellation
+                String original_data_source = JsonUtils.getString( header, "original_data_source", "" );
+
+                body = JsonUtils.createObjectBuilder( body ).
+                        add( "original_data_source", original_data_source ).
+                        build();
+            }
+        }
+
+        // Now build the object. If factory is null it means we don't implement it
+        Function<JsonObject, ? extends TrustMovement> factory = type.getFactory();
+        return factory==null?null:factory.apply( body );
     }
 
 }

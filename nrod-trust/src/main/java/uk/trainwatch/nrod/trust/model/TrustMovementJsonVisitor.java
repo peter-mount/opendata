@@ -48,16 +48,29 @@ public class TrustMovementJsonVisitor
         }
     }
 
+    /**
+     * Ensures we have the common fields in place
+     * @param t 
+     */
+    private void init( TrustMovement t )
+    {
+        b = Json.createObjectBuilder().
+                add( "msg_type", t.getMsg_type().
+                     getType() ).
+                add( "toc_id", t.getToc_id() );
+        add( "train_id", t.getTrain_id() );
+    }
+
     @Override
     public void visit( TrainActivation t )
     {
+        init( t );
         b = Json.createObjectBuilder().
                 add( "id", t.getId() );
 
         add( "schedule_source", t.getSchedule_source() );
         add( "train_file_address", t.getTrain_file_address() );
         add( "schedule_end_date", t.getSchedule_end_date() );
-        add( "train_id", t.getTrain_id() );
         add( "tp_origin_timestamp", t.getTp_origin_timestamp() );
 
         b.add( "creation_timestamp", t.getCreation_timestamp() ).
@@ -65,7 +78,6 @@ public class TrustMovementJsonVisitor
                 add( "origin_dep_timestamp", t.getOrigin_dep_timestamp() );
 
         add( "train_service_code", t.getTrain_service_code() );
-        b.add( "toc_id", t.getToc_id() );
         add( "d1266_record_number", t.getD1266_record_number() );
         add( "train_call_type", t.getTrain_call_type() );
         add( "train_uid", t.getTrain_uid() );
@@ -77,10 +89,28 @@ public class TrustMovementJsonVisitor
     }
 
     @Override
+    public void visit( TrainCancellation c )
+    {
+        init( c );
+
+        b.add( "orig_loc_stanox", c.getOrig_loc_stanox() ).
+                add( "orig_loc_timestamp", c.getOrig_loc_timestamp() ).
+                add( "dep_timestamp", c.getDep_timestamp() ).
+                add( "division_code", c.getDivision_code() ).
+                add( "loc_stanox", c.getLoc_stanox() ).
+                add( "canx_timestamp", c.getCanx_timestamp() );
+
+        add( "canx_reason_code", c.getCanx_reason_code() );
+        add( "canx_type", c.getCanx_type() );
+        add( "train_service_code", c.getTrain_service_code() );
+        add( "train_file_address", c.getTrain_file_address() );
+    }
+
+    @Override
     public void visit( TrainMovement t )
     {
-        b = Json.createObjectBuilder().
-                add( "id", t.getId() );
+        init( t );
+        b.add( "id", t.getId() );
         add( "event_type", t.getEvent_type() );
         b.add( "gbtt_timestamp", t.getGbtt_timestamp() ).
                 add( "original_loc_stanox", t.getOriginal_loc_stanox() ).
@@ -97,11 +127,10 @@ public class TrustMovementJsonVisitor
         add( "platform", t.getPlatform() );
         add( "division_code", t.getDivision_code() );
         b.add( "train_terminated", t.isTrain_terminated() );
-        add( "train_id", t.getTrain_id() );
         b.add( "offroute_ind", t.isOffroute_ind() );
         add( "variation_status", t.getVariation_status() );
         add( "train_service_code", t.getTrain_service_code() );
-        b.add( "toc_id", t.getToc_id() ).
+        b.
                 add( "loc_stanox", t.getLoc_stanox() ).
                 add( "auto_expected", t.isAuto_expected() ).
                 add( "direction_ind", t.getDirection_ind() );

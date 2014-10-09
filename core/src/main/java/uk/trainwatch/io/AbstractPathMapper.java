@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Objects;
 import java.util.function.Function;
+import uk.trainwatch.util.TimeUtils;
 
 /**
  *
@@ -38,20 +39,22 @@ public abstract class AbstractPathMapper<T>
         this.suffix = suffix == null ? "" : suffix;
     }
 
+    @Deprecated
     public static final LocalDateTime getLocalDateTime()
     {
-        return getLocalDateTime( Instant.now() );
+        return TimeUtils.getLocalDateTime();
     }
 
+    @Deprecated
     public static final LocalDateTime getLocalDateTime( final long timestamp )
     {
-        return getLocalDateTime( Instant.ofEpochMilli( timestamp ) );
+        return TimeUtils.getLocalDateTime( timestamp );
     }
 
+    @Deprecated
     public static final LocalDateTime getLocalDateTime( final Instant instant )
     {
-        Clock clock = Clock.fixed( instant, ZoneId.of( "UTC" ) );
-        return LocalDateTime.now( clock );
+        return TimeUtils.getLocalDateTime( instant );
     }
 
     protected final Path getPath( final LocalDateTime dateTime, final boolean hours )

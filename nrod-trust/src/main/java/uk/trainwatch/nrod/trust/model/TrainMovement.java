@@ -39,11 +39,9 @@ public class TrainMovement
     private String platform;
     private String division_code;
     private boolean train_terminated;
-    private String train_id;
     private boolean offroute_ind;
     private String variation_status;
     private String train_service_code;
-    private int toc_id;
     private long loc_stanox;
     private boolean auto_expected;
     private String direction_ind;
@@ -56,6 +54,7 @@ public class TrainMovement
 
     TrainMovement()
     {
+        super( TrustMovementType.MOVEMENT );
     }
 
     TrainMovement( long id, String event_type, long gbtt_timestamp, long original_loc_stanox,
@@ -67,6 +66,7 @@ public class TrainMovement
                    long loc_stanox, boolean auto_expected, String direction_ind, String route,
                    String planned_event_type, long next_report_stanox, String line_ind )
     {
+        super( TrustMovementType.MOVEMENT, toc_id, train_id );
         this.id = id;
         this.event_type = event_type;
         this.gbtt_timestamp = gbtt_timestamp;
@@ -84,11 +84,9 @@ public class TrainMovement
         this.platform = platform;
         this.division_code = division_code;
         this.train_terminated = train_terminated;
-        this.train_id = train_id;
         this.offroute_ind = offroute_ind;
         this.variation_status = variation_status;
         this.train_service_code = train_service_code;
-        this.toc_id = toc_id;
         this.loc_stanox = loc_stanox;
         this.auto_expected = auto_expected;
         this.direction_ind = direction_ind;
@@ -106,7 +104,7 @@ public class TrainMovement
             TrainDate td = new TrainDate( actual_timestamp ).//
                     clearTime().
                     setHour( 6 );
-            trainId = new TrainId( td, train_id );
+            trainId = new TrainId( td, getTrain_id() );
         }
         return trainId;
     }
@@ -283,11 +281,6 @@ public class TrainMovement
         return train_terminated;
     }
 
-    public String getTrain_id()
-    {
-        return train_id;
-    }
-
     public boolean isOffroute_ind()
     {
         return offroute_ind;
@@ -301,11 +294,6 @@ public class TrainMovement
     public String getTrain_service_code()
     {
         return train_service_code;
-    }
-
-    public int getToc_id()
-    {
-        return toc_id;
     }
 
     public long getLoc_stanox()
@@ -350,7 +338,8 @@ public class TrainMovement
     {
         int hash = 3;
         hash = 41 * hash + (int) (this.id ^ (this.id >>> 32));
-        hash = 41 * hash + (this.train_id != null ? this.train_id.hashCode() : 0);
+        hash = 41 * hash + (this.getTrain_id() != null ? this.getTrainId().
+                            hashCode() : 0);
         return hash;
     }
 
@@ -362,7 +351,7 @@ public class TrainMovement
             return false;
         }
         final TrainMovement other = (TrainMovement) obj;
-        return this.id == other.id && Objects.equals( this.train_id, other.train_id );
+        return this.id == other.id && Objects.equals( this.getTrainId(), other.getTrainId() );
     }
     //</editor-fold>
 
@@ -386,7 +375,7 @@ public class TrainMovement
     @Override
     public String toString()
     {
-        return "TrainMovement{" + "event_type=" + event_type + ", gbtt_timestamp=" + gbtt_timestamp + ", current_train_id=" + current_train_id + ", delay_monitoring_point=" + delay_monitoring_point + ", reporting_stanox=" + reporting_stanox + ", actual_timestamp=" + actual_timestamp + ", platform=" + platform + ", train_terminated=" + train_terminated + ", offroute_ind=" + offroute_ind + ", train_service_code=" + train_service_code + ", toc_id=" + toc_id + ", loc_stanox=" + loc_stanox + '}';
+        return "TrainMovement{" + "event_type=" + event_type + ", gbtt_timestamp=" + gbtt_timestamp + ", current_train_id=" + current_train_id + ", delay_monitoring_point=" + delay_monitoring_point + ", reporting_stanox=" + reporting_stanox + ", actual_timestamp=" + actual_timestamp + ", platform=" + platform + ", train_terminated=" + train_terminated + ", offroute_ind=" + offroute_ind + ", train_service_code=" + train_service_code + ", toc_id=" + getToc_id() + ", loc_stanox=" + loc_stanox + '}';
     }
 
     @Override
@@ -394,5 +383,5 @@ public class TrainMovement
     {
         v.visit( this );
     }
-    
+
 }

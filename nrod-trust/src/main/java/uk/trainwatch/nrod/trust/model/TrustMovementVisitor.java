@@ -16,6 +16,10 @@ public interface TrustMovementVisitor
     {
     }
 
+    default void visit( TrainCancellation c )
+    {
+    }
+
     default void visit( TrainMovement m )
     {
     }

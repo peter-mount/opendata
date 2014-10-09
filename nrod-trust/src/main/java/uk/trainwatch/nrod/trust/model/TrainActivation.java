@@ -22,13 +22,11 @@ public class TrainActivation
     private String schedule_source;
     private String train_file_address;
     private Date schedule_end_date;
-    private String train_id;
     private Date tp_origin_timestamp;
     private long creation_timestamp;
     private long tp_origin_stanox;
     private long origin_dep_timestamp;
     private String train_service_code;
-    private int toc_id;
     private String d1266_record_number;
     private String train_call_type;
     private String train_uid;
@@ -41,6 +39,7 @@ public class TrainActivation
 
     TrainActivation()
     {
+        super( TrustMovementType.ACTIVATION );
     }
 
     TrainActivation( int id, String schedule_source, String train_file_address, Date schedule_end_date,
@@ -49,11 +48,12 @@ public class TrainActivation
                      String train_call_type, String train_uid, String train_call_mode, String schedule_type,
                      long sched_origin_stanox, String schedule_wtt_id, Date schedule_start_date )
     {
+        super( TrustMovementType.ACTIVATION, toc_id, train_id );
+
         this.id = id;
         this.schedule_source = schedule_source;
         this.train_file_address = train_file_address;
         this.schedule_end_date = schedule_end_date;
-        this.train_id = train_id;
         this.tp_origin_timestamp = tp_origin_timestamp;
         this.creation_timestamp = creation_timestamp;
 
@@ -73,7 +73,6 @@ public class TrainActivation
 
         this.origin_dep_timestamp = origin_dep_timestamp;
         this.train_service_code = train_service_code;
-        this.toc_id = toc_id;
         this.d1266_record_number = d1266_record_number;
         this.train_call_type = train_call_type;
         this.train_uid = train_uid;
@@ -91,7 +90,7 @@ public class TrainActivation
             TrainDate td = new TrainDate( schedule_start_date.getTime() ).//
                     clearTime().
                     setHour( 6 );
-            trainId = new TrainId( td, train_id );
+            trainId = new TrainId( td, getTrain_id() );
         }
         return trainId;
     }
@@ -126,11 +125,6 @@ public class TrainActivation
         return schedule_end_date;
     }
 
-    public String getTrain_id()
-    {
-        return train_id;
-    }
-
     public Date getTp_origin_timestamp()
     {
         return tp_origin_timestamp;
@@ -154,11 +148,6 @@ public class TrainActivation
     public String getTrain_service_code()
     {
         return train_service_code;
-    }
-
-    public int getToc_id()
-    {
-        return toc_id;
     }
 
     public String getD1266_record_number()
@@ -209,13 +198,14 @@ public class TrainActivation
         hash = 89 * hash + (this.schedule_source != null ? this.schedule_source.hashCode() : 0);
         hash = 89 * hash + (this.train_file_address != null ? this.train_file_address.hashCode() : 0);
         hash = 89 * hash + (this.schedule_end_date != null ? this.schedule_end_date.hashCode() : 0);
-        hash = 89 * hash + (this.train_id != null ? this.train_id.hashCode() : 0);
+        hash = 89 * hash + (this.getTrain_id() != null ? this.getTrain_id().
+                            hashCode() : 0);
         hash = 89 * hash + (this.tp_origin_timestamp != null ? this.tp_origin_timestamp.hashCode() : 0);
         hash = 89 * hash + (int) (this.creation_timestamp ^ (this.creation_timestamp >>> 32));
         hash = 89 * hash + (int) (this.tp_origin_stanox ^ (this.tp_origin_stanox >>> 32));
         hash = 89 * hash + (int) (this.origin_dep_timestamp ^ (this.origin_dep_timestamp >>> 32));
         hash = 89 * hash + (this.train_service_code != null ? this.train_service_code.hashCode() : 0);
-        hash = 89 * hash + this.toc_id;
+        hash = 89 * hash + this.getToc_id();
         hash = 89 * hash + (this.d1266_record_number != null ? this.d1266_record_number.hashCode() : 0);
         hash = 89 * hash + (this.train_call_type != null ? this.train_call_type.hashCode() : 0);
         hash = 89 * hash + (this.train_uid != null ? this.train_uid.hashCode() : 0);
@@ -259,7 +249,8 @@ public class TrainActivation
         {
             return false;
         }
-        if( (this.train_id == null) ? (other.train_id != null) : !this.train_id.equals( other.train_id ) )
+        if( (this.getTrain_id() == null) ? (other.getTrain_id() != null) : !this.getTrain_id().
+                equals( other.getTrain_id() ) )
         {
             return false;
         }
@@ -286,7 +277,7 @@ public class TrainActivation
         {
             return false;
         }
-        if( this.toc_id != other.toc_id )
+        if( this.getToc_id() != other.getToc_id() )
         {
             return false;
         }
@@ -335,7 +326,8 @@ public class TrainActivation
     @Override
     public int compareTo( TrainActivation o )
     {
-        int r = train_id.compareTo( o.train_id );
+        int r = getTrain_id().
+                compareTo( o.getTrain_id() );
         if( r == 0 )
         {
             r = schedule_start_date.compareTo( o.schedule_start_date );
@@ -348,5 +340,5 @@ public class TrainActivation
     {
         v.visit( this );
     }
-    
+
 }
