@@ -13,7 +13,10 @@ import uk.trainwatch.nrod.util.TrainId;
 import uk.trainwatch.nrod.util.TrainTime;
 
 /**
- * Java representation of the mvt_movement table and 0003 movement messages
+ * A train movement message is sent whenever a train arrives, passes or departs a location monitored by TRUST. It
+ * records the time at which the event happens.
+ * <p>
+ * Reports may be automatically generated, or manually entered.
  * <p/>
  * @author peter
  */

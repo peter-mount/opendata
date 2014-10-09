@@ -9,7 +9,21 @@ import uk.trainwatch.nrod.util.TrainDate;
 import uk.trainwatch.nrod.util.TrainId;
 
 /**
- * Java representation of the mvt_activation table and 0001 movement messages
+ * An activation message is produced when a train entity is created from a schedule entity by the TRUST system. The
+ * train entity refers to a single run of a train on a specific day whereas the schedule entity is potentially valid for
+ * several months at a time. Within TRUST, this process is known as Train Call.
+ * <p>
+ * Most trains are called automatically (auto-call) before the train is due to run, either 1 or 2 hours depending on the
+ * train's class. The TRUST mainframe runs an internal process every 30 seconds throughout the day, causing potentially
+ * two lots of train activation messages to be received every minute.
+ * <p>
+ * Schedules which is Runs as required, or Runs to terminals/yards as required (flagged with Q or Y in the schedule) are
+ * usually called manually - the train operator will submit a message to the TRUST system and this will then cause the
+ * schedule to be activated for that day (a process is known as manual call.)
+ * <p>
+ * Any train may be manually called some hours in advance if the train is to be cancelled (e.g. a cancellation of a 6pm
+ * service which is decided at 8am will result in an auto-call train being manually called and then cancelled).
+ * <p>
  * <p/>
  * @author peter
  */

@@ -50,7 +50,8 @@ public class TrustMovementJsonVisitor
 
     /**
      * Ensures we have the common fields in place
-     * @param t 
+     * <p>
+     * @param t
      */
     private void init( TrustMovement t )
     {
@@ -104,6 +105,9 @@ public class TrustMovementJsonVisitor
         add( "canx_type", c.getCanx_type() );
         add( "train_service_code", c.getTrain_service_code() );
         add( "train_file_address", c.getTrain_file_address() );
+
+        // plannedCancellation & reactionaryCancellation are based on this
+        add( "original_data_source", c.getOriginal_data_source() );
     }
 
     @Override
@@ -138,5 +142,46 @@ public class TrustMovementJsonVisitor
         add( "planned_event_type", t.getPlanned_event_type() );
         b.add( "next_report_stanox", t.getNext_report_stanox() );
         add( "line_ind", t.getLine_ind() );
+    }
+
+    private void initAdjustment( TrustAdjustment t )
+    {
+        init( t );
+        add( "current_train_id", t.getCurrent_train_id() );
+        b.add( "original_loc_timestamp", t.getOriginal_loc_timestamp() ).
+                add( "dep_timestamp", t.getDep_timestamp() ).
+                add( "loc_stanox", t.getLoc_stanox() ).
+                add( "original_loc_stanox", t.getOriginal_loc_stanox() );
+        add( "train_file_address", t.getTrain_file_address() );
+        add( "train_service_code", t.getTrain_service_code() );
+    }
+
+    @Override
+    public void visit( TrainReinstatement t )
+    {
+        initAdjustment( t );
+        b.add( "reinstatement_timestamp", t.getReinstatement_timestamp() ).
+                add( "division_code_id", t.getDivision_code_id() );
+    }
+
+    @Override
+    public void visit( ChangeOfOrigin r )
+    {
+        initAdjustment( r );
+        add( "reason_code", r.getReason_code() );
+        b.add( "coo_timestamp", r.getCoo_timestamp() ).
+                add( "division_code", r.getDivision_code() );
+    }
+
+    @Override
+    public void visit( ChangeOfIdentity r )
+    {
+        // Note: tocId will always be 0 as this is for freight
+        init( r );
+        add( "current_train_id", r.getCurrent_train_id() );
+        add( "revised_train_id", r.getRevised_train_id() );
+        add( "train_file_address", r.getTrain_file_address() );
+        add( "train_service_code", r.getTrain_service_code() );
+        b.add( "event_timestamp", r.getEvent_timestamp() );
     }
 }

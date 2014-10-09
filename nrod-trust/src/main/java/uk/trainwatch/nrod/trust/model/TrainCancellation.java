@@ -6,7 +6,23 @@
 package uk.trainwatch.nrod.trust.model;
 
 /**
- *
+ * A cancellation message is sent when the train does not, or will not, complete its scheduled journey.
+ * <p>
+ * A train may be cancelled in one of four ways:
+ * <ul>
+ * <li>
+ * At activation time ("ON CALL"), usually where the applicable schedule has a STP indicator of "C" - see Planned
+ * Cancellations. Trains may be cancelled for other reasons before train has been activated, and when activation occurs,
+ * the train will be immediately cancelled with the appropriate reason code
+ * </li>
+ * <li>At the train's planned origin ("AT ORIGIN")</li>
+ * <li>En-route ("EN ROUTE")</li>
+ * <li>Off-route ("OUT OF PLAN")</li>
+ * </ul>
+ * <p>
+ * As with all other messages, cancellation messages will only be received for train schedules which have already been
+ * activated.
+ * <p>
  * @author Peter T Mount
  */
 public class TrainCancellation

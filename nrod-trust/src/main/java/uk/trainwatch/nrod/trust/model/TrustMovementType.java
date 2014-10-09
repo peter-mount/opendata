@@ -20,10 +20,16 @@ public enum TrustMovementType
     ACTIVATION( 1, TrainActivationFactory.INSTANCE ),
     CANCELLATION( 2, TrainCancellationFactory.INSTANCE ),
     MOVEMENT( 3, TrainMovementFactory.INSTANCE ),
+    /**
+     * Apparently this is not used in "production" at Network Rail
+     */
     UNIDENTIFIED_TRAIN( 4, null ),
-    REINSTATEMENT( 5, null ),
-    CHANGE_OF_ORIGIN( 6, null ),
-    CHANGE_OF_IDENTITY( 7, null ),
+    REINSTATEMENT( 5, TrainReinstatementFactory.INSTANCE ),
+    CHANGE_OF_ORIGIN( 6, ChangeOfOriginFactory.INSTANCE ),
+    CHANGE_OF_IDENTITY( 7, ChangeOfIdentityFactory.INSTANCE ),
+    /**
+     * Apparently this is not used in "production" at Network Rail
+     */
     CHANGE_OF_LOCATION( 8, null );
 
     private static final Map<String, TrustMovementType> NR_TYPES = new ConcurrentHashMap<>();

@@ -24,4 +24,15 @@ public interface TrustMovementVisitor
     {
     }
 
+    default void visit( TrainReinstatement r )
+    {
+    }
+
+    default void visit( ChangeOfOrigin r )
+    {
+    }
+
+    default void visit( ChangeOfIdentity r )
+    {
+    }
 }
