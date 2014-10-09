@@ -1,0 +1,122 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package uk.trainwatch.nrod.timetable.cif.record;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.function.Function;
+
+/**
+ * CIF file header
+ * 
+ * P16
+ * 
+ * @author Peter T Mount
+ */
+public class Header
+        extends Record
+{
+
+    static final Function<CIFParser, Record> factory = p -> new Header(
+            p.getString( 20 ),
+            p.getDate_ddmmyy(),
+            p.getTime2(),
+            p.getString( 7 ),
+            p.getString( 7 ),
+            // F full, U update
+            "F".equals( p.getString( 1 ) ),
+            p.getString( 1 ),
+            p.getDate_ddmmyy(),
+            p.getDate_ddmmyy()
+    // Spare 20
+    );
+
+    private final String mainframeId;
+    private final LocalDate dateOfExtract;
+    private final LocalTime timeOfExtract;
+    private final String currentFileRef;
+    private final String lastFileRef;
+    private final boolean fillExtract;
+    private final String cifVersion;
+    private final LocalDate startDate;
+    private final LocalDate endDate;
+
+    public Header( String mainframeId,
+                   LocalDate dateOfExtract, LocalTime timeOfExtract,
+                   String currentFileRef, String lastFileRef,
+                   boolean fullExtract,
+                   String cifVersion,
+                   LocalDate startDate, LocalDate endDate )
+    {
+        super( RecordType.HD );
+        this.mainframeId = mainframeId;
+        this.dateOfExtract = dateOfExtract;
+        this.timeOfExtract = timeOfExtract;
+        this.currentFileRef = currentFileRef;
+        this.lastFileRef = lastFileRef;
+        this.fillExtract = fullExtract;
+        this.cifVersion = cifVersion;
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
+
+    public static Function<CIFParser, Record> getFactory()
+    {
+        return factory;
+    }
+
+    public String getMainframeId()
+    {
+        return mainframeId;
+    }
+
+    public LocalDate getDateOfExtract()
+    {
+        return dateOfExtract;
+    }
+
+    public LocalTime getTimeOfExtract()
+    {
+        return timeOfExtract;
+    }
+
+    public String getCurrentFileRef()
+    {
+        return currentFileRef;
+    }
+
+    public String getLastFileRef()
+    {
+        return lastFileRef;
+    }
+
+    public boolean isFillExtract()
+    {
+        return fillExtract;
+    }
+
+    public String getCifVersion()
+    {
+        return cifVersion;
+    }
+
+    public LocalDate getStartDate()
+    {
+        return startDate;
+    }
+
+    public LocalDate getEndDate()
+    {
+        return endDate;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Header{" + "mainframeId=" + mainframeId + ", dateOfExtract=" + dateOfExtract + ", timeOfExtract=" + timeOfExtract + ", currentFileRef=" + currentFileRef + ", lastFileRef=" + lastFileRef + ", fillExtract=" + fillExtract + ", cifVersion=" + cifVersion + ", startDate=" + startDate + ", endDate=" + endDate + '}';
+    }
+
+}

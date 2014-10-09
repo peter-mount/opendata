@@ -28,6 +28,7 @@
         <module>nrod-trust</module>
         <module>nrod-td</module>
         <module>nrod-rtppm</module>
+        <module>nrod-timetable</module>
     </modules>
     
 </project>
