@@ -11,7 +11,7 @@ import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -519,5 +519,24 @@ public class JsonUtils
         o.forEach( (k, v) -> b.add( k, v ) );
         return b;
     }
-    
+
+    public static LocalTime getLocalTime( JsonObject o, String n )
+    {
+        JsonValue v = o.get( n );
+        if( v == null )
+        {
+            return null;
+        }
+        switch( v.getValueType() )
+        {
+            case STRING:
+                return TimeUtils.getLocalTime( ((JsonString) v).getString() );
+
+            case NUMBER:
+                return TimeUtils.getLocalTime( ((JsonNumber) v).longValue() );
+            default:
+                return null;
+        }
+    }
+
 }

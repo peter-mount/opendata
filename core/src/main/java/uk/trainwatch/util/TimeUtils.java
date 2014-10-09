@@ -13,6 +13,8 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -20,6 +22,8 @@ import java.time.format.DateTimeParseException;
  */
 public class TimeUtils
 {
+
+    private static final Logger LOG = Logger.getLogger( TimeUtils.class.getName() );
 
     public static final ZoneId UTC = ZoneId.of( "UTC" );
 
@@ -145,6 +149,18 @@ public class TimeUtils
         }
         return null;
     }
+
+    /**
+     * Returns the LocalTime based on the second of the day
+     * <p>
+     * @param secondOfDay <p>
+     * @return
+     */
+    public static final LocalTime getLocalTime( final long secondOfDay )
+    {
+        return LocalTime.ofSecondOfDay( secondOfDay );
+    }
+
     /**
      * Attempt to parse a string
      * <p>
@@ -155,6 +171,37 @@ public class TimeUtils
     {
         if( s != null && !s.isEmpty() )
         {
+            // Custom formats
+            if( s.length() == 6 )
+            {
+                // hhmmss
+                try
+                {
+                    return LocalTime.of(
+                            Integer.parseInt( s.substring( 0, 2 ) ),
+                            Integer.parseInt( s.substring( 2, 4 ) ),
+                            Integer.parseInt( s.substring( 4, 6 ) ) );
+                }
+                catch( Exception ex )
+                {
+                    LOG.log( Level.SEVERE, "Parse fail for: " + s, ex );
+                }
+            }
+            else if( s.length() == 4 )
+            {
+                // hhmm
+                try
+                {
+                    return LocalTime.of( Integer.parseInt( s.substring( 0, 2 ) ),
+                                         Integer.parseInt( s.substring( 2, 4 ) ) );
+                }
+                catch( Exception ex )
+                {
+                    LOG.log( Level.SEVERE, "Parse fail for: " + s, ex );
+                }
+            }
+
+            // Check default formats
             for( DateTimeFormatter dtf : TIMES )
             {
                 try
