@@ -31,3 +31,12 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+Notes
+=====
+
+Although this project is currently primarily concerned with Rail Open Data,
+it's actually for any Open Data feeds. Once I have completed transfering
+all of the rail system over to this project I'll be migrating other feeds
+like the MetOffice Data Point which I also use.
+
