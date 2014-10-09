@@ -80,7 +80,7 @@ public class TocStanoxAllClassDelayAnalyzer
         {
             if( !stanoxes.isEmpty() )
             {
-                LOG.log( Level.INFO, () -> "Generating report for toc " + toc );
+                LOG.log( Level.FINE, () -> "Generating report for toc " + toc );
 
                 JsonArrayBuilder ab = Json.createArrayBuilder();
                 stanoxes.forEach( (s, v) -> ab.add( Json.createObjectBuilder().

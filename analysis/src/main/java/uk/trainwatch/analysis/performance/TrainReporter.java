@@ -22,10 +22,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
 import javax.json.JsonStructure;
 import uk.trainwatch.io.report.ReportBuilder;
 import uk.trainwatch.nrod.trust.model.TrustMovement;
@@ -41,6 +45,8 @@ public class TrainReporter
         implements Consumer<TrustMovement>
 {
 
+    private static final Logger LOG = Logger.getLogger( TrainReporter.class.getName() );
+
     /**
      * Expire items from memory when last movement was 3 hours ago
      */
@@ -48,7 +54,7 @@ public class TrainReporter
     /**
      * Delay between receiving data and reporting it - to keep load down
      */
-    private static final long RECORD_DELAY = 15L * 60L * 1000L;
+    private static final long RECORD_DELAY = 10L * 60L * 1000L;
 
     private final Map<Integer, ConcurrentHashMap<String, Train>> trains = new ConcurrentHashMap<>();
 
@@ -71,26 +77,52 @@ public class TrainReporter
 
     private synchronized void backgroundProcessing()
     {
-        trains.forEach( (toc, trains) ->
-        {
-            // Expire any old entries
-            trains.values().
-                    removeIf( t -> t.isExpired() );
+        LOG.log( Level.INFO, "Starting background processing run" );
+        AtomicInteger before = new AtomicInteger();
+        AtomicInteger after = new AtomicInteger();
+        AtomicInteger reports = new AtomicInteger();
 
-            trains.forEach( (tid, t) ->
+        try
+        {
+            trains.forEach( (toc, trains) ->
             {
-                if( t.isReportable() )
+                before.addAndGet( trains.size() );
+
+                // Expire any old entries
+                trains.values().
+                        removeIf( t -> t.isExpired() );
+
+                after.addAndGet( trains.size() );
+
+                trains.forEach( (tid, t) ->
                 {
-                    report( tid, t );
+                    if( t.isReportable() )
+                    {
+                        reports.incrementAndGet();
+                        report( tid, t );
+                    }
                 }
+                );
+
             }
             );
         }
-        );
+        catch( Throwable t )
+        {
+            LOG.log( Level.SEVERE, "Failed background processing", t );
+        }
+
+        LOG.log( Level.INFO,
+                 () -> "After run, before " + before.get()
+                       + ", after expires " + after.get()
+                       + ", expired " + (before.get() - after.get())
+                       + " reports generated " + reports.get() );
     }
 
     private void report( String trainId, Train train )
     {
+        LOG.log( Level.FINE, () -> "Generating report for " + trainId + " toc " + train.getTocId() );
+
         LocalDateTime today = LocalDateTime.now();
 
         JsonArrayBuilder movements = Json.createArrayBuilder();
@@ -98,7 +130,13 @@ public class TrainReporter
         train.forEach( movement ->
         {
             movement.accept( visitor );
-            movements.add( visitor.getJsonObjectBuilder() );
+            
+            // Null check incase the visitor didn't do the conversion
+            JsonObjectBuilder b = visitor.getJsonObjectBuilder();
+            if( b != null )
+            {
+                movements.add( b );
+            }
         } );
 
         reportingConsumer.accept( new ReportBuilder().
@@ -163,7 +201,11 @@ public class TrainReporter
 
         public boolean add( TrustMovement e )
         {
-            lastUpdate = lastReport = System.currentTimeMillis();
+            lastUpdate = System.currentTimeMillis();
+            if( lastReport == 0L )
+            {
+                lastReport = lastUpdate;
+            }
             return movements.add( e );
         }
 
