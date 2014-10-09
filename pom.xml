@@ -18,6 +18,7 @@
         <module>rabbitmq</module>
         <module>nrod-trust</module>
         <module>nrod-core</module>
+        <module>nrod-td</module>
     </modules>
     
     <properties>
