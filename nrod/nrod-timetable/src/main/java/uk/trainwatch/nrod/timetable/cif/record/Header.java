@@ -11,9 +11,9 @@ import java.util.function.Function;
 
 /**
  * CIF file header
- * 
+ * <p>
  * P16
- * 
+ * <p>
  * @author Peter T Mount
  */
 public class Header
@@ -23,15 +23,14 @@ public class Header
     static final Function<CIFParser, Record> factory = p -> new Header(
             p.getString( 20 ),
             p.getDate_ddmmyy(),
-            p.getTime2(),
+            p.getTime_hhmm(),
             p.getString( 7 ),
             p.getString( 7 ),
             // F full, U update
-            "F".equals( p.getString( 1 ) ),
+            p.getBoolean( "F" ),
             p.getString( 1 ),
             p.getDate_ddmmyy(),
             p.getDate_ddmmyy()
-    // Spare 20
     );
 
     private final String mainframeId;

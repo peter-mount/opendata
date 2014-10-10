@@ -18,8 +18,8 @@ public class TerminatingLocation
 
     static final Function<CIFParser, Record> factory = p -> new TerminatingLocation(
             p.getString( 8 ),
-            p.getTime2H(),
-            p.getTime2(),
+            p.getTime_hhmmH(),
+            p.getTime_hhmm(),
             p.getString( 3 ),
             p.getString( 3 ),
             p.getString( 12 )

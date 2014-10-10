@@ -18,11 +18,11 @@ public class IntermediateLocation
 
     static final Function<CIFParser, Record> factory = p -> new IntermediateLocation(
             p.getString( 8 ),
-            p.getTime2H(),
-            p.getTime2H(),
-            p.getTime2H(),
-            p.getTime2(),
-            p.getTime2(),
+            p.getTime_hhmmH(),
+            p.getTime_hhmmH(),
+            p.getTime_hhmmH(),
+            p.getTime_hhmm(),
+            p.getTime_hhmm(),
             p.getString( 3 ),
             p.getString( 3 ),
             p.getString( 3 ),

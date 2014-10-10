@@ -20,7 +20,7 @@ public class ChangesEnRoute
             p.getString( 2 ),
             p.getString( 4 ),
             p.getString( 4 ),
-            p.getString( 1 ),
+            p.skip( 1 ),
             p.getString( 8 ),
             p.getString( 1 ),
             p.getString( 3 ),
@@ -30,18 +30,19 @@ public class ChangesEnRoute
             p.getString( 1 ),
             p.getString( 1 ),
             p.getString( 1 ),
-            p.getString( 1 ),
+            p.skip( 1 ),
             p.getString( 4 ),
             p.getString( 4 ),
-            p.getString( 4 ),
-            p.getInt( 5 ),
-            p.getString( 8 )
+            p.skip( 4 ),
+            p.getInt( 5 )
     );
+
     private final String location;
     private final String trainCat;
     private final String trainIdentity;
     private final String headcode;
-    private final String courseInd;
+    // No longer used
+    //private final String courseInd;
     private final String serviceCode;
     private final String portionId;
     private final String powerType;
@@ -51,25 +52,28 @@ public class ChangesEnRoute
     private final String trainClass;
     private final String sleepers;
     private final String reservations;
-    private final String connectionIndicator;
+    // No longer used
+    //private final String connectionIndicator;
     private final String cateringCode;
     private final String serviceBranding;
-    private final String tractionClass;
+    // No longer used
+    //private final String tractionClass;
     private final int uicCode;
-    private final String reserved;
 
-    public ChangesEnRoute( String location, String trainCat, String trainIdentity, String headcode, String courseInd,
+    public ChangesEnRoute( String location, String trainCat, String trainIdentity, String headcode,
+                           Void courseInd,
                            String serviceCode, String portionId, String powerType, String timingLoad, String speed,
                            String operatingCharacteristics, String trainClass, String sleepers, String reservations,
-                           String connectionIndicator, String cateringCode, String serviceBranding, String tractionClass,
-                           int uicCode, String reserved )
+                           Void connectionIndicator,
+                           String cateringCode, String serviceBranding,
+                           Void tractionClass,
+                           int uicCode )
     {
         super( RecordType.CR );
         this.location = location;
         this.trainCat = trainCat;
         this.trainIdentity = trainIdentity;
         this.headcode = headcode;
-        this.courseInd = courseInd;
         this.serviceCode = serviceCode;
         this.portionId = portionId;
         this.powerType = powerType;
@@ -79,12 +83,9 @@ public class ChangesEnRoute
         this.trainClass = trainClass;
         this.sleepers = sleepers;
         this.reservations = reservations;
-        this.connectionIndicator = connectionIndicator;
         this.cateringCode = cateringCode;
         this.serviceBranding = serviceBranding;
-        this.tractionClass = tractionClass;
         this.uicCode = uicCode;
-        this.reserved = reserved;
     }
 
     public String getLocation()
@@ -105,11 +106,6 @@ public class ChangesEnRoute
     public String getHeadcode()
     {
         return headcode;
-    }
-
-    public String getCourseInd()
-    {
-        return courseInd;
     }
 
     public String getServiceCode()
@@ -157,11 +153,6 @@ public class ChangesEnRoute
         return reservations;
     }
 
-    public String getConnectionIndicator()
-    {
-        return connectionIndicator;
-    }
-
     public String getCateringCode()
     {
         return cateringCode;
@@ -172,25 +163,15 @@ public class ChangesEnRoute
         return serviceBranding;
     }
 
-    public String getTractionClass()
-    {
-        return tractionClass;
-    }
-
     public int getUicCode()
     {
         return uicCode;
     }
 
-    public String getReserved()
-    {
-        return reserved;
-    }
-
     @Override
     public String toString()
     {
-        return "ChangesEnRoute{" + "location=" + location + ", trainCat=" + trainCat + ", trainIdentity=" + trainIdentity + ", headcode=" + headcode + ", courseInd=" + courseInd + ", serviceCode=" + serviceCode + ", portionId=" + portionId + ", powerType=" + powerType + ", timingLoad=" + timingLoad + ", speed=" + speed + ", operatingCharacteristics=" + operatingCharacteristics + ", trainClass=" + trainClass + ", sleepers=" + sleepers + ", reservations=" + reservations + ", connectionIndicator=" + connectionIndicator + ", cateringCode=" + cateringCode + ", serviceBranding=" + serviceBranding + ", tractionClass=" + tractionClass + ", uicCode=" + uicCode + ", reserved=" + reserved + '}';
+        return "ChangesEnRoute{" + "location=" + location + ", trainCat=" + trainCat + ", trainIdentity=" + trainIdentity + ", headcode=" + headcode + ", serviceCode=" + serviceCode + ", portionId=" + portionId + ", powerType=" + powerType + ", timingLoad=" + timingLoad + ", speed=" + speed + ", operatingCharacteristics=" + operatingCharacteristics + ", trainClass=" + trainClass + ", sleepers=" + sleepers + ", reservations=" + reservations + ", cateringCode=" + cateringCode + ", serviceBranding=" + serviceBranding + ", uicCode=" + uicCode + +'}';
     }
 
 }

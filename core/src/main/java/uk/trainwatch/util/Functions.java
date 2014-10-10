@@ -16,13 +16,14 @@ public class Functions
 
     /**
      * Cast to a specific class
-     * 
-     * @param <T> Type of class
+     * <p>
+     * @param <T>   Type of class
      * @param clazz Class of type T to cast to
+     * <p>
      * @return casted object or null if null or not an instance of clazz
      */
     public static <T> Function<? super Object, T> castTo( Class<T> clazz )
     {
-        return o -> o == null || !clazz.isAssignableFrom( clazz ) ? null : clazz.cast( o );
+        return o -> o == null || !clazz.isAssignableFrom( o.getClass() ) ? null : clazz.cast( o );
     }
 }

@@ -8,6 +8,21 @@ package uk.trainwatch.nrod.timetable.cif.record;
 import java.time.LocalDate;
 import java.util.function.Function;
 import uk.trainwatch.nrod.timetable.cif.TransactionType;
+import uk.trainwatch.nrod.timetable.util.BankHolidayRunning;
+import uk.trainwatch.nrod.timetable.util.BusSec;
+import uk.trainwatch.nrod.timetable.util.Catering;
+import uk.trainwatch.nrod.timetable.util.DaysRun;
+import uk.trainwatch.nrod.timetable.util.OperatingCharacteristics;
+import uk.trainwatch.nrod.timetable.util.PowerType;
+import uk.trainwatch.nrod.timetable.util.Reservations;
+import uk.trainwatch.nrod.timetable.util.STPIndicator;
+import uk.trainwatch.nrod.timetable.util.ServiceBranding;
+import uk.trainwatch.nrod.timetable.util.Sleepers;
+import uk.trainwatch.nrod.timetable.util.TimingLoad;
+import uk.trainwatch.nrod.timetable.util.TrainCategory;
+import uk.trainwatch.nrod.timetable.util.TrainClass;
+import uk.trainwatch.nrod.timetable.util.TrainStatus;
+import uk.trainwatch.nrod.timetable.util.TrainUID;
 
 /**
  *
@@ -17,70 +32,92 @@ public class BasicSchedule
         extends Record
 {
 
+    // Page 17
     static final Function<CIFParser, Record> factory = p -> new BasicSchedule(
             p.getTransactionType(),
-            p.getString( 6 ),
+            p.getTrainUID(),
             p.getDate_yymmdd(),
-            // FIXME 999999 is valid
             p.getDate_yymmdd(),
-            p.getString( 7 ),
-            p.getString( 1 ),
-            p.getString( 1 ),
-            p.getString( 2 ),
+            p.getDaysRun(),
+            p.getBankHolidayRunning(),
+            p.getTrainStatus(),
+            p.getTrainCategory(),
             p.getString( 4 ),
             p.getString( 4 ),
-            p.getString( 1 ),
+            p.skip( 1 ),
             p.getString( 8 ),
-            p.getString( 1 ),
+            p.getBusSec(),
+            p.getPowerType(),
+            p.getTimingLoad(),
             p.getString( 3 ),
-            p.getString( 4 ),
-            p.getString( 3 ),
-            p.getString( 6 ),
-            p.getString( 1 ),
-            p.getString( 1 ),
-            p.getString( 1 ),
-            p.getString( 1 ),
-            p.getString( 4 ),
-            p.getString( 4 ),
+            p.getOperatingCharacteristics(),
+            p.getTrainClass(),
+            p.getSleepers(),
+            p.getReservations(),
+            p.skip( 1 ),
+            p.getCatering(),
+            p.getServiceBranding(),
             // Spare 1
-            p.getString( 1 ),
-            p.getString( 1 )
+            p.skip( 1 ),
+            p.getSTPIndicator()
     );
+    //static final Function<CIFParser, Record> factory = factory1.compose( CIFParser::debug );
 
     // FIXME many of these can be objects
     private final TransactionType transactionType;
-    private final String trainUid;
+    private final TrainUID trainUid;
     private final LocalDate runsFrom;
     private final LocalDate runsTo;
-    private final String daysRun;
-    private final String bankHolRun;
-    private final String trainStatus;
-    private final String trainCat;
+    private final DaysRun daysRun;
+    private final BankHolidayRunning bankHolRun;
+    private final TrainStatus trainStatus;
+    private final TrainCategory trainCat;
     private final String trainIdentity;
     private final String headCode;
-    private final String courseInd;
+    // No longer used so no need to store
+    //private final String courseInd;
     private final String serviceCode;
-    private final String portionId;
-    private final String powerType;
-    private final String timingLoad;
+    private final BusSec portionId;
+    private final PowerType powerType;
+    private final TimingLoad timingLoad;
     private final String speed;
-    private final String operatingCharacteristics;
-    private final String trainClass;
-    private final String sleepers;
-    private final String reservations;
-    private final String connectionInd;
-    private final String cateringCode;
-    private final String serviceBranding;
-    private final String stpInd;
+    private final OperatingCharacteristics[] operatingCharacteristics;
+    private final TrainClass trainClass;
+    private final Sleepers sleepers;
+    private final Reservations reservations;
+    // No longer used
+    //private final String connectionInd;
+    private final Catering[] cateringCode;
+    private final ServiceBranding[] serviceBranding;
+    private final STPIndicator stpInd;
 
-    public BasicSchedule( TransactionType transactionType, String trainUid, LocalDate runsFrom, LocalDate runsTo,
-                          String daysRun, String bankHolRun, String trainStatus, String trainCat, String trainIdentity,
-                          String headCode, String courseInd, String serviceCode, String portionId, String powerType,
-                          String timingLoad, String speed, String operatingCharacteristics, String trainClass,
-                          String sleepers, String reservations, String connectionInd, String cateringCode,
-                          String serviceBranding,
-                          String spare,
-                          String stpInd )
+    public BasicSchedule( TransactionType transactionType,
+                          TrainUID trainUid,
+                          LocalDate runsFrom,
+                          LocalDate runsTo,
+                          DaysRun daysRun,
+                          BankHolidayRunning bankHolRun,
+                          TrainStatus trainStatus,
+                          TrainCategory trainCat,
+                          String trainIdentity,
+                          String headCode,
+                          // No longer used, here so we can skip
+                          Void courseInd,
+                          String serviceCode,
+                          BusSec portionId,
+                          PowerType powerType,
+                          TimingLoad timingLoad,
+                          String speed,
+                          OperatingCharacteristics[] operatingCharacteristics,
+                          TrainClass trainClass,
+                          Sleepers sleepers,
+                          Reservations reservations,
+                          // No longer used, here so we can skip
+                          Void connectionInd,
+                          Catering[] cateringCode,
+                          ServiceBranding[] serviceBranding,
+                          Void spare,
+                          STPIndicator stpInd )
     {
         super( RecordType.BS );
         this.transactionType = transactionType;
@@ -93,7 +130,6 @@ public class BasicSchedule
         this.trainCat = trainCat;
         this.trainIdentity = trainIdentity;
         this.headCode = headCode;
-        this.courseInd = courseInd;
         this.serviceCode = serviceCode;
         this.portionId = portionId;
         this.powerType = powerType;
@@ -103,7 +139,6 @@ public class BasicSchedule
         this.trainClass = trainClass;
         this.sleepers = sleepers;
         this.reservations = reservations;
-        this.connectionInd = connectionInd;
         this.cateringCode = cateringCode;
         this.serviceBranding = serviceBranding;
         this.stpInd = stpInd;
@@ -119,7 +154,7 @@ public class BasicSchedule
         return transactionType;
     }
 
-    public String getTrainUid()
+    public TrainUID getTrainUid()
     {
         return trainUid;
     }
@@ -134,22 +169,22 @@ public class BasicSchedule
         return runsTo;
     }
 
-    public String getDaysRun()
+    public DaysRun getDaysRun()
     {
         return daysRun;
     }
 
-    public String getBankHolRun()
+    public BankHolidayRunning getBankHolidayRunning()
     {
         return bankHolRun;
     }
 
-    public String getTrainStatus()
+    public TrainStatus getTrainStatus()
     {
         return trainStatus;
     }
 
-    public String getTrainCat()
+    public TrainCategory getTrainCategory()
     {
         return trainCat;
     }
@@ -164,27 +199,22 @@ public class BasicSchedule
         return headCode;
     }
 
-    public String getCourseInd()
-    {
-        return courseInd;
-    }
-
     public String getServiceCode()
     {
         return serviceCode;
     }
 
-    public String getPortionId()
+    public BusSec getPortionId()
     {
         return portionId;
     }
 
-    public String getPowerType()
+    public PowerType getPowerType()
     {
         return powerType;
     }
 
-    public String getTimingLoad()
+    public TimingLoad getTimingLoad()
     {
         return timingLoad;
     }
@@ -194,42 +224,37 @@ public class BasicSchedule
         return speed;
     }
 
-    public String getOperatingCharacteristics()
+    public OperatingCharacteristics[] getOperatingCharacteristics()
     {
         return operatingCharacteristics;
     }
 
-    public String getTrainClass()
+    public TrainClass getTrainClass()
     {
         return trainClass;
     }
 
-    public String getSleepers()
+    public Sleepers getSleepers()
     {
         return sleepers;
     }
 
-    public String getReservations()
+    public Reservations getReservations()
     {
         return reservations;
     }
 
-    public String getConnectionInd()
-    {
-        return connectionInd;
-    }
-
-    public String getCateringCode()
+    public Catering[] getCateringCode()
     {
         return cateringCode;
     }
 
-    public String getServiceBranding()
+    public ServiceBranding[] getServiceBranding()
     {
         return serviceBranding;
     }
 
-    public String getStpInd()
+    public STPIndicator getStpInd()
     {
         return stpInd;
     }
@@ -237,7 +262,7 @@ public class BasicSchedule
     @Override
     public String toString()
     {
-        return "BasicSchedule{" + "transactionType=" + transactionType + ", trainUid=" + trainUid + ", runsFrom=" + runsFrom + ", runsTo=" + runsTo + ", daysRun=" + daysRun + ", bankHolRun=" + bankHolRun + ", trainStatus=" + trainStatus + ", trainCat=" + trainCat + ", trainIdentity=" + trainIdentity + ", headCode=" + headCode + ", courseInd=" + courseInd + ", serviceCode=" + serviceCode + ", portionId=" + portionId + ", powerType=" + powerType + ", timingLoad=" + timingLoad + ", speed=" + speed + ", operatingCharacteristics=" + operatingCharacteristics + ", trainClass=" + trainClass + ", sleepers=" + sleepers + ", reservations=" + reservations + ", connectionInd=" + connectionInd + ", cateringCode=" + cateringCode + ", serviceBranding=" + serviceBranding + ", stpInd=" + stpInd + '}';
+        return "BasicSchedule{" + "transactionType=" + transactionType + ", trainUid=" + trainUid + ", runsFrom=" + runsFrom + ", runsTo=" + runsTo + ", daysRun=" + daysRun + ", bankHolRun=" + bankHolRun + ", trainStatus=" + trainStatus + ", trainCat=" + trainCat + ", trainIdentity=" + trainIdentity + ", headCode=" + headCode + ", serviceCode=" + serviceCode + ", portionId=" + portionId + ", powerType=" + powerType + ", timingLoad=" + timingLoad + ", speed=" + speed + ", operatingCharacteristics=" + operatingCharacteristics + ", trainClass=" + trainClass + ", sleepers=" + sleepers + ", reservations=" + reservations + ", cateringCode=" + cateringCode + ", serviceBranding=" + serviceBranding + ", stpInd=" + stpInd + '}';
     }
 
 }

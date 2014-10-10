@@ -23,17 +23,15 @@ public class Association
             p.getString( 6 ),
             p.getDate_yymmdd(),
             p.getDate_yymmdd(),
-            // Change types?
             p.getString( 7 ),
             p.getString( 2 ),
             p.getString( 1 ),
             p.getString( 7 ),
             p.getString( 1 ),
             p.getString( 1 ),
+            p.skip( 1 ),
             p.getString( 1 ),
-            p.getString( 1 ),
-            // Spare 31
-            p.getString( 31 ),
+            p.skip( 31 ),
             p.getString( 1 )
     );
 
@@ -49,14 +47,15 @@ public class Association
     private final String assocLocation;
     private final String baseLocSuffix;
     private final String assocLocSuffix;
-    private final String diagramType;
     private final String assocType;
     private final String stpIndicator;
 
     public Association( TransactionType transactionType, String mainTrainUID, String assocTrainUID, LocalDate startDate,
                         LocalDate endDate, String assocDays, String assocCat, String assocDateInd, String assocLocation,
-                        String baseLocSuffix, String assocLocSuffix, String diagramType, String assocType,
-                        String spare,
+                        String baseLocSuffix, String assocLocSuffix,
+                        Void diagramType,
+                        String assocType,
+                        Void spare,
                         String stpIndicator )
     {
         super( RecordType.AA );
@@ -71,7 +70,6 @@ public class Association
         this.assocLocation = assocLocation;
         this.baseLocSuffix = baseLocSuffix;
         this.assocLocSuffix = assocLocSuffix;
-        this.diagramType = diagramType;
         this.assocType = assocType;
         this.stpIndicator = stpIndicator;
     }
@@ -136,11 +134,6 @@ public class Association
         return assocLocSuffix;
     }
 
-    public String getDiagramType()
-    {
-        return diagramType;
-    }
-
     public String getAssocType()
     {
         return assocType;
@@ -154,7 +147,7 @@ public class Association
     @Override
     public String toString()
     {
-        return "Association{" + "transactionType=" + transactionType + ", mainTrainUID=" + mainTrainUID + ", assocTrainUID=" + assocTrainUID + ", startDate=" + startDate + ", endDate=" + endDate + ", assocDays=" + assocDays + ", assocCat=" + assocCat + ", assocDateInd=" + assocDateInd + ", assocLocation=" + assocLocation + ", baseLocSuffix=" + baseLocSuffix + ", assocLocSuffix=" + assocLocSuffix + ", diagramType=" + diagramType + ", assocType=" + assocType + ", stpIndicator=" + stpIndicator + '}';
+        return "Association{" + "transactionType=" + transactionType + ", mainTrainUID=" + mainTrainUID + ", assocTrainUID=" + assocTrainUID + ", startDate=" + startDate + ", endDate=" + endDate + ", assocDays=" + assocDays + ", assocCat=" + assocCat + ", assocDateInd=" + assocDateInd + ", assocLocation=" + assocLocation + ", baseLocSuffix=" + baseLocSuffix + ", assocLocSuffix=" + assocLocSuffix + ", assocType=" + assocType + ", stpIndicator=" + stpIndicator + '}';
     }
 
 }

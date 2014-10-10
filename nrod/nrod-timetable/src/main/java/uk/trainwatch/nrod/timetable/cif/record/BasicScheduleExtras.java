@@ -16,7 +16,7 @@ public class BasicScheduleExtras
 {
 
     static final Function<CIFParser, Record> factory = p -> new BasicScheduleExtras(
-            p.getString( 4 ),
+            p.skip( 4 ),
             p.getInt( 5 ),
             p.getString( 2 ),
             p.getString( 1 ),
@@ -24,18 +24,19 @@ public class BasicScheduleExtras
             p.getString( 1 )
     );
 
-    private final String tractionClass;
+    // No longer used
+    //private final String tractionClass;
     private final int uicCode;
     private final String atocCode;
     private final String applicableTimetableCode;
     private final String reserved1;
     private final String reserved2;
 
-    public BasicScheduleExtras( String tractionClass, int uicCode, String atocCode, String applicableTimetableCode,
+    public BasicScheduleExtras( Void tractionClass,
+                                int uicCode, String atocCode, String applicableTimetableCode,
                                 String reserved1, String reserved2 )
     {
         super( RecordType.BX );
-        this.tractionClass = tractionClass;
         this.uicCode = uicCode;
         this.atocCode = atocCode;
         this.applicableTimetableCode = applicableTimetableCode;
@@ -46,11 +47,6 @@ public class BasicScheduleExtras
     public static Function<CIFParser, Record> getFactory()
     {
         return factory;
-    }
-
-    public String getTractionClass()
-    {
-        return tractionClass;
     }
 
     public int getUicCode()
@@ -81,7 +77,7 @@ public class BasicScheduleExtras
     @Override
     public String toString()
     {
-        return "BasicScheduleExtras{" + "tractionClass=" + tractionClass + ", uicCode=" + uicCode + ", atocCode=" + atocCode + ", applicableTimetableCode=" + applicableTimetableCode + ", reserved1=" + reserved1 + ", reserved2=" + reserved2 + '}';
+        return "BasicScheduleExtras{" + ", uicCode=" + uicCode + ", atocCode=" + atocCode + ", applicableTimetableCode=" + applicableTimetableCode + ", reserved1=" + reserved1 + ", reserved2=" + reserved2 + '}';
     }
 
 }
