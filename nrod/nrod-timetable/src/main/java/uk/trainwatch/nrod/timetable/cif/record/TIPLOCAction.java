@@ -5,27 +5,27 @@
  */
 package uk.trainwatch.nrod.timetable.cif.record;
 
-import java.util.function.Function;
+import uk.trainwatch.nrod.location.Tiploc;
 
 /**
  *
  * @author Peter T Mount
  */
-public class TrailerRecord
+public abstract class TIPLOCAction
         extends Record
 {
 
-    static final Function<CIFParser, Record> factory = p -> new TrailerRecord();
+    private final Tiploc tiploc;
 
-    public TrailerRecord()
+    public TIPLOCAction( RecordType type, Tiploc tiploc )
     {
-        super( RecordType.ZZ );
+        super( type );
+        this.tiploc = tiploc;
     }
 
-    @Override
-    public void accept( RecordVisitor v )
+    public final Tiploc getTiploc()
     {
-        v.visit( this );
+        return tiploc;
     }
 
 }

@@ -27,13 +27,13 @@ public enum RecordType
     LI( IntermediateLocation.factory ),
     LO( OriginLocation.factory ),
     LT( TerminatingLocation.factory ),
+    TA( TIPLOCAmend.factory ),
+    TD( TIPLOCDelete.factory ),
     TI( TIPLOCInsert.factory ),
     ZZ( TrailerRecord.factory ),
     /*
      * According to the CIF End User Specification these have been defined but not implemented & will not appear in
      * extract files.
-     *
-     * We have them here so in case they do appear CIFParser will ignore them when running in strict mode
      */
     TN( TrainNote.factory ),
     LN( LocationNote.factory );
@@ -65,6 +65,11 @@ public enum RecordType
         this.factory = factory;
     }
 
+    /**
+     * The factory that will generate the appropriate {@link Record} for this type from the {@link CIFParser}
+     * <p>
+     * @return
+     */
     public Function<CIFParser, Record> getFactory()
     {
         return factory;

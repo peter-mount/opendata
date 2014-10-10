@@ -6,6 +6,7 @@
 package uk.trainwatch.nrod.timetable.cif.record;
 
 import java.util.function.Function;
+import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.util.BusSec;
 import uk.trainwatch.nrod.timetable.util.Catering;
 import uk.trainwatch.nrod.timetable.util.OperatingCharacteristics;
@@ -22,11 +23,11 @@ import uk.trainwatch.nrod.timetable.util.TrainClass;
  * @author Peter T Mount
  */
 public class ChangesEnRoute
-        extends Record
+        extends Location
 {
 
     static final Function<CIFParser, Record> factory = p -> new ChangesEnRoute(
-            p.getString( 8 ),
+            p.getTiplocSuffix(),
             p.getTrainCategory(),
             p.getString( 4 ),
             p.getString( 4 ),
@@ -47,7 +48,6 @@ public class ChangesEnRoute
             p.getInt( 5 )
     );
 
-    private final String location;
     private final TrainCategory trainCat;
     private final String trainIdentity;
     private final String headcode;
@@ -70,8 +70,10 @@ public class ChangesEnRoute
     //private final String tractionClass;
     private final int uicCode;
 
-    public ChangesEnRoute( String location,
-                           TrainCategory trainCat, String trainIdentity, String headcode,
+    public ChangesEnRoute( Tiploc location,
+                           TrainCategory trainCat,
+                           String trainIdentity,
+                           String headcode,
                            Void courseInd,
                            String serviceCode,
                            BusSec portionId,
@@ -88,8 +90,7 @@ public class ChangesEnRoute
                            Void tractionClass,
                            int uicCode )
     {
-        super( RecordType.CR );
-        this.location = location;
+        super( RecordType.CR, location );
         this.trainCat = trainCat;
         this.trainIdentity = trainIdentity;
         this.headcode = headcode;
@@ -107,9 +108,10 @@ public class ChangesEnRoute
         this.uicCode = uicCode;
     }
 
-    public String getLocation()
+    @Override
+    public void accept( RecordVisitor v )
     {
-        return location;
+        v.visit( this );
     }
 
     public TrainCategory getTrainCat()
@@ -185,12 +187,6 @@ public class ChangesEnRoute
     public int getUicCode()
     {
         return uicCode;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "ChangesEnRoute{" + "location=" + location + ", trainCat=" + trainCat + ", trainIdentity=" + trainIdentity + ", headcode=" + headcode + ", serviceCode=" + serviceCode + ", portionId=" + portionId + ", powerType=" + powerType + ", timingLoad=" + timingLoad + ", speed=" + speed + ", operatingCharacteristics=" + operatingCharacteristics + ", trainClass=" + trainClass + ", sleepers=" + sleepers + ", reservations=" + reservations + ", cateringCode=" + cateringCode + ", serviceBranding=" + serviceBranding + ", uicCode=" + uicCode + +'}';
     }
 
 }

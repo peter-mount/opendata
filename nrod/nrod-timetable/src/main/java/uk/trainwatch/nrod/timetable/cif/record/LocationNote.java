@@ -28,4 +28,10 @@ public class LocationNote
         super( RecordType.LN, noteType, note );
     }
 
+    @Override
+    public void accept( RecordVisitor v )
+    {
+        v.visit( this );
+    }
+
 }

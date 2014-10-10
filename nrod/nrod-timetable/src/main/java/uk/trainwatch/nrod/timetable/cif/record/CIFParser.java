@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
 import java.util.function.Function;
+import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.cif.TransactionType;
 import uk.trainwatch.nrod.timetable.util.ATOCCode;
 import uk.trainwatch.nrod.timetable.util.ATSCode;
@@ -433,6 +434,28 @@ public final class CIFParser
     public TransactionType getTransactionType()
     {
         return TransactionType.lookup( getString( 1 ) );
+    }
+
+    /**
+     * Get a 7 character Tiploc
+     * <p>
+     * @return
+     */
+    public Tiploc getTiploc()
+    {
+        return new Tiploc( getString( 7 ) );
+    }
+
+    /**
+     * Get a tiploc and skip the suffix character
+     * <p>
+     * @return
+     */
+    public Tiploc getTiplocSuffix()
+    {
+        Tiploc t = new Tiploc( getString( 7 ) );
+        skip( 1 );
+        return t;
     }
 
     /**

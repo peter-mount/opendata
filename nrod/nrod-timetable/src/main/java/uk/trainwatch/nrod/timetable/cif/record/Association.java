@@ -7,6 +7,7 @@ package uk.trainwatch.nrod.timetable.cif.record;
 
 import java.time.LocalDate;
 import java.util.function.Function;
+import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.cif.TransactionType;
 import uk.trainwatch.nrod.timetable.util.AssociationCategory;
 import uk.trainwatch.nrod.timetable.util.AssociationDateIndicator;
@@ -31,7 +32,7 @@ public class Association
             p.getDaysRun(),
             p.getAssociationCategory(),
             p.getAssociationDateIndicator(),
-            p.getString( 7 ),
+            p.getTiploc(),
             p.getString( 1 ),
             p.getString( 1 ),
             p.skip( 1 ),
@@ -48,7 +49,7 @@ public class Association
     private final DaysRun assocDays;
     private final AssociationCategory assocCat;
     private final AssociationDateIndicator assocDateInd;
-    private final String assocLocation;
+    private final Tiploc assocLocation;
     private final String baseLocSuffix;
     private final String assocLocSuffix;
     private final AssociationType assocType;
@@ -62,7 +63,7 @@ public class Association
                         DaysRun assocDays,
                         AssociationCategory assocCat,
                         AssociationDateIndicator assocDateInd,
-                        String assocLocation,
+                        Tiploc assocLocation,
                         String baseLocSuffix, String assocLocSuffix,
                         Void diagramType,
                         AssociationType assocType,
@@ -85,9 +86,10 @@ public class Association
         this.stpIndicator = stpIndicator;
     }
 
-    public static Function<CIFParser, Record> getFactory()
+    @Override
+    public void accept( RecordVisitor v )
     {
-        return factory;
+        v.visit( this );
     }
 
     public TransactionType getTransactionType()
@@ -130,7 +132,7 @@ public class Association
         return assocDateInd;
     }
 
-    public String getAssocLocation()
+    public Tiploc getAssocLocation()
     {
         return assocLocation;
     }
@@ -153,12 +155,6 @@ public class Association
     public STPIndicator getStpIndicator()
     {
         return stpIndicator;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "Association{" + "transactionType=" + transactionType + ", mainTrainUID=" + mainTrainUID + ", assocTrainUID=" + assocTrainUID + ", startDate=" + startDate + ", endDate=" + endDate + ", assocDays=" + assocDays + ", assocCat=" + assocCat + ", assocDateInd=" + assocDateInd + ", assocLocation=" + assocLocation + ", baseLocSuffix=" + baseLocSuffix + ", assocLocSuffix=" + assocLocSuffix + ", assocType=" + assocType + ", stpIndicator=" + stpIndicator + '}';
     }
 
 }

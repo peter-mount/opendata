@@ -7,6 +7,7 @@ package uk.trainwatch.nrod.timetable.cif.record;
 
 import java.time.LocalTime;
 import java.util.function.Function;
+import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.util.Activity;
 
 /**
@@ -14,11 +15,11 @@ import uk.trainwatch.nrod.timetable.util.Activity;
  * @author Peter T Mount
  */
 public class TerminatingLocation
-        extends Record
+        extends Location
 {
 
     static final Function<CIFParser, Record> factory = p -> new TerminatingLocation(
-            p.getString( 8 ),
+            p.getTiplocSuffix(),
             p.getTime_hhmmH(),
             p.getTime_hhmm(),
             p.getString( 3 ),
@@ -26,19 +27,20 @@ public class TerminatingLocation
             p.getActivity()
     );
 
-    private final String location;
     private final LocalTime workArrival;
     private final LocalTime pubArrival;
     private final String platform;
     private final String path;
     private final Activity[] activity;
 
-    public TerminatingLocation( String location, LocalTime workArrival, LocalTime pubArrival, String platform,
+    public TerminatingLocation( Tiploc location,
+                                LocalTime workArrival,
+                                LocalTime pubArrival,
+                                String platform,
                                 String path,
                                 Activity[] activity )
     {
-        super( RecordType.LT );
-        this.location = location;
+        super( RecordType.LT, location );
         this.workArrival = workArrival;
         this.pubArrival = pubArrival;
         this.platform = platform;
@@ -46,14 +48,10 @@ public class TerminatingLocation
         this.activity = activity;
     }
 
-    public static Function<CIFParser, Record> getFactory()
+    @Override
+    public void accept( RecordVisitor v )
     {
-        return factory;
-    }
-
-    public String getLocation()
-    {
-        return location;
+        v.visit( this );
     }
 
     public LocalTime getWorkArrival()
@@ -79,12 +77,6 @@ public class TerminatingLocation
     public Activity[] getActivity()
     {
         return activity;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "TerminatingLocation{" + "location=" + location + ", workArrival=" + workArrival + ", pubArrival=" + pubArrival + ", platform=" + platform + ", path=" + path + ", activity=" + activity + '}';
     }
 
 }

@@ -9,17 +9,23 @@ import uk.trainwatch.nrod.timetable.cif.record.CIFParser;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.TreeSet;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import uk.trainwatch.nrod.timetable.cif.record.BasicSchedule;
 import uk.trainwatch.nrod.timetable.cif.record.BasicScheduleExtras;
+import uk.trainwatch.nrod.timetable.cif.record.TIPLOCAction;
+import uk.trainwatch.nrod.timetable.model.Schedule;
+import uk.trainwatch.nrod.timetable.model.ScheduleBuilderVisitor;
 import uk.trainwatch.nrod.timetable.util.ATOCCode;
 import uk.trainwatch.nrod.timetable.util.OperatingCharacteristics;
 import uk.trainwatch.nrod.timetable.util.TimingLoad;
 import uk.trainwatch.util.Consumers;
 import uk.trainwatch.util.Functions;
+import uk.trainwatch.util.counter.CounterConsumer;
 
 /**
  * A test application which just parses a local CIF weekly file.
@@ -45,6 +51,7 @@ public class Main
             parseFile();
 
             // Comment out the one above & one of these for specific tests
+            //parseFileBitBucket();
             //findUnsupportedTimingLoads();
             //findUnsupportedATOCCode();
         }
@@ -58,9 +65,39 @@ public class Main
     }
 
     /**
-     * An example parser which simply sinks the values, useful for testing the parser against the entire set
+     * Shows parsing the CIF file into a ScheduleBuilder
+     * <p>
+     * @throws IOException
      */
     private static void parseFile()
+            throws IOException
+    {
+        // Strict mode so we fail on an invalid record type
+        final CIFParser parser = new CIFParser( true );
+
+        // In this example we ditch the Schedule's and just count them
+        CounterConsumer<Schedule> scheduleCounter = new CounterConsumer();
+        CounterConsumer<TIPLOCAction> tiplocCounter = new CounterConsumer<>();
+
+        // Our builder which builds Schedules and sends to the counter
+        final ScheduleBuilderVisitor builder = new ScheduleBuilderVisitor( scheduleCounter, tiplocCounter );
+
+        // Stream from the file
+        System.out.println( "Parsing file to ScheduleBuilderVisitor..." );
+        Files.lines( cifFile.toPath() ).
+                map( parser::parse ).
+                filter( Objects::nonNull ).
+                forEach( r -> r.accept( builder ) );
+
+        System.out.println( "Processed "
+                            + scheduleCounter.get() + " schedules, "
+                            + tiplocCounter.get() + " tiploc entries." );
+    }
+
+    /**
+     * An example parser which simply sinks the values, useful for testing the parser against the entire set
+     */
+    private static void parseFileBitBucket()
             throws IOException
     {
         // Strict mode so we fail on an invalid record type

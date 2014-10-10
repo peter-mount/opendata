@@ -41,9 +41,10 @@ public class BasicScheduleExtras
         this.applicableTimetableCode = applicableTimetableCode;
     }
 
-    public static Function<CIFParser, Record> getFactory()
+    @Override
+    public void accept( RecordVisitor v )
     {
-        return factory;
+        v.visit( this );
     }
 
     public int getUicCode()
@@ -59,12 +60,6 @@ public class BasicScheduleExtras
     public ATSCode getApplicableTimetableCode()
     {
         return applicableTimetableCode;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "BasicScheduleExtras{" + ", uicCode=" + uicCode + ", atocCode=" + atocCode + ", applicableTimetableCode=" + applicableTimetableCode + '}';
     }
 
 }

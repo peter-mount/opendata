@@ -7,6 +7,7 @@ package uk.trainwatch.nrod.timetable.cif.record;
 
 import java.time.LocalTime;
 import java.util.function.Function;
+import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.util.Activity;
 
 /**
@@ -14,11 +15,11 @@ import uk.trainwatch.nrod.timetable.util.Activity;
  * @author Peter T Mount
  */
 public class IntermediateLocation
-        extends Record
+        extends Location
 {
 
     static final Function<CIFParser, Record> factory = p -> new IntermediateLocation(
-            p.getString( 8 ),
+            p.getTiplocSuffix(),
             p.getTime_hhmmH(),
             p.getTime_hhmmH(),
             p.getTime_hhmmH(),
@@ -33,7 +34,6 @@ public class IntermediateLocation
             p.getAllowance()
     );
 
-    private final String location;
     private final LocalTime workArrival;
     private final LocalTime workDeparture;
     private final LocalTime workPass;
@@ -47,15 +47,15 @@ public class IntermediateLocation
     private final int pathingAllowance;
     private final int perfAllowance;
 
-    public IntermediateLocation( String location, LocalTime workArrival, LocalTime workDeparture, LocalTime workPass,
+    public IntermediateLocation( Tiploc location,
+                                 LocalTime workArrival, LocalTime workDeparture, LocalTime workPass,
                                  LocalTime pubArrival, LocalTime pubDeparture, String platform, String line, String path,
                                  Activity[] activity,
                                  int engAllowance,
                                  int pathingAllowance,
                                  int perfAllowance )
     {
-        super( RecordType.LI );
-        this.location = location;
+        super( RecordType.LI, location );
         this.workArrival = workArrival;
         this.workDeparture = workDeparture;
         this.workPass = workPass;
@@ -70,9 +70,10 @@ public class IntermediateLocation
         this.perfAllowance = perfAllowance;
     }
 
-    public String getLocation()
+    @Override
+    public void accept( RecordVisitor v )
     {
-        return location;
+        v.visit( this );
     }
 
     public LocalTime getWorkArrival()
@@ -133,12 +134,6 @@ public class IntermediateLocation
     public int getPerfAllowance()
     {
         return perfAllowance;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "IntermediateLocation{" + "location=" + location + ", workArrival=" + workArrival + ", workDeparture=" + workDeparture + ", workPass=" + workPass + ", pubArrival=" + pubArrival + ", pubDeparture=" + pubDeparture + ", platform=" + platform + ", line=" + line + ", path=" + path + ", activity=" + activity + ", engAllowance=" + engAllowance + ", pathingAllowance=" + pathingAllowance + ", perfAllowance=" + perfAllowance + '}';
     }
 
 }

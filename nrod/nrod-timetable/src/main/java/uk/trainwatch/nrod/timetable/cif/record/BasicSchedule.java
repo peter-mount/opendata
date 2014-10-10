@@ -61,9 +61,7 @@ public class BasicSchedule
             p.skip( 1 ),
             p.getSTPIndicator()
     );
-    //static final Function<CIFParser, Record> factory = factory1.compose( CIFParser::debug );
 
-    // FIXME many of these can be objects
     private final TransactionType transactionType;
     private final TrainUID trainUid;
     private final LocalDate runsFrom;
@@ -74,8 +72,6 @@ public class BasicSchedule
     private final TrainCategory trainCat;
     private final String trainIdentity;
     private final String headCode;
-    // No longer used so no need to store
-    //private final String courseInd;
     private final String serviceCode;
     private final BusSec portionId;
     private final PowerType powerType;
@@ -85,8 +81,6 @@ public class BasicSchedule
     private final TrainClass trainClass;
     private final Sleepers sleepers;
     private final Reservations reservations;
-    // No longer used
-    //private final String connectionInd;
     private final Catering[] cateringCode;
     private final ServiceBranding[] serviceBranding;
     private final STPIndicator stpInd;
@@ -101,7 +95,6 @@ public class BasicSchedule
                           TrainCategory trainCat,
                           String trainIdentity,
                           String headCode,
-                          // No longer used, here so we can skip
                           Void courseInd,
                           String serviceCode,
                           BusSec portionId,
@@ -112,7 +105,6 @@ public class BasicSchedule
                           TrainClass trainClass,
                           Sleepers sleepers,
                           Reservations reservations,
-                          // No longer used, here so we can skip
                           Void connectionInd,
                           Catering[] cateringCode,
                           ServiceBranding[] serviceBranding,
@@ -144,9 +136,10 @@ public class BasicSchedule
         this.stpInd = stpInd;
     }
 
-    public static Function<CIFParser, Record> getFactory()
+    @Override
+    public void accept( RecordVisitor v )
     {
-        return factory;
+        v.visit( this );
     }
 
     public TransactionType getTransactionType()
@@ -257,12 +250,6 @@ public class BasicSchedule
     public STPIndicator getStpInd()
     {
         return stpInd;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "BasicSchedule{" + "transactionType=" + transactionType + ", trainUid=" + trainUid + ", runsFrom=" + runsFrom + ", runsTo=" + runsTo + ", daysRun=" + daysRun + ", bankHolRun=" + bankHolRun + ", trainStatus=" + trainStatus + ", trainCat=" + trainCat + ", trainIdentity=" + trainIdentity + ", headCode=" + headCode + ", serviceCode=" + serviceCode + ", portionId=" + portionId + ", powerType=" + powerType + ", timingLoad=" + timingLoad + ", speed=" + speed + ", operatingCharacteristics=" + operatingCharacteristics + ", trainClass=" + trainClass + ", sleepers=" + sleepers + ", reservations=" + reservations + ", cateringCode=" + cateringCode + ", serviceBranding=" + serviceBranding + ", stpInd=" + stpInd + '}';
     }
 
 }

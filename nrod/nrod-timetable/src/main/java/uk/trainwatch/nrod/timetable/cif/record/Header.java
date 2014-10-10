@@ -62,9 +62,10 @@ public class Header
         this.endDate = endDate;
     }
 
-    public static Function<CIFParser, Record> getFactory()
+    @Override
+    public void accept( RecordVisitor v )
     {
-        return factory;
+        v.visit( this );
     }
 
     public String getMainframeId()
@@ -110,12 +111,6 @@ public class Header
     public LocalDate getEndDate()
     {
         return endDate;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "Header{" + "mainframeId=" + mainframeId + ", dateOfExtract=" + dateOfExtract + ", timeOfExtract=" + timeOfExtract + ", currentFileRef=" + currentFileRef + ", lastFileRef=" + lastFileRef + ", fillExtract=" + fillExtract + ", cifVersion=" + cifVersion + ", startDate=" + startDate + ", endDate=" + endDate + '}';
     }
 
 }

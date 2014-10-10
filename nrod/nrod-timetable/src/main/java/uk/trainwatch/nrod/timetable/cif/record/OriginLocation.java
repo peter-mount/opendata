@@ -7,6 +7,7 @@ package uk.trainwatch.nrod.timetable.cif.record;
 
 import java.time.LocalTime;
 import java.util.function.Function;
+import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.util.Activity;
 
 /**
@@ -14,11 +15,11 @@ import uk.trainwatch.nrod.timetable.util.Activity;
  * @author Peter T Mount
  */
 public class OriginLocation
-        extends Record
+        extends Location
 {
 
     static final Function<CIFParser, Record> factory = p -> new OriginLocation(
-            p.getString( 8 ),
+            p.getTiplocSuffix(),
             p.getTime_hhmmH(),
             p.getTime_hhmm(),
             p.getString( 3 ),
@@ -29,7 +30,6 @@ public class OriginLocation
             p.getAllowance()
     );
 
-    private final String location;
     private final LocalTime workDeparture;
     private final LocalTime publicDeparture;
     private final String platform;
@@ -39,15 +39,17 @@ public class OriginLocation
     private final Activity[] activity;
     private final int perfAllowance;
 
-    public OriginLocation( String location, LocalTime workDeparture, LocalTime publicDeparture, String platform,
+    public OriginLocation( Tiploc location,
+                           LocalTime workDeparture,
+                           LocalTime publicDeparture,
+                           String platform,
                            String line,
                            int engAllowance,
                            int pathAllowance,
                            Activity[] activity,
                            int perfAllowance )
     {
-        super( RecordType.LO );
-        this.location = location;
+        super( RecordType.LO, location );
         this.workDeparture = workDeparture;
         this.publicDeparture = publicDeparture;
         this.platform = platform;
@@ -58,14 +60,10 @@ public class OriginLocation
         this.perfAllowance = perfAllowance;
     }
 
-    public static Function<CIFParser, Record> getFactory()
+    @Override
+    public void accept( RecordVisitor v )
     {
-        return factory;
-    }
-
-    public String getLocation()
-    {
-        return location;
+        v.visit( this );
     }
 
     public LocalTime getWorkDeparture()
@@ -106,12 +104,6 @@ public class OriginLocation
     public int getPerfAllowance()
     {
         return perfAllowance;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "OriginLocation{" + "location=" + location + ", workDeparture=" + workDeparture + ", publicDeparture=" + publicDeparture + ", platform=" + platform + ", line=" + line + ", engAllowance=" + engAllowance + ", pathAllowance=" + pathAllowance + ", activity=" + activity + ", perfAllowance=" + perfAllowance + '}';
     }
 
 }

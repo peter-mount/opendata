@@ -19,9 +19,10 @@ public abstract class Record
         this.type = type;
     }
 
-    public final RecordType getType()
+    public final RecordType getRecordType()
     {
         return type;
     }
 
+    public abstract void accept( RecordVisitor v );
 }

@@ -12,11 +12,11 @@ import uk.trainwatch.nrod.location.Tiploc;
  *
  * @author Peter T Mount
  */
-public class TIPLOCInsert
+public class TIPLOCAmend
         extends TIPLOCAction
 {
 
-    static final Function<CIFParser, Record> factory = p -> new TIPLOCInsert(
+    static final Function<CIFParser, Record> factory = p -> new TIPLOCAmend(
             p.getTiploc(),
             p.getInt( 2 ),
             p.getInt( 6 ),
@@ -25,7 +25,8 @@ public class TIPLOCInsert
             p.getLong( 5 ),
             p.skip( 4 ),
             p.getString( 3 ),
-            p.getString( 16 )
+            p.getString( 16 ),
+            p.getTiploc()
     );
     private final int caps;
     private final int nalco;
@@ -34,17 +35,20 @@ public class TIPLOCInsert
     private final long stanox;
     private final String crs;
     private final String description;
+    private final Tiploc newTiploc;
 
-    public TIPLOCInsert( Tiploc tiploc,
-                         int caps,
-                         int nalco,
-                         String nlcCheck,
-                         String tpsDescription,
-                         long stanox,
-                         Void PO_Loc_Code,
-                         String crs, String description )
+    public TIPLOCAmend( Tiploc tiploc,
+                        int caps,
+                        int nalco,
+                        String nlcCheck,
+                        String tpsDescription,
+                        long stanox,
+                        Void PO_Loc_Code,
+                        String crs,
+                        String description,
+                        Tiploc newTiploc )
     {
-        super( RecordType.TI, tiploc);
+        super( RecordType.TI, tiploc );
         this.caps = caps;
         this.nalco = nalco;
         this.nlcCheck = nlcCheck;
@@ -52,6 +56,7 @@ public class TIPLOCInsert
         this.stanox = stanox;
         this.crs = crs;
         this.description = description;
+        this.newTiploc = newTiploc;
     }
 
     @Override
@@ -93,6 +98,11 @@ public class TIPLOCInsert
     public String getDescription()
     {
         return description;
+    }
+
+    public Tiploc getNewTiploc()
+    {
+        return newTiploc;
     }
 
 }

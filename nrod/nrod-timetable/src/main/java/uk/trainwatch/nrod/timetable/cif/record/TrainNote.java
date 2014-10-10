@@ -28,4 +28,10 @@ public class TrainNote
         super( RecordType.TN, note, note );
     }
 
+    @Override
+    public void accept( RecordVisitor v )
+    {
+        v.visit( this );
+    }
+
 }
