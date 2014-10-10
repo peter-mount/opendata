@@ -6,6 +6,8 @@
 package uk.trainwatch.nrod.timetable.cif.record;
 
 import java.util.function.Function;
+import uk.trainwatch.nrod.timetable.util.ATOCCode;
+import uk.trainwatch.nrod.timetable.util.ATSCode;
 
 /**
  *
@@ -18,30 +20,25 @@ public class BasicScheduleExtras
     static final Function<CIFParser, Record> factory = p -> new BasicScheduleExtras(
             p.skip( 4 ),
             p.getInt( 5 ),
-            p.getString( 2 ),
-            p.getString( 1 ),
-            p.getString( 8 ),
-            p.getString( 1 )
+            p.getATOCCode(),
+            p.getATSCode()
     );
 
     // No longer used
     //private final String tractionClass;
     private final int uicCode;
-    private final String atocCode;
-    private final String applicableTimetableCode;
-    private final String reserved1;
-    private final String reserved2;
+    private final ATOCCode atocCode;
+    private final ATSCode applicableTimetableCode;
 
     public BasicScheduleExtras( Void tractionClass,
-                                int uicCode, String atocCode, String applicableTimetableCode,
-                                String reserved1, String reserved2 )
+                                int uicCode,
+                                ATOCCode atocCode,
+                                ATSCode applicableTimetableCode )
     {
         super( RecordType.BX );
         this.uicCode = uicCode;
         this.atocCode = atocCode;
         this.applicableTimetableCode = applicableTimetableCode;
-        this.reserved1 = reserved1;
-        this.reserved2 = reserved2;
     }
 
     public static Function<CIFParser, Record> getFactory()
@@ -54,30 +51,20 @@ public class BasicScheduleExtras
         return uicCode;
     }
 
-    public String getAtocCode()
+    public ATOCCode getAtocCode()
     {
         return atocCode;
     }
 
-    public String getApplicableTimetableCode()
+    public ATSCode getApplicableTimetableCode()
     {
         return applicableTimetableCode;
-    }
-
-    public String getReserved1()
-    {
-        return reserved1;
-    }
-
-    public String getReserved2()
-    {
-        return reserved2;
     }
 
     @Override
     public String toString()
     {
-        return "BasicScheduleExtras{" + ", uicCode=" + uicCode + ", atocCode=" + atocCode + ", applicableTimetableCode=" + applicableTimetableCode + ", reserved1=" + reserved1 + ", reserved2=" + reserved2 + '}';
+        return "BasicScheduleExtras{" + ", uicCode=" + uicCode + ", atocCode=" + atocCode + ", applicableTimetableCode=" + applicableTimetableCode + '}';
     }
 
 }

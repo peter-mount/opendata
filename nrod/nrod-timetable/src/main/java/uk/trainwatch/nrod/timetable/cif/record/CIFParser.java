@@ -10,6 +10,12 @@ import java.time.LocalTime;
 import java.util.Objects;
 import java.util.function.Function;
 import uk.trainwatch.nrod.timetable.cif.TransactionType;
+import uk.trainwatch.nrod.timetable.util.ATOCCode;
+import uk.trainwatch.nrod.timetable.util.ATSCode;
+import uk.trainwatch.nrod.timetable.util.Activity;
+import uk.trainwatch.nrod.timetable.util.AssociationCategory;
+import uk.trainwatch.nrod.timetable.util.AssociationDateIndicator;
+import uk.trainwatch.nrod.timetable.util.AssociationType;
 import uk.trainwatch.nrod.timetable.util.BankHolidayRunning;
 import uk.trainwatch.nrod.timetable.util.BusSec;
 import uk.trainwatch.nrod.timetable.util.Catering;
@@ -291,6 +297,62 @@ public final class CIFParser
     {
         ensureAvailable( 5 );
         return LocalTime.of( getInt( 2 ), getInt( 2 ), "H".equals( getString( 1 ) ) ? 30 : 0 );
+    }
+
+    /**
+     * Get an allowance time in seconds. This is usually used for engineering, pathing or performance allowances where
+     * the time is specified in minutes or with an H for Half a minute.
+     * <p>
+     * A blank represents half a minute
+     * <p>
+     * @return
+     */
+    public int getAllowance()
+    {
+        char a = getString( 1 ).
+                charAt( 0 );
+
+        int t = 0;
+        if( Character.isDigit( a ) )
+        {
+            t = (int) (a - '0') * 60;
+        }
+
+        if( getBoolean( "H" ) )
+        {
+            t += 30;
+        }
+        return t;
+    }
+
+    public Activity[] getActivity()
+    {
+        return Activity.lookupAll( getString( 12 ) );
+    }
+
+    public AssociationCategory getAssociationCategory()
+    {
+        return AssociationCategory.lookup( getString( 2 ) );
+    }
+
+    public AssociationDateIndicator getAssociationDateIndicator()
+    {
+        return AssociationDateIndicator.lookup( getString( 1 ) );
+    }
+
+    public AssociationType getAssociationType()
+    {
+        return AssociationType.lookup( getString( 1 ) );
+    }
+
+    public ATOCCode getATOCCode()
+    {
+        return ATOCCode.lookup( getString( 2 ) );
+    }
+
+    public ATSCode getATSCode()
+    {
+        return ATSCode.lookup( getString( 1 ) );
     }
 
     public BusSec getBusSec()

@@ -7,6 +7,7 @@ package uk.trainwatch.nrod.timetable.cif.record;
 
 import java.time.LocalTime;
 import java.util.function.Function;
+import uk.trainwatch.nrod.timetable.util.Activity;
 
 /**
  *
@@ -22,7 +23,7 @@ public class TerminatingLocation
             p.getTime_hhmm(),
             p.getString( 3 ),
             p.getString( 3 ),
-            p.getString( 12 )
+            p.getActivity()
     );
 
     private final String location;
@@ -30,10 +31,11 @@ public class TerminatingLocation
     private final LocalTime pubArrival;
     private final String platform;
     private final String path;
-    private final String activity;
+    private final Activity[] activity;
 
     public TerminatingLocation( String location, LocalTime workArrival, LocalTime pubArrival, String platform,
-                                String path, String activity )
+                                String path,
+                                Activity[] activity )
     {
         super( RecordType.LT );
         this.location = location;
@@ -74,7 +76,7 @@ public class TerminatingLocation
         return path;
     }
 
-    public String getActivity()
+    public Activity[] getActivity()
     {
         return activity;
     }

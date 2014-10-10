@@ -14,6 +14,8 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import uk.trainwatch.nrod.timetable.cif.record.BasicSchedule;
+import uk.trainwatch.nrod.timetable.cif.record.BasicScheduleExtras;
+import uk.trainwatch.nrod.timetable.util.ATOCCode;
 import uk.trainwatch.nrod.timetable.util.OperatingCharacteristics;
 import uk.trainwatch.nrod.timetable.util.TimingLoad;
 import uk.trainwatch.util.Consumers;
@@ -44,7 +46,7 @@ public class Main
 
             // Comment out the one above & one of these for specific tests
             //findUnsupportedTimingLoads();
-            //findUnsupportedOperatingCharacteristics();
+            //findUnsupportedATOCCode();
         }
         catch( Exception ex )
         {
@@ -65,6 +67,7 @@ public class Main
         final CIFParser parser = new CIFParser( true );
 
         // Stream from the file
+        System.out.println( "Parsing file to bit bucket..." );
         Files.lines( cifFile.toPath() ).
                 // parse the next record
                 map( parser::parse ).
@@ -109,6 +112,29 @@ public class Main
                 collect( Collectors.toCollection( () -> new TreeSet() ) ).
                 // This is formatted so can be pasted into TimingLoad source
                 forEach( c -> System.out.printf( "/**\n/* Class %1$s\n*/\nC%1$s(\"%1$s\",\"Class %1$s\"),\n", c ) );
+    }
+
+    private static void findUnsupportedATOCCode()
+            throws IOException
+    {
+        // Strict mode so we fail on an invalid record type
+        final CIFParser parser = new CIFParser( true );
+
+        System.out.println( "Scanning for unsupported ATOCCode's..." );
+        Files.lines( cifFile.toPath() ).
+                map( parser::parse ).
+                map( Functions.castTo( BasicScheduleExtras.class ) ).
+                filter( Objects::nonNull ).
+                // Filter for the unkown value
+                filter( s -> s.getAtocCode() == ATOCCode.UNKNOWN ).
+                // Swap back the original line from the file
+                map( parser::currentLine ).
+                // Manually extract the field
+                map( l -> l.substring( 11, 13 ) ).
+                // collect into a set then report findings
+                collect( Collectors.toCollection( () -> new TreeSet() ) ).
+                // This is formatted so can be pasted into TimingLoad source
+                forEach( c -> System.out.printf( "/**\n/* %1$s\n*/\n%1$s(\"%1$s\",\"%1$s\"),\n", c ) );
     }
 
     private static void findUnsupportedOperatingCharacteristics()

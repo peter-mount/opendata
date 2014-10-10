@@ -7,6 +7,7 @@ package uk.trainwatch.nrod.timetable.cif.record;
 
 import java.time.LocalTime;
 import java.util.function.Function;
+import uk.trainwatch.nrod.timetable.util.Activity;
 
 /**
  *
@@ -26,10 +27,10 @@ public class IntermediateLocation
             p.getString( 3 ),
             p.getString( 3 ),
             p.getString( 3 ),
-            p.getString( 12 ),
-            p.getString( 2 ),
-            p.getString( 2 ),
-            p.getString( 2 )
+            p.getActivity(),
+            p.getAllowance(),
+            p.getAllowance(),
+            p.getAllowance()
     );
 
     private final String location;
@@ -41,15 +42,17 @@ public class IntermediateLocation
     private final String platform;
     private final String line;
     private final String path;
-    private final String activity;
-    private final String engAllowance;
-    private final String pathingAllowance;
-    private final String perfAllowance;
+    private final Activity[] activity;
+    private final int engAllowance;
+    private final int pathingAllowance;
+    private final int perfAllowance;
 
     public IntermediateLocation( String location, LocalTime workArrival, LocalTime workDeparture, LocalTime workPass,
                                  LocalTime pubArrival, LocalTime pubDeparture, String platform, String line, String path,
-                                 String activity, String engAllowance, String pathingAllowance,
-                                 String perfAllowance )
+                                 Activity[] activity,
+                                 int engAllowance,
+                                 int pathingAllowance,
+                                 int perfAllowance )
     {
         super( RecordType.LI );
         this.location = location;
@@ -112,22 +115,22 @@ public class IntermediateLocation
         return path;
     }
 
-    public String getActivity()
+    public Activity[] getActivity()
     {
         return activity;
     }
 
-    public String getEngAllowance()
+    public int getEngAllowance()
     {
         return engAllowance;
     }
 
-    public String getPathingAllowance()
+    public int getPathingAllowance()
     {
         return pathingAllowance;
     }
 
-    public String getPerfAllowance()
+    public int getPerfAllowance()
     {
         return perfAllowance;
     }

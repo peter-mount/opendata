@@ -7,6 +7,7 @@ package uk.trainwatch.nrod.timetable.cif.record;
 
 import java.time.LocalTime;
 import java.util.function.Function;
+import uk.trainwatch.nrod.timetable.util.Activity;
 
 /**
  *
@@ -22,10 +23,10 @@ public class OriginLocation
             p.getTime_hhmm(),
             p.getString( 3 ),
             p.getString( 3 ),
-            p.getString( 2 ),
-            p.getString( 2 ),
-            p.getString( 12 ),
-            p.getString( 2 )
+            p.getAllowance(),
+            p.getAllowance(),
+            p.getActivity(),
+            p.getAllowance()
     );
 
     private final String location;
@@ -33,14 +34,17 @@ public class OriginLocation
     private final LocalTime publicDeparture;
     private final String platform;
     private final String line;
-    private final String engAllowance;
-    private final String pathAllowance;
-    private final String activity;
-    private final String perfAllowance;
+    private final int engAllowance;
+    private final int pathAllowance;
+    private final Activity[] activity;
+    private final int perfAllowance;
 
     public OriginLocation( String location, LocalTime workDeparture, LocalTime publicDeparture, String platform,
-                           String line, String engAllowance, String pathAllowance, String activity,
-                           String perfAllowance )
+                           String line,
+                           int engAllowance,
+                           int pathAllowance,
+                           Activity[] activity,
+                           int perfAllowance )
     {
         super( RecordType.LO );
         this.location = location;
@@ -84,22 +88,22 @@ public class OriginLocation
         return line;
     }
 
-    public String getEngAllowance()
+    public int getEngAllowance()
     {
         return engAllowance;
     }
 
-    public String getPathAllowance()
+    public int getPathAllowance()
     {
         return pathAllowance;
     }
 
-    public String getActivity()
+    public Activity[] getActivity()
     {
         return activity;
     }
 
-    public String getPerfAllowance()
+    public int getPerfAllowance()
     {
         return perfAllowance;
     }

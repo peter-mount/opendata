@@ -8,6 +8,11 @@ package uk.trainwatch.nrod.timetable.cif.record;
 import java.time.LocalDate;
 import java.util.function.Function;
 import uk.trainwatch.nrod.timetable.cif.TransactionType;
+import uk.trainwatch.nrod.timetable.util.AssociationCategory;
+import uk.trainwatch.nrod.timetable.util.AssociationDateIndicator;
+import uk.trainwatch.nrod.timetable.util.AssociationType;
+import uk.trainwatch.nrod.timetable.util.DaysRun;
+import uk.trainwatch.nrod.timetable.util.STPIndicator;
 
 /**
  *
@@ -23,16 +28,16 @@ public class Association
             p.getString( 6 ),
             p.getDate_yymmdd(),
             p.getDate_yymmdd(),
-            p.getString( 7 ),
-            p.getString( 2 ),
-            p.getString( 1 ),
+            p.getDaysRun(),
+            p.getAssociationCategory(),
+            p.getAssociationDateIndicator(),
             p.getString( 7 ),
             p.getString( 1 ),
             p.getString( 1 ),
             p.skip( 1 ),
-            p.getString( 1 ),
+            p.getAssociationType(),
             p.skip( 31 ),
-            p.getString( 1 )
+            p.getSTPIndicator()
     );
 
     private final TransactionType transactionType;
@@ -40,23 +45,29 @@ public class Association
     private final String assocTrainUID;
     private final LocalDate startDate;
     private final LocalDate endDate;
-    // This is 1 char per day, 0 or 1
-    private final String assocDays;
-    private final String assocCat;
-    private final String assocDateInd;
+    private final DaysRun assocDays;
+    private final AssociationCategory assocCat;
+    private final AssociationDateIndicator assocDateInd;
     private final String assocLocation;
     private final String baseLocSuffix;
     private final String assocLocSuffix;
-    private final String assocType;
-    private final String stpIndicator;
+    private final AssociationType assocType;
+    private final STPIndicator stpIndicator;
 
-    public Association( TransactionType transactionType, String mainTrainUID, String assocTrainUID, LocalDate startDate,
-                        LocalDate endDate, String assocDays, String assocCat, String assocDateInd, String assocLocation,
+    public Association( TransactionType transactionType,
+                        String mainTrainUID,
+                        String assocTrainUID,
+                        LocalDate startDate,
+                        LocalDate endDate,
+                        DaysRun assocDays,
+                        AssociationCategory assocCat,
+                        AssociationDateIndicator assocDateInd,
+                        String assocLocation,
                         String baseLocSuffix, String assocLocSuffix,
                         Void diagramType,
-                        String assocType,
+                        AssociationType assocType,
                         Void spare,
-                        String stpIndicator )
+                        STPIndicator stpIndicator )
     {
         super( RecordType.AA );
         this.transactionType = transactionType;
@@ -104,17 +115,17 @@ public class Association
         return endDate;
     }
 
-    public String getAssocDays()
+    public DaysRun getAssocDays()
     {
         return assocDays;
     }
 
-    public String getAssocCat()
+    public AssociationCategory getAssociationCategory()
     {
         return assocCat;
     }
 
-    public String getAssocDateInd()
+    public AssociationDateIndicator getAssocDateInd()
     {
         return assocDateInd;
     }
@@ -134,12 +145,12 @@ public class Association
         return assocLocSuffix;
     }
 
-    public String getAssocType()
+    public AssociationType getAssocType()
     {
         return assocType;
     }
 
-    public String getStpIndicator()
+    public STPIndicator getStpIndicator()
     {
         return stpIndicator;
     }

@@ -35,8 +35,8 @@ public enum RecordType
      *
      * We have them here so in case they do appear CIFParser will ignore them when running in strict mode
      */
-    TN( null ),
-    LN( null );
+    TN( TrainNote.factory ),
+    LN( LocationNote.factory );
     private static final Map<String, RecordType> TYPES = new ConcurrentHashMap<>();
 
     static

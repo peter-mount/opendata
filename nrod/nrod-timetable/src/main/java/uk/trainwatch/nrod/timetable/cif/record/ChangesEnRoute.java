@@ -6,6 +6,16 @@
 package uk.trainwatch.nrod.timetable.cif.record;
 
 import java.util.function.Function;
+import uk.trainwatch.nrod.timetable.util.BusSec;
+import uk.trainwatch.nrod.timetable.util.Catering;
+import uk.trainwatch.nrod.timetable.util.OperatingCharacteristics;
+import uk.trainwatch.nrod.timetable.util.PowerType;
+import uk.trainwatch.nrod.timetable.util.Reservations;
+import uk.trainwatch.nrod.timetable.util.ServiceBranding;
+import uk.trainwatch.nrod.timetable.util.Sleepers;
+import uk.trainwatch.nrod.timetable.util.TimingLoad;
+import uk.trainwatch.nrod.timetable.util.TrainCategory;
+import uk.trainwatch.nrod.timetable.util.TrainClass;
 
 /**
  *
@@ -17,55 +27,64 @@ public class ChangesEnRoute
 
     static final Function<CIFParser, Record> factory = p -> new ChangesEnRoute(
             p.getString( 8 ),
-            p.getString( 2 ),
+            p.getTrainCategory(),
             p.getString( 4 ),
             p.getString( 4 ),
             p.skip( 1 ),
             p.getString( 8 ),
-            p.getString( 1 ),
+            p.getBusSec(),
+            p.getPowerType(),
+            p.getTimingLoad(),
             p.getString( 3 ),
-            p.getString( 4 ),
-            p.getString( 3 ),
-            p.getString( 6 ),
-            p.getString( 1 ),
-            p.getString( 1 ),
-            p.getString( 1 ),
+            p.getOperatingCharacteristics(),
+            p.getTrainClass(),
+            p.getSleepers(),
+            p.getReservations(),
             p.skip( 1 ),
-            p.getString( 4 ),
-            p.getString( 4 ),
+            p.getCatering(),
+            p.getServiceBranding(),
             p.skip( 4 ),
             p.getInt( 5 )
     );
 
     private final String location;
-    private final String trainCat;
+    private final TrainCategory trainCat;
     private final String trainIdentity;
     private final String headcode;
     // No longer used
     //private final String courseInd;
     private final String serviceCode;
-    private final String portionId;
-    private final String powerType;
-    private final String timingLoad;
+    private final BusSec portionId;
+    private final PowerType powerType;
+    private final TimingLoad timingLoad;
     private final String speed;
-    private final String operatingCharacteristics;
-    private final String trainClass;
-    private final String sleepers;
-    private final String reservations;
+    private final OperatingCharacteristics[] operatingCharacteristics;
+    private final TrainClass trainClass;
+    private final Sleepers sleepers;
+    private final Reservations reservations;
     // No longer used
     //private final String connectionIndicator;
-    private final String cateringCode;
-    private final String serviceBranding;
+    private final Catering[] cateringCode;
+    private final ServiceBranding[] serviceBranding;
     // No longer used
     //private final String tractionClass;
     private final int uicCode;
 
-    public ChangesEnRoute( String location, String trainCat, String trainIdentity, String headcode,
+    public ChangesEnRoute( String location,
+                           TrainCategory trainCat, String trainIdentity, String headcode,
                            Void courseInd,
-                           String serviceCode, String portionId, String powerType, String timingLoad, String speed,
-                           String operatingCharacteristics, String trainClass, String sleepers, String reservations,
+                           String serviceCode,
+                           BusSec portionId,
+                           PowerType powerType,
+                           TimingLoad timingLoad,
+                           String speed,
+                           OperatingCharacteristics[] operatingCharacteristics,
+                           TrainClass trainClass,
+                           Sleepers sleepers,
+                           Reservations reservations,
                            Void connectionIndicator,
-                           String cateringCode, String serviceBranding,
+                           Catering[] cateringCode,
+                           ServiceBranding[] serviceBranding,
                            Void tractionClass,
                            int uicCode )
     {
@@ -93,7 +112,7 @@ public class ChangesEnRoute
         return location;
     }
 
-    public String getTrainCat()
+    public TrainCategory getTrainCat()
     {
         return trainCat;
     }
@@ -113,17 +132,17 @@ public class ChangesEnRoute
         return serviceCode;
     }
 
-    public String getPortionId()
+    public BusSec getPortionId()
     {
         return portionId;
     }
 
-    public String getPowerType()
+    public PowerType getPowerType()
     {
         return powerType;
     }
 
-    public String getTimingLoad()
+    public TimingLoad getTimingLoad()
     {
         return timingLoad;
     }
@@ -133,32 +152,32 @@ public class ChangesEnRoute
         return speed;
     }
 
-    public String getOperatingCharacteristics()
+    public OperatingCharacteristics[] getOperatingCharacteristics()
     {
         return operatingCharacteristics;
     }
 
-    public String getTrainClass()
+    public TrainClass getTrainClass()
     {
         return trainClass;
     }
 
-    public String getSleepers()
+    public Sleepers getSleepers()
     {
         return sleepers;
     }
 
-    public String getReservations()
+    public Reservations getReservations()
     {
         return reservations;
     }
 
-    public String getCateringCode()
+    public Catering[] getCateringCode()
     {
         return cateringCode;
     }
 
-    public String getServiceBranding()
+    public ServiceBranding[] getServiceBranding()
     {
         return serviceBranding;
     }
