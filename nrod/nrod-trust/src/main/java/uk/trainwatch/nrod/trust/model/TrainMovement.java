@@ -4,13 +4,7 @@
  */
 package uk.trainwatch.nrod.trust.model;
 
-import java.util.Date;
 import java.util.Objects;
-import uk.trainwatch.nrod.location.TrainLocation;
-import uk.trainwatch.nrod.location.TrainLocationFactory;
-import uk.trainwatch.nrod.util.TrainDate;
-import uk.trainwatch.nrod.util.TrainId;
-import uk.trainwatch.nrod.util.TrainTime;
 
 /**
  * A train movement message is sent whenever a train arrives, passes or departs a location monitored by TRUST. It
@@ -25,7 +19,6 @@ public class TrainMovement
         implements Comparable<TrainMovement>
 {
 
-    private long id;
     private String event_type;
     private long gbtt_timestamp;
     private long original_loc_stanox;
@@ -52,15 +45,13 @@ public class TrainMovement
     private String planned_event_type;
     private long next_report_stanox;
     private String line_ind;
-    private transient TrainTime time;
-    private transient TrainId trainId;
 
     TrainMovement()
     {
         super( TrustMovementType.MOVEMENT );
     }
 
-    TrainMovement( long id, String event_type, long gbtt_timestamp, long original_loc_stanox,
+    TrainMovement( String event_type, long gbtt_timestamp, long original_loc_stanox,
                    long planned_timestamp, int timetable_variation, long original_loc_timestamp,
                    String current_train_id, boolean delay_monitoring_point, long reporting_stanox,
                    long actual_timestamp, boolean correction_ind, String event_source, String train_file_address,
@@ -70,7 +61,6 @@ public class TrainMovement
                    String planned_event_type, long next_report_stanox, String line_ind )
     {
         super( TrustMovementType.MOVEMENT, toc_id, train_id );
-        this.id = id;
         this.event_type = event_type;
         this.gbtt_timestamp = gbtt_timestamp;
         this.original_loc_stanox = original_loc_stanox;
@@ -100,22 +90,6 @@ public class TrainMovement
     }
 
     //<editor-fold defaultstate="collapsed" desc="Synthetic fields">
-    public synchronized TrainId getTrainId()
-    {
-        if( trainId == null )
-        {
-            TrainDate td = new TrainDate( actual_timestamp ).//
-                    clearTime().
-                    setHour( 6 );
-            trainId = new TrainId( td, getTrain_id() );
-        }
-        return trainId;
-    }
-
-//    public TrainOperator getToc()
-//    {
-//        return TrainOperatorFactory.INSTANCE.getById( toc_id );
-//    }
     /**
      * The timestamp for this movement.
      * <p/>
@@ -129,17 +103,10 @@ public class TrainMovement
         return isOffroute_ind() ? getActual_timestamp() : getPlanned_timestamp();
     }
 
-    public synchronized TrainTime getTime()
-    {
-        if( time == null )
-        {
-            time = TrainTime.getTime( getTimestamp() );
-        }
-        return time;
-    }
-
     /**
      * The delay in seconds
+     * <p>
+     * @return
      */
     public String getHeadCode()
     {
@@ -147,63 +114,18 @@ public class TrainMovement
                 substring( 2, 6 );
     }
 
+    /**
+     * The delay in seconds
+     * <p>
+     * @return delay in seconds
+     */
     public long getDelay()
     {
         return (actual_timestamp - planned_timestamp) / 1000L;
     }
-
-    /**
-     * The delay in a human format. Blank if lt 30s and include 1/2 symbol for 1/2 seconds
-     * <p/>
-     * @return
-     */
-    public String getDelayHtml()
-    {
-        return isOffroute_ind() ? "N/A" : TrainDate.getDelayHtml( getDelay(), false );
-    }
-
-    public TrainLocation getOriginal_loc()
-    {
-        return TrainLocationFactory.INSTANCE.getTrainLocationByStanox( original_loc_stanox );
-    }
-
-    public Date getPlanned_time()
-    {
-        return new Date( planned_timestamp );
-    }
-
-    public Date getOriginal_loc_time()
-    {
-        return new Date( original_loc_timestamp );
-    }
-
-    public TrainLocation getReporting()
-    {
-        return TrainLocationFactory.INSTANCE.getTrainLocationByStanox( reporting_stanox );
-    }
-
-    public Date getActual_time()
-    {
-        return new Date( actual_timestamp );
-    }
-
-    public TrainLocation getLoc()
-    {
-        return TrainLocationFactory.INSTANCE.getTrainLocationByStanox( loc_stanox );
-    }
-
-    public TrainLocation getNext_report()
-    {
-        return TrainLocationFactory.INSTANCE.getTrainLocationByStanox( next_report_stanox );
-    }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Bean getters">
-    public long getId()
-    {
-        return id;
-    }
-
     public String getEvent_type()
     {
         return event_type;
@@ -339,11 +261,7 @@ public class TrainMovement
     @Override
     public int hashCode()
     {
-        int hash = 3;
-        hash = 41 * hash + (int) (this.id ^ (this.id >>> 32));
-        hash = 41 * hash + (this.getTrain_id() != null ? this.getTrainId().
-                            hashCode() : 0);
-        return hash;
+        return Objects.hashCode( getTrain_id() );
     }
 
     @Override
@@ -354,7 +272,7 @@ public class TrainMovement
             return false;
         }
         final TrainMovement other = (TrainMovement) obj;
-        return this.id == other.id && Objects.equals( this.getTrainId(), other.getTrainId() );
+        return Objects.equals( this.getTrain_id(), other.getTrain_id() );
     }
     //</editor-fold>
 

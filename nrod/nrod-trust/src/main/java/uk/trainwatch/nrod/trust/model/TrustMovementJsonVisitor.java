@@ -66,9 +66,7 @@ public class TrustMovementJsonVisitor
     public void visit( TrainActivation t )
     {
         init( t );
-        b = Json.createObjectBuilder().
-                add( "id", t.getId() );
-
+        
         add( "schedule_source", t.getSchedule_source() );
         add( "train_file_address", t.getTrain_file_address() );
         add( "schedule_end_date", t.getSchedule_end_date() );
@@ -114,7 +112,7 @@ public class TrustMovementJsonVisitor
     public void visit( TrainMovement t )
     {
         init( t );
-        b.add( "id", t.getId() );
+
         add( "event_type", t.getEvent_type() );
         b.add( "gbtt_timestamp", t.getGbtt_timestamp() ).
                 add( "original_loc_stanox", t.getOriginal_loc_stanox() ).
@@ -147,6 +145,7 @@ public class TrustMovementJsonVisitor
     private void initAdjustment( TrustAdjustment t )
     {
         init( t );
+        
         add( "current_train_id", t.getCurrent_train_id() );
         b.add( "original_loc_timestamp", t.getOriginal_loc_timestamp() ).
                 add( "dep_timestamp", t.getDep_timestamp() ).
@@ -160,6 +159,7 @@ public class TrustMovementJsonVisitor
     public void visit( TrainReinstatement t )
     {
         initAdjustment( t );
+
         b.add( "reinstatement_timestamp", t.getReinstatement_timestamp() ).
                 add( "division_code_id", t.getDivision_code_id() );
     }
@@ -168,6 +168,7 @@ public class TrustMovementJsonVisitor
     public void visit( ChangeOfOrigin r )
     {
         initAdjustment( r );
+        
         add( "reason_code", r.getReason_code() );
         b.add( "coo_timestamp", r.getCoo_timestamp() ).
                 add( "division_code", r.getDivision_code() );
@@ -178,6 +179,7 @@ public class TrustMovementJsonVisitor
     {
         // Note: tocId will always be 0 as this is for freight
         init( r );
+        
         add( "current_train_id", r.getCurrent_train_id() );
         add( "revised_train_id", r.getRevised_train_id() );
         add( "train_file_address", r.getTrain_file_address() );

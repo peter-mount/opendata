@@ -32,7 +32,6 @@ public class TrainActivation
         implements Comparable<TrainActivation>
 {
 
-    private int id;
     private String schedule_source;
     private String train_file_address;
     private Date schedule_end_date;
@@ -56,7 +55,7 @@ public class TrainActivation
         super( TrustMovementType.ACTIVATION );
     }
 
-    TrainActivation( int id, String schedule_source, String train_file_address, Date schedule_end_date,
+    TrainActivation( String schedule_source, String train_file_address, Date schedule_end_date,
                      String train_id, Date tp_origin_timestamp, long creation_timestamp, long tp_origin_stanox,
                      long origin_dep_timestamp, String train_service_code, int toc_id, String d1266_record_number,
                      String train_call_type, String train_uid, String train_call_mode, String schedule_type,
@@ -64,7 +63,6 @@ public class TrainActivation
     {
         super( TrustMovementType.ACTIVATION, toc_id, train_id );
 
-        this.id = id;
         this.schedule_source = schedule_source;
         this.train_file_address = train_file_address;
         this.schedule_end_date = schedule_end_date;
@@ -107,11 +105,6 @@ public class TrainActivation
             trainId = new TrainId( td, getTrain_id() );
         }
         return trainId;
-    }
-
-    public int getId()
-    {
-        return id;
     }
 
     public Date getCreation()
@@ -208,7 +201,6 @@ public class TrainActivation
     public int hashCode()
     {
         int hash = 3;
-        hash = 89 * hash + this.id;
         hash = 89 * hash + (this.schedule_source != null ? this.schedule_source.hashCode() : 0);
         hash = 89 * hash + (this.train_file_address != null ? this.train_file_address.hashCode() : 0);
         hash = 89 * hash + (this.schedule_end_date != null ? this.schedule_end_date.hashCode() : 0);
@@ -243,10 +235,6 @@ public class TrainActivation
             return false;
         }
         final TrainActivation other = (TrainActivation) obj;
-        if( this.id != other.id )
-        {
-            return false;
-        }
         if( (this.schedule_source == null) ? (other.schedule_source != null) : !this.schedule_source.equals(
                 other.schedule_source ) )
         {

@@ -22,7 +22,6 @@ public enum TrainActivationFactory
     public TrainActivation apply( JsonObject t )
     {
         return new TrainActivation(
-                JsonUtils.getInt( t, "id" ),
                 JsonUtils.getString( t, "schedule_source" ),
                 JsonUtils.getString( t, "train_file_address" ),
                 JsonUtils.getDate( t, "schedule_end_date" ),

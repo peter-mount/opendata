@@ -9,15 +9,15 @@ import uk.trainwatch.util.JsonUtils;
  * @author peter
  */
 public enum TrainMovementFactory
-implements Function<JsonObject,TrainMovement>
+        implements Function<JsonObject, TrainMovement>
 {
+
     INSTANCE;
 
     @Override
     public TrainMovement apply( JsonObject t )
     {
         return new TrainMovement(
-                JsonUtils.getLong( t, "id" ),
                 JsonUtils.getString( t, "event_type" ),
                 JsonUtils.getLong( t, "gbtt_timestamp" ),
                 JsonUtils.getLong( t, "original_loc_stanox" ),
