@@ -8,6 +8,7 @@ package uk.trainwatch.util;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.Clock;
 import java.time.Instant;
@@ -250,25 +251,32 @@ public class TimeUtils
 
     public static java.sql.Date toSqlDate( LocalDate ld )
     {
-        Date d = toDate( ld );
-        if( d == null )
-        {
-            return null;
-        }
-        return new java.sql.Date( d.getTime() );
+        return ld == null ? null : java.sql.Date.valueOf( ld );
     }
 
     public static void setDate( PreparedStatement s, int col, LocalDate ld )
             throws SQLException
     {
-        java.sql.Date d = toSqlDate( ld );
-        if( d == null )
+        if( ld == null )
         {
             s.setNull( col, Types.DATE );
         }
         else
         {
-            s.setDate( col, d );
+            s.setDate( col, java.sql.Date.valueOf( ld ) );
+        }
+    }
+
+    public static void setDateTime( PreparedStatement s, int col, LocalDateTime ld )
+            throws SQLException
+    {
+        if( ld == null )
+        {
+            s.setNull( col, Types.TIMESTAMP );
+        }
+        else
+        {
+            s.setTimestamp( col, Timestamp.valueOf( ld ) );
         }
     }
 

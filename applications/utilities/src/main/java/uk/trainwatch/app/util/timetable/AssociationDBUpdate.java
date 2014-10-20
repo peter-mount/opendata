@@ -19,8 +19,6 @@ import uk.trainwatch.util.sql.CUDConsumer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import uk.trainwatch.nrod.timetable.cif.record.Association;
 import uk.trainwatch.util.TimeUtils;
 import uk.trainwatch.util.UncheckedSQLException;
@@ -33,14 +31,18 @@ public class AssociationDBUpdate
         extends CUDConsumer<Association>
 {
 
-    private static final Logger LOG = Logger.getLogger( AssociationDBUpdate.class.getName() );
-
     public AssociationDBUpdate( Connection con )
     {
         super( con,
-               "INSERT INTO timetable.association (mainuid,assocuid,startdt,enddt,assocdays,assoccat,assocdateind,tiploc,baselocsuff,assoclocsuff,assoctype,stpind) values (?,?,?,?,?,?,?,?,?,?,?,?)",
+               "INSERT INTO timetable.association"
+               + " (mainuid,assocuid,startdt,enddt,assocdays,assoccat,assocdateind,tiploc,baselocsuff,assoclocsuff,assoctype,stpind)"
+               + " values"
+               + " (timetable.trainuid(?),timetable.trainuid(?),?,?,?,?,?,timetable.tiploc(?),?,?,?,?)",
                null,
-               "DELETE FROM timetable.association WHERE mainuid=?, assocuid=?, startdt=?, enddt=?, assocdays=?, assoccat=?, assocdateind=?,tiploc=?"
+               "DELETE FROM timetable.association"
+               + " WHERE mainuid=timetable.trainuid(?) AND assocuid=timetable.trainuid(?) AND startdt=? AND enddt=? AND assocdays=?"
+               + " AND assoccat=? AND assocdateind=? AND tiploc=tiploc(?)"
+               + " AND baselocsuff=? AND assoclocsuff=? AND assoctype=? AND stpind=?"
         );
     }
 
@@ -50,15 +52,17 @@ public class AssociationDBUpdate
         try
         {
             totaled();
-            
+
             switch( t.getTransactionType() )
             {
                 case NEW:
-                    insert( t );
+                    execute( t, getInsert() );
+                    inserted();
                     break;
 
                 case DELETE:
-                    delete( t );
+                    execute( t, getDelete() );
+                    deleted();
                     break;
 
                 case REVISE:
@@ -68,25 +72,13 @@ public class AssociationDBUpdate
         }
         catch( SQLException ex )
         {
-            // Only Throw if it's not a duplicate key, can happen on insert
-            String m = ex.getMessage();
-            if( m == null || !m.contains( "duplicate key" ) )
-            {
-                throw new UncheckedSQLException( ex );
-            }
-            else
-            {
-                // Log as required
-                LOG.log( Level.FINE, null, ex );
-            }
+            throw new UncheckedSQLException( ex );
         }
     }
 
-    private void insert( Association t )
+    private void execute( Association t, PreparedStatement s )
             throws SQLException
     {
-        PreparedStatement s = getInsert();
-        
         int i = 1;
         s.setString( i++, t.getMainTrainUID() );
         s.setString( i++, t.getAssocTrainUID() );
@@ -106,31 +98,7 @@ public class AssociationDBUpdate
                   ordinal() );
         s.setInt( i++, t.getStpIndicator().
                   ordinal() );
-        
-        s.executeUpdate();
-        inserted();
-    }
 
-    private void delete( Association t )
-            throws SQLException
-    {
-        PreparedStatement s = getInsert();
-        
-        int i = 1;
-        s.setString( i++, t.getMainTrainUID() );
-        s.setString( i++, t.getAssocTrainUID() );
-        TimeUtils.setDate( s, i++, t.getStartDate() );
-        TimeUtils.setDate( s, i++, t.getEndDate() );
-        s.setInt( i++, t.getAssocDays().
-                  getDaysRunning() );
-        s.setInt( i++, t.getAssociationCategory().
-                  ordinal() );
-        s.setInt( i++, t.getAssocDateInd().
-                  ordinal() );
-        s.setString( i++, t.getAssocLocation().
-                     getKey() );
-        
         s.executeUpdate();
-        deleted();
     }
 }

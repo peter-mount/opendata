@@ -30,6 +30,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.UnrecognizedOptionException;
+import uk.trainwatch.util.UncheckedSQLException;
 import uk.trainwatch.util.app.BaseApplication;
 
 /**
@@ -108,8 +109,16 @@ public class Main
                 }
                 catch( UnrecognizedOptionException ex )
                 {
-                    LOG.log( Level.WARNING, ex, () -> "Failed to parse args " );
+                    LOG.log( Level.WARNING, ex, ex::getMessage );
                     showHelp.accept( util );
+                }
+                catch( UncheckedSQLException ex )
+                {
+                    LOG.log( Level.SEVERE, null, ex.getCause() );
+                }
+                catch( Exception ex )
+                {
+                    LOG.log( Level.SEVERE, null, ex );
                 }
             }
         }

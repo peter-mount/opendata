@@ -207,10 +207,38 @@ public final class Consumers
         return log( clazz.getName(), level );
     }
 
+    /**
+     * Compose two Consumer's.
+     * <p>
+     * Unlike {@link Consumer#andThen(java.util.function.Consumer)} this will handle nulls, so:
+     * <ol>
+     * <li>if a is null then this returns b which must not be null</li>
+     * <li>if b is null then this returns a which must not be null</li>
+     * <li>otherwise as a and b are not null returns {@code a.andThen(b)}</li>
+     * </ol>
+     * <p>
+     * @param <T>
+     * @param a   first Consumer
+     * @param b   second Consumer
+     * <p>
+     * @return composed consumer
+     * <p>
+     * @throws NullPointerException if both consumers are null
+     */
     public static <T> Consumer<T> andThen( Consumer<T> a, Consumer<T> b )
     {
-        Objects.requireNonNull( b );
-        return a == null ? b : a.andThen( b );
+        if( a == null )
+        {
+            return Objects.requireNonNull( b );
+        }
+        else if( b == null )
+        {
+            return Objects.requireNonNull( a );
+        }
+        else
+        {
+            return a.andThen( b );
+        }
     }
 
     /**
@@ -231,12 +259,15 @@ public final class Consumers
             return sink();
         }
 
-        Consumer<T> c = consumers[0];
-        for( int i = 1; i < consumers.length; i++ )
+        Consumer<T> c = null;
+        for( Consumer<T> consumer : consumers )
         {
-            c = c.andThen( consumers[i] );
+            if( consumer != null )
+            {
+                c = andThen( c, consumer );
+            }
         }
-        return c;
+        return ensureNotNull( c );
     }
 
     public static <T> Consumer<T> andThenGuarded( Consumer<T> a, Consumer<T> b )
@@ -286,12 +317,16 @@ public final class Consumers
             return sink();
         }
 
-        Consumer<T> c = consumers[0];
-        for( int i = 1; i < consumers.length; i++ )
+        Consumer<T> c = null;
+        for( Consumer<T> consumer : consumers )
         {
-            c = c.andThen( guard( log, consumers[i] ) );
+            if( consumer != null )
+
+            {
+                c = andThen( c, guard( log, consumer ) );
+            }
         }
-        return c;
+        return ensureNotNull( c );
     }
 
     /**

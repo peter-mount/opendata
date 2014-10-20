@@ -6,6 +6,7 @@
 package uk.trainwatch.nrod.timetable.cif.record;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.function.Function;
 
@@ -81,6 +82,11 @@ public class Header
     public LocalTime getTimeOfExtract()
     {
         return timeOfExtract;
+    }
+
+    public LocalDateTime getLocalDateTimeOfExtract()
+    {
+        return dateOfExtract.atTime( timeOfExtract );
     }
 
     public String getCurrentFileRef()

@@ -19,12 +19,12 @@ import uk.trainwatch.util.sql.CUDConsumer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.sql.Types;
 import uk.trainwatch.nrod.timetable.cif.record.TIPLOCAction;
 import uk.trainwatch.nrod.timetable.cif.record.TIPLOCAmend;
 import uk.trainwatch.nrod.timetable.cif.record.TIPLOCDelete;
 import uk.trainwatch.nrod.timetable.cif.record.TIPLOCInsert;
+import uk.trainwatch.util.UncheckedSQLException;
 
 /**
  * Handles updating the tiploc table in the database
@@ -34,8 +34,6 @@ import uk.trainwatch.nrod.timetable.cif.record.TIPLOCInsert;
 public class TiplocDBUpdate
         extends CUDConsumer<TIPLOCAction>
 {
-
-    private static final Logger LOG = Logger.getLogger( TiplocDBUpdate.class.getName() );
 
     public TiplocDBUpdate( Connection con )
     {
@@ -68,12 +66,7 @@ public class TiplocDBUpdate
         }
         catch( SQLException ex )
         {
-            // Only log if it's not a duplicate key - only occurs if we try to insert an existing key & we'll treat that as fine
-            String m = ex.getMessage();
-            if( m == null || !m.contains( "duplicate key" ) )
-            {
-                LOG.log( Level.SEVERE, null, ex );
-            }
+            throw new UncheckedSQLException( ex );
         }
     }
 
@@ -88,8 +81,26 @@ public class TiplocDBUpdate
         s.setInt( 3, t.getNalco() );
         s.setString( 4, t.getNlcCheck() );
         s.setString( 5, t.getTpsDescription() );
-        s.setLong( 6, t.getStanox() );
-        s.setString( 7, t.getCrs() );
+
+        if( t.getStanox() == 0 )
+        {
+            s.setNull( 6, Types.BIGINT );
+        }
+        else
+        {
+            s.setLong( 6, t.getStanox() );
+        }
+
+        String crs = t.getCrs();
+        if( crs == null || crs.isEmpty() || "   ".equals( crs ) )
+        {
+            s.setNull( 7, Types.CHAR );
+        }
+        else
+        {
+            s.setString( 7, t.getCrs() );
+        }
+
         s.setString( 8, t.getDescription() );
         s.executeUpdate();
 
@@ -126,11 +137,6 @@ public class TiplocDBUpdate
         s.executeUpdate();
 
         deleted();
-    }
-
-    public void log()
-    {
-        LOG.log( Level.INFO, () -> "Tiplocs processed " + toString() );
     }
 
 }

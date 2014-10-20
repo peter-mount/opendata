@@ -5,7 +5,7 @@
  */
 package uk.trainwatch.nrod.timetable.model;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -14,12 +14,14 @@ import uk.trainwatch.nrod.timetable.cif.record.BasicRecordVisitor;
 import uk.trainwatch.nrod.timetable.cif.record.BasicSchedule;
 import uk.trainwatch.nrod.timetable.cif.record.BasicScheduleExtras;
 import uk.trainwatch.nrod.timetable.cif.record.ChangesEnRoute;
+import uk.trainwatch.nrod.timetable.cif.record.Header;
 import uk.trainwatch.nrod.timetable.cif.record.IntermediateLocation;
 import uk.trainwatch.nrod.timetable.cif.record.Location;
 import uk.trainwatch.nrod.timetable.cif.record.OriginLocation;
 import uk.trainwatch.nrod.timetable.cif.record.RecordVisitor;
 import uk.trainwatch.nrod.timetable.cif.record.TIPLOCAction;
 import uk.trainwatch.nrod.timetable.cif.record.TerminatingLocation;
+import uk.trainwatch.nrod.timetable.cif.record.TrailerRecord;
 import uk.trainwatch.util.Consumers;
 
 /**
@@ -33,26 +35,29 @@ public class ScheduleBuilderVisitor
         extends BasicRecordVisitor
 {
 
-    private final Consumer<Association> assocConsumer;
     private final Consumer<Schedule> scheduleConsumer;
     private BasicSchedule basicSchedule;
     private BasicScheduleExtras basicScheduleExtras;
     private List<Location> locations;
 
-    public ScheduleBuilderVisitor( Consumer<Schedule> scheduleConsumer,
-                                   Consumer<Association> assocConsumer,
+    /**
+     *
+     * @param headerConsumer   consume {@link Header}'s or null
+     * @param tiplocConsumer   consume {@link TIPLOCAction}'s or null
+     * @param assocConsumer    consume {@link Association}'s or null
+     * @param scheduleConsumer consume built {@link Schedule}'s or null
+     * @param trailerConsumer  consume {@link TrailerRecord}'s or null
+     * @param lastFileDate     timestamp of last extract or null
+     */
+    public ScheduleBuilderVisitor( Consumer<Header> headerConsumer,
                                    Consumer<TIPLOCAction> tiplocConsumer,
-                                   LocalDate lastFileDate )
+                                   Consumer<Association> assocConsumer,
+                                   Consumer<Schedule> scheduleConsumer,
+                                   Consumer<TrailerRecord> trailerConsumer,
+                                   LocalDateTime lastFileDate )
     {
-        super( tiplocConsumer, lastFileDate );
+        super( headerConsumer, tiplocConsumer, assocConsumer, trailerConsumer, lastFileDate );
         this.scheduleConsumer = Consumers.ensureNotNull( scheduleConsumer );
-        this.assocConsumer = Consumers.ensureNotNull( assocConsumer );
-    }
-
-    @Override
-    public void visit( Association a )
-    {
-        assocConsumer.accept( a );
     }
 
     @Override
