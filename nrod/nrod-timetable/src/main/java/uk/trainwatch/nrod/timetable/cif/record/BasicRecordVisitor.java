@@ -8,15 +8,13 @@ package uk.trainwatch.nrod.timetable.cif.record;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import uk.trainwatch.util.Consumers;
 
 /**
- * Default {@link RecordVisitor} which has the ability to check the CIF file date and optionally send some updates to a
- * consumer.
+ * Default {@link RecordVisitor} which has the ability to check the CIF file date and optionally send some updates to a consumer.
  * <p>
  * @author Peter T Mount
  */
@@ -43,7 +41,7 @@ public class BasicRecordVisitor
 
     public BasicRecordVisitor( Consumer<TIPLOCAction> tiplocConsumer, LocalDate lastFileDate )
     {
-        this.tiplocConsumer = Objects.requireNonNull( tiplocConsumer );
+        this.tiplocConsumer = Consumers.ensureNotNull( tiplocConsumer );
         this.lastFileDate = lastFileDate;
     }
 
@@ -54,14 +52,12 @@ public class BasicRecordVisitor
 
         log.log( Level.INFO,
                  () -> "Processing CIF FILE " + h.getCurrentFileRef() + " extracted " + h.getDateOfExtract()
-                       + " Schedules run from " + h.getStartDate() + " until " + h.getEndDate() );
+                 + " Schedules run from " + h.getStartDate() + " until " + h.getEndDate() );
 
         // Check to see if the file is more recent than a previous run
-        if( lastFileDate != null )
-        {
+        if( lastFileDate != null ) {
             if( !h.getDateOfExtract().
-                    isAfter( lastFileDate ) )
-            {
+                    isAfter( lastFileDate ) ) {
                 throw new IllegalStateException(
                         "Failed extract as it's not more recent than previous one. Current " + lastFileDate + " this file " + h.
                         getDateOfExtract() );

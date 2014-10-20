@@ -45,6 +45,7 @@ public final class CIFParser
     private String line;
     private int length;
     private int pos;
+    private int lineCount;
 
     /**
      * Construct a non-strict parser
@@ -106,13 +107,14 @@ public final class CIFParser
      */
     public Record parse()
     {
+        lineCount++;
         final String t = getString( 2 );
         final RecordType rt = RecordType.lookup( t );
         if( rt == null )
         {
             if( strict )
             {
-                throw new IllegalArgumentException( "Unsupported type \"" + t + "\"" );
+                throw new IllegalArgumentException( "Unsupported type \"" + t + "\" line " + lineCount );
             }
             return null;
         }
@@ -121,6 +123,16 @@ public final class CIFParser
             Function<CIFParser, Record> factory = rt.getFactory();
             return factory == null ? null : factory.apply( this );
         }
+    }
+
+    /**
+     * The line number in the source file. The first line is 1, but this will return 0 if no lines have been parsed.
+     * <p>
+     * @return Line number
+     */
+    public int lineCount()
+    {
+        return lineCount;
     }
 
     private void ensureAvailable( int l )

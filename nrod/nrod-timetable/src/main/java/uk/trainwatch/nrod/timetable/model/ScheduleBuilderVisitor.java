@@ -8,8 +8,8 @@ package uk.trainwatch.nrod.timetable.model;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
+import uk.trainwatch.nrod.timetable.cif.record.Association;
 import uk.trainwatch.nrod.timetable.cif.record.BasicRecordVisitor;
 import uk.trainwatch.nrod.timetable.cif.record.BasicSchedule;
 import uk.trainwatch.nrod.timetable.cif.record.BasicScheduleExtras;
@@ -33,32 +33,26 @@ public class ScheduleBuilderVisitor
         extends BasicRecordVisitor
 {
 
+    private final Consumer<Association> assocConsumer;
     private final Consumer<Schedule> scheduleConsumer;
     private BasicSchedule basicSchedule;
     private BasicScheduleExtras basicScheduleExtras;
     private List<Location> locations;
 
-    public ScheduleBuilderVisitor( Consumer<Schedule> scheduleConsumer )
-    {
-        this( scheduleConsumer, Consumers.sink(), null );
-    }
-
-    public ScheduleBuilderVisitor( Consumer<Schedule> scheduleConsumer, LocalDate lastFileDate )
-    {
-        this( scheduleConsumer, Consumers.sink(), lastFileDate );
-    }
-
-    public ScheduleBuilderVisitor( Consumer<Schedule> scheduleConsumer, Consumer<TIPLOCAction> tiplocConsumer )
-    {
-        this( scheduleConsumer, tiplocConsumer, null );
-    }
-
     public ScheduleBuilderVisitor( Consumer<Schedule> scheduleConsumer,
+                                   Consumer<Association> assocConsumer,
                                    Consumer<TIPLOCAction> tiplocConsumer,
                                    LocalDate lastFileDate )
     {
         super( tiplocConsumer, lastFileDate );
-        this.scheduleConsumer = Objects.requireNonNull( scheduleConsumer );
+        this.scheduleConsumer = Consumers.ensureNotNull( scheduleConsumer );
+        this.assocConsumer = Consumers.ensureNotNull( assocConsumer );
+    }
+
+    @Override
+    public void visit( Association a )
+    {
+        assocConsumer.accept( a );
     }
 
     @Override

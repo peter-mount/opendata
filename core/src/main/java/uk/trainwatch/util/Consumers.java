@@ -21,6 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,6 +34,21 @@ public final class Consumers
 {
 
     private static final Logger LOG = Logger.getLogger( Consumers.class.getName() );
+
+    /**
+     * Create a consumer if some condition is true, null if false
+     * <p>
+     * @param <C>
+     * @param <T>       type
+     * @param condition condition
+     * @param s         supplier
+     * <p>
+     * @return Consumer or null
+     */
+    public static <C extends Consumer<T>, T> C createIf( boolean condition, Supplier<C> s )
+    {
+        return condition ? s.get() : null;
+    }
 
     /**
      * Wrap a consumer with one that uses a mapping function to translate from one type to the type accepted by that
@@ -191,6 +207,12 @@ public final class Consumers
         return log( clazz.getName(), level );
     }
 
+    public static <T> Consumer<T> andThen( Consumer<T> a, Consumer<T> b )
+    {
+        Objects.requireNonNull( b );
+        return a == null ? b : a.andThen( b );
+    }
+
     /**
      * Returns a composed {@link Consumer} that performs in sequence each operation passed in {@code consumers}.
      * <p>
@@ -215,6 +237,11 @@ public final class Consumers
             c = c.andThen( consumers[i] );
         }
         return c;
+    }
+
+    public static <T> Consumer<T> andThenGuarded( Consumer<T> a, Consumer<T> b )
+    {
+        return andThen( a, guard( b ) );
     }
 
     /**
@@ -320,7 +347,7 @@ public final class Consumers
      */
     public static <T> Consumer<T> guard( Consumer<T> c )
     {
-        return guard( LOG, c );
+        return guard( LOG, Objects.requireNonNull( c ) );
     }
 
     /**
