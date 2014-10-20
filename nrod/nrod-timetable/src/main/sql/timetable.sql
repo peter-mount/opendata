@@ -1,6 +1,7 @@
 SET search_path = timetable;
 
 -- Drop tables in sequence
+DROP TABLE schedule_loc;
 DROP TABLE schedule;
 DROP TABLE association;
 
@@ -292,20 +293,23 @@ CREATE TABLE schedule (
     trainuid        BIGINT REFERENCES trainuid(id),
     runsfrom        DATE NOT NULL,
     stpIndicator    INTEGER REFERENCES STPIndicator(id),
-    -- Some details from BasicSchedule which might be useful
     runsto          DATE NOT NULL,
     dayrun          INTEGER REFERENCES daysrun(id),
     bankholrun      INTEGER REFERENCES BankHolidayRunning(id),
+    -- Some details from BasicSchedule which might be useful
     trainidentity   CHAR(4),
     headcode        CHAR(4),
     -- Some details from BasicScheduleExtras
     atoccode        INTEGER REFERENCES ATOCCode(id),
     -- This is the full json content for this schedule
     schedule        TEXT,
-    PRIMARY KEY (trainuid,runsfrom,stpIndicator)
+    PRIMARY KEY (trainuid,runsfrom,stpIndicator,runsto,dayrun,bankholrun,trainidentity,headcode,atoccode)
 );
 ALTER TABLE schedule OWNER TO rail;
 ALTER SEQUENCE schedule_id_seq OWNER TO rail;
+
+-- Used mainly for deletes
+CREATE INDEX schedule_tfi ON schedule(trainuid,runsfrom,stpIndicator);
 
 CREATE UNIQUE INDEX schedule_i ON schedule(id);
 CREATE INDEX schedule_t ON schedule(trainuid);

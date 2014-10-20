@@ -52,17 +52,17 @@ public class ScheduleDBUpdate
         s.setDate( i++, Date.valueOf( t.getRunsFrom() ) );
         s.setInt( i++, t.getStpInd().
                   ordinal() );
+        s.setDate( i++, Date.valueOf( t.getRunsTo() ) );
+        s.setInt( i++, t.getDaysRun().
+                  getDaysRunning() );
+        s.setInt( i++, t.getBankHolidayRunning().
+                  ordinal() );
         return i;
     }
 
     private int setVal( Schedule t, PreparedStatement s, int i )
             throws SQLException
     {
-        s.setDate( i++, Date.valueOf( t.getRunsTo() ) );
-        s.setInt( i++, t.getDaysRun().
-                  getDaysRunning() );
-        s.setInt( i++, t.getBankHolidayRunning().
-                  ordinal() );
         s.setString( i++, t.getTrainIdentity() );
         s.setString( i++, t.getHeadCode() );
         s.setInt( i++, t.getAtocCode().
