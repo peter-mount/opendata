@@ -289,21 +289,30 @@ CREATE INDEX association_e  ON association (enddt);
 
 CREATE TABLE schedule (
     id              SERIAL,
-    -- The primary key - taken from BS Delete records in CIF
+    -- The portion required to delete schedules
     trainuid        BIGINT REFERENCES trainuid(id),
     runsfrom        DATE NOT NULL,
     stpIndicator    INTEGER REFERENCES STPIndicator(id),
+    -- The rest of the details from BasicSchedule
     runsto          DATE NOT NULL,
     dayrun          INTEGER REFERENCES daysrun(id),
     bankholrun      INTEGER REFERENCES BankHolidayRunning(id),
-    -- Some details from BasicSchedule which might be useful
+    trainstatus     INTEGER REFERENCES trainstatus(id),
+    traincategory   INTEGER REFERENCES traincategory(id),
     trainidentity   CHAR(4),
     headcode        CHAR(4),
+    servicecode     CHAR(8),
     -- Some details from BasicScheduleExtras
     atoccode        INTEGER REFERENCES ATOCCode(id),
     -- This is the full json content for this schedule
     schedule        TEXT,
-    PRIMARY KEY (trainuid,runsfrom,stpIndicator,runsto,dayrun,bankholrun,trainidentity,headcode,atoccode)
+    PRIMARY KEY (
+        trainuid,runsfrom,stpIndicator,runsto,dayrun,bankholrun,
+        trainstatus,traincategory,
+        trainidentity,
+        headcode,servicecode,
+        atoccode
+    )
 );
 ALTER TABLE schedule OWNER TO rail;
 ALTER SEQUENCE schedule_id_seq OWNER TO rail;

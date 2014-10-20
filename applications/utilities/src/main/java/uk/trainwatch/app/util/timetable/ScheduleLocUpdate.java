@@ -71,6 +71,7 @@ public class ScheduleLocUpdate
                 // to get at the id, it'll be in the sequence.
                 scheduleId = getCurrentScheduleId();
                 insert( scheduleId, t );
+                inserted();
                 break;
 
             case REVISE:
@@ -78,13 +79,17 @@ public class ScheduleLocUpdate
                 scheduleId = getScheduleId( t );
                 delete( scheduleId );
                 insert( scheduleId, t );
+                updated();
                 break;
 
             case DELETE:
                 scheduleId = getScheduleId( t );
                 delete( scheduleId );
+                deleted();
                 break;
         }
+
+        totaled();
     }
 
     /**
@@ -92,8 +97,7 @@ public class ScheduleLocUpdate
      * <p>
      * This is valid for update and deletes only as we have to search the table for it.
      * <p>
-     * @param t
-     * <p>
+     * @param t <p>
      * @return
      */
     private long getScheduleId( Schedule t )

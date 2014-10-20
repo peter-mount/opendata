@@ -25,19 +25,22 @@ import uk.trainwatch.util.sql.CUDConsumer;
 
 /**
  * Imports a Schedule into the schedule table
+ * <p>
  * @author Peter T Mount
  */
 public class ScheduleDBUpdate
         extends CUDConsumer<Schedule>
 {
+
     public ScheduleDBUpdate( Connection con )
     {
         super( con,
                "INSERT INTO timetable.schedule"
-               + " (trainuid,runsfrom,stpindicator,runsto,dayrun,bankholrun,trainidentity,headcode,atoccode,schedule)"
-               + " VALUES (timetable.trainuid(?),?,?,?,?,?,?,?,?,?)",
+               + " (trainuid,runsfrom,stpindicator,runsto,dayrun,bankholrun,trainstatus,traincategory,trainidentity,headcode,servicecode,atoccode,schedule)"
+               + " VALUES (timetable.trainuid(?),?,?,?,?,?,?,?,?,?,?,?,?)",
                "UPDATE timetable.schedule"
-               + " SET runsto=?, dayrun=?, bankholrun=?, trainidentity=?, headcode=?, atoccode=?, schedule=?"
+               + " SET runsto=?, dayrun=?, bankholrun=?, trainstatus=?, traincategory=?, trainidentity=?, headcode=?,"
+               + " servicecode=?, atoccode=?, schedule=?"
                + " WHERE trainuid=timetable.trainuid(?) AND runsfrom=? AND stpindicator=?",
                "DELETE FROM timetable.schedule"
                + " WHERE trainuid=timetable.trainuid(?) AND runsfrom=? AND stpindicator=?"
@@ -63,8 +66,13 @@ public class ScheduleDBUpdate
     private int setVal( Schedule t, PreparedStatement s, int i )
             throws SQLException
     {
+        s.setInt( i++, t.getTrainStatus().
+                  ordinal() );
+        s.setInt( i++, t.getTrainCategory().
+                  ordinal() );
         s.setString( i++, t.getTrainIdentity() );
         s.setString( i++, t.getHeadCode() );
+        s.setString( i++, t.getServiceCode() );
         s.setInt( i++, t.getAtocCode().
                   ordinal() );
         s.setString( i++, "{}" );
@@ -86,6 +94,7 @@ public class ScheduleDBUpdate
                     i = setKey( t, s, 1 );
                     setVal( t, s, i );
                     s.executeUpdate();
+                    inserted();
                     break;
 
                 case REVISE:
@@ -93,14 +102,18 @@ public class ScheduleDBUpdate
                     i = setKey( t, s, 1 );
                     setVal( t, s, i );
                     s.executeUpdate();
+                    updated();
                     break;
 
                 case DELETE:
                     s = getDelete();
                     setKey( t, s, 1 );
                     s.executeUpdate();
+                    deleted();
                     break;
             }
+            
+            totaled();
         }
         catch( SQLException ex )
         {
