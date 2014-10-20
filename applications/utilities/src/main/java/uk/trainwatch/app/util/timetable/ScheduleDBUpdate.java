@@ -30,7 +30,6 @@ import uk.trainwatch.util.sql.CUDConsumer;
 public class ScheduleDBUpdate
         extends CUDConsumer<Schedule>
 {
-
     public ScheduleDBUpdate( Connection con )
     {
         super( con,

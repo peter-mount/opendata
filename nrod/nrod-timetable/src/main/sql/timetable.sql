@@ -301,7 +301,8 @@ CREATE TABLE schedule (
     -- Some details from BasicScheduleExtras
     atoccode        INTEGER REFERENCES ATOCCode(id),
     -- This is the full json content for this schedule
-    schedule        TEXT
+    schedule        TEXT,
+    PRIMARY KEY (trainuid,runsfrom,stpIndicator)
 );
 ALTER TABLE schedule OWNER TO rail;
 ALTER SEQUENCE schedule_id_seq OWNER TO rail;

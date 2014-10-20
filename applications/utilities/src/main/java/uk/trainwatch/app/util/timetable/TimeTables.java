@@ -428,9 +428,9 @@ public class TimeTables
                         lastUpdate );
             }
 
-            // Progress counter for every 10k records
+            // Progress counter for every 50k records
             Consumer<? super Record> recCount = Consumers.ifThen(
-                    l -> (parser.lineCount() % 10000) == 0,
+                    l -> (parser.lineCount() % 50000) == 0,
                     l -> LOG.log( Level.INFO, () -> "read " + parser.lineCount() + " records." )
             );
 
