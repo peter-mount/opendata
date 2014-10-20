@@ -24,7 +24,7 @@ import uk.trainwatch.util.UncheckedSQLException;
 import uk.trainwatch.util.sql.CUDConsumer;
 
 /**
- *
+ * Imports a Schedule into the schedule table
  * @author Peter T Mount
  */
 public class ScheduleDBUpdate

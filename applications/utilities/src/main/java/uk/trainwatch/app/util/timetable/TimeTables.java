@@ -42,6 +42,7 @@ import uk.trainwatch.nrod.timetable.cif.record.CIFParser;
 import uk.trainwatch.nrod.timetable.cif.record.Header;
 import uk.trainwatch.nrod.timetable.cif.record.Record;
 import uk.trainwatch.nrod.timetable.cif.record.TrailerRecord;
+import uk.trainwatch.nrod.timetable.model.Schedule;
 import uk.trainwatch.nrod.timetable.model.ScheduleBuilderVisitor;
 import uk.trainwatch.nrod.timetable.util.ATOCCode;
 import uk.trainwatch.nrod.timetable.util.ATSCode;
@@ -174,6 +175,12 @@ public class TimeTables
     {
         LOG.log( Level.INFO, "Clearing down Schedule database" );
 
+        try( Statement s = con.createStatement() )
+        {
+            LOG.log( Level.INFO, () -> "Deleting schedule_loc" );
+            s.execute( "DELETE FROM timetable.schedule_loc" );
+        }
+        
         // Clear down our existing tables
         Arrays.asList(
                 "schedule",
@@ -276,8 +283,7 @@ public class TimeTables
     /**
      * Prepares the daysrun table which maps days of week to a single id
      * <p>
-     * @param con
-     * <p>
+     * @param con <p>
      * @throws SQLException
      */
     private void prepareDaysRun( Connection con )
@@ -365,8 +371,15 @@ public class TimeTables
 
             // The persistance consumers
             ScheduleDBUpdate schedules = Consumers.createIf( includeSchedules, () -> new ScheduleDBUpdate( con ) );
+            ScheduleLocUpdate scheduleLocations = Consumers.createIf( includeSchedules,
+                                                                      () -> new ScheduleLocUpdate( con ) );
+            Consumer<Schedule> scheduleConsumer = Consumers.createIf( includeSchedules,
+                                                                      () -> Consumers.andThen( schedules,
+                                                                                               scheduleLocations ) );
+
             AssociationDBUpdate associations = Consumers.createIf( includeAssociations,
                                                                    () -> new AssociationDBUpdate( con ) );
+
             TiplocDBUpdate tiplocs = Consumers.createIf( includeTiploc, () -> new TiplocDBUpdate( con ) );
 
             // Now what to do at the end of the import
@@ -375,17 +388,20 @@ public class TimeTables
 
             if( includeTiploc )
             {
-                trailer = trailer.andThen( t -> LOG.log( Level.INFO, () -> "Tiplocs " + tiplocs ) );
+                trailer = trailer.andThen( t -> LOG.log( Level.INFO,
+                                                         () -> "Tiplocs " + tiplocs ) );
             }
 
             if( includeAssociations )
             {
-                trailer = trailer.andThen( t -> LOG.log( Level.INFO, () -> "Associations " + associations ) );
+                trailer = trailer.andThen( t -> LOG.log( Level.INFO,
+                                                         () -> "Associations " + associations ) );
             }
 
             if( includeSchedules )
             {
-                trailer = trailer.andThen( t -> LOG.log( Level.INFO, () -> "Schedules " + schedules ) );
+                trailer = trailer.andThen( t -> LOG.log( Level.INFO,
+                                                         () -> "Schedules " + schedules + ", locations " + scheduleLocations ) );
             }
 
             // Pick the type of builder - if not forming schedules or associations then there's no need to use
@@ -397,7 +413,7 @@ public class TimeTables
                         header,
                         tiplocs,
                         associations,
-                        schedules,
+                        scheduleConsumer,
                         trailer,
                         lastUpdate );
             }
@@ -412,9 +428,9 @@ public class TimeTables
                         lastUpdate );
             }
 
-            // Progress counter for every 100k records
+            // Progress counter for every 10k records
             Consumer<? super Record> recCount = Consumers.ifThen(
-                    l -> (parser.lineCount() % 100000) == 0,
+                    l -> (parser.lineCount() % 10000) == 0,
                     l -> LOG.log( Level.INFO, () -> "read " + parser.lineCount() + " records." )
             );
 

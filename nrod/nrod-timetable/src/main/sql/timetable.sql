@@ -328,5 +328,5 @@ CREATE TABLE schedule_loc (
 );
 ALTER TABLE schedule_loc OWNER TO rail;
 
-CREATE UNIQUE INDEX schedule_loc_s ON schedule_loc(scheduleid);
+CREATE INDEX schedule_loc_s ON schedule_loc(scheduleid);
 CREATE INDEX schedule_loc_t ON schedule_loc(tiploc);

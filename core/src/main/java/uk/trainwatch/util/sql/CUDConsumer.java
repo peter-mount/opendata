@@ -53,6 +53,11 @@ public abstract class CUDConsumer<T>
         }
     }
 
+    protected final Connection getConnection()
+    {
+        return con;
+    }
+
     @Override
     public String toString()
     {

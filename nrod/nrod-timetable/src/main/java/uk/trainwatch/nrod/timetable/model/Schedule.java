@@ -6,7 +6,6 @@
 package uk.trainwatch.nrod.timetable.model;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -186,14 +185,9 @@ public class Schedule
         return locations.isEmpty();
     }
 
-    public Stream<? super Location> stream()
+    public Stream<Location> stream()
     {
         return locations.stream();
-    }
-
-    public Stream<? super Location> parallelStream()
-    {
-        return locations.parallelStream();
     }
 
     public void forEach( Consumer<Location> action )
