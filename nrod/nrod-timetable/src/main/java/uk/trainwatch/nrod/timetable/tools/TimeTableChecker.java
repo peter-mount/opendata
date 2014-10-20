@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.trainwatch.app.util.timetable;
+package uk.trainwatch.nrod.timetable.tools;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import uk.trainwatch.app.util.Utility;
 import uk.trainwatch.nrod.timetable.cif.record.BasicSchedule;
 import uk.trainwatch.nrod.timetable.cif.record.BasicScheduleExtras;
 import uk.trainwatch.nrod.timetable.cif.record.CIFParser;
@@ -38,6 +37,7 @@ import uk.trainwatch.nrod.timetable.util.OperatingCharacteristics;
 import uk.trainwatch.nrod.timetable.util.TimingLoad;
 import uk.trainwatch.util.Consumers;
 import uk.trainwatch.util.Functions;
+import uk.trainwatch.util.app.Utility;
 import uk.trainwatch.util.counter.CounterConsumer;
 
 /**

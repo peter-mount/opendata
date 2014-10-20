@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.trainwatch.app.util;
+package uk.trainwatch.util.app;
 
 import java.util.concurrent.Callable;
 import org.apache.commons.cli.CommandLine;

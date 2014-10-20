@@ -15,6 +15,7 @@
  */
 package uk.trainwatch.app.util;
 
+import uk.trainwatch.util.app.Utility;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -45,8 +46,8 @@ public class Main
             throws Exception
     {
         // Load all of the utility implementations
-        Map<String, Utility> tools = StreamSupport.stream( ServiceLoader.load( Utility.class ).
-                spliterator(), false ).
+        ServiceLoader<Utility> loader = ServiceLoader.load( Utility.class );
+        Map<String, Utility> tools = StreamSupport.stream( loader.spliterator(), false ).
                 collect( Collectors.toMap( Utility::getName, Function.identity() ) );
 
         Supplier<String> toolNames = () -> tools.keySet().

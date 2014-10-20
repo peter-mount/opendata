@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.trainwatch.app.util.timetable;
+package uk.trainwatch.nrod.timetable.sql;
 
 import java.sql.Connection;
 import java.sql.Date;

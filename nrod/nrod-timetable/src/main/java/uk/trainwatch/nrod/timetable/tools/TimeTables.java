@@ -13,8 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.trainwatch.app.util.timetable;
+package uk.trainwatch.nrod.timetable.tools;
 
+import uk.trainwatch.nrod.timetable.sql.ScheduleDBUpdate;
+import uk.trainwatch.nrod.timetable.sql.TiplocDBUpdate;
+import uk.trainwatch.nrod.timetable.sql.ScheduleLocUpdate;
+import uk.trainwatch.nrod.timetable.sql.AssociationDBUpdate;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -36,7 +40,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
-import uk.trainwatch.app.util.DBUtility;
 import uk.trainwatch.nrod.timetable.cif.record.BasicRecordVisitor;
 import uk.trainwatch.nrod.timetable.cif.record.CIFParser;
 import uk.trainwatch.nrod.timetable.cif.record.Header;
@@ -66,6 +69,7 @@ import uk.trainwatch.nrod.timetable.util.TrainStatus;
 import uk.trainwatch.util.Consumers;
 import uk.trainwatch.util.TimeUtils;
 import uk.trainwatch.util.UncheckedSQLException;
+import uk.trainwatch.util.app.DBUtility;
 
 /**
  *
