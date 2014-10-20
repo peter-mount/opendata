@@ -5,6 +5,10 @@
  */
 package uk.trainwatch.util;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -13,6 +17,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,6 +32,11 @@ public class TimeUtils
 
     public static final ZoneId UTC = ZoneId.of( "UTC" );
 
+    public static Instant getInstant( long timestamp )
+    {
+        return Instant.ofEpochMilli( timestamp );
+    }
+
     /**
      * Gets the {@link LocalDateTime} for a timestamp in UTC
      * <p>
@@ -35,7 +45,7 @@ public class TimeUtils
      */
     public static final LocalDateTime getLocalDateTime( final long timestamp )
     {
-        return getLocalDateTime( Instant.ofEpochMilli( timestamp ) );
+        return getLocalDateTime( getInstant( timestamp ) );
     }
 
     /**
@@ -58,6 +68,17 @@ public class TimeUtils
     {
         Clock clock = Clock.fixed( instant, UTC );
         return LocalDateTime.now( clock );
+    }
+
+    public static final LocalDate getLocalDate( final long timestamp )
+    {
+        return getLocalDate( getInstant( timestamp ) );
+    }
+
+    public static final LocalDate getLocalDate( final Instant instant )
+    {
+        Clock clock = Clock.fixed( instant, UTC );
+        return LocalDate.now( clock );
     }
 
     /**
@@ -215,5 +236,50 @@ public class TimeUtils
             }
         }
         return null;
+    }
+
+    public static Date toDate( LocalDate ld )
+    {
+        if( ld == null )
+        {
+            return null;
+        }
+        return Date.from( ld.atStartOfDay( UTC ).
+                toInstant() );
+    }
+
+    public static java.sql.Date toSqlDate( LocalDate ld )
+    {
+        Date d = toDate( ld );
+        if( d == null )
+        {
+            return null;
+        }
+        return new java.sql.Date( d.getTime() );
+    }
+
+    public static void setDate( PreparedStatement s, int col, LocalDate ld )
+            throws SQLException
+    {
+        java.sql.Date d = toSqlDate( ld );
+        if( d == null )
+        {
+            s.setNull( col, Types.DATE );
+        }
+        else
+        {
+            s.setDate( col, d );
+        }
+    }
+
+    public static LocalDate getLocalDate( ResultSet rs, String n )
+            throws SQLException
+    {
+        Date d = rs.getDate( n );
+        if( rs.wasNull() )
+        {
+            return null;
+        }
+        return getLocalDate( d.getTime() );
     }
 }

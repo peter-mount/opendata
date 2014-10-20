@@ -127,7 +127,7 @@ public class TimeTables
         }
 
         LOG.log( Level.INFO, "Clearing down Schedule database" );
-        
+
         try( Connection con = getConnection(); Statement s = con.createStatement() )
         {
 
@@ -137,7 +137,7 @@ public class TimeTables
             LOG.log( Level.INFO, "Deleting tiplocs" );
             s.execute( "DELETE FROM timetable.tiploc" );
         }
-        
+
         LOG.log( Level.INFO, "Schedule database is now clean" );
     }
 
@@ -153,21 +153,13 @@ public class TimeTables
             // Build schedules
             CounterConsumer<Schedule> scheduleCounter = Consumers.createIf( includeSchedules,
                                                                             () -> new CounterConsumer<>() );
-            CounterConsumer<Association> assocCounter = Consumers.createIf( includeSchedules,
-                                                                            () -> new CounterConsumer<>() );
-            TiplocDBUpdate tiplocCounter = Consumers.createIf( includeTiploc, () -> new TiplocDBUpdate( con ) );
+            AssociationDBUpdate associations = Consumers.createIf( includeSchedules,
+                                                                   () -> new AssociationDBUpdate( con ) );
+            TiplocDBUpdate tiplocs = Consumers.createIf( includeTiploc, () -> new TiplocDBUpdate( con ) );
 
             // Pick the type of builder - if not forming schedules or associations then there's no need
             // to use the more expensive visitor
-            final RecordVisitor builder;
-            if( includeSchedules )
-            {
-                builder = new ScheduleBuilderVisitor( scheduleCounter, assocCounter, tiplocCounter, null );
-            }
-            else
-            {
-                builder = new BasicRecordVisitor( tiplocCounter, null );
-            }
+            final RecordVisitor builder = new ScheduleBuilderVisitor( scheduleCounter, associations, tiplocs, null );
 
             // Stream from the file
             LOG.log( Level.INFO, () -> "Parsing " + cifFile );
@@ -175,20 +167,22 @@ public class TimeTables
             Files.lines( cifFile ).
                     map( parser::parse ).
                     filter( Objects::nonNull ).
+                    peek( Consumers.ifThen( l -> (parser.lineCount() % 10000) == 0,
+                                            l -> LOG.log( Level.INFO, () -> "read " + parser.lineCount() + " records." )
+                            ) ).
                     forEach( r -> r.accept( builder ) );
 
             LOG.log( Level.INFO, () -> "Processed " + parser.lineCount() + " records." );
 
             if( includeTiploc )
             {
-                tiplocCounter.log();
+                tiplocs.log();
             }
 
             if( includeSchedules )
             {
-                LOG.log( Level.INFO, () -> "Processed "
-                                           + scheduleCounter.get() + " schedules, "
-                                           + assocCounter.get() + " associations" );
+                LOG.log( Level.INFO, () -> "Associations " + associations.toString() );
+                LOG.log( Level.INFO, () -> "Processed " + scheduleCounter.get() + " schedules, " );
             }
         }
         catch( IOException |
