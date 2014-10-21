@@ -61,9 +61,9 @@ public class IntermediateLocation
         this.workPass = workPass;
         this.pubArrival = pubArrival;
         this.pubDeparture = pubDeparture;
-        this.platform = platform;
-        this.line = line;
-        this.path = path;
+        this.platform = platform.trim();
+        this.line = line.trim();
+        this.path = path.trim();
         this.activity = activity;
         this.engAllowance = engAllowance;
         this.pathingAllowance = pathingAllowance;
@@ -91,12 +91,12 @@ public class IntermediateLocation
         return workPass;
     }
 
-    public LocalTime getPubArrival()
+    public LocalTime getPublicArrival()
     {
         return pubArrival;
     }
 
-    public LocalTime getPubDeparture()
+    public LocalTime getPublicDeparture()
     {
         return pubDeparture;
     }
@@ -126,7 +126,7 @@ public class IntermediateLocation
         return engAllowance;
     }
 
-    public int getPathingAllowance()
+    public int getPathAllowance()
     {
         return pathingAllowance;
     }

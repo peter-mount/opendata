@@ -14,7 +14,7 @@ public class Tiploc
 
     public Tiploc( String key )
     {
-        super( key );
+        super( key.trim() );
     }
     
 }

@@ -52,8 +52,8 @@ public class OriginLocation
         super( RecordType.LO, location );
         this.workDeparture = workDeparture;
         this.publicDeparture = publicDeparture;
-        this.platform = platform;
-        this.line = line;
+        this.platform = platform.trim();
+        this.line = line.trim();
         this.engAllowance = engAllowance;
         this.pathAllowance = pathAllowance;
         this.activity = activity;

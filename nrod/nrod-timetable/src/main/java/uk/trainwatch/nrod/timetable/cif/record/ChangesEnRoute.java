@@ -114,7 +114,7 @@ public class ChangesEnRoute
         v.visit( this );
     }
 
-    public TrainCategory getTrainCat()
+    public TrainCategory getTrainCategory()
     {
         return trainCat;
     }
@@ -124,7 +124,7 @@ public class ChangesEnRoute
         return trainIdentity;
     }
 
-    public String getHeadcode()
+    public String getHeadCode()
     {
         return headcode;
     }

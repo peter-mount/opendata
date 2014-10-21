@@ -20,6 +20,8 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import uk.trainwatch.nrod.timetable.model.Schedule;
+import uk.trainwatch.nrod.timetable.model.ScheduleJsonBuilder;
+import uk.trainwatch.util.JsonUtils;
 import uk.trainwatch.util.UncheckedSQLException;
 import uk.trainwatch.util.sql.CUDConsumer;
 
@@ -32,6 +34,8 @@ public class ScheduleDBUpdate
         extends CUDConsumer<Schedule>
 {
 
+    private final ScheduleJsonBuilder jsonBuilder = new ScheduleJsonBuilder();
+    
     public ScheduleDBUpdate( Connection con )
     {
         super( con,
@@ -47,6 +51,15 @@ public class ScheduleDBUpdate
         );
     }
 
+    /**
+     * The key fields common to insert, update & delete
+     * 
+     * @param t
+     * @param s
+     * @param i
+     * @return
+     * @throws SQLException 
+     */
     private int setKey( Schedule t, PreparedStatement s, int i )
             throws SQLException
     {
@@ -63,6 +76,14 @@ public class ScheduleDBUpdate
         return i;
     }
 
+    /**
+     * The rest of the fields used only in insert & update
+     * @param t
+     * @param s
+     * @param i
+     * @return
+     * @throws SQLException 
+     */
     private int setVal( Schedule t, PreparedStatement s, int i )
             throws SQLException
     {
@@ -75,7 +96,10 @@ public class ScheduleDBUpdate
         s.setString( i++, t.getServiceCode() );
         s.setInt( i++, t.getAtocCode().
                   ordinal() );
-        s.setString( i++, "{}" );
+    
+        // Generate json for the actual schedule
+        s.setString( i++, JsonUtils.encode( jsonBuilder.visit( t)) );
+        
         return i;
     }
 

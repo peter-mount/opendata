@@ -43,8 +43,8 @@ public class TerminatingLocation
         super( RecordType.LT, location );
         this.workArrival = workArrival;
         this.pubArrival = pubArrival;
-        this.platform = platform;
-        this.path = path;
+        this.platform = platform.trim();
+        this.path = path.trim();
         this.activity = activity;
     }
 
@@ -59,7 +59,7 @@ public class TerminatingLocation
         return workArrival;
     }
 
-    public LocalTime getPubArrival()
+    public LocalTime getPublicArrival()
     {
         return pubArrival;
     }

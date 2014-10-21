@@ -50,6 +50,17 @@ public class Schedule
         this.locations = locations;
     }
 
+    BasicSchedule getBasicSchedule()
+    {
+        return basicSchedule;
+    }
+
+    BasicScheduleExtras getBasicScheduleExtras()
+    {
+        return basicScheduleExtras;
+    }
+
+    
     public TransactionType getTransactionType()
     {
         return basicSchedule.getTransactionType();
