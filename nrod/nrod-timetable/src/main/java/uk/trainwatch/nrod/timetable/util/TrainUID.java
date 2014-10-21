@@ -20,12 +20,23 @@ public class TrainUID
     public TrainUID( String s )
     {
         Objects.requireNonNull( s );
-        if( s.length() != 6 )
+        switch( s.length() )
         {
-            throw new IllegalArgumentException( "Invalid TrainUID \"" + s + "\"" );
+            // Most train uid's start with a letter
+            case 6:
+                type = s.charAt( 0 );
+                id = s.substring( 1 );
+                break;
+
+            // Some start with a ' ' so appear in schedules as 5 digits
+            case 5:
+                type = ' ';
+                id = s;
+                break;
+
+            default:
+                throw new IllegalArgumentException( "Invalid TrainUID \"" + s + "\"" );
         }
-        type = s.charAt( 0);
-        id = s.substring( 1 );
     }
 
     public String getId()

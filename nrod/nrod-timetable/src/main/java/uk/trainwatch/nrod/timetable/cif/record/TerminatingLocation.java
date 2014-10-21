@@ -7,8 +7,10 @@ package uk.trainwatch.nrod.timetable.cif.record;
 
 import java.time.LocalTime;
 import java.util.function.Function;
+import javax.json.JsonObject;
 import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.util.Activity;
+import uk.trainwatch.util.JsonUtils;
 
 /**
  *
@@ -25,6 +27,15 @@ public class TerminatingLocation
             p.getString( 3 ),
             p.getString( 3 ),
             p.getActivity()
+    );
+
+    public static final Function<JsonObject, TerminatingLocation> fromJson = o -> new TerminatingLocation(
+            new Tiploc( o.getString( "tiploc" ) ),
+            JsonUtils.getLocalTime( o, "workArrival" ),
+            JsonUtils.getLocalTime( o, "pubArrival" ),
+            JsonUtils.getString( o, "platform" ),
+            JsonUtils.getString( o, "path" ),
+            JsonUtils.getEnumArray( Activity.class, o, "activity" )
     );
 
     private final LocalTime workArrival;

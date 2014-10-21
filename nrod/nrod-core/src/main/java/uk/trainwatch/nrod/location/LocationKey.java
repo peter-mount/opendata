@@ -11,6 +11,7 @@ import java.util.Objects;
  * @author peter
  */
 public class LocationKey
+        implements Comparable<LocationKey>
 {
 
     private final String key;
@@ -60,4 +61,11 @@ public class LocationKey
         final LocationKey other = (LocationKey) obj;
         return Objects.equals( this.key, other.key ) || this.id == other.id;
     }
+
+    @Override
+    public int compareTo( LocationKey o )
+    {
+        return key.compareTo( o.key );
+    }
+
 }

@@ -11767,7 +11767,8 @@ id|location|crs|nlc|tiploc|stanox|station|delay_monitor_point|data|notes|easting
 11737|Velindre Works|||VLNDRWK||f|f|f|||
 11738|Ventnor Bus Terminal|VTN|036800|VNTNRBS||t|f|f|||
 11739|Victoria|VIC|542600|VICTRIA|87201|t|t|t||528901|179000
-11739|Victoria|VIC|542600|VICTRIA|87201|t|t|t||528900|179000
+11739|Victoria|VIC|542600|VICTRIC|87201|t|t|t||528900|179000
+11739|Victoria|VIC|542600|VICTRIE|87201|t|t|t||528900|179000
 11740|Victoria Ballast||542620|VICTBAL|87197|f|f|f|||
 11741|Victoria Carriage Holding Sidings|XVC|542612|VICTCS|87196|f|f|f|||
 11742|Victoria Carriage Road|XVR|542662|VICTRCR|87201|f|t|t|||

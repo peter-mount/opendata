@@ -60,7 +60,6 @@ public class Schedule
         return basicScheduleExtras;
     }
 
-    
     public TransactionType getTransactionType()
     {
         return basicSchedule.getTransactionType();
@@ -204,6 +203,11 @@ public class Schedule
     public void forEach( Consumer<Location> action )
     {
         locations.forEach( action );
+    }
+
+    public List<Location> getLocations()
+    {
+        return locations;
     }
 
 }

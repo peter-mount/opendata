@@ -144,8 +144,10 @@ public enum TrainLocationFactory
                         getKey().
                         startsWith( "X" ) ).
                 // Sort
-                sorted( (a, b) -> a.getKey().
-                        compareTo( b.getKey() ) ).
+                sorted( (a, b) -> a.getValue().
+                        getLocation().
+                        compareTo( b.getValue().
+                                getLocation() ) ).
                 map( Map.Entry::getValue ).
                 collect( Collectors.toList() );
     }

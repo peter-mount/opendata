@@ -164,6 +164,7 @@ public class ScheduleJsonBuilder
                      toString() ).
                 add( "platform", il.getPlatform() ).
                 add( "line", il.getLine() ).
+                add( "path", il.getPath() ).
                 add( "engAllowance", il.getEngAllowance() ).
                 add( "pathAllowance", il.getPathAllowance() ).
                 add( "perfAllowance", il.getPerfAllowance() ).

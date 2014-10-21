@@ -6,6 +6,7 @@
 package uk.trainwatch.nrod.timetable.cif.record;
 
 import java.util.function.Function;
+import javax.json.JsonObject;
 import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.util.BusSec;
 import uk.trainwatch.nrod.timetable.util.Catering;
@@ -17,6 +18,7 @@ import uk.trainwatch.nrod.timetable.util.Sleepers;
 import uk.trainwatch.nrod.timetable.util.TimingLoad;
 import uk.trainwatch.nrod.timetable.util.TrainCategory;
 import uk.trainwatch.nrod.timetable.util.TrainClass;
+import uk.trainwatch.util.JsonUtils;
 
 /**
  *
@@ -46,6 +48,28 @@ public class ChangesEnRoute
             p.getServiceBranding(),
             p.skip( 4 ),
             p.getInt( 5 )
+    );
+
+    public static final Function<JsonObject, ChangesEnRoute> fromJson = o -> new ChangesEnRoute(
+            new Tiploc( o.getString( "tiploc" ) ),
+            JsonUtils.getEnum( TrainCategory.class, o, "trainCategory" ),
+            JsonUtils.getString( o, "trainIdentity" ),
+            JsonUtils.getString( o, "headCode" ),
+            null,
+            JsonUtils.getString( o, "serviceCode" ),
+            JsonUtils.getEnum( BusSec.class, o, "portionId" ),
+            JsonUtils.getEnum( PowerType.class, o, "powerType" ),
+            JsonUtils.getEnum( TimingLoad.class, o, "timingLoad" ),
+            JsonUtils.getString( o, "speed" ),
+            JsonUtils.getEnumArray( OperatingCharacteristics.class, o, "operChars" ),
+            JsonUtils.getEnum( TrainClass.class, o, "trainClass" ),
+            JsonUtils.getEnum( Sleepers.class, o, "sleepers" ),
+            JsonUtils.getEnum( Reservations.class, o, "reservations" ),
+            null,
+            JsonUtils.getEnumArray( Catering.class, o, "catering" ),
+            JsonUtils.getEnumArray( ServiceBranding.class, o, "branding" ),
+            null,
+            JsonUtils.getInt( o, "uicCode" )
     );
 
     private final TrainCategory trainCat;

@@ -7,8 +7,10 @@ package uk.trainwatch.nrod.timetable.cif.record;
 
 import java.time.LocalTime;
 import java.util.function.Function;
+import javax.json.JsonObject;
 import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.util.Activity;
+import uk.trainwatch.util.JsonUtils;
 
 /**
  *
@@ -32,6 +34,22 @@ public class IntermediateLocation
             p.getAllowance(),
             p.getAllowance(),
             p.getAllowance()
+    );
+
+    public static final Function<JsonObject, IntermediateLocation> fromJson = o -> new IntermediateLocation(
+            new Tiploc( o.getString( "tiploc" ) ),
+            JsonUtils.getLocalTime( o, "workArrival" ),
+            JsonUtils.getLocalTime( o, "workDeparture" ),
+            JsonUtils.getLocalTime( o, "workPass" ),
+            JsonUtils.getLocalTime( o, "pubArrival" ),
+            JsonUtils.getLocalTime( o, "pubDeparture" ),
+            JsonUtils.getString( o, "platform" ),
+            JsonUtils.getString( o, "line" ),
+            JsonUtils.getString( o, "path" ),
+            JsonUtils.getEnumArray( Activity.class, o, "activity" ),
+            JsonUtils.getInt( o, "engAllowance" ),
+            JsonUtils.getInt( o, "pathAllowance" ),
+            JsonUtils.getInt( o, "perfAllowance" )
     );
 
     private final LocalTime workArrival;
@@ -63,7 +81,8 @@ public class IntermediateLocation
         this.pubDeparture = pubDeparture;
         this.platform = platform.trim();
         this.line = line.trim();
-        this.path = path.trim();
+        // FIXME current db has no path in the json, so account for this until the next full reload
+        this.path = path == null ? "" : path.trim();
         this.activity = activity;
         this.engAllowance = engAllowance;
         this.pathingAllowance = pathingAllowance;

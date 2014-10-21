@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.nrod.timetable.util;
 
+import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,6 +46,26 @@ public class DaysRun
             }
         }
         days = d;
+    }
+
+    public boolean isOnDay( Day dow )
+    {
+        return (days & 1 << dow.ordinal()) != 0;
+    }
+
+    public boolean isOnDay( DayOfWeek dow )
+    {
+        return (days & 1 << dow.ordinal()) != 0;
+    }
+
+    /**
+     * Convenience, returns
+     * <p>
+     * @param dow
+     */
+    public DaysRun( DayOfWeek dow )
+    {
+        this( 1 << dow.ordinal() );
     }
 
     /**

@@ -7,6 +7,7 @@ package uk.trainwatch.nrod.timetable.cif.record;
 
 import java.time.LocalDate;
 import java.util.function.Function;
+import javax.json.JsonObject;
 import uk.trainwatch.nrod.timetable.cif.TransactionType;
 import uk.trainwatch.nrod.timetable.util.BankHolidayRunning;
 import uk.trainwatch.nrod.timetable.util.BusSec;
@@ -23,6 +24,7 @@ import uk.trainwatch.nrod.timetable.util.TrainCategory;
 import uk.trainwatch.nrod.timetable.util.TrainClass;
 import uk.trainwatch.nrod.timetable.util.TrainStatus;
 import uk.trainwatch.nrod.timetable.util.TrainUID;
+import uk.trainwatch.util.JsonUtils;
 
 /**
  *
@@ -60,6 +62,35 @@ public class BasicSchedule
             // Spare 1
             p.skip( 1 ),
             p.getSTPIndicator()
+    );
+
+    public static final Function<JsonObject, BasicSchedule> fromJson = o -> new BasicSchedule(
+            // Dummy
+            TransactionType.NEW,
+            new TrainUID( JsonUtils.getString( o, "trainUid" ) ),
+            JsonUtils.getLocalDate( o, "runsFrom" ),
+            JsonUtils.getLocalDate( o, "runsTo" ),
+            new DaysRun( o.getInt( "daysRun" ) ),
+            JsonUtils.getEnum( BankHolidayRunning.class, o, "bankHolidayRunning" ),
+            JsonUtils.getEnum( TrainStatus.class, o, "trainStatus" ),
+            JsonUtils.getEnum( TrainCategory.class, o, "trainCategory" ),
+            JsonUtils.getString( o, "trainIdentity" ),
+            JsonUtils.getString( o, "headCode" ),
+            null,
+            JsonUtils.getString( o, "serviceCode" ),
+            JsonUtils.getEnum( BusSec.class, o, "portionId" ),
+            JsonUtils.getEnum( PowerType.class, o, "powerType" ),
+            JsonUtils.getEnum( TimingLoad.class, o, "timingLoad" ),
+            JsonUtils.getString( o, "speed" ),
+            JsonUtils.getEnumArray( OperatingCharacteristics.class, o, "operChars" ),
+            JsonUtils.getEnum( TrainClass.class, o, "trainClass" ),
+            JsonUtils.getEnum( Sleepers.class, o, "sleepers" ),
+            JsonUtils.getEnum( Reservations.class, o, "reservations" ),
+            null,
+            JsonUtils.getEnumArray( Catering.class, o, "catering" ),
+            JsonUtils.getEnumArray( ServiceBranding.class, o, "branding" ),
+            null,
+            JsonUtils.getEnum( STPIndicator.class, o, "stpIndicator" )
     );
 
     private final TransactionType transactionType;

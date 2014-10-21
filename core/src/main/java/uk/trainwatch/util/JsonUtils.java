@@ -7,16 +7,20 @@ package uk.trainwatch.util;
 
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -537,6 +541,28 @@ public class JsonUtils
             default:
                 return null;
         }
+    }
+
+    public static LocalDate getLocalDate( JsonObject o, String n )
+    {
+        String s = getString( o, n );
+        return s == null ? null : LocalDate.parse( s );
+    }
+
+    public static <T extends Enum<T>> T getEnum( Class<T> c, JsonObject o, String n )
+    {
+        String s = getString( o, n );
+        return s == null ? null : Enum.valueOf( c, s );
+    }
+
+    public static <T extends Enum<T>> T[] getEnumArray( Class<T> c, JsonObject o, String n )
+    {
+        List<T> l = o.getJsonArray( n ).
+                stream().
+                map( e -> Enum.valueOf( c, ((JsonString) e).getString() ) ).
+                collect( Collectors.toList() );
+
+        return l.toArray( (T[]) Array.newInstance( c, l.size() ) );
     }
 
 }

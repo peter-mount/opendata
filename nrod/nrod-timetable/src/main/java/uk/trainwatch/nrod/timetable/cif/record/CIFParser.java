@@ -296,6 +296,14 @@ public final class CIFParser
     public LocalTime getTime_hhmm()
     {
         ensureAvailable( 4 );
+        
+        // Check for blank, if so return null
+        if( "    ".equals( getString( 4 ) ) )
+        {
+            return null;
+        }
+        pos -= 4;
+        
         return LocalTime.of( getInt( 2 ), getInt( 2 ) );
     }
 
@@ -309,6 +317,14 @@ public final class CIFParser
     public LocalTime getTime_hhmmH()
     {
         ensureAvailable( 5 );
+        
+        // Check for blank, if so return null
+        if( "     ".equals( getString( 5 ) ) )
+        {
+            return null;
+        }
+        pos -= 5;
+        
         return LocalTime.of( getInt( 2 ), getInt( 2 ), "H".equals( getString( 1 ) ) ? 30 : 0 );
     }
 
