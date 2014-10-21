@@ -6,9 +6,11 @@ package uk.trainwatch.nrod.location;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import uk.trainwatch.io.format.PsvReader;
 
 /**
@@ -30,20 +32,20 @@ public enum TrainLocationFactory
         {
             PsvReader.load( getClass().
                     getResourceAsStream( "location.psv" ),
-                            s -> new TrainLocation(
-                                    Long.parseLong( s[0] ),
-                                    s[1],
-                                    s[2],
-                                    s[3],
-                                    s[4],
-                                    Long.parseLong( s[5] ),
-                                    "t".equals( s[6] ),
-                                    "t".equals( s[7] ),
-                                    "t".equals( s[8] ),
-                                    s[9],
-                                    s[10].isEmpty() ? 0 : Integer.parseInt( s[10] ),
-                                    s[11].isEmpty() ? 0 : Integer.parseInt( s[11] )
-                            )
+                            s -> s.length < 12 ? null : new TrainLocation(
+                                            s[0].isEmpty() ? 0 : Long.parseLong( s[0] ),
+                                            s[1],
+                                            s[2],
+                                            s[3],
+                                            s[4],
+                                            s[5].isEmpty() ? 0 : Long.parseLong( s[5] ),
+                                            "t".equals( s[6] ),
+                                            "t".equals( s[7] ),
+                                            "t".equals( s[8] ),
+                                            s[9],
+                                            s[10].isEmpty() ? 0 : Integer.parseInt( s[10] ),
+                                            s[11].isEmpty() ? 0 : Integer.parseInt( s[11] )
+                                    )
             ).
                     forEach( loc ->
                             {
@@ -124,5 +126,27 @@ public enum TrainLocationFactory
     public TrainLocation getTrainLocationByStanox( long stanox )
     {
         return get( new TrainLocationID( stanox ) );
+    }
+
+    /**
+     * Return all stations, e.g. those who have a CRS code
+     * <p>
+     * @return
+     */
+    public Collection<TrainLocation> getStations()
+    {
+        return map.entrySet().
+                stream().
+                // Filter just CRS
+                filter( e -> e.getKey() instanceof CRS ).
+                // Filter out X?? codes as they are not stations
+                filter( e -> !e.getKey().
+                        getKey().
+                        startsWith( "X" ) ).
+                // Sort
+                sorted( (a, b) -> a.getKey().
+                        compareTo( b.getKey() ) ).
+                map( Map.Entry::getValue ).
+                collect( Collectors.toList() );
     }
 }
