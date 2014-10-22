@@ -215,3 +215,42 @@ table.wikitable td.tableblankrow {
     color: white;
     height: 5px;
 }
+
+table.wikitable td.netstart,
+table.wikitable td.netpass,
+table.wikitable td.netstop,
+table.wikitable td.netend,
+table.wikitable td.netjoin,
+table.wikitable td.netdivide {
+    width: 11em;
+    z-index: 20;
+    border-collapse: collapse;
+    border: 0;
+    border-left: 1px solid white;
+    border-right: 1px solid white;
+}
+
+table.wikitable td.netpass {
+    background: white url("/images/net/20px-BSicon_STR.svg.png") no-repeat top left;
+}
+
+table.wikitable td.netstart {
+    background: white url("/images/net/20px-BSicon_KBHFa.svg.png") no-repeat top left;
+}
+
+table.wikitable td.netstop {
+    background: white url("/images/net/BSicon_BHF.svg.png") no-repeat top left;
+}
+
+table.wikitable td.netend {
+    background: white url("/images/net/20px-BSicon_KBHFe.svg.png") no-repeat top left;
+    border-bottom: 1px solid white;
+}
+
+table.wikitable td.netjoin {
+    background: white url("/images/net/20px-BSicon_ABZrg.svg.png") no-repeat top left;
+}
+
+table.wikitable td.netdivide {
+    background: white url("/images/net/20px-BSicon_ABZlf.svg.png") no-repeat top left;
+}

@@ -18,19 +18,19 @@ public enum AssociationCategory
     /**
      * Train joins another
      */
-    JOIN( "JJ", "Train Joins" ),
+    JOIN( "JJ", "Train Joins", "Joined by" ),
     /**
      * Train divides
      */
-    DIVIDE( "VV", "Train divides" ),
+    DIVIDE( "VV", "Train divides", "Divides into" ),
     /**
      * Next train
      */
-    NEXT( "NP", "Next" ),
+    NEXT( "NP", "Next", "Becomes" ),
     /**
      * Unknown
      */
-    UNKNOWN( "  ", "Unknown" );
+    UNKNOWN( "  ", "Unknown", "" );
 
     private static final Map<String, AssociationCategory> CODES = new HashMap<>();
     private static final Map<Integer, AssociationCategory> IDS = new HashMap<>();
@@ -55,11 +55,13 @@ public enum AssociationCategory
     }
     private final String code;
     private final String description;
+    private final String legend;
 
-    private AssociationCategory( String code, String description )
+    private AssociationCategory( String code, String description, String legend )
     {
         this.code = code;
         this.description = description;
+        this.legend = legend;
     }
 
     /**
@@ -80,6 +82,11 @@ public enum AssociationCategory
     public String getDescription()
     {
         return description;
+    }
+
+    public String getLegend()
+    {
+        return legend;
     }
 
 }

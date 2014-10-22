@@ -125,6 +125,7 @@
 <table class="wikitable">
     <tr>
         <th colspan="7">Planned Schedule</th>
+        <td rowspan="3" class="tableblankcol tableblankrow"></td>
     </tr>
     <tr>
         <th rowspan="2">Location</th>
@@ -148,6 +149,20 @@
             <c:when test="${class5 or freight or pass}"><c:set var="passClass" value="wttpass"/></c:when>
             <c:otherwise><c:set var="passClass" value="wttnormal"/></c:otherwise>
         </c:choose>
+
+        <%-- Joining/Dividing etc --%>
+        <c:set var="assoc" value="${assocMap.get(location.location)}"/>
+        <c:if test="${not empty assoc and location.recordType ne 'CR'}">
+            <c:set var="assoc" value="${assoc.get(0)}"/>
+            <c:set var="cat" value="${assoc.getAssociationCategory()}"/>
+            <tr ${passClass}>
+                <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                <td class="net${cat.toString().toLowerCase()} tableright">
+                    ${cat.legend} <a href="../${assoc.assocTrainUID}/${searchDate}">${assoc.assocTrainUID}</a>
+                </td>
+            </tr>
+        </c:if>
+
         <c:choose>
             <c:when test="${location.recordType eq 'LO'}">
                 <tr class="${passClass}">
@@ -165,6 +180,7 @@
                     <td></td>
                     <td><t:time value="${location.workDeparture}" working="true"/></td>
                     <td></td>
+                    <td class="netstart"></td>
                 </tr>
             </c:when>
             <c:when test="${location.recordType eq 'LI'}">
@@ -184,6 +200,14 @@
                     <td><t:time value="${location.workArrival}" working="true"/></td>
                     <td><t:time value="${location.workDeparture}" working="true"/></td>
                     <td><t:time value="${location.workPass}" working="true"/></td>
+                    <c:choose>
+                        <c:when test="${pass or freight or class5}">
+                            <td class="netpass"></td>
+                        </c:when>
+                        <c:otherwise>
+                            <td class="netstop"></td>
+                        </c:otherwise>
+                    </c:choose>
                 </tr>
             </c:when>
             <c:when test="${location.recordType eq 'LT'}">
@@ -202,6 +226,7 @@
                     <td><t:time value="${location.workArrival}" working="true"/></td>
                     <td></td>
                     <td></td>
+                    <td class="netend"></td>
                 </tr>
             </c:when>
             <c:when test="${location.recordType eq 'CR'}">
@@ -220,7 +245,7 @@
             <th class="tableright">Location
             </th>
             <c:forEach var="v" items="${associations}">
-                    <td><t:tiplocName value="${v.assocLocation}"/></td>
+                <td><t:tiplocName value="${v.assocLocation}"/></td>
             </c:forEach>
         </tr>
         <tr>

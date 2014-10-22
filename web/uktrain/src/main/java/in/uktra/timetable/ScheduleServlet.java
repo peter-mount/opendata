@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
+import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.cif.record.Association;
 import uk.trainwatch.nrod.timetable.model.Schedule;
 import uk.trainwatch.nrod.timetable.sql.ScheduleResultSetFactory;
@@ -153,7 +155,14 @@ public class ScheduleServlet
                         map( AssociationFilter.INSTANCE ).
                         collect( Collectors.toList() );
 
+                // The associations as a list
                 req.put( "associations", associations );
+                
+                // Keyed by tiploc
+                req.put( "assocMap", associations.stream().
+                        collect( Collectors.groupingBy( sh -> sh.getAssocLocation() ) ) );
+                System.out.println( associations.stream().
+                        collect( Collectors.groupingBy( sh -> sh.getAssocLocation() ) ) );
             }
         }
     }
