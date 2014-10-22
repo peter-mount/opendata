@@ -97,9 +97,20 @@ public class IntermediateLocation
         super( RecordType.LI, location );
         this.workArrival = workArrival;
         this.workDeparture = workDeparture;
+
+        // Added Oct 22 2014: If workPass is set then we ignore public times as they are always 00:00
         this.workPass = workPass;
-        this.pubArrival = pubArrival;
-        this.pubDeparture = pubDeparture;
+        if( workPass == null )
+        {
+            this.pubArrival = pubArrival;
+            this.pubDeparture = pubDeparture;
+        }
+        else
+        {
+            this.pubArrival = null;
+            this.pubDeparture = null;
+        }
+        
         this.platform = platform.trim();
         this.line = line.trim();
         // FIXME current db has no path in the json, so account for this until the next full reload

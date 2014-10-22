@@ -17,10 +17,14 @@ package uk.trainwatch.util.sql;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * A suite of JDBC utilities
@@ -31,6 +35,41 @@ public class SQL
 {
 
     private static final Logger LOG = Logger.getLogger( SQL.class.getName() );
+
+    /**
+     * Return a {@link Stream} of objects produced from a {@link ResultSet}
+     * <p>
+     * @param <T>     Type of object
+     * @param rs      ResultSet
+     * @param factory Function to generate the object from the ResultSet
+     * <p>
+     * @return stream
+     */
+    public static <T> Stream<T> stream( ResultSet rs, Function<ResultSet, T> factory )
+    {
+        if( rs == null )
+        {
+            return Stream.empty();
+        }
+        return StreamSupport.stream( new ResultSetSpliterator<>( rs, factory ), false );
+    }
+
+    /**
+     * Return a {@link Stream} of objects produced from the result of a query against a {@link PreparedStatement}
+     * <p>
+     * @param <T>     Type of object
+     * @param s       PreparedStatement
+     * @param factory Function to generate the object from the ResultSet
+     * <p>
+     * @return stream
+     * <p>
+     * @throws SQLException if the query fails
+     */
+    public static <T> Stream<T> stream( PreparedStatement s, Function<ResultSet, T> factory )
+            throws SQLException
+    {
+        return stream( s.executeQuery(), factory );
+    }
 
     /**
      * Delete the contents of a table and it's id sequence

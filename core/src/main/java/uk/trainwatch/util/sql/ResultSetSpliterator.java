@@ -15,40 +15,22 @@
  */
 package uk.trainwatch.util.sql;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  *
  * @author Peter T Mount
  */
-public class ResultSetSpliterator<T>
+class ResultSetSpliterator<T>
         implements Spliterator<T>
 {
 
     private final ResultSet resultSet;
     private final Function<ResultSet, T> factory;
-
-    public static <T> Stream<T> stream( ResultSet rs, Function<ResultSet, T> factory )
-    {
-        if( rs == null )
-        {
-            return Stream.empty();
-        }
-        return StreamSupport.stream( new ResultSetSpliterator<>( rs, factory ), false );
-    }
-
-    public static <T> Stream<T> stream( PreparedStatement s, Function<ResultSet, T> factory )
-            throws SQLException
-    {
-        return stream( s.executeQuery(), factory );
-    }
 
     /**
      *
