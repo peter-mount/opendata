@@ -1,0 +1,217 @@
+/*
+Copyright 2014 peter.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+/* 
+    Created on : 15-Jul-2014, 19:03:29
+    Author     : peter
+*/
+#banner_outer {
+    display: table;
+    table-layout: auto;
+    width: 100%;
+}
+#banner_inner {
+    display: table-row;
+    background: #fff;
+    color: #000;
+}
+#banner_left, #banner_right {
+    display: table-cell;
+    padding: 3px;
+}
+#banner_right {
+    text-align: right;
+    text-wrap: avoid;
+}
+#banner_left h1 {
+    margin:0;
+    padding:0;
+}
+
+#eu_cookie_notice {
+    border-bottom: 1px solid black;
+    padding:2px;
+    margin:0;
+    margin-bottom: 2px;
+    background: orange;
+    color: black;
+}
+
+#navbar {
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+#navbar a {
+    margin-left: .2em;
+    margin-right: .2em;
+    text-decoration: underline;
+    text-decoration: none;
+}
+
+#navbar a:hover {
+    text-decoration: underline;
+}
+#maincontent {
+    padding: 2px;
+    line-height: 1.4em;
+    font-family: "Lucida Grande","Trebuchet MS",Verdana,Helvetica,Arial,sans-serif;
+    font-size: 1em;
+    color: #333;
+}
+
+#maincontent h2 {
+    color: #28313F;
+    font-family: "Trebuchet MS",Arial,Helvetica,sans-serif;
+    font-weight: normal;
+    color: #3F3F3F;
+    font-size: 2em;
+    margin: 0.2em 0 0.2em 0;
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
+}
+
+#pagebody {
+    margin: 2px;
+}
+
+/* hide any br's within ul/ol content */
+/*ul br, ol br { display:none; }*/
+
+div.copyright {
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 2px;
+}
+
+div.copyright-symbol {
+    float: left;
+    padding: 0.25em 0.4em;
+    font-size: 5em;
+    font-weight: bold;
+}
+
+
+div.copyright-text {
+    padding: 0.25em 0.4em;
+    font-style: italic;
+}
+
+#home-1col {
+    width: 100%;
+    border: 1px solid red;
+}
+
+#home-2coll-left, #home-3col-left {
+    float: left;
+    width: 25%;
+    border: 1px solid red;
+}
+
+#home-2colr-right, #home-3col-right {
+    float: left;
+    width: 25%;
+    border: 1px solid red;
+}
+
+#home-2coll-center, #home-2colr-center {
+    width: 75%;
+    border: 1px solid red;
+}
+
+#home-3col-center {
+    width: 50%;
+    border: 1px solid red;
+}
+
+div.notice {
+    background: burlywood url("/images/general/Information24.png") no-repeat top left;
+    min-height: 26px;
+    min-width: 100px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-left: 3em;
+    margin-right: 3em;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 26px;
+    padding-right: 2px;
+    border: 1px solid black;
+    color: black;
+}
+
+#main-content {
+    font-size: 0.8em;
+}
+
+table.wikitable {
+    margin: 1em 0;
+    background-color: #f9f9f9;
+    border: 1px #aaa solid;
+    border-collapse: collapse;
+    color: black;
+}
+
+table.wikitable thead th, table.wikitable th {
+    background-color: #f2f2f2;
+    text-align: center;
+    border: 1px #aaa solid;
+    padding: 0.2em;
+}
+
+table.wikitable tbody td, table.wikitable td {
+    background-color: #f9f9f9;
+    border: 1px #aaa solid;
+    padding: 0.2em;
+}
+
+.stpvar, .stpwtt {
+    display: inline-block;
+    width: 2.5em;
+    text-align: center;
+}
+.stpvar {
+    font-weight: bold;
+}
+.stpwtt {
+}
+
+.wttnormal {color: #000;}
+.wttpass {color: #888;}
+
+table.padr, .padr {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.tablecenter {text-align: center;}
+.tableleft {text-align: left;}
+.tableright {text-align: right;}
+table.wikitable td.tableblankcol {
+    border-top: 1px solid white;
+    border-bottom: 1px solid white;
+    background: white;
+    color: white;
+    width: 5px;
+}
+table.wikitable td.tableblankrow {
+    border-left: 1px solid white;
+    border-right: 1px solid white;
+    background: white;
+    color: white;
+    height: 5px;
+}

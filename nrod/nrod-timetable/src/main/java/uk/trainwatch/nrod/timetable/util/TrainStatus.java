@@ -14,50 +14,51 @@ import java.util.Map;
  */
 public enum TrainStatus
 {
+
     /**
      * Bus (Permanent)
      */
-    BUS( "B" ),
+    BUS( "B", "Bus (Permanent)" ),
     /**
      * Freight (Permanent - WTT)
      */
-    FREIGHT( "F" ),
+    FREIGHT( "F", "Freight (Permanent - WTT)" ),
     /**
      * Passenger &amp; Parcels (Permanent - WTT)
      */
-    PASSENGER_PARCELS( "P" ),
+    PASSENGER_PARCELS( "P", "Passenger &amp; Parcels (Permanent - WTT)" ),
     /**
      * Ship (Permanent)
      */
-    SHIP( "S" ),
+    SHIP( "S", "Ship (Permanent)" ),
     /**
      * Trip (Permanent)
      */
-    TRIP( "T" ),
+    TRIP( "T", "Trip (Permanent)" ),
     /**
      * Passenger &amp; Parcels (Short Term Planning)
      */
-    STP_PASSENGER_PARCELS( "1" ),
+    STP_PASSENGER_PARCELS( "1", "Passenger &amp; Parcels (Short Term Planning)" ),
     /**
      * Freight (Short Term Planning)
      */
-    STP_FREIGHT( "2" ),
+    STP_FREIGHT( "2", "Freight (Short Term Planning)" ),
     /**
      * Trip (Short Term Planning)
      */
-    STP_TRIP( "3" ),
+    STP_TRIP( "3", "Trip (Short Term Planning)" ),
     /**
      * Ship (Short Term Planning)
      */
-    STP_SHIP( "4" ),
+    STP_SHIP( "4", "Ship (Short Term Planning)" ),
     /**
      * Bus (Short Term Planning)
      */
-    STP_BUS( "5" ),
+    STP_BUS( "5", "Bus (Short Term Planning)" ),
     /**
      * Unknown
      */
-    UNKNOWN( " " );
+    UNKNOWN( " ", "" );
 
     private static final Map<String, TrainStatus> CODES = new HashMap<>();
 
@@ -74,15 +75,22 @@ public enum TrainStatus
         return CODES.getOrDefault( s, TrainStatus.UNKNOWN );
     }
     private final String code;
+    private final String desc;
 
-    private TrainStatus( String code )
+    private TrainStatus( String code, String desc )
     {
         this.code = code;
+        this.desc = desc;
     }
 
     public String getCode()
     {
         return code;
+    }
+
+    public String getDescription()
+    {
+        return desc;
     }
 
 }

@@ -13,6 +13,7 @@
         <module>brokers</module>
         <module>core</module>
         <module>nrod</module>
+        <module>web</module>
     </modules>
     
     <properties>

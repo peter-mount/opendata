@@ -234,14 +234,14 @@ public enum TimingLoad
         for( TimingLoad bhx : values() )
         {
             CODES.put( bhx.code, bhx );
-            CODES.put( (bhx.code + "    ").substring( 0, 4 ), bhx );
         }
     }
 
     public static TimingLoad lookup( String s )
     {
-        return CODES.getOrDefault( s, TimingLoad.UNKNOWN );
+        return CODES.getOrDefault( s.trim(), TimingLoad.UNKNOWN );
     }
+    
     private final String code;
     private final String description;
 

@@ -140,7 +140,7 @@ public class DaysRun
          */
         public boolean runsToday( int days )
         {
-            return (days & mask) == 1;
+            return (days & mask) == mask;
         }
     }
 }
