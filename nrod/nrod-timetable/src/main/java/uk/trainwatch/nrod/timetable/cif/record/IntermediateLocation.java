@@ -12,6 +12,7 @@ import javax.json.JsonObject;
 import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.util.Activity;
 import uk.trainwatch.util.JsonUtils;
+import uk.trainwatch.util.TimeUtils;
 
 /**
  *
@@ -58,16 +59,11 @@ public class IntermediateLocation
                  toString() ).
             add( "tiploc", l.getLocation().
                  getKey() ).
-            add( "workArrival", l.getWorkArrival().
-                 toString() ).
-            add( "workDeparture", l.getWorkDeparture().
-                 toString() ).
-            add( "workPass", l.getWorkPass().
-                 toString() ).
-            add( "pubArrival", l.getPublicArrival().
-                 toString() ).
-            add( "pubDeparture", l.getPublicDeparture().
-                 toString() ).
+            add( "workArrival", TimeUtils.toJson( l.getWorkArrival() ) ).
+            add( "workDeparture", TimeUtils.toJson( l.getWorkDeparture() ) ).
+            add( "workPass", TimeUtils.toJson( l.getWorkPass() ) ).
+            add( "pubArrival", TimeUtils.toJson( l.getPublicArrival() ) ).
+            add( "pubDeparture", TimeUtils.toJson( l.getPublicDeparture() ) ).
             add( "platform", l.getPlatform() ).
             add( "line", l.getLine() ).
             add( "path", l.getPath() ).

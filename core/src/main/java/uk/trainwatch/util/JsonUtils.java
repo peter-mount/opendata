@@ -569,8 +569,7 @@ public class JsonUtils
     /**
      * Returns a {@link JsonArrayBuilder} containing each enum value
      * <p>
-     * @param ary
-     * <p>
+     * @param ary <p>
      * @return
      */
     public static JsonArrayBuilder getArray( Enum<?> ary[] )
@@ -586,4 +585,54 @@ public class JsonUtils
         return b;
     }
 
+    /**
+     * Create a {@link JsonValue{ of a String, handling nulls
+     * <p>
+     * @param s String
+     * <p>
+     * @return JsonValue
+     */
+    public static JsonValue createJsonValue( final String s )
+    {
+        return s == null ? JsonValue.NULL : createJsonString( s );
+    }
+
+    /**
+     * Create a {@link JsonString}.
+     * <p>
+     * This is here mainly to support {@link #createJsonValue(java.lang.String)} as the {@link Json} class does not
+     * provide a way of generating this.
+     * <p>
+     * @param s String
+     * <p>
+     * @return JsonString
+     * <p>
+     * @throws NullPointerException if s is null
+     */
+    public static JsonString createJsonString( final String s )
+    {
+        Objects.requireNonNull( s );
+        return new JsonString()
+        {
+
+            @Override
+            public String getString()
+            {
+                return s;
+            }
+
+            @Override
+            public CharSequence getChars()
+            {
+                return s;
+            }
+
+            @Override
+            public JsonValue.ValueType getValueType()
+            {
+                return JsonValue.ValueType.STRING;
+            }
+
+        };
+    }
 }

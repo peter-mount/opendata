@@ -23,7 +23,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import uk.trainwatch.util.UncheckedSQLException;
 
 /**
  *

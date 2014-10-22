@@ -12,6 +12,7 @@ import javax.json.JsonObject;
 import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.util.Activity;
 import uk.trainwatch.util.JsonUtils;
+import uk.trainwatch.util.TimeUtils;
 
 /**
  *
@@ -44,10 +45,8 @@ public class TerminatingLocation
                  toString() ).
             add( "tiploc", l.getLocation().
                  getKey() ).
-            add( "workArrival", l.getWorkArrival().
-                 toString() ).
-            add( "pubArrival", l.getPublicArrival().
-                 toString() ).
+            add( "workArrival", TimeUtils.toJson( l.getWorkArrival() ) ).
+            add( "pubArrival", TimeUtils.toJson( l.getPublicArrival() ) ).
             add( "platform", l.getPlatform() ).
             add( "path", l.getPath() ).
             add( "activity", JsonUtils.getArray( l.getActivity() ) ).

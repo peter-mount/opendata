@@ -24,7 +24,7 @@ import uk.trainwatch.nrod.timetable.cif.record.TIPLOCAction;
 import uk.trainwatch.nrod.timetable.cif.record.TIPLOCAmend;
 import uk.trainwatch.nrod.timetable.cif.record.TIPLOCDelete;
 import uk.trainwatch.nrod.timetable.cif.record.TIPLOCInsert;
-import uk.trainwatch.util.UncheckedSQLException;
+import uk.trainwatch.util.sql.UncheckedSQLException;
 
 /**
  * Handles updating the tiploc table in the database

@@ -22,7 +22,7 @@ import java.sql.SQLException;
 import uk.trainwatch.nrod.timetable.model.Schedule;
 import uk.trainwatch.nrod.timetable.model.ScheduleJsonBuilder;
 import uk.trainwatch.util.JsonUtils;
-import uk.trainwatch.util.UncheckedSQLException;
+import uk.trainwatch.util.sql.UncheckedSQLException;
 import uk.trainwatch.util.sql.CUDConsumer;
 
 /**

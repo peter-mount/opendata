@@ -21,7 +21,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import uk.trainwatch.nrod.timetable.cif.record.Association;
 import uk.trainwatch.util.TimeUtils;
-import uk.trainwatch.util.UncheckedSQLException;
+import uk.trainwatch.util.sql.UncheckedSQLException;
 
 /**
  *

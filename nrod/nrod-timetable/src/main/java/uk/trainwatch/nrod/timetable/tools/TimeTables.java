@@ -68,8 +68,9 @@ import uk.trainwatch.nrod.timetable.util.TrainClass;
 import uk.trainwatch.nrod.timetable.util.TrainStatus;
 import uk.trainwatch.util.Consumers;
 import uk.trainwatch.util.TimeUtils;
-import uk.trainwatch.util.UncheckedSQLException;
+import uk.trainwatch.util.sql.UncheckedSQLException;
 import uk.trainwatch.util.app.DBUtility;
+import uk.trainwatch.util.sql.SQL;
 
 /**
  *
@@ -80,7 +81,7 @@ public class TimeTables
 {
 
     protected static final Logger LOG = Logger.getLogger( TimeTables.class.getName() );
-
+    private static final String SCHEMA = "timetable";
     private List<Path> cifFiles;
 
     private boolean fullImport;
@@ -179,12 +180,8 @@ public class TimeTables
     {
         LOG.log( Level.INFO, "Clearing down Schedule database" );
 
-        try( Statement s = con.createStatement() )
-        {
-            LOG.log( Level.INFO, () -> "Deleting schedule_loc" );
-            s.execute( "DELETE FROM timetable.schedule_loc" );
-        }
-        
+        SQL.deleteTable( con, SCHEMA, "schedule_loc" );
+
         // Clear down our existing tables
         Arrays.asList(
                 "schedule",
@@ -192,7 +189,7 @@ public class TimeTables
                 "tiploc",
                 "trainuid",
                 "lastupdate" ).
-                forEach( t -> deleteTable( con, t ) );
+                forEach( t -> SQL.deleteIdTable( con, SCHEMA, t ) );
 
         // Initialise our enum tables
         Arrays.asList(
@@ -215,73 +212,11 @@ public class TimeTables
                 TrainCategory.class,
                 TrainClass.class,
                 TrainStatus.class ).
-                forEach( c -> updateEnumTable( con, c ) );
+                forEach( c -> SQL.updateEnumTable( con, SCHEMA, c ) );
 
         prepareDaysRun( con );
 
         LOG.log( Level.INFO, "Schedule database is now clean" );
-    }
-
-    /**
-     * Delete the contents of a table and it's id sequence
-     * <p>
-     * @param con   Connection
-     * @param table Table name
-     * <p>
-     * @throws SQLException
-     */
-    private void deleteTable( Connection con, String table )
-    {
-        try( Statement s = con.createStatement() )
-        {
-            LOG.log( Level.INFO, () -> "Deleting " + table );
-            s.execute( "DELETE FROM timetable." + table );
-
-            String seq = table + "_id_seq";
-            LOG.log( Level.INFO, () -> "Resetting sequence " + seq );
-            s.execute( "ALTER SEQUENCE timetable." + seq + " RESTART WITH 1" );
-        }
-        catch( SQLException ex )
-        {
-            throw new UncheckedSQLException( ex );
-        }
-    }
-
-    /**
-     * Ensures that a normalizing table representing our enum's are in sync
-     * <p>
-     * @param con       Connection
-     * @param enumClass Enum class
-     */
-    private void updateEnumTable( Connection con, Class<? extends Enum<?>> enumClass )
-    {
-        String table = enumClass.getSimpleName().
-                toLowerCase();
-
-        LOG.log( Level.INFO, () -> "Reinitialising " + table );
-
-        try( Statement s = con.createStatement() )
-        {
-            s.executeUpdate( "DELETE FROM timetable." + table );
-        }
-        catch( SQLException ex )
-        {
-            throw new UncheckedSQLException( ex );
-        }
-
-        try( PreparedStatement s = con.prepareStatement( "INSERT INTO timetable." + table + " (id,code) VALUES (?,?)" ) )
-        {
-            for( Enum<?> enumValue : enumClass.getEnumConstants() )
-            {
-                s.setInt( 1, enumValue.ordinal() );
-                s.setString( 2, enumValue.toString() );
-                s.executeUpdate();
-            }
-        }
-        catch( SQLException ex )
-        {
-            throw new UncheckedSQLException( ex );
-        }
     }
 
     /**
@@ -297,10 +232,7 @@ public class TimeTables
 
         LOG.log( Level.INFO, () -> "Reinitialising " + table );
 
-        try( Statement s = con.createStatement() )
-        {
-            s.executeUpdate( "DELETE FROM timetable." + table );
-        }
+        SQL.deleteTable( con, SCHEMA, table );
 
         try( PreparedStatement s = con.prepareStatement(
                 "INSERT INTO timetable." + table

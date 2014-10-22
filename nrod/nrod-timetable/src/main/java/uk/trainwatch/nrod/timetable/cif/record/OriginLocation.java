@@ -12,6 +12,7 @@ import javax.json.JsonObject;
 import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.util.Activity;
 import uk.trainwatch.util.JsonUtils;
+import uk.trainwatch.util.TimeUtils;
 
 /**
  *
@@ -53,10 +54,8 @@ public class OriginLocation
                  toString() ).
             add( "tiploc", l.getLocation().
                  getKey() ).
-            add( "workDeparture", l.getWorkDeparture().
-                 toString() ).
-            add( "pubDeparture", l.getPublicDeparture().
-                 toString() ).
+            add( "workDeparture", TimeUtils.toJson( l.getWorkDeparture() ) ).
+            add( "pubDeparture", TimeUtils.toJson( l.getPublicDeparture() ) ).
             add( "platform", l.getPlatform() ).
             add( "line", l.getLine() ).
             add( "engAllowance", l.getEngAllowance() ).

@@ -26,6 +26,7 @@ import uk.trainwatch.nrod.timetable.util.TrainClass;
 import uk.trainwatch.nrod.timetable.util.TrainStatus;
 import uk.trainwatch.nrod.timetable.util.TrainUID;
 import uk.trainwatch.util.JsonUtils;
+import uk.trainwatch.util.TimeUtils;
 
 /**
  *
@@ -97,10 +98,8 @@ public class BasicSchedule
     public static final Function<BasicSchedule, JsonObject> toJson = s -> Json.createObjectBuilder().
             add( "trainUid", s.getTrainUid().
                  toString() ).
-            add( "runsFrom", s.getRunsFrom().
-                 toString() ).
-            add( "runsTo", s.getRunsTo().
-                 toString() ).
+            add( "runsFrom", TimeUtils.toJson( s.getRunsFrom() ) ).
+            add( "runsTo", TimeUtils.toJson( s.getRunsTo() ) ).
             add( "daysRun", s.getDaysRun().
                  getDaysRunning() ).
             add( "bankHolidayRunning", s.getBankHolidayRunning().

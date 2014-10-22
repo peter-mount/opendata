@@ -22,7 +22,7 @@ import javax.json.JsonObject;
 import uk.trainwatch.nrod.timetable.model.Schedule;
 import uk.trainwatch.nrod.timetable.model.ScheduleJsonDecoder;
 import uk.trainwatch.util.JsonUtils;
-import uk.trainwatch.util.UncheckedSQLException;
+import uk.trainwatch.util.sql.UncheckedSQLException;
 
 /**
  * Function that will generate a {@link Schedule} from a {@link ResultSet}

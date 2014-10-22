@@ -20,7 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Objects;
 import java.util.function.Consumer;
-import uk.trainwatch.util.UncheckedSQLException;
 
 /**
  * A consumer which will perform Create, Update or Delete operations on a Database

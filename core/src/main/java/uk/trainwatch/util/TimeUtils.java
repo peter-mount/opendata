@@ -21,6 +21,8 @@ import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.json.JsonString;
+import javax.json.JsonValue;
 
 /**
  *
@@ -290,4 +292,78 @@ public class TimeUtils
         }
         return getLocalDate( d.getTime() );
     }
+
+    /**
+     * Return the string of a {@link LocalDate} or null if it's null
+     * <p>
+     * @param d date
+     * <p>
+     * @return String or null
+     */
+    public static String toString( LocalDate d )
+    {
+        return d == null ? null : d.toString();
+    }
+
+    /**
+     * Return the string of a {@link LocalTime} or null if it's null
+     * <p>
+     * @param t time
+     * <p>
+     * @return String or null
+     */
+    public static String toString( LocalTime t )
+    {
+        return t == null ? null : t.toString();
+    }
+
+    /**
+     * Return the string of a {@link LocalDateTime} or null if it's null
+     * <p>
+     * @param dt date time
+     * <p>
+     * @return String or null
+     */
+    public static String toString( LocalDateTime dt )
+    {
+        return dt == null ? null : dt.toString();
+    }
+
+    /**
+     * Convert a {@link LocalDate} to Json handling nulls
+     * <p>
+     * @param d date
+     * <p>
+     * @return JsonValue
+     */
+
+    public static JsonValue toJson( LocalDate d )
+    {
+        return d == null ? JsonValue.NULL : JsonUtils.createJsonString( d.toString() );
+    }
+
+    /**
+     * Convert a {@link LocalTime} to Json handling nulls
+     * <p>
+     * @param t time
+     * <p>
+     * @return JsonValue
+     */
+    public static JsonValue toJson( LocalTime t )
+    {
+        return t == null ? JsonValue.NULL : JsonUtils.createJsonString( t.toString() );
+    }
+
+    /**
+     * Convert a {@link LocalDateTime} to Json handling nulls
+     * <p>
+     * @param dt date time
+     * <p>
+     * @return JsonValue
+     */
+    public static JsonValue toJson( LocalDateTime dt )
+    {
+        return dt == null ? JsonValue.NULL : JsonUtils.createJsonString( dt.toString() );
+    }
+
 }

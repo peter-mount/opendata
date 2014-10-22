@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.cif.record.Location;
 import uk.trainwatch.nrod.timetable.model.Schedule;
-import uk.trainwatch.util.UncheckedSQLException;
+import uk.trainwatch.util.sql.UncheckedSQLException;
 import uk.trainwatch.util.sql.CUDConsumer;
 
 /**
