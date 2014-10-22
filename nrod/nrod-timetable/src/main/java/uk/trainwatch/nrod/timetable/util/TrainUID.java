@@ -14,7 +14,6 @@ import java.util.Objects;
 public class TrainUID
 {
 
-    private final char type;
     private final String id;
 
     public TrainUID( String s )
@@ -24,14 +23,12 @@ public class TrainUID
         {
             // Most train uid's start with a letter
             case 6:
-                type = s.charAt( 0 );
-                id = s.substring( 1 );
+                id = s;
                 break;
 
             // Some start with a ' ' so appear in schedules as 5 digits
             case 5:
-                type = ' ';
-                id = s;
+                id = " " + s;
                 break;
 
             default:
@@ -39,21 +36,10 @@ public class TrainUID
         }
     }
 
-    public String getId()
-    {
-        return id;
-    }
-
-    public char getType()
-    {
-        return type;
-    }
-
     @Override
     public int hashCode()
     {
         int hash = 7;
-        hash = 11 * hash + Objects.hashCode( this.type );
         hash = 11 * hash + Objects.hashCode( this.id );
         return hash;
     }
@@ -66,12 +52,12 @@ public class TrainUID
             return false;
         }
         final TrainUID other = (TrainUID) obj;
-        return this.type == other.type || Objects.equals( this.id, other.id );
+        return Objects.equals( this.id, other.id );
     }
 
     @Override
     public String toString()
     {
-        return type + id;
+        return id;
     }
 }

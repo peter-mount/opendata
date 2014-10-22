@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -563,6 +564,26 @@ public class JsonUtils
                 collect( Collectors.toList() );
 
         return l.toArray( (T[]) Array.newInstance( c, l.size() ) );
+    }
+
+    /**
+     * Returns a {@link JsonArrayBuilder} containing each enum value
+     * <p>
+     * @param ary
+     * <p>
+     * @return
+     */
+    public static JsonArrayBuilder getArray( Enum<?> ary[] )
+    {
+        JsonArrayBuilder b = Json.createArrayBuilder();
+        if( ary != null && ary.length > 0 )
+        {
+            for( Enum<?> a : ary )
+            {
+                b.add( a.toString() );
+            }
+        }
+        return b;
     }
 
 }

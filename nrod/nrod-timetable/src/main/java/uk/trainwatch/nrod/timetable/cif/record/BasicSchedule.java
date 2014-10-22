@@ -7,6 +7,7 @@ package uk.trainwatch.nrod.timetable.cif.record;
 
 import java.time.LocalDate;
 import java.util.function.Function;
+import javax.json.Json;
 import javax.json.JsonObject;
 import uk.trainwatch.nrod.timetable.cif.TransactionType;
 import uk.trainwatch.nrod.timetable.util.BankHolidayRunning;
@@ -92,6 +93,44 @@ public class BasicSchedule
             null,
             JsonUtils.getEnum( STPIndicator.class, o, "stpIndicator" )
     );
+
+    public static final Function<BasicSchedule, JsonObject> toJson = s -> Json.createObjectBuilder().
+            add( "trainUid", s.getTrainUid().
+                 toString() ).
+            add( "runsFrom", s.getRunsFrom().
+                 toString() ).
+            add( "runsTo", s.getRunsTo().
+                 toString() ).
+            add( "daysRun", s.getDaysRun().
+                 getDaysRunning() ).
+            add( "bankHolidayRunning", s.getBankHolidayRunning().
+                 toString() ).
+            add( "trainStatus", s.getTrainStatus().
+                 toString() ).
+            add( "trainCategory", s.getTrainCategory().
+                 toString() ).
+            add( "trainIdentity", s.getTrainIdentity() ).
+            add( "headCode", s.getHeadCode() ).
+            add( "serviceCode", s.getServiceCode() ).
+            add( "portionId", s.getPortionId().
+                 toString() ).
+            add( "powerType", s.getPowerType().
+                 toString() ).
+            add( "timingLoad", s.getTimingLoad().
+                 toString() ).
+            add( "speed", s.getSpeed() ).
+            add( "operChars", JsonUtils.getArray( s.getOperatingCharacteristics() ) ).
+            add( "trainClass", s.getTrainClass().
+                 toString() ).
+            add( "sleepers", s.getSleepers().
+                 toString() ).
+            add( "reservations", s.getReservations().
+                 toString() ).
+            add( "catering", JsonUtils.getArray( s.getCateringCode() ) ).
+            add( "branding", JsonUtils.getArray( s.getServiceBranding() ) ).
+            add( "stpIndicator", s.getStpInd().
+                 toString() ).
+            build();
 
     private final TransactionType transactionType;
     private final TrainUID trainUid;

@@ -108,7 +108,7 @@ public class ScheduleLocUpdate
                 ) )
         {
             s.setString( 1, t.getTrainUid().
-                         getId() );
+                         toString() );
             s.setDate( 2, Date.valueOf( t.getRunsFrom() ) );
             s.setInt( 3, t.getStpInd().
                       ordinal() );

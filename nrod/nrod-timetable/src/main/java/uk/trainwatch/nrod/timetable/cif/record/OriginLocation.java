@@ -7,6 +7,7 @@ package uk.trainwatch.nrod.timetable.cif.record;
 
 import java.time.LocalTime;
 import java.util.function.Function;
+import javax.json.Json;
 import javax.json.JsonObject;
 import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.util.Activity;
@@ -35,18 +36,35 @@ public class OriginLocation
     /**
      * Function that can decode a JsonObject to an OriginLocation
      */
-    public static final Function<JsonObject,OriginLocation> fromJson = o-> new OriginLocation(
-                        new Tiploc( o.getString( "tiploc" ) ),
-                        JsonUtils.getLocalTime( o, "workDeparture" ),
-                        JsonUtils.getLocalTime( o, "pubDeparture" ),
-                        JsonUtils.getString( o, "platform" ),
-                        JsonUtils.getString( o, "line" ),
-                        JsonUtils.getInt( o, "engAllowance" ),
-                        JsonUtils.getInt( o, "pathAllowance" ),
-                        JsonUtils.getEnumArray( Activity.class, o, "activity" ),
-                        JsonUtils.getInt( o, "perfAllowance" )
+    public static final Function<JsonObject, OriginLocation> fromJson = o -> new OriginLocation(
+            new Tiploc( o.getString( "tiploc" ) ),
+            JsonUtils.getLocalTime( o, "workDeparture" ),
+            JsonUtils.getLocalTime( o, "pubDeparture" ),
+            JsonUtils.getString( o, "platform" ),
+            JsonUtils.getString( o, "line" ),
+            JsonUtils.getInt( o, "engAllowance" ),
+            JsonUtils.getInt( o, "pathAllowance" ),
+            JsonUtils.getEnumArray( Activity.class, o, "activity" ),
+            JsonUtils.getInt( o, "perfAllowance" )
     );
-    
+
+    public static final Function<OriginLocation, JsonObject> toJson = l -> Json.createObjectBuilder().
+            add( "type", l.getRecordType().
+                 toString() ).
+            add( "tiploc", l.getLocation().
+                 getKey() ).
+            add( "workDeparture", l.getWorkDeparture().
+                 toString() ).
+            add( "pubDeparture", l.getPublicDeparture().
+                 toString() ).
+            add( "platform", l.getPlatform() ).
+            add( "line", l.getLine() ).
+            add( "engAllowance", l.getEngAllowance() ).
+            add( "pathAllowance", l.getPathAllowance() ).
+            add( "perfAllowance", l.getPerfAllowance() ).
+            add( "activity", JsonUtils.getArray( l.getActivity() ) ).
+            build();
+
     private final LocalTime workDeparture;
     private final LocalTime publicDeparture;
     private final String platform;

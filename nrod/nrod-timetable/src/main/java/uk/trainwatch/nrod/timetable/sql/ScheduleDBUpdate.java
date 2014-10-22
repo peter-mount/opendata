@@ -35,7 +35,7 @@ public class ScheduleDBUpdate
 {
 
     private final ScheduleJsonBuilder jsonBuilder = new ScheduleJsonBuilder();
-    
+
     public ScheduleDBUpdate( Connection con )
     {
         super( con,
@@ -53,18 +53,20 @@ public class ScheduleDBUpdate
 
     /**
      * The key fields common to insert, update & delete
-     * 
+     * <p>
      * @param t
      * @param s
      * @param i
+     * <p>
      * @return
-     * @throws SQLException 
+     * <p>
+     * @throws SQLException
      */
     private int setKey( Schedule t, PreparedStatement s, int i )
             throws SQLException
     {
         s.setString( i++, t.getTrainUid().
-                     getId() );
+                     toString() );
         s.setDate( i++, Date.valueOf( t.getRunsFrom() ) );
         s.setInt( i++, t.getStpInd().
                   ordinal() );
@@ -78,11 +80,14 @@ public class ScheduleDBUpdate
 
     /**
      * The rest of the fields used only in insert & update
+     * <p>
      * @param t
      * @param s
      * @param i
+     * <p>
      * @return
-     * @throws SQLException 
+     * <p>
+     * @throws SQLException
      */
     private int setVal( Schedule t, PreparedStatement s, int i )
             throws SQLException
@@ -96,10 +101,10 @@ public class ScheduleDBUpdate
         s.setString( i++, t.getServiceCode() );
         s.setInt( i++, t.getAtocCode().
                   ordinal() );
-    
+
         // Generate json for the actual schedule
-        s.setString( i++, JsonUtils.encode( jsonBuilder.visit( t)) );
-        
+        s.setString( i++, JsonUtils.encode( jsonBuilder.visit( t ) ) );
+
         return i;
     }
 
@@ -136,7 +141,7 @@ public class ScheduleDBUpdate
                     deleted();
                     break;
             }
-            
+
             totaled();
         }
         catch( SQLException ex )

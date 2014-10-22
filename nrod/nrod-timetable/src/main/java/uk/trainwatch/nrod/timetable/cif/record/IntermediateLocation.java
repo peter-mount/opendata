@@ -7,6 +7,7 @@ package uk.trainwatch.nrod.timetable.cif.record;
 
 import java.time.LocalTime;
 import java.util.function.Function;
+import javax.json.Json;
 import javax.json.JsonObject;
 import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.util.Activity;
@@ -51,6 +52,30 @@ public class IntermediateLocation
             JsonUtils.getInt( o, "pathAllowance" ),
             JsonUtils.getInt( o, "perfAllowance" )
     );
+
+    public static final Function<IntermediateLocation, JsonObject> toJson = l -> Json.createObjectBuilder().
+            add( "type", l.getRecordType().
+                 toString() ).
+            add( "tiploc", l.getLocation().
+                 getKey() ).
+            add( "workArrival", l.getWorkArrival().
+                 toString() ).
+            add( "workDeparture", l.getWorkDeparture().
+                 toString() ).
+            add( "workPass", l.getWorkPass().
+                 toString() ).
+            add( "pubArrival", l.getPublicArrival().
+                 toString() ).
+            add( "pubDeparture", l.getPublicDeparture().
+                 toString() ).
+            add( "platform", l.getPlatform() ).
+            add( "line", l.getLine() ).
+            add( "path", l.getPath() ).
+            add( "engAllowance", l.getEngAllowance() ).
+            add( "pathAllowance", l.getPathAllowance() ).
+            add( "perfAllowance", l.getPerfAllowance() ).
+            add( "activity", JsonUtils.getArray( l.getActivity() ) ).
+            build();
 
     private final LocalTime workArrival;
     private final LocalTime workDeparture;

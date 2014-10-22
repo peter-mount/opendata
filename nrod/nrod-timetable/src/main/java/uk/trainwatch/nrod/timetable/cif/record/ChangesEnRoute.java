@@ -6,6 +6,7 @@
 package uk.trainwatch.nrod.timetable.cif.record;
 
 import java.util.function.Function;
+import javax.json.Json;
 import javax.json.JsonObject;
 import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.util.BusSec;
@@ -71,6 +72,35 @@ public class ChangesEnRoute
             null,
             JsonUtils.getInt( o, "uicCode" )
     );
+
+    public static final Function<ChangesEnRoute, JsonObject> toJson = s -> Json.createObjectBuilder().
+            add( "type", s.getRecordType().
+                 toString() ).
+            add( "tiploc", s.getLocation().
+                 getKey() ).
+            add( "trainCategory", s.getTrainCategory().
+                 toString() ).
+            add( "trainIdentity", s.getTrainIdentity() ).
+            add( "headCode", s.getHeadCode() ).
+            add( "serviceCode", s.getServiceCode() ).
+            add( "portionId", s.getPortionId().
+                 toString() ).
+            add( "powerType", s.getPowerType().
+                 toString() ).
+            add( "timingLoad", s.getTimingLoad().
+                 toString() ).
+            add( "speed", s.getSpeed() ).
+            add( "operChars", JsonUtils.getArray( s.getOperatingCharacteristics() ) ).
+            add( "trainClass", s.getTrainClass().
+                 toString() ).
+            add( "sleepers", s.getSleepers().
+                 toString() ).
+            add( "reservations", s.getReservations().
+                 toString() ).
+            add( "catering", JsonUtils.getArray( s.getCateringCode() ) ).
+            add( "branding", JsonUtils.getArray( s.getServiceBranding() ) ).
+            add( "uicCode", s.getUicCode() ).
+            build();
 
     private final TrainCategory trainCat;
     private final String trainIdentity;

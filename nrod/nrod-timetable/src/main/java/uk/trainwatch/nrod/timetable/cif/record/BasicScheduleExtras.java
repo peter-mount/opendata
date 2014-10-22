@@ -6,6 +6,7 @@
 package uk.trainwatch.nrod.timetable.cif.record;
 
 import java.util.function.Function;
+import javax.json.Json;
 import javax.json.JsonObject;
 import uk.trainwatch.nrod.timetable.util.ATOCCode;
 import uk.trainwatch.nrod.timetable.util.ATSCode;
@@ -32,6 +33,14 @@ public class BasicScheduleExtras
             JsonUtils.getEnum( ATOCCode.class, o, "atocCode" ),
             JsonUtils.getEnum( ATSCode.class, o, "atsCode" )
     );
+
+    public static final Function<BasicScheduleExtras, JsonObject> toJson = s -> Json.createObjectBuilder().
+            add( "uicCode", s.getUicCode() ).
+            add( "atocCode", s.getAtocCode().
+                 getCode() ).
+            add( "atsCode", s.getApplicableTimetableCode().
+                 getCode() ).
+            build();
 
     // No longer used
     //private final String tractionClass;
