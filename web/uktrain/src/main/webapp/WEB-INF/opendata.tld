@@ -55,7 +55,7 @@
       <name>value</name>
       <required>true</required>
       <rtexprvalue>true</rtexprvalue>
-      <type>uk.trainwatch.nrod.timetable.cif.record.Location</type>
+      <type>java.lang.Object</type>
     </attribute>
   </tag>
 </taglib>

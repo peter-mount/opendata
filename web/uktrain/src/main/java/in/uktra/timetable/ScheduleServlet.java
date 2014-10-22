@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
+import uk.trainwatch.nrod.timetable.cif.record.Association;
 import uk.trainwatch.nrod.timetable.model.Schedule;
 import uk.trainwatch.nrod.timetable.sql.ScheduleResultSetFactory;
 import uk.trainwatch.util.TimeUtils;
@@ -107,14 +108,53 @@ public class ScheduleServlet
         }
         else
         {
+            getAssociations( request, date, uid );
+
             request.renderTile( "timetable.schedule" );
         }
     }
 
-    private void showHome( ApplicationRequest request )
-            throws IOException
+    private void getAssociations( ApplicationRequest request, LocalDate date, String uid )
+            throws SQLException,
+                   IOException
     {
-        request.sendError( HttpServletResponse.SC_NOT_FOUND, request.getPathInfo() );
-    }
+        Map<String, Object> req = request.getRequestScope();
 
+        // Filter to today
+        DayOfWeek dow = date.getDayOfWeek();
+
+        try( Connection con = getConnection() )
+        {
+            try( PreparedStatement s = con.prepareStatement(
+                    "SELECT t1.uid as mainuid, t2.uid as assocuid, a.startdt, a.enddt, a.assocdays, a.assoccat, a.assocdateind,"
+                    + " l.tiploc as tiploc,"
+                    + " a.baselocsuff, a.assoclocsuff,"
+                    + " a.assoctype, a.stpind"
+                    + " FROM timetable.association a"
+                    + " INNER JOIN timetable.trainuid t1 ON a.mainuid=t1.id"
+                    + " INNER JOIN timetable.trainuid t2 ON a.assocuid=t2.id"
+                    + " INNER JOIN timetable.tiploc l ON a.tiploc=l.id"
+                    + " WHERE ? BETWEEN a.startdt AND a.enddt"
+                    + " AND t1.uid=?" ) )
+            {
+                TimeUtils.setDate( s, 1, date );
+                s.setString( 2, uid );
+
+                List<Association> associations = SQL.stream( s, Association.fromSql ).
+                        filter( Objects::nonNull ).
+                        // Filter out those that don't apply today
+                        filter( sh -> sh.getAssocDays().
+                                isOnDay( dow ) ).
+                        // Group by assoc uid so we can handle overlays
+                        collect( Collectors.groupingBy( a -> a.getAssocTrainUID() ) ).
+                        // Now for each group sort out the applicable entry
+                        values().
+                        stream().
+                        map( AssociationFilter.INSTANCE ).
+                        collect( Collectors.toList() );
+
+                req.put( "associations", associations );
+            }
+        }
+    }
 }

@@ -14,36 +14,44 @@ import java.util.Map;
  */
 public enum AssociationDateIndicator
 {
+
     /**
      * Standard (same day)
      */
-    STANDARD("S","Standard (same day)"),
+    STANDARD( "S", "Standard (same day)" ),
     /**
      * Over next midnight
      */
-    OVER_NEXT_MIDNIGHT("N","Over next midnight"),
+    OVER_NEXT_MIDNIGHT( "N", "Over next midnight" ),
     /**
      * Over previous midnight
      */
-    OVER_PREV_MIDNIGHT("P","Over previous midnight"),
+    OVER_PREV_MIDNIGHT( "P", "Over previous midnight" ),
     /**
      * Unknown
      */
     UNKNOWN( " ", "Unknown" );
 
     private static final Map<String, AssociationDateIndicator> CODES = new HashMap<>();
+    private static final Map<Integer, AssociationDateIndicator> IDS = new HashMap<>();
 
     static
     {
         for( AssociationDateIndicator bhx : values() )
         {
             CODES.put( bhx.code, bhx );
+            IDS.put( bhx.ordinal(), bhx );
         }
+    }
+
+    public static AssociationDateIndicator lookup( int i )
+    {
+        return IDS.getOrDefault( i, UNKNOWN );
     }
 
     public static AssociationDateIndicator lookup( String s )
     {
-        return CODES.getOrDefault(s, AssociationDateIndicator.UNKNOWN );
+        return CODES.getOrDefault( s, AssociationDateIndicator.UNKNOWN );
     }
     private final String code;
     private final String description;

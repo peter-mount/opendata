@@ -293,6 +293,17 @@ public class TimeUtils
         return getLocalDate( d.getTime() );
     }
 
+    public static LocalDate getLocalDate( ResultSet rs, int i )
+            throws SQLException
+    {
+        Date d = rs.getDate( i );
+        if( rs.wasNull() )
+        {
+            return null;
+        }
+        return getLocalDate( d.getTime() );
+    }
+
     /**
      * Return the string of a {@link LocalDate} or null if it's null
      * <p>
@@ -336,7 +347,6 @@ public class TimeUtils
      * <p>
      * @return JsonValue
      */
-
     public static JsonValue toJson( LocalDate d )
     {
         return d == null ? JsonValue.NULL : JsonUtils.createJsonString( d.toString() );

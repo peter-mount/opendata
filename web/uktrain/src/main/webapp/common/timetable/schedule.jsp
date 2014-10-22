@@ -210,3 +210,63 @@
         </c:choose>
     </c:forEach>
 </table>
+
+<c:if test="${!associations.isEmpty()}">
+    <table class="wikitable">
+        <tr>
+            <th colspan="${associations.size()+1}">Associated Trains</th>
+        </tr>
+        <tr>
+            <th class="tableright">Location
+            </th>
+            <c:forEach var="v" items="${associations}">
+                    <td><t:tiplocName value="${v.assocLocation}"/></td>
+            </c:forEach>
+        </tr>
+        <tr>
+            <th class="tableright">Category
+            </th>
+            <c:forEach var="v" items="${associations}">
+                <td>${v.associationCategory.description}</td>
+            </c:forEach>
+        </tr>
+        <tr>
+            <th class="tableright">Associated Train
+            </th>
+            <c:forEach var="v" items="${associations}">
+                <td><a href="../${v.assocTrainUID}/${searchDate}">${v.assocTrainUID}</a></td>
+                </c:forEach>
+        </tr>
+        <tr>
+            <th class="tableright">Applicable
+            </th>
+            <c:forEach var="v" items="${associations}">
+                <td>${v.startDate} TO ${v.endDate}</td>
+            </c:forEach>
+        </tr>
+        <tr>
+            <th class="tableright">Days service runs</th>
+                <c:forEach var="v" items="${associations}">
+                <td>
+                    <c:forEach var="dow" varStatus="stat" items="${v.assocDays.week}">
+                        ${dow.toString().substring(0,3)}<c:if test="${not stat.last}">, </c:if>
+                    </c:forEach>
+                </td>
+            </c:forEach>
+        </tr>
+        <tr>
+            <th class="tableright">Type
+            </th>
+            <c:forEach var="v" items="${associations}">
+                <td>${v.assocType.description}</td>
+            </c:forEach>
+        </tr>
+        <tr>
+            <th class="tableright">STP Ind
+            </th>
+            <c:forEach var="v" items="${associations}">
+                <td>${v.stpIndicator.description}</td>
+            </c:forEach>
+        </tr>
+    </table>
+</c:if>

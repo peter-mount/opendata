@@ -22,7 +22,7 @@ public class TiplocNameTag
         extends BodyTagSupport
 {
 
-    private Location loc;
+    private Object loc;
 
     @Override
     public int doStartTag()
@@ -33,7 +33,16 @@ public class TiplocNameTag
             return SKIP_BODY;
         }
 
-        Tiploc tiploc = loc.getLocation();
+        Tiploc tiploc = null;
+        if( loc instanceof Location )
+        {
+            tiploc = ((Location) loc).getLocation();
+        }
+        else if( loc instanceof Tiploc )
+        {
+            tiploc = (Tiploc) loc;
+        }
+
         if( tiploc == null )
         {
             return SKIP_BODY;
@@ -59,7 +68,7 @@ public class TiplocNameTag
         return SKIP_BODY;
     }
 
-    public void setValue( Location loc )
+    public void setValue( Object loc )
     {
         this.loc = loc;
     }

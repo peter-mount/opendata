@@ -33,13 +33,20 @@ public enum AssociationCategory
     UNKNOWN( "  ", "Unknown" );
 
     private static final Map<String, AssociationCategory> CODES = new HashMap<>();
+    private static final Map<Integer, AssociationCategory> IDS = new HashMap<>();
 
     static
     {
         for( AssociationCategory bhx : values() )
         {
             CODES.put( bhx.code, bhx );
+            IDS.put( bhx.ordinal(), bhx );
         }
+    }
+
+    public static AssociationCategory lookup( int i )
+    {
+        return IDS.getOrDefault( i, UNKNOWN );
     }
 
     public static AssociationCategory lookup( String s )

@@ -5,6 +5,8 @@
  */
 package uk.trainwatch.nrod.timetable.cif.record;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.function.Function;
 import uk.trainwatch.nrod.location.Tiploc;
@@ -14,6 +16,8 @@ import uk.trainwatch.nrod.timetable.util.AssociationDateIndicator;
 import uk.trainwatch.nrod.timetable.util.AssociationType;
 import uk.trainwatch.nrod.timetable.util.DaysRun;
 import uk.trainwatch.nrod.timetable.util.STPIndicator;
+import uk.trainwatch.util.TimeUtils;
+import uk.trainwatch.util.sql.UncheckedSQLException;
 
 /**
  *
@@ -40,6 +44,35 @@ public class Association
             p.skip( 31 ),
             p.getSTPIndicator()
     );
+
+    public static final Function<ResultSet, Association> fromSql = r ->
+    {
+        try
+        {
+            return new Association(
+                    // Dummy entry
+                    TransactionType.NEW,
+                    r.getString( 1 ),
+                    r.getString( 2 ),
+                    TimeUtils.getLocalDate( r, 3 ),
+                    TimeUtils.getLocalDate( r, 4 ),
+                    new DaysRun( r.getInt( 5 ) ),
+                    AssociationCategory.lookup( r.getInt( 6 ) ),
+                    AssociationDateIndicator.lookup( r.getInt( 7 ) ),
+                    new Tiploc( r.getString( 8 ) ),
+                    r.getString( 9 ),
+                    r.getString( 10 ),
+                    null,
+                    AssociationType.lookup( r.getInt( 11 ) ),
+                    null,
+                    STPIndicator.lookup( r.getInt( 12 ) )
+            );
+        }
+        catch( SQLException ex )
+        {
+            throw new UncheckedSQLException( ex );
+        }
+    };
 
     private final TransactionType transactionType;
     private final String mainTrainUID;

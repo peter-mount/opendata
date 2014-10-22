@@ -37,13 +37,20 @@ public enum STPIndicator
     PERMANENT( "P", "Permanent schedule" );
 
     private static final Map<String, STPIndicator> CODES = new HashMap<>();
+    private static final Map<Integer, STPIndicator> IDS = new HashMap<>();
 
     static
     {
         for( STPIndicator bhx : values() )
         {
             CODES.put( bhx.code, bhx );
+            IDS.put( bhx.ordinal(), bhx );
         }
+    }
+
+    public static STPIndicator lookup( int i )
+    {
+        return IDS.getOrDefault( i, N );
     }
 
     public static STPIndicator lookup( String s )

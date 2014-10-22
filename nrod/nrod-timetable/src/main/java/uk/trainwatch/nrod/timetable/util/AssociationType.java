@@ -29,13 +29,20 @@ public enum AssociationType
     UNKNOWN( " ", "Unknown" );
 
     private static final Map<String, AssociationType> CODES = new HashMap<>();
+    private static final Map<Integer, AssociationType> IDS = new HashMap<>();
 
     static
     {
         for( AssociationType bhx : values() )
         {
             CODES.put( bhx.code, bhx );
+            IDS.put( bhx.ordinal(), bhx );
         }
+    }
+
+    public static AssociationType lookup( int i )
+    {
+        return IDS.getOrDefault( i, UNKNOWN );
     }
 
     public static AssociationType lookup( String s )
