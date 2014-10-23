@@ -32,7 +32,7 @@
             <th>Pass</th>
         </tr>
     </thead>
-    <c:forEach var="schedule" items="${schedules}">
+   <c:forEach var="schedule" items="${schedules}">
         <%-- Determine the train type --%>
         <c:set var="pass" value="false"/>
         <c:set var="class5" value="false"/>

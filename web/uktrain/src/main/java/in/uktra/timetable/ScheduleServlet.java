@@ -5,29 +5,22 @@
  */
 package in.uktra.timetable;
 
+import in.uktra.servlet.AbstractServlet;
 import in.uktra.servlet.ApplicationRequest;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
-import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.cif.record.Association;
 import uk.trainwatch.nrod.timetable.model.Schedule;
-import uk.trainwatch.nrod.timetable.sql.ScheduleResultSetFactory;
-import uk.trainwatch.util.TimeUtils;
-import uk.trainwatch.util.sql.SQL;
+import uk.trainwatch.nrod.timetable.util.AssociationCategory;
 
 /**
  *
@@ -35,135 +28,78 @@ import uk.trainwatch.util.sql.SQL;
  */
 @WebServlet( name = "TTSchedule", urlPatterns = "/timetable/schedule/*" )
 public class ScheduleServlet
-        extends AbstractSearchServlet
+        extends AbstractServlet
 {
 
     private final Pattern pattern = Pattern.compile(
             "/([A-Za-z0-9 ]+)/([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9])" );
 
     @Override
-    protected void doSearch( ApplicationRequest request )
+    protected void doGet( ApplicationRequest request )
             throws ServletException,
                    IOException
     {
         String pathInfo = request.getPathInfo();
 
         Matcher m = pattern.matcher( pathInfo );
-        if( m.matches() )
-        {
-
-            String trainUid = m.group( 1 );
-            LocalDate date = LocalDate.parse( m.group( 2 ) );
-
-            try
-            {
-                search( request, date, trainUid );
-            }
-            catch( SQLException ex )
-            {
-                throw new ServletException( ex );
-            }
-        }
-        else
+        if( !m.matches() )
         {
             request.sendError( HttpServletResponse.SC_NOT_FOUND, "no match " + request.getPathInfo() );
+            return;
         }
-    }
 
-    protected final void search( ApplicationRequest request, LocalDate date, String uid )
-            throws SQLException,
-                   IOException
-    {
-        Map<String, Object> req = request.getRequestScope();
-        req.put( "searchDate", date );
+        String trainUid = m.group( 1 );
+        LocalDate date = LocalDate.parse( m.group( 2 ) );
 
-        // Filter to today
-        DayOfWeek dow = date.getDayOfWeek();
-
-        Schedule schedule;
-        try( Connection con = getConnection() )
+        try
         {
-            try( PreparedStatement s = con.prepareStatement(
-                    "SELECT s.schedule FROM timetable.schedule s"
-                    + " INNER JOIN timetable.trainuid i ON s.trainuid=i.id"
-                    + " WHERE ? BETWEEN s.runsfrom AND s.runsto"
-                    + " AND i.uid=?" ) )
+            Schedule schedule = ScheduleSQL.getSchedule( date, trainUid );
+            if( schedule == null )
             {
-                TimeUtils.setDate( s, 1, date );
-                s.setString( 2, uid );
-
-                List<Schedule> schedules = SQL.stream( s, ScheduleResultSetFactory.INSTANCE ).
-                        filter( Objects::nonNull ).
-                        filter( sh -> sh.getDaysRun().
-                                isOnDay( dow ) ).
-                        collect( Collectors.toList() );
-
-                // Get the active schedule
-                schedule = ActiveScheduleFilter.INSTANCE.apply( schedules );
-                req.put( "schedule", schedule );
+                request.sendError( HttpServletResponse.SC_NOT_FOUND,
+                                   "Unable to find train " + trainUid + " on " + date );
+                return;
             }
-        }
 
-        if( schedule == null )
-        {
-            request.sendError( HttpServletResponse.SC_NOT_FOUND, "Unable to find train " + uid + " on " + date );
-        }
-        else
-        {
-            getAssociations( request, date, uid );
+            Map<String, Object> req = request.getRequestScope();
+            req.put( "searchDate", date );
+            req.put( "schedule", schedule );
 
+            // The trains associated with this one
+            List<Association> associations = ScheduleSQL.getMainAssociations( date, trainUid );
+            req.put( "associations", associations );
+            req.put( "assocMap", ScheduleSQL.groupAssociationsByLocation( associations ) );
+
+            // Map of the associations own schedules
+            Map<Association, Schedule> schedules = ScheduleSQL.getAssociatedSchedules( date, associations );
+            req.put( "assocSchedules", schedules );
+
+            // The other 
+            req.put( "otherSchedules",
+                     ScheduleSQL.getMainSchedules( date, associations ) );
+
+            // Look for a NEXT association
+            req.put( "nextTrain", associations.stream().
+                     filter( a -> a.getAssociationCategory() == AssociationCategory.NEXT ).
+                     collect( Collectors.toList() ) );
+
+            // Now look at what trains we are associated with
+            List<Association> other = ScheduleSQL.getOtherAssociations( date, trainUid );
+            req.put( "prevTrain", other.
+                     stream().
+                     filter( a -> a.getAssociationCategory() == AssociationCategory.NEXT
+                                  || a.getAssociationCategory() == AssociationCategory.DIVIDE ).
+                     collect( Collectors.toList() ) );
+
+            // Map of the other associations own schedules
+            req.put( "prevSchedules", ScheduleSQL.getAssociatedSchedules( date, other ) );
+
+            // Look for any associations that form this service
             request.renderTile( "timetable.schedule" );
         }
-    }
-
-    private void getAssociations( ApplicationRequest request, LocalDate date, String uid )
-            throws SQLException,
-                   IOException
-    {
-        Map<String, Object> req = request.getRequestScope();
-
-        // Filter to today
-        DayOfWeek dow = date.getDayOfWeek();
-
-        try( Connection con = getConnection() )
+        catch( SQLException ex )
         {
-            try( PreparedStatement s = con.prepareStatement(
-                    "SELECT t1.uid as mainuid, t2.uid as assocuid, a.startdt, a.enddt, a.assocdays, a.assoccat, a.assocdateind,"
-                    + " l.tiploc as tiploc,"
-                    + " a.baselocsuff, a.assoclocsuff,"
-                    + " a.assoctype, a.stpind"
-                    + " FROM timetable.association a"
-                    + " INNER JOIN timetable.trainuid t1 ON a.mainuid=t1.id"
-                    + " INNER JOIN timetable.trainuid t2 ON a.assocuid=t2.id"
-                    + " INNER JOIN timetable.tiploc l ON a.tiploc=l.id"
-                    + " WHERE ? BETWEEN a.startdt AND a.enddt"
-                    + " AND t1.uid=?" ) )
-            {
-                TimeUtils.setDate( s, 1, date );
-                s.setString( 2, uid );
-
-                List<Association> associations = SQL.stream( s, Association.fromSql ).
-                        filter( Objects::nonNull ).
-                        // Filter out those that don't apply today
-                        filter( sh -> sh.getAssocDays().
-                                isOnDay( dow ) ).
-                        // Group by assoc uid so we can handle overlays
-                        collect( Collectors.groupingBy( a -> a.getAssocTrainUID() ) ).
-                        // Now for each group sort out the applicable entry
-                        values().
-                        stream().
-                        map( AssociationFilter.INSTANCE ).
-                        collect( Collectors.toList() );
-
-                // The associations as a list
-                req.put( "associations", associations );
-                
-                // Keyed by tiploc
-                req.put( "assocMap", associations.stream().
-                        collect( Collectors.groupingBy( sh -> sh.getAssocLocation() ) ) );
-                System.out.println( associations.stream().
-                        collect( Collectors.groupingBy( sh -> sh.getAssocLocation() ) ) );
-            }
+            throw new ServletException( ex );
         }
     }
 }

@@ -7,22 +7,20 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="t" uri="http://uktra.in/tld/opendata" %>
 
+<h2>
+    <t:time value="${schedule.departure}"/> <t:tiplocName value="${schedule.origin}"/>
+    to
+    <t:tiplocName value="${schedule.destination}"/>
+    <c:forEach var="assoc" varStatus="stat" items="${associations.stream().filter(a->a.getAssociationCategory().getCode().equals('VV')).iterator()}">
+        <c:choose><c:when test="${stat.last}">&amp;</c:when><c:otherwise>,</c:otherwise></c:choose>
+        <c:set var="sched" value="${otherSchedules.get(assoc)}"/>
+        <t:tiplocName value="${sched.destination}"/>
+    </c:forEach>
+</h2>
 
 <table class="wikitable">
     <tr>
         <th colspan="5">Schedule Information</th>
-    </tr>
-    <tr>
-        <th class="tableright">WTT Schedule UID</th>
-        <td colspan="4">${schedule.trainUid}</td>
-    </tr>
-    <tr>
-        <th class="tableright">STP Indicator</th>
-        <td colspan="4">${schedule.stpInd}</td>
-    </tr>
-    <tr>
-        <th class="tableright">Identity</th>
-        <td colspan="4">${schedule.trainIdentity}</td>
     </tr>
     <tr>
         <th class="tableright">Applicable</th>
@@ -39,6 +37,18 @@
     <tr>
         <th class="tableright">Bank Holiday Running</th>
         <td colspan="4">${schedule.bankHolidayRunning.description}</td>
+    </tr>
+    <tr>
+        <th class="tableright">WTT Schedule UID</th>
+        <td colspan="4">${schedule.trainUid}</td>
+    </tr>
+    <tr>
+        <th class="tableright">STP Indicator</th>
+        <td colspan="4">${schedule.stpInd}</td>
+    </tr>
+    <tr>
+        <th class="tableright">Identity</th>
+        <td colspan="4">${schedule.trainIdentity}</td>
     </tr>
     <tr>
         <th class="tableright">Service Code</th>
@@ -109,18 +119,8 @@
 
 </table>
 
-<c:set var="class5" value="false"/>
-<c:set var="freight" value="false"/>
-<c:choose>
-    <c:when test="${schedule.trainIdentity eq '    '}">
-        <%-- blank id's treat as freight --%>
-        <c:set var="freight" value="true"/>
-    </c:when>
-    <c:when test='${schedule.getTrainIdentity().startsWith("5")}'>
-        <%-- class 5 usually means toc movement not public --%>
-        <c:set var="class5" value="true"/>
-    </c:when>
-</c:choose>
+<c:set var="class5" value="${schedule.class5}"/>
+<c:set var="freight" value="${schedule.freight}"/>
 
 <table class="wikitable">
     <tr>
@@ -140,27 +140,62 @@
         <th>Dep</th>
         <th>Pass</th>
     </tr>
+
+    <%-- Previous services --%>
+    <c:forEach var="assoc" varStatus="stat" items="${prevTrain}">
+        <c:set var="sched" value="${prevSchedules.get(assoc)}"/>
+        <c:set var="loc" value="${sched.getLocation(schedule.origin.location)}"/>
+        <tr class="wttassoc">
+            <td class="tableright">
+                originally the <t:time value="${sched.departure}"/> from
+                <a href="../${assoc.mainTrainUID}/${searchDate}"><t:tiplocName value="${sched.origin}"/></a>
+            </td>
+            <td></td>
+            <td><c:if test="${not sched.class5 and not sched.freight}"><t:time value="${loc.publicArrival}"/></c:if></td>
+                <td></td>
+                <td><t:time value="${loc.workArrival}"/></td>
+            <td></td>
+            <td></td>
+            <c:choose>
+                <c:when test="${stat.first}"><td class="netprevfirst"></td></c:when>
+                <c:otherwise>
+                    <td class="netprevinter"></td>
+                    <td class="netprevinter2"></td>
+                </c:otherwise>
+            </c:choose>
+        </tr>
+    </c:forEach>
+
+    <%-- This trains schedule --%>
     <c:forEach var="location" items="${schedule.locations}">
-        <c:set var="pass" value="false"/>
-        <c:if test="${location.recordType eq 'LI' and not empty location.workPass}">
-            <c:set var="pass" value="true"/>
-        </c:if>
+        <c:set var="pass" value="${location.pass}"/>
         <c:choose>
             <c:when test="${class5 or freight or pass}"><c:set var="passClass" value="wttpass"/></c:when>
             <c:otherwise><c:set var="passClass" value="wttnormal"/></c:otherwise>
         </c:choose>
 
-        <%-- Joining/Dividing etc --%>
-        <c:set var="assoc" value="${assocMap.get(location.location)}"/>
-        <c:if test="${not empty assoc and location.recordType ne 'CR'}">
-            <c:set var="assoc" value="${assoc.get(0)}"/>
-            <c:set var="cat" value="${assoc.getAssociationCategory()}"/>
-            <tr ${passClass}>
-                <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                <td class="net${cat.toString().toLowerCase()} tableright">
-                    ${cat.legend} <a href="../${assoc.assocTrainUID}/${searchDate}">${assoc.assocTrainUID}</a>
-                </td>
-            </tr>
+        <%-- Joining train --%>
+        <c:set var="assocs" value="${assocMap.get(location.location)}"/>
+        <c:if test="${not empty assocs and location.recordType ne 'CR'}">
+            <c:forEach var="assoc" items="${assocs}">
+                <c:set var="sched" value="${otherSchedules.get(assoc)}"/>
+                <c:set var="cat" value="${assoc.getAssociationCategory()}"/>
+                <c:if test="${cat.code eq 'JJ'}">
+                    <tr class="wttassoc">
+                        <td class="tableright">
+                            ${cat.legend} <t:time value="${sched.departure}"/> <a href="../${assoc.assocTrainUID}/${searchDate}"><t:tiplocName value="${sched.origin}"/></a>
+                        </td>
+                        <td></td>
+                        <td><c:if test="${not sched.class5 and not sched.freight}"><t:time value="${sched.destination.publicArrival}"/></c:if></td>
+                            <td></td>
+                            <td><t:time value="${sched.destination.workArrival}"/></td>
+                        <td></td>
+                        <td></td>
+                        <td class="netjoin"></td>
+                        <td class="netjoin2"></td>
+                    </tr>
+                </c:if>
+            </c:forEach>
         </c:if>
 
         <c:choose>
@@ -180,7 +215,10 @@
                     <td></td>
                     <td><t:time value="${location.workDeparture}" working="true"/></td>
                     <td></td>
-                    <td class="netstart"></td>
+                    <c:choose>
+                        <c:when test="${prevTrain.isEmpty()}"><td class="netstart"></td></c:when>
+                        <c:otherwise><td class="netprevlast"></td></c:otherwise>
+                    </c:choose>
                 </tr>
             </c:when>
             <c:when test="${location.recordType eq 'LI'}">
@@ -226,20 +264,87 @@
                     <td><t:time value="${location.workArrival}" working="true"/></td>
                     <td></td>
                     <td></td>
-                    <td class="netend"></td>
+                    <c:choose>
+                        <c:when test="${nextTrain.isEmpty()}"><td class="netend"></td></c:when>
+                        <c:otherwise><td class="netnextfirst"></td></c:otherwise>
+                    </c:choose>
                 </tr>
             </c:when>
             <c:when test="${location.recordType eq 'CR'}">
                 <%-- Change Record --%>
             </c:when>
         </c:choose>
+
+        <%-- Dividing train after the station --%>
+        <c:set var="assocs" value="${assocMap.get(location.location)}"/>
+        <c:if test="${not empty assocs and location.recordType ne 'CR'}">
+            <c:forEach var="assoc" items="${assocs}">
+                <c:set var="sched" value="${otherSchedules.get(assoc)}"/>
+                <c:set var="cat" value="${assoc.getAssociationCategory()}"/>
+                <c:if test="${cat.code eq 'VV'}">
+                    <tr class="wttassoc">
+                        <td class="tableright">
+                            ${cat.legend} <a href="../${assoc.assocTrainUID}/${searchDate}"><t:tiplocName value="${sched.destination}"/></a>
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td><c:if test="${not sched.class5 and not sched.freight}"><t:time value="${sched.departure}"/></c:if></td>
+                            <td></td>
+                            <td><t:time value="${sched.origin.workDeparture}"/></td>
+                        <td></td>
+                        <td class="netdivide"></td>
+                        <td class="netdivide2"></td>
+                    </tr>
+                </c:if>
+            </c:forEach>
+        </c:if>
+
     </c:forEach>
+
+    <%-- Next train --%>
+    <c:forEach var="assoc" varStatus="stat" items="${nextTrain}">
+        <c:set var="sched" value="${otherSchedules.get(assoc)}"/>
+        <tr class="wttassoc">
+            <td class="tableright">
+                forms the <t:time value="${sched.departure}"/> to
+                <a href="../${assoc.assocTrainUID}/${searchDate}"><t:tiplocName value="${sched.destination}"/></a>
+            </td>
+            <td></td>
+            <td></td>
+            <td><c:if test="${not sched.class5 or not sched.freight}"><t:time value="${sched.departure}"/></c:if></td>
+                <td></td>
+                <td><c:if test="${sched.class5 or sched.freight}"><t:time value="${sched.departure}"/></c:if></td>
+                <td></td>
+            <c:choose>
+                <c:when test="${stat.last}"><td class="netnextlast"></td></c:when>
+                <c:otherwise>
+                    <td class="netnextinter"></td>
+                    <td class="netnextinter2"></td>
+                </c:otherwise>
+            </c:choose>
+        </tr>
+    </c:forEach>
+
 </table>
 
 <c:if test="${!associations.isEmpty()}">
     <table class="wikitable">
         <tr>
             <th colspan="${associations.size()+1}">Associated Trains</th>
+        </tr>
+        <tr>
+            <th>Service</th>
+                <c:forEach var="v" items="${associations}">
+                    <c:set var="sched" value="${otherSchedules.get(v)}"/>
+                    <c:choose>
+                        <c:when test="">
+                        <td><t:time value="${sched.origin}"/> from <t:tiplocName value="${sched.origin}"/></td>
+                    </c:when>
+                    <c:otherwise>
+                        <td><t:time value="${sched.departure}"/> to <t:tiplocName value="${sched.destination}"/></td>
+                    </c:otherwise>
+                </c:choose>
+            </c:forEach>
         </tr>
         <tr>
             <th class="tableright">Location

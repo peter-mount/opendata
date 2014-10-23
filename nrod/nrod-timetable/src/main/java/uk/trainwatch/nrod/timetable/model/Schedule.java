@@ -6,13 +6,17 @@
 package uk.trainwatch.nrod.timetable.model;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.cif.TransactionType;
 import uk.trainwatch.nrod.timetable.cif.record.BasicSchedule;
 import uk.trainwatch.nrod.timetable.cif.record.BasicScheduleExtras;
 import uk.trainwatch.nrod.timetable.cif.record.Location;
+import uk.trainwatch.nrod.timetable.cif.record.OriginLocation;
+import uk.trainwatch.nrod.timetable.cif.record.TerminatingLocation;
 import uk.trainwatch.nrod.timetable.util.ATOCCode;
 import uk.trainwatch.nrod.timetable.util.ATSCode;
 import uk.trainwatch.nrod.timetable.util.BankHolidayRunning;
@@ -60,6 +64,75 @@ public class Schedule
         return basicScheduleExtras;
     }
 
+    /**
+     * Convenience method to get the origin (start) {@link Location} from the schedule
+     * <p>
+     * @return Location or null if empty (should never occur)
+     */
+    public OriginLocation getOrigin()
+    {
+        if( locations == null || locations.isEmpty() )
+        {
+            return null;
+        }
+        return (OriginLocation) locations.get( 0 );
+    }
+
+    public LocalTime getDeparture()
+    {
+        OriginLocation l = getOrigin();
+        if( l == null )
+        {
+            return null;
+        }
+        if( isClass5() || isFreight() )
+        {
+            return l.getWorkDeparture();
+        }
+        return l.getPublicDeparture();
+    }
+
+    /**
+     * Convenience method to get the Terminating (end) {@link Location} from the schedule
+     * <p>
+     * @return Location or null if empty (should never occur)
+     */
+    public TerminatingLocation getDestination()
+    {
+        if( locations == null || locations.isEmpty() )
+        {
+            return null;
+        }
+        return (TerminatingLocation) locations.get( locations.size() - 1 );
+    }
+
+    public LocalTime getArrival()
+    {
+        TerminatingLocation l = getDestination();
+        if( l == null )
+        {
+            return null;
+        }
+        if( isClass5() || isFreight() )
+        {
+            return l.getWorkArrival();
+        }
+        return l.getPublicArrival();
+    }
+
+    public Location getLocation( Tiploc tiploc )
+    {
+        for( Location loc : locations )
+        {
+            if( loc.getLocation().
+                    equals( tiploc ) )
+            {
+                return loc;
+            }
+        }
+        return null;
+    }
+
     public TransactionType getTransactionType()
     {
         return basicSchedule.getTransactionType();
@@ -103,6 +176,18 @@ public class Schedule
     public String getTrainIdentity()
     {
         return basicSchedule.getTrainIdentity();
+    }
+
+    public boolean isFreight()
+    {
+        return getTrainIdentity().
+                equals( "    " );
+    }
+
+    public boolean isClass5()
+    {
+        return getTrainIdentity().
+                startsWith( "5" );
     }
 
     public String getHeadCode()

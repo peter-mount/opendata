@@ -7,6 +7,7 @@ package uk.trainwatch.util;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -33,12 +34,19 @@ public enum DaemonThreadFactory
     /**
      * Old school cached Thread Pool, use for normal tasks
      */
-    private final Executor cachedExecutor = Executors.newCachedThreadPool( this );
+    private final ExecutorService cachedExecutor = Executors.newCachedThreadPool( this );
     /**
      * Work stealing pool which will use all available processors
      */
-    private final Executor workExecutor = Executors.newWorkStealingPool();
+    private final ExecutorService workExecutor = Executors.newWorkStealingPool();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool( 4, this );
+
+    public void shutdown()
+    {
+        cachedExecutor.shutdownNow();
+        workExecutor.shutdownNow();
+        scheduler.shutdownNow();
+    }
 
     /**
      * Returns the main Executor.

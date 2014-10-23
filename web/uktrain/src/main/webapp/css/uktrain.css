@@ -170,13 +170,15 @@ table.wikitable thead th, table.wikitable th {
     background-color: #f2f2f2;
     text-align: center;
     border: 1px #aaa solid;
-    padding: 0.2em;
+    padding-left: 0.2em;
+    padding-right: 0.2em;
 }
 
 table.wikitable tbody td, table.wikitable td {
     background-color: #f9f9f9;
     border: 1px #aaa solid;
-    padding: 0.2em;
+    padding-left: 0.2em;
+    padding-right: 0.2em;
 }
 
 .stpvar, .stpwtt {
@@ -192,6 +194,7 @@ table.wikitable tbody td, table.wikitable td {
 
 .wttnormal {color: #000;}
 .wttpass {color: #888;}
+.wttassoc {color: #666;}
 
 table.padr, .padr {
     margin-left: 5px;
@@ -220,37 +223,93 @@ table.wikitable td.netstart,
 table.wikitable td.netpass,
 table.wikitable td.netstop,
 table.wikitable td.netend,
-table.wikitable td.netjoin,
-table.wikitable td.netdivide {
-    width: 11em;
-    z-index: 20;
+table.wikitable td.netjoin, table.wikitable td.netjoin2,
+table.wikitable td.netdivide, table.wikitable td.netdivide2,
+table.wikitable td.netnextfirst,
+table.wikitable td.netnextinter, table.wikitable td.netnextinter2,
+table.wikitable td.netnextlast,
+table.wikitable td.netprevfirst,
+table.wikitable td.netprevinter, table.wikitable td.netprevinter2,
+table.wikitable td.netprevlast,
+table.wikitable td.netblank {
+    width: 1em;
     border-collapse: collapse;
     border: 0;
-    border-left: 1px solid white;
-    border-right: 1px solid white;
 }
 
 table.wikitable td.netpass {
-    background: white url("/images/net/20px-BSicon_STR.svg.png") no-repeat top left;
+    background: white url("/images/net/STR.png") no-repeat top left;
+    border-right: 1px solid white;
 }
 
 table.wikitable td.netstart {
-    background: white url("/images/net/20px-BSicon_KBHFa.svg.png") no-repeat top left;
+    background: white url("/images/net/KBHFa.png") no-repeat top left;
+    border-right: 1px solid white;
 }
 
 table.wikitable td.netstop {
-    background: white url("/images/net/BSicon_BHF.svg.png") no-repeat top left;
+    background: white url("/images/net/BHF.png") no-repeat top left;
+    border-right: 1px solid white;
 }
 
 table.wikitable td.netend {
-    background: white url("/images/net/20px-BSicon_KBHFe.svg.png") no-repeat top left;
+    background: white url("/images/net/KBHFe.png") no-repeat top left;
+    border-right: 1px solid white;
     border-bottom: 1px solid white;
 }
 
 table.wikitable td.netjoin {
-    background: white url("/images/net/20px-BSicon_ABZrg.svg.png") no-repeat top left;
+    background: white url("/images/net/ABZrg.png") no-repeat top left;
+}
+
+table.wikitable td.netjoin2 {
+    background: white url("/images/net/STRq.png") no-repeat top left;
+    border-right: 1px solid white;
 }
 
 table.wikitable td.netdivide {
-    background: white url("/images/net/20px-BSicon_ABZlf.svg.png") no-repeat top left;
+    background: white url("/images/net/ABZlf.png") no-repeat top left;
+}
+
+table.wikitable td.netdivide2 {
+    background: white url("/images/net/CONTfq.png") no-repeat top left;
+    border-right: 1px solid white;
+}
+
+table.wikitable td.netnextfirst {
+    background: white url("/images/net/KBHFxe.png") no-repeat top left;
+    border-right: 1px solid white;
+}
+
+table.wikitable td.netnextinter {
+    background: white url("/images/net/exABZlf.png") no-repeat top left;
+}
+
+table.wikitable td.netnextinter2 {
+    background: white url("/images/net/exCONTfq.png") no-repeat top left;
+    border-right: 1px solid white;
+}
+
+table.wikitable td.netnextlast {
+    background: white url("/images/net/exCONTf.png") no-repeat top left;
+    border-right: 1px solid white;
+    border-bottom: 1px solid white;
+}
+
+table.wikitable td.netprevfirst {
+    background: white url("/images/net/exCONTg.png") no-repeat top left;
+    border-right: 1px solid white;
+}
+
+table.wikitable td.netprevinter {
+    background: white url("/images/net/exABZrg.png") no-repeat top left;
+}
+table.wikitable td.netprevinter2 {
+    background: white url("/images/net/exSTRq.png") no-repeat top left;
+    border-right: 1px solid white;
+}
+
+table.wikitable td.netprevlast {
+    background: white url("/images/net/KBHFxa.png") no-repeat top left;
+    border-right: 1px solid white;
 }

@@ -42,4 +42,8 @@ public abstract class Location
         return location;
     }
 
+    public boolean isPass()
+    {
+        return false;
+    }
 }

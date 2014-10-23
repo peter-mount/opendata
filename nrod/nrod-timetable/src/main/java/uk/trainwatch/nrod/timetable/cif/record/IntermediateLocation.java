@@ -110,7 +110,7 @@ public class IntermediateLocation
             this.pubArrival = null;
             this.pubDeparture = null;
         }
-        
+
         this.platform = platform.trim();
         this.line = line.trim();
         // FIXME current db has no path in the json, so account for this until the next full reload
@@ -185,6 +185,12 @@ public class IntermediateLocation
     public int getPerfAllowance()
     {
         return perfAllowance;
+    }
+
+    @Override
+    public boolean isPass()
+    {
+        return workPass != null;
     }
 
 }
