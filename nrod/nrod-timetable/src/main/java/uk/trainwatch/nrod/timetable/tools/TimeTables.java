@@ -40,6 +40,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
+import org.kohsuke.MetaInfServices;
 import uk.trainwatch.nrod.timetable.cif.record.BasicRecordVisitor;
 import uk.trainwatch.nrod.timetable.cif.record.CIFParser;
 import uk.trainwatch.nrod.timetable.cif.record.Header;
@@ -70,12 +71,14 @@ import uk.trainwatch.util.Consumers;
 import uk.trainwatch.util.TimeUtils;
 import uk.trainwatch.util.sql.UncheckedSQLException;
 import uk.trainwatch.util.app.DBUtility;
+import uk.trainwatch.util.app.Utility;
 import uk.trainwatch.util.sql.SQL;
 
 /**
  *
  * @author peter
  */
+@MetaInfServices( Utility.class )
 public class TimeTables
         extends DBUtility
 {

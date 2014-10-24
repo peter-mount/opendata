@@ -14,4 +14,14 @@
             <scope>runtime</scope>
         </dependencySet>
     </dependencySets>
+    <fileSets>
+        <fileSet>
+            <directory>src/main/assembly</directory>
+            <outputDirectory>/</outputDirectory>
+            <fileMode>0755</fileMode>
+            <includes>
+                <include>odutils</include>
+            </includes>
+        </fileSet>
+    </fileSets>
 </assembly>

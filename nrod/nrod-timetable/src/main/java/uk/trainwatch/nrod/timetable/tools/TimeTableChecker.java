@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
+import org.kohsuke.MetaInfServices;
 import uk.trainwatch.nrod.timetable.cif.record.BasicSchedule;
 import uk.trainwatch.nrod.timetable.cif.record.BasicScheduleExtras;
 import uk.trainwatch.nrod.timetable.cif.record.CIFParser;
@@ -45,6 +46,7 @@ import uk.trainwatch.util.counter.CounterConsumer;
  * <p>
  * @author Peter T Mount
  */
+@MetaInfServices( Utility.class )
 public class TimeTableChecker
         implements Utility
 {
