@@ -16,6 +16,7 @@ import uk.trainwatch.nrod.timetable.cif.record.BasicSchedule;
 import uk.trainwatch.nrod.timetable.cif.record.BasicScheduleExtras;
 import uk.trainwatch.nrod.timetable.cif.record.Location;
 import uk.trainwatch.nrod.timetable.cif.record.OriginLocation;
+import uk.trainwatch.nrod.timetable.cif.record.RecordType;
 import uk.trainwatch.nrod.timetable.cif.record.TerminatingLocation;
 import uk.trainwatch.nrod.timetable.util.ATOCCode;
 import uk.trainwatch.nrod.timetable.util.ATSCode;
@@ -122,15 +123,12 @@ public class Schedule
 
     public Location getLocation( Tiploc tiploc )
     {
-        for( Location loc : locations )
-        {
-            if( loc.getLocation().
-                    equals( tiploc ) )
-            {
-                return loc;
-            }
-        }
-        return null;
+        return locations.stream().
+                filter( l -> l.getLocation().
+                        equals( tiploc ) ).
+                filter( l -> l.getRecordType() != RecordType.CR ).
+                findFirst().
+                orElse( null );
     }
 
     public TransactionType getTransactionType()
