@@ -38,6 +38,7 @@ public abstract class DBUtility
         this.options = new Options();
         options.addOption( "U", "username", true, "DB Username" );
         options.addOption( "P", "password", true, "DB Password" );
+        options.addOption( "D", "database", true, "Database name" );
         options.addOption( "H", "hostname", true, "DB Host, defaults to localhost" );
     }
 
