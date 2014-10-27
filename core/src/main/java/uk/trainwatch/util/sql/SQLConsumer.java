@@ -61,6 +61,14 @@ public interface SQLConsumer<T>
         return (u, t) -> c.accept( t );
     }
 
+    /**
+     * Wraps a SQLConsumer with a Consumer which allows for any SQLException to be converted into an
+     * UncheckedSQLException
+     * <p>
+     * @param <T>
+     * @param c <p>
+     * @return
+     */
     static <T> Consumer<T> guard( SQLConsumer<T> c )
     {
         return t ->
@@ -77,14 +85,41 @@ public interface SQLConsumer<T>
     }
 
     /**
-     * Composes a new SQLConsumer so that if an UncheckedSQLException is thrown then the original SQLException is
-     * rethrown.
+     * Similar to {@link #guard(uk.trainwatch.util.sql.SQLConsumer)} but this will consumer any duplicate key
+     * violations. This is useful when importing data from archives but allows us to continue as the database already
+     * contains some (not necessarily all) data.
      * <p>
      * @param <T>
      * @param c
      * <p>
      * @return
+     */
+    static <T> Consumer<T> guardIgnoreDuplicates( SQLConsumer<T> c )
+    {
+        return t ->
+        {
+            try
+            {
+                c.accept( t );
+            }
+            catch( SQLException ex )
+            {
+                String m = ex.getMessage();
+                if( m == null || !m.contains( "duplicate key value violates unique constraint" ) )
+                {
+                    throw new UncheckedSQLException( ex );
+                }
+            }
+        };
+    }
+
+    /**
+     * Composes a new SQLConsumer so that if an UncheckedSQLException is thrown then the original SQLException is
+     * rethrown.
      * <p>
+     * @param <T>
+     * @param c   <p>
+     * @return <p>
      * @throws SQLException
      */
     static <T> SQLConsumer<T> compose( Consumer<T> c )
