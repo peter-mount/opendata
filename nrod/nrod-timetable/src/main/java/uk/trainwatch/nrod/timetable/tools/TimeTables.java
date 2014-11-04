@@ -36,15 +36,18 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.kohsuke.MetaInfServices;
+import uk.trainwatch.nrod.timetable.cif.record.Association;
 import uk.trainwatch.nrod.timetable.cif.record.BasicRecordVisitor;
 import uk.trainwatch.nrod.timetable.cif.record.CIFParser;
 import uk.trainwatch.nrod.timetable.cif.record.Header;
 import uk.trainwatch.nrod.timetable.cif.record.Record;
+import uk.trainwatch.nrod.timetable.cif.record.TIPLOCAction;
 import uk.trainwatch.nrod.timetable.cif.record.TrailerRecord;
 import uk.trainwatch.nrod.timetable.model.Schedule;
 import uk.trainwatch.nrod.timetable.model.ScheduleBuilderVisitor;
@@ -73,6 +76,7 @@ import uk.trainwatch.util.sql.UncheckedSQLException;
 import uk.trainwatch.util.app.DBUtility;
 import uk.trainwatch.util.app.Utility;
 import uk.trainwatch.util.sql.SQL;
+import uk.trainwatch.util.sql.SQLConsumer;
 
 /**
  *
@@ -262,13 +266,16 @@ public class TimeTables
     {
         Objects.requireNonNull( cifFile, "No CIF file provided" );
 
+        // Strict mode so we fail on an invalid record type
+        final CIFParser parser = new CIFParser( true );
+
+        final Supplier<String> exceptionLogger = () -> "Failed on line " + parser.lineCount()
+                                                       + " position " + parser.position()
+                                                       + "\n" + parser.currentLine( null );
         try
         {
             // Do the import in one massive transaction
             con.setAutoCommit( false );
-
-            // Strict mode so we fail on an invalid record type
-            final CIFParser parser = new CIFParser( true );
 
             // When did we last run an update
             LocalDateTime lastUpdate = null;
@@ -309,17 +316,27 @@ public class TimeTables
             };
 
             // The persistance consumers
-            ScheduleDBUpdate schedules = Consumers.createIf( includeSchedules, () -> new ScheduleDBUpdate( con ) );
-            ScheduleLocUpdate scheduleLocations = Consumers.createIf( includeSchedules,
-                                                                      () -> new ScheduleLocUpdate( con ) );
-            Consumer<Schedule> scheduleConsumer = Consumers.createIf( includeSchedules,
-                                                                      () -> Consumers.andThen( schedules,
-                                                                                               scheduleLocations ) );
+            Consumer<Schedule> schedules = Consumers.createIf(
+                    includeSchedules,
+                    () -> SQLConsumer.guard(
+                            new ScheduleDBUpdate( con ) ) );
 
-            AssociationDBUpdate associations = Consumers.createIf( includeAssociations,
-                                                                   () -> new AssociationDBUpdate( con ) );
+            Consumer<Schedule> scheduleLocations = Consumers.createIf(
+                    includeSchedules,
+                    () -> SQLConsumer.guard( new ScheduleLocUpdate( con ) ) );
 
-            TiplocDBUpdate tiplocs = Consumers.createIf( includeTiploc, () -> new TiplocDBUpdate( con ) );
+            Consumer<Schedule> scheduleConsumer = Consumers.createIf(
+                    includeSchedules,
+                    () -> Consumers.andThen( schedules,
+                                             scheduleLocations ) );
+
+            Consumer<Association> associations = Consumers.createIf(
+                    includeAssociations,
+                    () -> SQLConsumer.guard( new AssociationDBUpdate( con ) ) );
+
+            Consumer<TIPLOCAction> tiplocs = Consumers.createIf(
+                    includeTiploc,
+                    () -> SQLConsumer.guard( new TiplocDBUpdate( con ) ) );
 
             // Now what to do at the end of the import
             Consumer<TrailerRecord> trailer = t -> LOG.log( Level.INFO,
@@ -382,11 +399,18 @@ public class TimeTables
         }
         catch( IOException ex )
         {
+            LOG.log( Level.SEVERE, exceptionLogger );
             throw new UncheckedIOException( ex );
         }
         catch( SQLException ex )
         {
+            LOG.log( Level.SEVERE, exceptionLogger );
             throw new UncheckedSQLException( ex );
+        }
+        catch( Exception ex )
+        {
+            LOG.log( Level.SEVERE, exceptionLogger );
+            throw new RuntimeException( ex );
         }
 
     }

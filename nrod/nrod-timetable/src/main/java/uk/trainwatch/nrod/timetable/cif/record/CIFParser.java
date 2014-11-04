@@ -157,6 +157,11 @@ public final class CIFParser
         return line;
     }
 
+    public int position()
+    {
+        return pos;
+    }
+
     /**
      * Get a String.
      * <p>
@@ -172,6 +177,56 @@ public final class CIFParser
         int s = pos;
         pos += l;
         return line.substring( s, pos );
+    }
+
+    /**
+     * Get a String. If it's blank (all spaces) then null is returned.
+     * <p>
+     * This string will always be l characters long if not null.
+     * <p>
+     * @param l number of characters to read
+     * <p>
+     * @return String
+     */
+    public String getStringNull( int l )
+    {
+        return isBlank( l ) ? null : getString( l );
+    }
+
+    /**
+     * Peek at the next l characters
+     * <p>
+     * This does not move the current record position.
+     * <p>
+     * @param l <p>
+     * @return String of l characters
+     */
+    public String peek( int l )
+    {
+        ensureAvailable( l );
+        return line.substring( pos, pos + l );
+    }
+
+    /**
+     * Is the next l characters blank (all spaces).
+     * <p>
+     * This does not move the current record position.
+     * <p>
+     * @param l number of characters
+     * <p>
+     * @return true if next l characters are all spaces
+     */
+    public boolean isBlank( int l )
+    {
+        ensureAvailable( l );
+        for( int i = 0, p = pos; i < l; i++, p++ )
+        {
+            if( line.charAt( p ) != ' ' )
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -235,6 +290,12 @@ public final class CIFParser
     public LocalDate getDate_ddmmyy()
     {
         ensureAvailable( 6 );
+
+        if( isBlank( 6 ) )
+        {
+            return null;
+        }
+
         int d = getInt( 2 );
         int m = getInt( 2 );
         int y = getInt( 2 );
@@ -249,6 +310,11 @@ public final class CIFParser
     public LocalDate getDate_yymmdd()
     {
         ensureAvailable( 6 );
+
+        if( isBlank( 6 ) )
+        {
+            return null;
+        }
 
         // Note 3 on P16 of the CIF guide
         int y = getInt( 2 );
@@ -296,14 +362,13 @@ public final class CIFParser
     public LocalTime getTime_hhmm()
     {
         ensureAvailable( 4 );
-        
+
         // Check for blank, if so return null
-        if( "    ".equals( getString( 4 ) ) )
+        if( isBlank( 4 ) )
         {
             return null;
         }
-        pos -= 4;
-        
+
         return LocalTime.of( getInt( 2 ), getInt( 2 ) );
     }
 
@@ -317,14 +382,13 @@ public final class CIFParser
     public LocalTime getTime_hhmmH()
     {
         ensureAvailable( 5 );
-        
+
         // Check for blank, if so return null
-        if( "     ".equals( getString( 5 ) ) )
+        if( isBlank( 5 ) )
         {
             return null;
         }
-        pos -= 5;
-        
+
         return LocalTime.of( getInt( 2 ), getInt( 2 ), "H".equals( getString( 1 ) ) ? 30 : 0 );
     }
 

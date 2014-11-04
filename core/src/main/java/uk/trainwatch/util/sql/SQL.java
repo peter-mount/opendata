@@ -45,7 +45,7 @@ public class SQL
      * <p>
      * @return stream
      */
-    public static <T> Stream<T> stream( ResultSet rs, Function<ResultSet, T> factory )
+    public static <T> Stream<T> stream( ResultSet rs, SQLFunction<ResultSet, T> factory )
     {
         if( rs == null )
         {
@@ -65,7 +65,7 @@ public class SQL
      * <p>
      * @throws SQLException if the query fails
      */
-    public static <T> Stream<T> stream( PreparedStatement s, Function<ResultSet, T> factory )
+    public static <T> Stream<T> stream( PreparedStatement s, SQLFunction<ResultSet, T> factory )
             throws SQLException
     {
         return stream( s.executeQuery(), factory );
@@ -157,4 +157,42 @@ public class SQL
         }
     }
 
+    /**
+     * Get the current value of a sequence
+     * <p>
+     * @param con      Connection
+     * @param sequence Sequence name
+     * <p>
+     * @return current value
+     * <p>
+     * @throws SQLException if the sequence has not been updated in this connection
+     */
+    public static long currval( Connection con, String sequence )
+            throws SQLException
+    {
+        try( Statement s = con.createStatement() )
+        {
+            try( ResultSet rs = s.executeQuery( "SELECT currval('timetable.schedule_id_seq')" ) )
+            {
+                if( rs != null && rs.next() )
+                {
+                    return rs.getLong( 1 );
+                }
+            }
+        }
+        throw new SQLException( "No currval for " + sequence );
+    }
+
+    /**
+     * SQLFunction to retrieve the first column of a ResultSet as an Integer
+     */
+    public static final SQLFunction<ResultSet, Integer> INT_LOOKUP = rs -> rs.getInt( 1 );
+    /**
+     * SQLFunction to retrieve the first column of a ResultSet as a Long
+     */
+    public static final SQLFunction<ResultSet, Long> LONG_LOOKUP = rs -> rs.getLong( 1 );
+    /**
+     * SQLFunction to retrieve the first column of a ResultSet as a String
+     */
+    public static final SQLFunction<ResultSet, String> STRING_LOOKUP = rs -> rs.getString( 1 );
 }

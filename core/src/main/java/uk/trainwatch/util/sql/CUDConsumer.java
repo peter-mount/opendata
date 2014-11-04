@@ -19,15 +19,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 /**
  * A consumer which will perform Create, Update or Delete operations on a Database
  * <p>
  * @author Peter T Mount
+ * @param <T>
  */
 public abstract class CUDConsumer<T>
-        implements Consumer<T>
+        implements SQLConsumer<T>
 {
 
     private final Connection con;

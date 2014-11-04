@@ -21,12 +21,19 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import uk.trainwatch.nrod.location.Tiploc;
+import uk.trainwatch.nrod.timetable.cif.TransactionType;
 import uk.trainwatch.nrod.timetable.cif.record.Location;
 import uk.trainwatch.nrod.timetable.model.Schedule;
 import uk.trainwatch.util.sql.UncheckedSQLException;
 import uk.trainwatch.util.sql.CUDConsumer;
+import uk.trainwatch.util.sql.SQL;
+import uk.trainwatch.util.sql.SQLBiConsumer;
+import uk.trainwatch.util.sql.SQLConsumer;
 
 /**
  * Imports mapping of a schedule into the schedule_loc table which maps every tiploc within a schedule to the schedule.
@@ -39,7 +46,15 @@ public class ScheduleLocUpdate
         extends CUDConsumer<Schedule>
 {
 
-    private final Statement currval;
+    private final PreparedStatement getScheduleId;
+    private final PreparedStatement getScheduleIdShort;
+
+    private final SQLBiConsumer<Long, String> delete;
+    private final SQLBiConsumer<Long, String> insert;
+
+    private final BiConsumer<Long, String> newSchedules;
+    private final BiConsumer<Long, String> updateSchedules;
+    private final BiConsumer<Long, String> deleteSchedules;
 
     public ScheduleLocUpdate( Connection con )
     {
@@ -49,47 +64,133 @@ public class ScheduleLocUpdate
                "DELETE FROM timetable.schedule_loc WHERE scheduleid=? AND tiploc=timetable.tiploc(?)"
         );
 
+        // used to retrieve the scheduleId(s) for a Schedule
         try
         {
-            currval = con.createStatement();
+            // For updates
+            getScheduleId = con.prepareStatement(
+                    "SELECT id FROM timetable.schedule WHERE trainuid=timetable.trainuid(?) AND runsfrom=? AND runsto=? AND dayrun=?"
+            );
+
+            // Delete
+            getScheduleIdShort = con.prepareStatement(
+                    "SELECT id FROM timetable.schedule WHERE trainuid=timetable.trainuid(?) AND runsfrom=?"
+            );
+
         }
         catch( SQLException ex )
         {
             throw new UncheckedSQLException( ex );
         }
+
+        // Delete a schedule
+        delete = (scheduleId, tiploc) ->
+        {
+            PreparedStatement s = getDelete();
+            s.setLong( 1, scheduleId );
+            s.setString( 2, tiploc );
+            s.executeUpdate();
+        };
+
+        insert = (scheduleId, tiploc) ->
+        {
+            PreparedStatement s = getInsert();
+            s.setLong( 1, scheduleId );
+            s.setString( 2, tiploc );
+            s.executeUpdate();
+        };
+
+        newSchedules = SQLBiConsumer.guard( insert.andThen( (i, l) -> inserted() ) );
+
+        updateSchedules = SQLBiConsumer.guard( delete.andThen( insert ).
+                andThen( (i, l) -> updated() )
+        );
+
+        deleteSchedules = SQLBiConsumer.guard( delete.
+                andThen( (i, l) -> deleted() )
+        );
+
     }
 
     @Override
-    public void accept( Schedule t )
+    public void accept( Schedule schedule )
+            throws SQLException
     {
-        long scheduleId;
+        TransactionType tx = schedule.getTransactionType();
 
-        switch( t.getTransactionType() )
+        if( tx == TransactionType.NEW || tx == TransactionType.REVISE )
         {
-            case NEW:
+            Consumer<String> func = null;
+            if( tx == TransactionType.NEW )
+            {
                 // Use getCurrentScheduleId as we've just inserted it so no need to do a select
                 // to get at the id, it'll be in the sequence.
-                scheduleId = getCurrentScheduleId();
-                insert( scheduleId, t );
-                inserted();
-                break;
-
-            case REVISE:
+                long scheduleId = SQL.currval( getConnection(), "timetable.schedule_id_seq" );
+                func = tiploc -> newSchedules.accept( scheduleId, tiploc );
+            }
+            else if( tx == TransactionType.REVISE )
+            {
                 // For revising just delete then insert
-                scheduleId = getScheduleId( t );
-                delete( scheduleId );
-                insert( scheduleId, t );
-                updated();
-                break;
+                long scheduleId = getScheduleIdUpdate( schedule );
+                func = tiploc -> updateSchedules.accept( scheduleId, tiploc );
+            }
 
-            case DELETE:
-                scheduleId = getScheduleId( t );
-                delete( scheduleId );
-                deleted();
-                break;
+            tiplocs( schedule ).
+                    forEach( func );
+        }
+        else if( tx == TransactionType.DELETE )
+        {
+            if( schedule.getRunsTo() == null )
+            {
+                // As we are deleting multiple schedules (i.e. truncated record when STPInd is C)
+                // run through each scheduleId returned
+                getScheduleIdDelete( schedule ).
+                        forEach( SQLConsumer.guard(
+                                        sid -> tiplocs( schedule ).
+                                        forEach( tiploc -> deleteSchedules.accept( sid, tiploc ) )
+                                ) );
+            }
+            else
+            {
+                // We have a schedule so just delete it
+                long scheduleId = getScheduleIdUpdate( schedule );
+                if( scheduleId != 0 )
+                {
+                    tiplocs( schedule ).
+                            forEach( tiploc -> deleteSchedules.accept( scheduleId, tiploc ) );
+                }
+            }
         }
 
         totaled();
+    }
+
+    /**
+     * Get the schedule's id.
+     * <p>
+     * This is valid for updates only as we have to search the table for it and it's specific to the schedule's range
+     * <p>
+     * @param t <p>
+     * @return
+     */
+    private long getScheduleIdUpdate( Schedule t )
+            throws SQLException
+    {
+        getScheduleId.setString( 1, t.getTrainUid().
+                                 toString() );
+        getScheduleId.setDate( 2, Date.valueOf( t.getRunsFrom() ) );
+        getScheduleId.setDate( 3, Date.valueOf( t.getRunsTo() ) );
+        getScheduleId.setInt( 4, t.getDaysRun().
+                              getDaysRunning() );
+
+        try( ResultSet rs = getScheduleId.executeQuery() )
+        {
+            if( rs == null || !rs.next() )
+            {
+                return 0;
+            }
+            return rs.getLong( 1 );
+        }
     }
 
     /**
@@ -100,93 +201,39 @@ public class ScheduleLocUpdate
      * @param t <p>
      * @return
      */
-    private long getScheduleId( Schedule t )
+    private Stream<Long> getScheduleIdDelete( Schedule t )
+            throws SQLException
     {
-        try( PreparedStatement s = getConnection().
-                prepareStatement(
-                        "SELECT id FROM timetable.schedule WHERE trainuid=timetable.trainuid(?) AND runsfrom=? AND stpIndicator=?"
-                ) )
+        // Are we a full or short
+        PreparedStatement s;
+        if( t.getRunsTo() == null )
         {
-            s.setString( 1, t.getTrainUid().
-                         toString() );
-            s.setDate( 2, Date.valueOf( t.getRunsFrom() ) );
-            s.setInt( 3, t.getStpInd().
-                      ordinal() );
-            try( ResultSet rs = s.executeQuery() )
-            {
-                if( rs == null || !rs.next() )
-                {
-                    return 0;
-                }
-                return rs.getLong( 1 );
-            }
+            s = getScheduleIdShort;
         }
-        catch( SQLException ex )
+        else
         {
-            throw new UncheckedSQLException( ex );
+            s = getScheduleId;
+            s.setDate( 3, Date.valueOf( t.getRunsTo() ) );
+            s.setInt( 4, t.getDaysRun().
+                      getDaysRunning() );
         }
+
+        s.setString( 1, t.getTrainUid().
+                     toString() );
+        s.setDate( 2, Date.valueOf( t.getRunsFrom() ) );
+
+        return SQL.stream( s, SQL.LONG_LOOKUP );
     }
 
-    /**
-     * Get the current scheduleId.
-     * <p>
-     * This is valid for new inserted schedules only!
-     * <p>
-     * It's safe as the currval() function returns the last value generated by this Connection.
-     * <p>
-     * @return
-     */
-    private long getCurrentScheduleId()
+    private Stream<String> tiplocs( Schedule t )
+            throws SQLException
     {
-        try( ResultSet rs = currval.executeQuery( "SELECT currval('timetable.schedule_id_seq')" ) )
-        {
-            if( rs != null && rs.next() )
-            {
-                return rs.getLong( 1 );
-            }
-        }
-        catch( SQLException ex )
-        {
-            throw new UncheckedSQLException( ex );
-        }
-        throw new IllegalStateException( "No currval" );
-
-    }
-
-    private void delete( long scheduleId )
-    {
-        try
-        {
-            PreparedStatement s = getDelete();
-            s.setLong( 1, scheduleId );
-            s.executeUpdate();
-        }
-        catch( SQLException ex )
-        {
-            throw new UncheckedSQLException( ex );
-        }
-    }
-
-    private void insert( long scheduleId, Schedule t )
-    {
-        t.stream().
+        return t.stream().
                 map( Location::getLocation ).
                 map( Tiploc::getKey ).
                 // distinct(). causes duplicate keys so use a set
                 collect( Collectors.toSet() ).
-                forEach( tiploc ->
-                        {
-                            try
-                            {
-                                PreparedStatement s = getInsert();
-                                s.setLong( 1, scheduleId );
-                                s.setString( 2, tiploc );
-                                s.executeUpdate();
-                            }
-                            catch( SQLException ex )
-                            {
-                                throw new UncheckedSQLException( ex );
-                            }
-                } );
+                stream();
     }
+
 }

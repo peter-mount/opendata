@@ -24,7 +24,8 @@ public class TIPLOCAmend
             p.getString( 26 ),
             p.getLong( 5 ),
             p.skip( 4 ),
-            p.getString( 3 ),
+            // StringNull as if '   ' then we insert null into the db to prevent duplicate key constraints
+            p.getStringNull( 3 ),
             p.getString( 16 ),
             p.getTiploc()
     );

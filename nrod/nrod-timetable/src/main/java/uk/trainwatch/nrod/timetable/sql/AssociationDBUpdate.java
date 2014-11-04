@@ -21,7 +21,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import uk.trainwatch.nrod.timetable.cif.record.Association;
 import uk.trainwatch.util.TimeUtils;
-import uk.trainwatch.util.sql.UncheckedSQLException;
 
 /**
  *
@@ -41,38 +40,32 @@ public class AssociationDBUpdate
                null,
                "DELETE FROM timetable.association"
                + " WHERE mainuid=timetable.trainuid(?) AND assocuid=timetable.trainuid(?) AND startdt=? AND enddt=? AND assocdays=?"
-               + " AND assoccat=? AND assocdateind=? AND tiploc=tiploc(?)"
+               + " AND assoccat=? AND assocdateind=? AND tiploc=timetable.tiploc(?)"
                + " AND baselocsuff=? AND assoclocsuff=? AND assoctype=? AND stpind=?"
         );
     }
 
     @Override
     public void accept( Association t )
+            throws SQLException
     {
-        try
+        totaled();
+
+        switch( t.getTransactionType() )
         {
-            totaled();
+            case NEW:
+                execute( t, getInsert() );
+                inserted();
+                break;
 
-            switch( t.getTransactionType() )
-            {
-                case NEW:
-                    execute( t, getInsert() );
-                    inserted();
-                    break;
+            case DELETE:
+                execute( t, getDelete() );
+                deleted();
+                break;
 
-                case DELETE:
-                    execute( t, getDelete() );
-                    deleted();
-                    break;
-
-                case REVISE:
-                    // Association's don't update, just create/delete
-                    break;
-            }
-        }
-        catch( SQLException ex )
-        {
-            throw new UncheckedSQLException( ex );
+            case REVISE:
+                // Association's don't update, just create/delete
+                break;
         }
     }
 

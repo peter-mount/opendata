@@ -30,14 +30,14 @@ class ResultSetSpliterator<T>
 {
 
     private final ResultSet resultSet;
-    private final Function<ResultSet, T> factory;
+    private final SQLFunction<ResultSet, T> factory;
 
     /**
      *
      * @param resultSet {@link ResultSet} to iterate over
      * @param factory   {@link Function} that will take a ResultSet row and produce some object
      */
-    public ResultSetSpliterator( ResultSet resultSet, Function<ResultSet, T> factory )
+    public ResultSetSpliterator( ResultSet resultSet, SQLFunction<ResultSet, T> factory )
     {
         this.resultSet = resultSet;
         this.factory = factory;

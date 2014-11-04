@@ -24,7 +24,6 @@ import uk.trainwatch.nrod.timetable.cif.record.TIPLOCAction;
 import uk.trainwatch.nrod.timetable.cif.record.TIPLOCAmend;
 import uk.trainwatch.nrod.timetable.cif.record.TIPLOCDelete;
 import uk.trainwatch.nrod.timetable.cif.record.TIPLOCInsert;
-import uk.trainwatch.util.sql.UncheckedSQLException;
 
 /**
  * Handles updating the tiploc table in the database
@@ -46,27 +45,21 @@ public class TiplocDBUpdate
 
     @Override
     public void accept( TIPLOCAction t )
+            throws SQLException
     {
-        try
-        {
-            totaled();
+        totaled();
 
-            if( t instanceof TIPLOCInsert )
-            {
-                insert( (TIPLOCInsert) t );
-            }
-            else if( t instanceof TIPLOCAmend )
-            {
-                alter( (TIPLOCAmend) t );
-            }
-            else if( t instanceof TIPLOCDelete )
-            {
-                delete( (TIPLOCDelete) t );
-            }
-        }
-        catch( SQLException ex )
+        if( t instanceof TIPLOCInsert )
         {
-            throw new UncheckedSQLException( ex );
+            insert( (TIPLOCInsert) t );
+        }
+        else if( t instanceof TIPLOCAmend )
+        {
+            alter( (TIPLOCAmend) t );
+        }
+        else if( t instanceof TIPLOCDelete )
+        {
+            delete( (TIPLOCDelete) t );
         }
     }
 

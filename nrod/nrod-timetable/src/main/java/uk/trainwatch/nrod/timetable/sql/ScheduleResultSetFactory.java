@@ -22,6 +22,7 @@ import javax.json.JsonObject;
 import uk.trainwatch.nrod.timetable.model.Schedule;
 import uk.trainwatch.nrod.timetable.model.ScheduleJsonDecoder;
 import uk.trainwatch.util.JsonUtils;
+import uk.trainwatch.util.sql.SQLFunction;
 import uk.trainwatch.util.sql.UncheckedSQLException;
 
 /**
@@ -30,7 +31,7 @@ import uk.trainwatch.util.sql.UncheckedSQLException;
  * @author Peter T Mount
  */
 public enum ScheduleResultSetFactory
-        implements Function<ResultSet, Schedule>
+        implements SQLFunction<ResultSet, Schedule>
 {
 
     INSTANCE;
