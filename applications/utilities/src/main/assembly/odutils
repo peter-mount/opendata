@@ -9,4 +9,4 @@
 #
 DIR=$(dirname $0)
 CP=$(echo $(ls $DIR/*.jar)|sed "s/ /:/g");
-exec java -cp $CP uk.trainwatch.app.util.Main $@
+exec java -cp $CP uk.trainwatch.app.util.Main "$@"
