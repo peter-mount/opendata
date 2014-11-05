@@ -136,6 +136,11 @@ public final class Consumers
         };
     }
 
+    public static <T, U> Consumer<T> consume( Function<T, U> f, Consumer<U> c )
+    {
+        return t -> c.accept( f.apply( t ) );
+    }
+
     /**
      * A consumer that does nothing
      * <p>

@@ -13,6 +13,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
@@ -548,6 +549,12 @@ public class JsonUtils
     {
         String s = getString( o, n );
         return s == null ? null : LocalDate.parse( s );
+    }
+
+    public static LocalDateTime getLocalDateTime( JsonObject o, String n )
+    {
+        String s = getString( o, n );
+        return s == null ? null : LocalDateTime.parse( s );
     }
 
     public static <T extends Enum<T>> T getEnum( Class<T> c, JsonObject o, String n )

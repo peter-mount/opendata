@@ -34,14 +34,13 @@ public class AssociationDBUpdate
     {
         super( con,
                "INSERT INTO timetable.association"
-               + " (mainuid,assocuid,startdt,enddt,assocdays,assoccat,assocdateind,tiploc,baselocsuff,assoclocsuff,assoctype,stpind)"
-               + " values"
-               + " (timetable.trainuid(?),timetable.trainuid(?),?,?,?,?,?,timetable.tiploc(?),?,?,?,?)",
+               + " (mainuid,assocuid,startdt,enddt,assocdays,assoccat,assocdateind,tiploc,assoctype,baselocsuff,assoclocsuff,stpind)"
+               + " VALUES (timetable.trainuid(?),timetable.trainuid(?),?,?,?,?,?,timetable.tiploc(?),?,?,?,?)",
                null,
                "DELETE FROM timetable.association"
-               + " WHERE mainuid=timetable.trainuid(?) AND assocuid=timetable.trainuid(?) AND startdt=? AND enddt=? AND assocdays=?"
-               + " AND assoccat=? AND assocdateind=? AND tiploc=timetable.tiploc(?)"
-               + " AND baselocsuff=? AND assoclocsuff=? AND assoctype=? AND stpind=?"
+               + " WHERE mainuid=timetable.trainuid(?) AND assocuid=timetable.trainuid(?)"
+               + " AND startdt=? AND enddt=? AND assocdays=?"
+               + " AND assoccat=? AND assocdateind=? AND tiploc=timetable.tiploc(?) AND assoctype=?"
         );
     }
 
@@ -51,15 +50,21 @@ public class AssociationDBUpdate
     {
         totaled();
 
+        PreparedStatement s = null;
         switch( t.getTransactionType() )
         {
             case NEW:
-                execute( t, getInsert() );
+                s = getInsert();
+                int i = setKey( t, s );
+                setVal( t, s, i );
+                s.executeUpdate();
                 inserted();
                 break;
 
             case DELETE:
-                execute( t, getDelete() );
+                s = getDelete();
+                setKey( t, s );
+                s.executeUpdate();
                 deleted();
                 break;
 
@@ -69,7 +74,7 @@ public class AssociationDBUpdate
         }
     }
 
-    private void execute( Association t, PreparedStatement s )
+    private int setKey( Association t, PreparedStatement s )
             throws SQLException
     {
         int i = 1;
@@ -85,13 +90,18 @@ public class AssociationDBUpdate
                   ordinal() );
         s.setString( i++, t.getAssocLocation().
                      getKey() );
-        s.setString( i++, t.getBaseLocSuffix() );
-        s.setString( i++, t.getAssocLocSuffix() );
         s.setInt( i++, t.getAssocType().
                   ordinal() );
+        return i;
+    }
+
+    private int setVal( Association t, PreparedStatement s, int i )
+            throws SQLException
+    {
+        s.setString( i++, t.getBaseLocSuffix() );
+        s.setString( i++, t.getAssocLocSuffix() );
         s.setInt( i++, t.getStpIndicator().
                   ordinal() );
-
-        s.executeUpdate();
+        return i;
     }
 }
