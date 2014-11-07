@@ -28,41 +28,46 @@ import static uk.trainwatch.util.app.Application.loadProperties;
  * @author Peter T Mount
  */
 public class Main
-        extends Application {
+        extends Application
+{
 
     private RabbitConnection rabbitmq;
 
-    public static void main(String... args)
+    public static void main( String... args )
             throws IOException,
-            InterruptedException {
-        LOG.log(Level.INFO, "Initialising Rail Analyser");
+                   InterruptedException
+    {
+        LOG.log( Level.INFO, "Initialising Rail Analyser" );
 
         new Main().run();
     }
 
     @Override
     protected void setupBrokers()
-            throws IOException {
-        Properties p = loadProperties("rabbit.properties");
+            throws IOException
+    {
+        Properties p = loadProperties( "rabbit.properties" );
 
-        rabbitmq = new RabbitConnection(p.getProperty("username"),
-                p.getProperty("password"),
-                p.getProperty("host"));
+        rabbitmq = new RabbitConnection( p.getProperty( "username" ),
+                                         p.getProperty( "password" ),
+                                         p.getProperty( "host" ) );
     }
 
     @Override
-    protected void stop() {
+    protected void stop()
+    {
         super.stop();
         rabbitmq.close();
     }
 
     @Override
     protected void setupApplication()
-            throws IOException {
-        RtppmReporter.setup(rabbitmq);
-        //TocPerformance.setup(rabbitmq);
-        //TrustDispatcher.setup(rabbitmq);
-        //TrainMovementLogger.setup(rabbitmq);
+            throws IOException
+    {
+        RtppmReporter.setup( rabbitmq );
+        TocPerformance.setup( rabbitmq );
+        TrustDispatcher.setup( rabbitmq );
+        TrainMovementLogger.setup( rabbitmq );
     }
 
 }

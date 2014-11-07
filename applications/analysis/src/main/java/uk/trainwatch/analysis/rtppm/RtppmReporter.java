@@ -21,14 +21,18 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import uk.trainwatch.nrod.rtppm.factory.RTPPMDataMsgFactory;
 import uk.trainwatch.nrod.rtppm.model.RTPPMDataMsg;
+import uk.trainwatch.nrod.rtppm.sql.OperatorPPMSQL;
 import uk.trainwatch.rabbitmq.RabbitConnection;
 import uk.trainwatch.rabbitmq.RabbitMQ;
 import uk.trainwatch.util.Consumers;
 import uk.trainwatch.util.JsonUtils;
 import uk.trainwatch.util.app.Application;
 import uk.trainwatch.util.counter.RateMonitor;
+import uk.trainwatch.util.sql.UncheckedSQLException;
 
 /**
  *
@@ -55,11 +59,19 @@ public class RtppmReporter
 
         Consumer<RTPPMDataMsg> recorder = m ->
         {
-            /*
-             * try { try (Connection con = getConnection()) { OperatorPPMSQL.INSERT_OPERATORPAGEPPM.accept(con, m); } }
-             * catch (SQLException | UncheckedSQLException ex) { Logger.getLogger(RtppmReporter.class.getName()).
-             * log(Level.SEVERE, "Failure in rtppm", ex); }
-             */
+            try
+            {
+                try( Connection con = getConnection() )
+                {
+                    OperatorPPMSQL.INSERT_OPERATORPAGEPPM.accept( con, m );
+                }
+            }
+            catch( SQLException |
+                   UncheckedSQLException ex )
+            {
+                Logger.getLogger( RtppmReporter.class.getName() ).
+                        log( Level.SEVERE, "Failure in rtppm", ex );
+            }
         };
 
         Consumer<RTPPMDataMsg> rtppmMonitor = RateMonitor.log( RtppmReporter.class,
@@ -71,11 +83,11 @@ public class RtppmReporter
         Consumer<RTPPMDataMsg> consumer = Consumers.andThen( recorder, rtppmMonitor, dailyTweet );
 
         RabbitMQ.queueStream( rabbitmq,
-                              "analyser.rtppm.db.dev",
+                              "analyser.rtppm.db",
                               "nr.rtppm",
                               s -> s.map( RabbitMQ.toString.andThen( JsonUtils.parseJsonObject ) ).
                               map( RTPPMDataMsgFactory.INSTANCE ).
-                              forEach( dailyTweet )
+                              forEach( consumer )
         );
     }
 

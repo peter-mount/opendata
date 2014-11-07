@@ -146,7 +146,7 @@ public class RtppmTweet
 
         // The tweet text
         String tweet = String.format(
-                "%s %04d %s %d: PPM %d%% (%d%%). %d ran, %d ontime, %d late %d c/vlate %s",
+                "%s PPM for %04d %s %d: %d%% (%d%%). %d ran, %d ontime, %d late %d c/vlate %s",
                 o.getDisplay(),
                 date.getYear(),
                 date.getMonth().
