@@ -87,24 +87,6 @@ public class RtppmTweet
                             {
                                 tweet( last );
                             }
-
-                            if( o.getName().
-                            startsWith( "Southeastern" ) )
-                            {
-                                tweet( o );
-
-                                try
-                                {
-                                    Thread.currentThread().
-                                            sleep( 2000L );
-                                }
-                                catch( InterruptedException ex )
-                                {
-                                    Logger.getLogger( RtppmTweet.class.getName() ).
-                                            log( Level.SEVERE, null, ex );
-                                }
-                                System.exit( 999 );
-                            }
                 } );
     }
 
