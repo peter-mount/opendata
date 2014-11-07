@@ -15,6 +15,7 @@
  */
 package uk.trainwatch.analysis;
 
+import uk.trainwatch.analysis.rtppm.RtppmReporter;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -59,9 +60,9 @@ public class Main
     protected void setupApplication()
             throws IOException {
         RtppmReporter.setup(rabbitmq);
-        TocPerformance.setup(rabbitmq);
-        TrustDispatcher.setup(rabbitmq);
-        TrainMovementLogger.setup(rabbitmq);
+        //TocPerformance.setup(rabbitmq);
+        //TrustDispatcher.setup(rabbitmq);
+        //TrainMovementLogger.setup(rabbitmq);
     }
 
 }

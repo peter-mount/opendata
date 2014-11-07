@@ -60,7 +60,7 @@ public class Main
         if( args.length == 0 )
         {
             LOG.log( Level.INFO, toolNames );
-            return;
+            System.exit( 1 );
         }
 
         String toolName = args[0];
@@ -101,6 +101,9 @@ public class Main
                     if( util.parseArgs( cmd ) )
                     {
                         util.call();
+
+                        // Exit with return code 0
+                        System.exit( 0 );
                     }
                     else
                     {
@@ -123,6 +126,8 @@ public class Main
                 }
             }
         }
+
+        System.exit( 1 );
     }
 
 }
