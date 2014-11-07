@@ -82,7 +82,7 @@ public class RtppmReporter
 
         Consumer<RTPPMDataMsg> consumer = Consumers.andThen( recorder, rtppmMonitor, dailyTweet );
 
-        RabbitMQ.queueStream( rabbitmq,
+        RabbitMQ.queueDurableStream( rabbitmq,
                               "analyser.rtppm.db",
                               "nr.rtppm",
                               s -> s.map( RabbitMQ.toString.andThen( JsonUtils.parseJsonObject ) ).
