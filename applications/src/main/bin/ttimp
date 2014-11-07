@@ -1,0 +1,56 @@
+#!/bin/bash
+# ------------------------------------------------------------
+# Based on ttupdate.
+#
+# Script to import a single CIF file into the timetable database
+# ------------------------------------------------------------
+
+DIR=/usr/local/opendata
+BIN=$DIR/utils
+ETC=$DIR/etc
+
+. $ETC/config
+
+CP=$(echo $(ls $BIN/*.jar)|sed "s/ /:/g");
+
+rm -f $DIR/tmp/temp.cif.gz $DIR/tmp/temp.cif
+
+CIF="$1"
+export TWEET="Timetable Update $(hostname -s): $(basename $CIF .gz)"
+LOGFILE=/tmp/log.$$
+(
+    echo Exctacting CIF
+    cp -v $CIF $DIR/tmp/temp.cif.gz
+    gunzip -v $DIR/tmp/temp.cif.gz
+    echo
+    
+    java \
+	-cp $CP \
+	-Djava.util.logging.config.file=$ETC/logging.properties \
+	uk.trainwatch.app.util.Main \
+	timetables \
+	$RAILDB_ARGS \
+	$DIR/tmp/temp.cif
+    RC=$?
+    echo $RC >/tmp/rc
+
+) 2>&1 | tee $LOGFILE
+
+    RC=$(</tmp/rc)
+    
+    if [[ $RC -eq 0 ]]
+    then
+	TWEET="$TWEET Successful"
+    else
+	TWEET="$TWEET Failed"
+fi
+    
+rm -f $DIR/tmp/temp.cif.gz $DIR/tmp/temp.cif
+
+/usr/local/opendata/bin/memo \
+    	--title "$TWEET" \
+	--type LOG \
+	--tweet ProjectArea51 \
+	$LOGFILE
+
+rm $LOGFILE

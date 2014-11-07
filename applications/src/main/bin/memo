@@ -1,0 +1,36 @@
+#!/bin/bash
+# ------------------------------------------------------------
+# Script that allows for a memo to be posted on a51.li
+#
+# It's usually used by other scripts, especially those run by
+# cron, so that the logs are available immediately online.
+#
+# usage:
+#
+# memo --title "Title of memo" --type LOG --tweet ProjectArea51
+#
+# Where:
+#   --title the memo title & the tweeted text
+#   --type  The memo type, one of text, html or log.
+#           If not present then html is presumed
+#   --tweet The twitter account to use.
+#
+# Note: this requires the config to be setup and permissions
+#       within the a51li bot to allow access to twitter and
+#       to specific twitter accounts
+# ------------------------------------------------------------
+DIR=/usr/local/opendata
+BIN=$DIR/utils
+ETC=$DIR/etc
+
+. $ETC/config
+
+CP=$(echo $(ls $BIN/*.jar)|sed "s/ /:/g");
+
+exec java \
+	-cp $CP \
+	-Djava.util.logging.config.file=$ETC/logging.properties \
+	uk.trainwatch.app.util.Main \
+	memo $MEMO_ARGS \
+	"$@"
+

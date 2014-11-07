@@ -1,0 +1,111 @@
+#!/bin/bash
+# ------------------------------------------------------------
+# Script to retrieve a CIF file from Network Rail and import
+# it into the timetable database
+# ------------------------------------------------------------
+
+# Needed for running within cron
+export PATH=/usr/local/java/jdk/bin:$PATH
+
+DIR=/usr/local/opendata
+BIN=$DIR/utils
+ETC=$DIR/etc
+
+. $ETC/config
+
+CP=$(echo $(ls $BIN/*.jar)|sed "s/ /:/g");
+
+rm -f $DIR/tmp/temp.cif.gz $DIR/tmp/temp.cif
+
+TMPDIR=/usr/local/opendata/tmp
+TTDIR=/usr/local/networkrail/timetable
+
+:>/tmp/ttupdate
+
+LOGFILE=/tmp/log.$$
+(
+    # We need yesterday's name as updates happen late at night & we run in the early hours of the morning
+    DOW=$(date -d yesterday +"%a"|tr A-Z a-z)
+
+    TEMPCIF=$TMPDIR/${DOW}-update.cif.gz
+    rm -f $TEMPCIF
+
+    echo Retrieving CIF for $DOW
+    curl \
+	--silent \
+	-L \
+	-u ${NROD_USER}:${NROD_PASS} \
+	-o $TEMPCIF \
+	"https://datafeeds.networkrail.co.uk/ntrod/CifFileAuthenticate?type=CIF_ALL_UPDATE_DAILY&day=toc-update-${DOW}.CIF.gz"
+
+    if [[ ! -f $TEMPCIF ]]
+    then
+	echo "Failed to retrieve CIF file from Network Rail"
+	echo >/tmp/ttupdate "Failed to retrieve CIF"
+	echo 1 >/tmp/rc
+    else
+
+	DAY=$(zcat $TEMPCIF|head -1|cut -c21-22)
+	MON=$(zcat $TEMPCIF|head -1|cut -c19-20)
+	YEAR=20$(zcat $TEMPCIF|head -1|cut -c17-18)
+	echo
+	echo "CIF File appears to be for $YEAR/$MON/$DAY"
+
+	CIFDIR=$TTDIR/$YEAR/$MON
+	mkdir -p $CIFDIR
+
+	CIF=$CIFDIR/$DAY-update.cif.gz
+	if [[ -f $CIF ]]
+	then
+	    echo "FAILURE: we already have $CIF"
+	    echo >/tmp/ttupdate "we already have CIF for $YEAR/$MON/$DAY"
+	    echo 1 >/tmp/rc
+	else
+
+	    # Install into the archive directory
+	    mv $TEMPCIF $CIF
+
+	    # Now same as ttimp
+	    echo 
+	    echo Exctacting CIF
+	    
+	    cp -v $CIF $DIR/tmp/temp.cif.gz
+	    gunzip -v $DIR/tmp/temp.cif.gz
+
+	    echo
+	    echo Performing import of $(wc -l $DIR/tmp/temp.cif) records
+	    echo
+	    
+	    java \
+		-cp $CP \
+		-Djava.util.logging.config.file=$ETC/logging.properties \
+		uk.trainwatch.app.util.Main \
+		timetables \
+		$RAILDB_ARGS \
+		$DIR/tmp/temp.cif
+	    echo $? >/tmp/rc
+
+	fi
+
+    fi
+
+) 2>&1 | tee $LOGFILE
+
+RC=$(</tmp/rc)
+if [[ $RC -eq 0 ]]
+then
+    TWEET="Timetable update success:"
+else
+    TWEET="Timetable update failure:"
+fi
+TWEET="$TWEET $(</tmp/ttupdate)"
+
+rm -f $DIR/tmp/temp.cif.gz $DIR/tmp/temp.cif
+
+/usr/local/opendata/bin/memo \
+    --title "$TWEET" \
+    --type LOG \
+    --tweet ProjectArea51 \
+    $LOGFILE
+
+rm $LOGFILE
