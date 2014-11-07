@@ -9,6 +9,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.cif.TransactionType;
 import uk.trainwatch.nrod.timetable.util.ATOCCode;
@@ -40,6 +42,8 @@ import uk.trainwatch.nrod.timetable.util.TrainUID;
  */
 public final class CIFParser
 {
+
+    private static final Logger LOG = Logger.getLogger( CIFParser.class.getName() );
 
     private final boolean strict;
     private String line;
@@ -190,7 +194,12 @@ public final class CIFParser
      */
     public String getStringNull( int l )
     {
-        return isBlank( l ) ? null : getString( l );
+        if( isBlank( l ) )
+        {
+            skip( l );
+            return null;
+        }
+        return getString( l );
     }
 
     /**
@@ -293,6 +302,7 @@ public final class CIFParser
 
         if( isBlank( 6 ) )
         {
+            skip( 6 );
             return null;
         }
 
@@ -313,6 +323,7 @@ public final class CIFParser
 
         if( isBlank( 6 ) )
         {
+            skip( 6 );
             return null;
         }
 
@@ -366,6 +377,7 @@ public final class CIFParser
         // Check for blank, if so return null
         if( isBlank( 4 ) )
         {
+            skip( 4 );
             return null;
         }
 
@@ -386,6 +398,7 @@ public final class CIFParser
         // Check for blank, if so return null
         if( isBlank( 5 ) )
         {
+            skip( 5 );
             return null;
         }
 
