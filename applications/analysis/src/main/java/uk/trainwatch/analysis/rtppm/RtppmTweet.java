@@ -78,7 +78,7 @@ public class RtppmTweet
                 forEach( o ->
                         {
                             // Replace with the new one
-                            OperatorPagePPM last = current.replace( o.getName(), o );
+                            OperatorPagePPM last = current.put( o.getName(), o );
 
                             // When total drops it's usually the begining of the day
                             if( last != null
