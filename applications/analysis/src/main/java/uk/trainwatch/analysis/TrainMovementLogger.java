@@ -17,7 +17,7 @@ package uk.trainwatch.analysis;
 
 import java.util.Objects;
 import java.util.function.Consumer;
-import uk.trainwatch.analysis.performance.TrainReporter;
+import uk.trainwatch.nrod.trust.perf.TrainReporter;
 import uk.trainwatch.nrod.trust.model.TrustMovement;
 import uk.trainwatch.nrod.trust.model.TrustMovementFactory;
 import uk.trainwatch.rabbitmq.RabbitConnection;

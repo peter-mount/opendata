@@ -17,8 +17,8 @@ package uk.trainwatch.analysis;
 
 import java.util.Objects;
 import java.util.function.Consumer;
-import uk.trainwatch.analysis.performance.TocStanoxAllClassDelayAnalyzer;
-import uk.trainwatch.analysis.performance.TocStanoxClassDelayAnalyzer;
+import uk.trainwatch.nrod.trust.perf.TocStanoxAllClassDelayAnalyzer;
+import uk.trainwatch.nrod.trust.perf.TocStanoxClassDelayAnalyzer;
 import uk.trainwatch.nrod.trust.model.TrainMovement;
 import uk.trainwatch.nrod.trust.model.TrustMovementFactory;
 import uk.trainwatch.rabbitmq.RabbitConnection;
