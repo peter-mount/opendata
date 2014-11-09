@@ -81,7 +81,7 @@ CREATE UNIQUE INDEX realtime_i ON realtime(id);
 CREATE INDEX realtime_o ON realtime(operator);
 CREATE INDEX realtime_dt ON realtime(dt,tm);
 CREATE INDEX realtime_d ON realtime(dt);
-CREATE UNIQUE INDEX realtime_to ON realtime(ts,operator);
+CREATE UNIQUE INDEX realtime_dto ON realtime(dt,tm,operator);
 
 -- ----------------------------------------------------------------------
 -- Function used to record the operatorpageppm data

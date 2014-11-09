@@ -61,6 +61,7 @@ CREATE TABLE dim_date (
        month_index	CHAR(7) NOT NULL,
        PRIMARY KEY(dt_id)
 );
+ALTER TABLE dim_date OWNER TO rail;
 
 CREATE INDEX dim_date_1 on dim_date(dt);
 CREATE INDEX dim_date_2 on dim_date(year);

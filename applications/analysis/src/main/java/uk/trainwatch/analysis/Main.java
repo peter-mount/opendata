@@ -19,6 +19,7 @@ import uk.trainwatch.analysis.rtppm.RtppmReporter;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.logging.Level;
+import uk.trainwatch.analysis.rtppm.TrustLogger;
 import uk.trainwatch.rabbitmq.RabbitConnection;
 import uk.trainwatch.util.app.Application;
 import static uk.trainwatch.util.app.Application.loadProperties;
@@ -68,6 +69,7 @@ public class Main
         TocPerformance.setup( rabbitmq );
         TrustDispatcher.setup( rabbitmq );
         TrainMovementLogger.setup( rabbitmq );
+        TrustLogger.setup( rabbitmq );
     }
 
 }

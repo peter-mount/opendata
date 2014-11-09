@@ -33,6 +33,8 @@ CREATE TABLE dim_time (
        PRIMARY KEY(tm_id)
 );
 
+ALTER TABLE dim_time OWNER TO rail;
+
 CREATE INDEX dim_time_tm ON dim_time(tm);
 CREATE INDEX dim_time_h  ON dim_time(hour);
 CREATE INDEX dim_time_hm ON dim_time(hour,minute);
