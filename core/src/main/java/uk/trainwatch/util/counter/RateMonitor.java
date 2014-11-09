@@ -66,7 +66,12 @@ public class RateMonitor<T>
             // Read & reset the count. Don't put it in the logger as we use a supplier & won't be invoked if the logger
             // isn't showing the required level
             int count = counter.getAndSet( 0 );
-            log.log( level, () -> label + ' ' + count );
+            
+            // Reduce logspam by only logging when we've done something
+            if( count > 0 )
+            {
+                log.log( level, () -> label + ' ' + count );
+            }
         }, 1L, 1L, TimeUnit.MINUTES );
     }
 
