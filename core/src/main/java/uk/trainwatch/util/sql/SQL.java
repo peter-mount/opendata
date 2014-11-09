@@ -20,7 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -69,6 +68,26 @@ public class SQL
             throws SQLException
     {
         return stream( s.executeQuery(), factory );
+    }
+
+    /**
+     * Utility to prepare a {@link PreparedStatement} from a SQL and arguments
+     * @param c Connection connection
+     * @param sql SQL to use
+     * @param args Arguments for sql
+     * @return PreparedStatement
+     * @throws SQLException 
+     */
+    public static PreparedStatement prepare( Connection c, String sql, Object... args )
+            throws SQLException
+    {
+        PreparedStatement s = c.prepareStatement( sql );
+        int i = 1;
+        for( Object arg : args )
+        {
+            s.setObject( i++, arg );
+        }
+        return s;
     }
 
     /**
