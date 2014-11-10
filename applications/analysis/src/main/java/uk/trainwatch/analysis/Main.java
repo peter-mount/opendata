@@ -66,7 +66,7 @@ public class Main
             throws IOException
     {
         RtppmReporter.setup( rabbitmq );
-        TocPerformance.setup( rabbitmq );
+        //TocPerformance.setup( rabbitmq );
         TrustDispatcher.setup( rabbitmq );
         TrainMovementLogger.setup( rabbitmq );
         TrustLogger.setup( rabbitmq );
