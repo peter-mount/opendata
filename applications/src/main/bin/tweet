@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+# Run's the utility application
+#
+# Now this is messy & needs doing right later, but it gets around a problem
+# with using "java -jar" and java.util.ServiceLoader. When used with -jar
+# ServiceLoader only loads the Utility's in the first jar one is found
+# not all of them, but when run with "-cp" it works.
+#
+DIR=/usr/local/opendata
+BIN=$DIR/utils
+ETC=$DIR/etc
+
+. $ETC/config
+
+CP=$(echo $(ls $BIN/*.jar)|sed "s/ /:/g");
+
+exec java \
+	-cp $CP \
+	-Djava.util.logging.config.file=$ETC/logging.properties \
+	uk.trainwatch.app.util.Main \
+	tweet $MEMO_ARGS \
+	"$@"
+
