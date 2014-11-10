@@ -78,9 +78,9 @@ public class RtppmReporter
                                                                "rtppm messages recorded" );
 
         // The daily tweet of performance
-        Consumer<RTPPMDataMsg> dailyTweet = new RtppmTweet( rabbitmq, jdbcProps );
+        //Consumer<RTPPMDataMsg> dailyTweet = new RtppmTweet( rabbitmq, jdbcProps );
 
-        Consumer<RTPPMDataMsg> consumer = Consumers.andThen( recorder, rtppmMonitor, dailyTweet );
+        Consumer<RTPPMDataMsg> consumer = Consumers.andThen( recorder, rtppmMonitor /*, dailyTweet*/ );
 
         RabbitMQ.queueDurableStream( rabbitmq,
                               "analyser.rtppm.db",
