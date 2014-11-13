@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+<tiles-definitions>
+    
+    <definition name="performance.home" extends="layout.main">
+        <put-attribute name="title" value="Rail Operator Performance" />
+        <put-attribute name="body" value=".performance.home" />
+        <put-attribute name="javascript" value="/common/jquery.jsp" />
+    </definition>
+    <definition name=".performance.home" extends="layout.1col">
+        <put-attribute name="center" value="/common/performance/home.jsp" />
+    </definition>
+
+    <!-- ppm -->    
+    <definition name="performance.ppm.view" extends="layout.main">
+        <put-attribute name="title" value="Public Performance Measure" />
+        <put-attribute name="body" value=".performance.ppm.view" />
+        <put-attribute name="javascript" value="/common/jquery.jsp" />
+    </definition>
+    <definition name=".performance.ppm.view" extends="layout.1col">
+        <put-attribute name="center" value="/common/performance/ppm.jsp" />
+    </definition>
+
+    <definition name="performance.ppm.years" extends="layout.main">
+        <put-attribute name="title" value="Public Performance Measure" />
+        <put-attribute name="body" value=".performance.ppm.years" />
+    </definition>
+    <definition name=".performance.ppm.years" extends="layout.1col">
+        <put-attribute name="center" value="/common/performance/ppm-years.jsp" />
+    </definition>
+
+    <definition name="performance.ppm.months" extends="layout.main">
+        <put-attribute name="title" value="Public Performance Measure" />
+        <put-attribute name="body" value=".performance.ppm.months" />
+    </definition>
+    <definition name=".performance.ppm.months" extends="layout.1col">
+        <put-attribute name="center" value="/common/performance/ppm-months.jsp" />
+    </definition>
+    
+    <definition name="performance.ppm.days" extends="layout.main">
+        <put-attribute name="title" value="Public Performance Measure" />
+        <put-attribute name="body" value=".performance.ppm.days" />
+    </definition>
+    <definition name=".performance.ppm.days" extends="layout.1col">
+        <put-attribute name="center" value="/common/performance/ppm-days.jsp" />
+    </definition>
+    
+</tiles-definitions>

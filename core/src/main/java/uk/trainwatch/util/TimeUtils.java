@@ -19,9 +19,9 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.json.JsonString;
 import javax.json.JsonValue;
 
 /**
@@ -31,7 +31,8 @@ import javax.json.JsonValue;
 public class TimeUtils
 {
 
-    private static final Logger LOG = Logger.getLogger( TimeUtils.class.getName() );
+    private static final Logger LOG = Logger.getLogger( TimeUtils.class.
+            getName() );
 
     public static final ZoneId UTC = ZoneId.of( "UTC" );
 
@@ -73,6 +74,17 @@ public class TimeUtils
         return LocalDateTime.now( clock );
     }
 
+    public static LocalDateTime getLocalDateTime( final LocalDate date )
+    {
+        return LocalDateTime.of( date, LocalTime.MIN );
+    }
+
+    public static final LocalDate getLocalDate()
+    {
+        return getLocalDateTime().
+                toLocalDate();
+    }
+
     public static final LocalDate getLocalDate( final long timestamp )
     {
         return getLocalDate( getInstant( timestamp ) );
@@ -104,25 +116,27 @@ public class TimeUtils
      * <p>
      * TODO order these so the most used one is first
      */
-    private static final DateTimeFormatter DATES[] =
-    {
-        DateTimeFormatter.ISO_DATE,
-        DateTimeFormatter.ISO_LOCAL_DATE,
-        DateTimeFormatter.ISO_OFFSET_DATE,
-        DateTimeFormatter.BASIC_ISO_DATE
-    };
+    private static final DateTimeFormatter DATES[]
+                                             =
+            {
+                DateTimeFormatter.ISO_DATE,
+                DateTimeFormatter.ISO_LOCAL_DATE,
+                DateTimeFormatter.ISO_OFFSET_DATE,
+                DateTimeFormatter.BASIC_ISO_DATE
+            };
 
     /**
      * The formatters we'll use to get a LocalDateTime.
      * <p>
      * TODO order these so the most used one is first
      */
-    private static final DateTimeFormatter TIMES[] =
-    {
-        DateTimeFormatter.ISO_TIME,
-        DateTimeFormatter.ISO_LOCAL_TIME,
-        DateTimeFormatter.ISO_OFFSET_TIME
-    };
+    private static final DateTimeFormatter TIMES[]
+                                             =
+            {
+                DateTimeFormatter.ISO_TIME,
+                DateTimeFormatter.ISO_LOCAL_TIME,
+                DateTimeFormatter.ISO_OFFSET_TIME
+            };
 
     /**
      * Attempt to parse a string
@@ -134,7 +148,7 @@ public class TimeUtils
     {
         if( s != null && !s.isEmpty() )
         {
-            for( DateTimeFormatter dtf : DATETIMES )
+            for( DateTimeFormatter dtf: DATETIMES )
             {
                 try
                 {
@@ -159,7 +173,7 @@ public class TimeUtils
     {
         if( s != null && !s.isEmpty() )
         {
-            for( DateTimeFormatter dtf : DATES )
+            for( DateTimeFormatter dtf: DATES )
             {
                 try
                 {
@@ -216,8 +230,9 @@ public class TimeUtils
                 // hhmm
                 try
                 {
-                    return LocalTime.of( Integer.parseInt( s.substring( 0, 2 ) ),
-                                         Integer.parseInt( s.substring( 2, 4 ) ) );
+                    return LocalTime.
+                            of( Integer.parseInt( s.substring( 0, 2 ) ),
+                                Integer.parseInt( s.substring( 2, 4 ) ) );
                 }
                 catch( Exception ex )
                 {
@@ -226,7 +241,7 @@ public class TimeUtils
             }
 
             // Check default formats
-            for( DateTimeFormatter dtf : TIMES )
+            for( DateTimeFormatter dtf: TIMES )
             {
                 try
                 {
@@ -269,7 +284,8 @@ public class TimeUtils
         }
     }
 
-    public static void setDateTime( PreparedStatement s, int col, LocalDateTime ld )
+    public static void setDateTime( PreparedStatement s, int col,
+                                    LocalDateTime ld )
             throws SQLException
     {
         if( ld == null )
@@ -349,7 +365,8 @@ public class TimeUtils
      */
     public static JsonValue toJson( LocalDate d )
     {
-        return d == null ? JsonValue.NULL : JsonUtils.createJsonString( d.toString() );
+        return d == null ? JsonValue.NULL : JsonUtils.createJsonString( d.
+                toString() );
     }
 
     /**
@@ -361,7 +378,8 @@ public class TimeUtils
      */
     public static JsonValue toJson( LocalTime t )
     {
-        return t == null ? JsonValue.NULL : JsonUtils.createJsonString( t.toString() );
+        return t == null ? JsonValue.NULL : JsonUtils.createJsonString( t.
+                toString() );
     }
 
     /**
@@ -373,7 +391,31 @@ public class TimeUtils
      */
     public static JsonValue toJson( LocalDateTime dt )
     {
-        return dt == null ? JsonValue.NULL : JsonUtils.createJsonString( dt.toString() );
+        return dt == null ? JsonValue.NULL : JsonUtils.createJsonString( dt.
+                toString() );
     }
+
+    /**
+     * Converts a {@link LocalDate} into a database date used in the dim_date
+     * table.
+     * <p>
+     * @param date
+     *             <p>
+     * @return
+     */
+    public static final Function<LocalDate, Long> toDBDate = date -> (long) ((date.getYear() * 400) + date.getDayOfYear());
+    /**
+     * Converts a database date from the dim_date table into a {@link LocalDate}
+     */
+    public static final Function<Long, LocalDate> fromDBDate = dt -> LocalDate.
+            ofYearDay( (int) (dt / 400L), (int) (dt % 400L) );
+
+    /**
+     * Function to convert a LocalDateTime to a LocalDate representing rail days.
+     * <p>
+     * A Rail day starts at 0200, so 0159 is in the day before.
+     */
+    public static final Function<LocalDateTime, LocalDate> toRailDate = t -> t.minusHours( 2 ).
+            toLocalDate();
 
 }
