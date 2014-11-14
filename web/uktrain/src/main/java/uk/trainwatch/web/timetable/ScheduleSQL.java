@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -238,7 +239,7 @@ public class ScheduleSQL
             throws SQLException
     {
         return SQLBiFunction.<LocalDate, List<Association>, Map<Association, Schedule>>compose(
-                (d, l) -> l.stream().
+                ( d, l ) -> l.stream().
                 collect( Collectors.toMap( Function.identity(),
                                            SQLFunction.guard( a -> getSchedule( d, a.getAssocTrainUID() ) )
                         ) )
@@ -250,7 +251,7 @@ public class ScheduleSQL
             throws SQLException
     {
         return SQLBiFunction.<LocalDate, List<Association>, Map<Association, Schedule>>compose(
-                (d, l) -> l.stream().
+                ( d, l ) -> l.stream().
                 collect( Collectors.toMap( Function.identity(),
                                            SQLFunction.guard( a -> getSchedule( d, a.getMainTrainUID() ) )
                         ) )
@@ -307,8 +308,7 @@ public class ScheduleSQL
                             collect( Collectors.toList() );
 
                             // Sort so they are in chronological order
-                            Collections.
-                            sort( schedules, new ScheduleLocalTimeAtTiplocComparator( station.getTiploc() ) );
+                            Collections.sort( schedules, new ScheduleLocalTimeAtTiplocComparator( station.getTiploc() ) );
 
                             return schedules;
                                 }
@@ -316,4 +316,21 @@ public class ScheduleSQL
                 } );
     }
 
+    /**
+     * Predicate to match a Freight train in the schedule
+     */
+    public static final Predicate<Schedule> FREIGHT = s -> s.getTrainIdentity().
+            equals( "    " );
+    /**
+     * Predicate to match a Class 5 service (i.e. a train operator moving stock)
+     */
+    public static final Predicate<Schedule> CLASS5 = s -> s.getTrainIdentity().
+            startsWith( "5" );
+
+    /**
+     * Predicate to match (hopefully) a public train
+     */
+    public static final Predicate<Schedule> PUBLIC_TRAIN = FREIGHT.
+            or( CLASS5 ).
+            negate();
 }

@@ -26,7 +26,7 @@ import uk.trainwatch.nrod.timetable.util.AssociationCategory;
  *
  * @author Peter T Mount
  */
-@WebServlet( name = "TTSchedule", urlPatterns = "/timetable/schedule/*" )
+@WebServlet(name = "TTSchedule", urlPatterns = "/timetable/schedule/*")
 public class ScheduleServlet
         extends AbstractServlet
 {
@@ -64,6 +64,7 @@ public class ScheduleServlet
             Map<String, Object> req = request.getRequestScope();
             req.put( "searchDate", date );
             req.put( "schedule", schedule );
+            req.put( "pageTitle", "Schedule " + schedule.getTrainIdentity() );
 
             // The trains associated with this one
             List<Association> associations = ScheduleSQL.getMainAssociations( date, trainUid );

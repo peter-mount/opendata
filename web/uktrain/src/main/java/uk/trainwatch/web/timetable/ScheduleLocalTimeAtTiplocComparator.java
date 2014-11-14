@@ -47,12 +47,23 @@ public class ScheduleLocalTimeAtTiplocComparator
         Location l2 = findLocation( o2 );
         LocalTime t1 = getTime( l1 );
         LocalTime t2 = getTime( l2 );
-        return t1.compareTo( t2 );
+        if( t1 == null )
+        {
+            return t2 == null ? 0 : 1;
+        }
+        else if( t2 == null )
+        {
+            return -1;
+        }
+        else
+        {
+            return t1.compareTo( t2 );
+        }
     }
 
     private Location findLocation( Schedule t )
     {
-        for( Location l : t.getLocations() )
+        for( Location l: t.getLocations() )
         {
             if( tiploc.equals( l.getLocation().
                     getKey() ) && !(l instanceof ChangesEnRoute) )

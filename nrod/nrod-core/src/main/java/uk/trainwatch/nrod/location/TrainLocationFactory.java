@@ -6,12 +6,21 @@ package uk.trainwatch.nrod.location;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.sql.DataSource;
 import uk.trainwatch.io.format.PsvReader;
+import uk.trainwatch.util.sql.SQL;
 
 /**
  *
@@ -24,10 +33,13 @@ public enum TrainLocationFactory
 
     private static final Logger LOG = Logger.getLogger( TrainLocationFactory.class.getName() );
 
-    private final Map<LocationKey, TrainLocation> map = new ConcurrentHashMap<>();
+    private Map<LocationKey, TrainLocation> map = new ConcurrentHashMap<>();
+    private List<String> stationIndex;
+    private Map<String, List<TrainLocation>> stations;
 
     private TrainLocationFactory()
     {
+        // By default use our old data
         try
         {
             PsvReader.load( getClass().
@@ -39,12 +51,7 @@ public enum TrainLocationFactory
                                             s[3],
                                             s[4],
                                             s[5].isEmpty() ? 0 : Long.parseLong( s[5] ),
-                                            "t".equals( s[6] ),
-                                            "t".equals( s[7] ),
-                                            "t".equals( s[8] ),
-                                            s[9],
-                                            s[10].isEmpty() ? 0 : Integer.parseInt( s[10] ),
-                                            s[11].isEmpty() ? 0 : Integer.parseInt( s[11] )
+                                            s[9]
                                     )
             ).
                     forEach( loc ->
@@ -60,6 +67,44 @@ public enum TrainLocationFactory
         catch( IOException ex )
         {
             throw new UncheckedIOException( ex );
+        }
+    }
+
+    /**
+     * Allows us to reload from the timetable
+     * <p>
+     * @param dataSource
+     *                   <p>
+     * @throws SQLException
+     */
+    void reload( DataSource dataSource )
+            throws SQLException
+    {
+        LOG.log( Level.INFO, "Reloading TrainLocations" );
+        try( Connection con = dataSource.getConnection() )
+        {
+            try( Statement s = con.createStatement() )
+            {
+                Map<LocationKey, TrainLocation> newMap = new ConcurrentHashMap<>();
+                SQL.stream( s.executeQuery( "SELECT * FROM timetable.tiploc" ), TrainLocation.fromSQL ).
+                        forEach( loc ->
+                                {
+                                    newMap.put( new TrainLocationID( loc.getId() ), loc );
+                                    newMap.put( new CRS( loc.getCrs() ), loc );
+                                    newMap.put( new NLC( loc.getNlc() ), loc );
+                                    newMap.put( new Stanox( loc.getStanox() ), loc );
+                                    newMap.put( new Tiploc( loc.getTiploc() ), loc );
+                        } );
+                map = newMap;
+
+                // Create the station index
+                stations = getStationStream().
+                        collect( Collectors.groupingBy( TrainLocation::getLocationIndex ) );
+                stationIndex = stations.keySet().
+                        stream().
+                        sorted().
+                        collect( Collectors.toList() );
+            }
         }
     }
 
@@ -135,20 +180,33 @@ public enum TrainLocationFactory
      */
     public Collection<TrainLocation> getStations()
     {
-        return map.entrySet().
-                stream().
-                // Filter just CRS
-                filter( e -> e.getKey() instanceof CRS ).
-                // Filter out X?? codes as they are not stations
-                filter( e -> !e.getKey().
-                        getKey().
-                        startsWith( "X" ) ).
-                // Sort
-                sorted( (a, b) -> a.getValue().
-                        getLocation().
-                        compareTo( b.getValue().
-                                getLocation() ) ).
-                map( Map.Entry::getValue ).
+        return getStationStream().
                 collect( Collectors.toList() );
     }
+
+    public List<String> getStationIndex()
+    {
+        return stationIndex;
+    }
+
+    public List<TrainLocation> getStationIndex( String code )
+    {
+        return stations.getOrDefault( code, Collections.emptyList() );
+    }
+
+    /**
+     * Stream of all Stations
+     * <p>
+     * @return
+     */
+    public Stream<TrainLocation> getStationStream()
+    {
+        return map.entrySet().
+                stream().
+                filter( e -> e.getKey() instanceof CRS ).
+                map( Map.Entry::getValue ).
+                filter( TrainLocation::isStation ).
+                sorted( TrainLocation.COMPARATOR );
+    }
+
 }

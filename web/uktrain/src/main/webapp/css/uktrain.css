@@ -313,3 +313,17 @@ table.wikitable td.netprevlast {
     background: white url("/images/net/KBHFxa.png") no-repeat top left;
     border-right: 1px solid white;
 }
+
+.mapOuter {
+    border: 1px solid black;
+    margin: 1px;
+    padding: 1px;
+}
+.mapAttr {
+    font-size: 0.6em;
+    font-family: Arial,sans-serif;
+    height: 1.5em;
+    background: #fff;
+    color: #000;
+    text-align: right;
+}

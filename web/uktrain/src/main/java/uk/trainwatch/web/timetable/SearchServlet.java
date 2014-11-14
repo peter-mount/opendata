@@ -22,7 +22,7 @@ import uk.trainwatch.nrod.location.TrainLocationFactory;
  * <p>
  * @author Peter T Mount
  */
-@WebServlet( name = "TTSearch", urlPatterns = "/timetable/search" )
+@WebServlet(name = "TTSearch", urlPatterns = "/timetable/search")
 public class SearchServlet
         extends AbstractServlet
 {
@@ -72,6 +72,7 @@ public class SearchServlet
                 LocalDate date = LocalDate.parse( dateStr );
 
                 Map<String, Object> req = request.getRequestScope();
+                req.put( "pageTitle", "UK Time Table" );
                 req.put( "station", loc );
                 req.put( "searchDate", date );
                 req.put( "schedules", ScheduleSQL.getSchedules( loc, date ) );
@@ -98,6 +99,7 @@ public class SearchServlet
     {
         Map<String, Object> req = request.getRequestScope();
 
+        req.put( "pageTitle", "UK Time Table" );
         req.put( "stations", TrainLocationFactory.INSTANCE.getStations() );
 
         request.renderTile( "timetable.home" );

@@ -201,7 +201,18 @@
         <c:choose>
             <c:when test="${location.recordType eq 'LO'}">
                 <tr class="${passClass}">
-                    <td><t:tiplocName value="${location}"/></td>
+                    <td>
+                        <c:choose>
+                            <c:when test="${pass}">
+                                <t:tiplocName value="${location}"/>
+                            </c:when>
+                            <c:otherwise>
+                                <a href="/station/${location.location.key}">
+                                    <t:tiplocName value="${location}"/>
+                                </a>
+                            </c:otherwise>
+                        </c:choose>
+                    </td>
                     <td align="center">${location.platform}</td>
                     <td></td>
                     <c:choose>
@@ -223,7 +234,18 @@
             </c:when>
             <c:when test="${location.recordType eq 'LI'}">
                 <tr class="${passClass}">
-                    <td><t:tiplocName value="${location}"/></td>
+                    <td>
+                        <c:choose>
+                            <c:when test="${pass}">
+                                <t:tiplocName value="${location}"/>
+                            </c:when>
+                            <c:otherwise>
+                                <a href="/station/${location.location.key}">
+                                    <t:tiplocName value="${location}"/>
+                                </a>
+                            </c:otherwise>
+                        </c:choose>
+                    </td>
                     <td align="center">${location.platform}</td>
                     <c:choose>
                         <c:when test="${pass or freight or class5}">
@@ -250,7 +272,18 @@
             </c:when>
             <c:when test="${location.recordType eq 'LT'}">
                 <tr class="${passClass}">
-                    <td><t:tiplocName value="${location}"/></td>
+                    <td>
+                        <c:choose>
+                            <c:when test="${pass}">
+                                <t:tiplocName value="${location}"/>
+                            </c:when>
+                            <c:otherwise>
+                                <a href="/station/${location.location.key}">
+                                    <t:tiplocName value="${location}"/>
+                                </a>
+                            </c:otherwise>
+                        </c:choose>
+                    </td>
                     <td align="center">${location.platform}</td>
                     <c:choose>
                         <c:when test='${pass or freight or class5}'>

@@ -4,6 +4,10 @@
  */
 package uk.trainwatch.nrod.location;
 
+import java.sql.ResultSet;
+import java.util.Comparator;
+import uk.trainwatch.util.sql.SQLFunction;
+
 /**
  *
  * @author peter
@@ -12,41 +16,40 @@ public class TrainLocation
         implements Comparable<TrainLocation>
 {
 
+    public static final SQLFunction<ResultSet, TrainLocation> fromSQL = rs -> new TrainLocation(
+            rs.getLong( 1 ),
+            rs.getString( 6 ),
+            rs.getString( 8 ),
+            rs.getString( 4 ),
+            rs.getString( 2 ),
+            rs.getLong( 7 ),
+            rs.getString( 9 )
+    );
+
+    public static final Comparator<TrainLocation> COMPARATOR = ( a, b ) -> a.getLocation().
+            compareTo( b.getLocation() );
+
     private long id;
     private String location;
     private String crs;
     private String nlc;
     private String tiploc;
     private long stanox;
-    private boolean data;
-    private boolean station;
-    private boolean delay_monitor_point;
     private String notes;
-    int easting;
-    int northing;
 
     public TrainLocation()
     {
     }
 
-    TrainLocation( long id, String location, String crs, String nlc, String tiploc, long stanox,
-                   boolean station,
-                   boolean delay_monitor_point,
-                   boolean data,
-                   String notes,
-                   int easting,
-                   int norting )
+    TrainLocation( long id, String location, String crs, String nlc, String tiploc, long stanox, String notes )
     {
         this.id = id;
-        this.location = location;
-        this.crs = crs;
-        this.nlc = nlc;
-        this.tiploc = tiploc;
+        this.location = location == null ? null : location.trim();
+        this.crs = crs == null ? null : crs.trim();
+        this.nlc = nlc == null ? null : nlc.trim();
+        this.tiploc = tiploc == null ? null : tiploc.trim();
         this.stanox = stanox;
-        this.data = data;
-        this.station = station;
-        this.delay_monitor_point = delay_monitor_point;
-        this.notes = notes;
+        this.notes = notes == null ? null : notes.trim();
     }
 
     /**
@@ -63,30 +66,35 @@ public class TrainLocation
      * Is this a station or some other point on the rail network
      * <p/>
      * @return true for a station, false for an intermediate point
+     * <p>
      */
     public boolean isStation()
     {
-        return station;
+        return crs != null && !crs.startsWith( "X" );
     }
 
     /**
      * Does this location have data associated with it
      * <p/>
      * @return
+     * @deprecated
      */
+    @Deprecated
     public boolean isData()
     {
-        return data;
+        return false;
     }
 
     /**
      * Is this location also a delayed monitoring point
      * <p/>
      * @return
+     * @deprecated
      */
+    @Deprecated
     public boolean isDelay_monitor_point()
     {
-        return delay_monitor_point;
+        return false;
     }
 
     public long getId()
@@ -97,6 +105,11 @@ public class TrainLocation
     public String getLocation()
     {
         return location;
+    }
+
+    public String getLocationIndex()
+    {
+        return location == null || location.isEmpty() ? "?" : location.substring( 0, 1 );
     }
 
     public String getCrs()
@@ -117,16 +130,6 @@ public class TrainLocation
     public long getStanox()
     {
         return stanox;
-    }
-
-    public int getEasting()
-    {
-        return easting;
-    }
-
-    public int getNorthing()
-    {
-        return northing;
     }
 
     @Override

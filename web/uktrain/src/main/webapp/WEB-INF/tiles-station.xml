@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+<tiles-definitions>
+    
+    <definition name="station.home" extends="layout.main">
+        <put-attribute name="title" value="Rail Station Index" />
+        <put-attribute name="body" value=".station.home" />
+        <put-attribute name="javascript" value="/common/blank.jsp" />
+    </definition>
+    <definition name=".station.home" extends="layout.1col">
+        <put-attribute name="center" value="/common/station/home.jsp" />
+    </definition>
+    
+    <definition name="station.info" extends="layout.main">
+        <put-attribute name="title" value="Rail Station Information" />
+        <put-attribute name="body" value=".station.info" />
+        <put-attribute name="javascript" value="/common/jquery_map.jsp" />
+        <put-attribute name="footer" value="layout.footer.map" />
+    </definition>
+    <definition name=".station.info" extends="layout.2col-right">
+        <put-attribute name="center" value=".station.info.body" />
+        <put-attribute name="right" value=".station.info.right" />
+    </definition>
+    <definition name=".station.info.right" template="/common/station/info.jsp">
+        <put-attribute name="details" value="/common/station/trainLocation.jsp" />
+    </definition>
+    <definition name=".station.info.body" template="/common/station/detail.jsp">
+        <put-attribute name="map" value="/common/station/map.jsp" />
+    </definition>
+    
+</tiles-definitions>

@@ -4,10 +4,18 @@
     Author     : Peter T Mount
 --%><%@page contentType="text/html" pageEncoding="UTF-8"%><!DOCTYPE html>
 <html>
+    <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
     <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title><tiles:insertAttribute name="title"/></title>
+        <title>
+            <c:choose>
+                <c:when test="${not empty pageTitle}">${pageTitle}</c:when>
+                <c:otherwise>
+                    <tiles:insertAttribute name="title"/>
+                </c:otherwise>
+            </c:choose>
+        </title>
         <link rel="stylesheet" href="/css/tcmain.css" />
         <link rel="stylesheet" href="/css/uktrain.css" />
         <tiles:insertAttribute name="javascript"/>

@@ -20,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.JsonValue;
@@ -398,10 +399,6 @@ public class TimeUtils
     /**
      * Converts a {@link LocalDate} into a database date used in the dim_date
      * table.
-     * <p>
-     * @param date
-     *             <p>
-     * @return
      */
     public static final Function<LocalDate, Long> toDBDate = date -> (long) ((date.getYear() * 400) + date.getDayOfYear());
     /**
@@ -418,4 +415,23 @@ public class TimeUtils
     public static final Function<LocalDateTime, LocalDate> toRailDate = t -> t.minusHours( 2 ).
             toLocalDate();
 
+    /**
+     * Returns a {@link Predicate} that returns true if a {@link LocalDateTime} is between two others.
+     * <p>
+     * @param start Start time
+     * @param end   End time
+     * <p>
+     * @return predicate
+     * <p>
+     * @throws IllegalArgumentException if start is not before end
+     */
+    public static Predicate<LocalDateTime> isWithin( LocalDateTime start, LocalDateTime end )
+    {
+        if( !start.isBefore( end ) )
+        {
+            throw new IllegalArgumentException( "Start " + start + " must be before end " + end );
+        }
+
+        return dt -> !dt.isBefore( start ) && dt.isBefore( end );
+    }
 }

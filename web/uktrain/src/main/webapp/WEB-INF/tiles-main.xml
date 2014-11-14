@@ -28,6 +28,13 @@
         <put-attribute name="footer.right" value="/common/layout/footer/footer_right.jsp" />
     </definition>
     
+    <!-- footer for when showing maps -->
+    <definition name="layout.footer.map" template="/common/layout/footer/footer.jsp">
+        <put-attribute name="footer.left" value="/common/layout/footer/footer_left_map.jsp" />
+        <put-attribute name="footer.center" value="/common/layout/footer/footer_center.jsp" />
+        <put-attribute name="footer.right" value="/common/layout/footer/footer_right.jsp" />
+    </definition>
+    
     <!-- Cookie notice -->
     <definition name="layout.cookie" template="/common/layout/cookie/cookie.jsp"/>
     
