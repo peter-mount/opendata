@@ -25,11 +25,12 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.IntSummaryStatistics;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import uk.trainwatch.util.TimeUtils;
 import uk.trainwatch.util.sql.SQL;
-import static uk.trainwatch.util.sql.SQL.INT_LOOKUP;
 
 /**
  *
@@ -122,6 +123,30 @@ public enum PerformanceManager
                 stat.accept( rs.getInt( 2 ) );
             }
             return stat;
+        }
+    }
+
+    /**
+     * Returns a map keyed by operator id of DailyPPM's for a month
+     * <p>
+     * @param year
+     * @param month
+     *              <p>
+     * @return
+     *         <p>
+     * @throws SQLException
+     */
+    public Map<Integer, List<DailyPPM>> getMonthsDailyPPM( int year, int month )
+            throws SQLException
+    {
+        try( Connection con = dataSource.getConnection();
+             PreparedStatement s = con.prepareStatement(
+                     "SELECT d.dt, p.operator,p.ppm FROM rtppm.daily p INNER JOIN datetime.dim_date d ON d.dt_id=p.dt WHERE d.year=? AND d.month=? ORDER BY p.dt" ) )
+        {
+            s.setInt( 1, year );
+            s.setInt( 2, month );
+            return SQL.stream( s, rs -> new DailyPPM( rs.getDate( 1 ), rs.getInt( 2 ), rs.getInt( 3 ) ) ).
+                    collect( Collectors.groupingBy( DailyPPM::getId ) );
         }
     }
 

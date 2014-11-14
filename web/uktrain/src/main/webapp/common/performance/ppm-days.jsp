@@ -9,9 +9,12 @@
 <p>
     Data is available for the following days in ${month} <a href="/performance/ppm/${date.year}">${date.year}</a>
 </p>
+<c:set var="valid" value="false"/>
 <table class="wikitable">
     <tr>
-        <th colspan="7">${month} ${date.year}</th>
+        <th><a href="/performance/ppm/${prevMonth.year}/${prevMonth.month.value}">&lt;&lt;</a></th>
+        <th colspan="5">${month} ${date.year}</th>
+        <th><a href="/performance/ppm/${nextMonth.year}/${nextMonth.month.value}">&gt;&gt;</a></th>
     </tr>
     <tr>
         <c:forEach var="dow" items="${down}">
@@ -34,6 +37,7 @@
                 <c:choose>
                     <c:when test="${day.dayOfMonth>=days.min and day.dayOfMonth<=days.max}">
                         <a href='/performance/ppm/${day.year}/${day.month.value}/${day.dayOfMonth}'>${day.dayOfMonth}</a>
+                        <c:set var="valid" value="true"/>
                     </c:when>
                     <c:otherwise>
                         ${day.dayOfMonth}
@@ -50,3 +54,46 @@
         </c:choose>
     </c:forEach>
 </table>
+
+<c:if test="${valid}">
+    <h2>Performance by operator for ${month} ${date.year}</h2>
+
+    Public Performance Measure for <select id="operator"></select>
+
+    <div id="performance" style="margin:2px;padding:0;background: #fff;"></div>
+    <script>
+        $('#performance').css({'height': ($('body').width() * 9 / 16) + 'px'});
+        var perf = {};
+        <c:forEach var="toc" varStatus="stoc" items="${operators}">
+            <c:forEach var="ppm" varStatus="stat" items="${monthppm.get(toc.id)}">
+                <c:if test="${stat.first}">
+        $('#operator').append($('<option></option>').val('t${toc.id}').text('${toc.display}'));
+        perf['t${toc.id}'] = [
+                </c:if>
+        [${ppm.timestamp},${ppm.value}]
+                <c:if test="${not stat.last}">,</c:if>
+                <c:if test="${stat.last}">
+        ];
+                </c:if>
+            </c:forEach>
+        </c:forEach>
+        var replot = function () {
+            $.plot('#performance', [{
+                    data: perf[$('#operator').val()],
+                    lines: {show: true}
+                }], {
+                xaxis: {
+                    mode: 'time',
+                    min: ${startDate},
+                    max: ${endDate}
+                },
+                yaxis: {
+                    min: 0,
+                    max: 100
+                }
+            });
+        };
+        $('#operator').change(replot).val('t2');
+        replot();
+    </script>
+</c:if>

@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -137,34 +138,51 @@ public class PPMCurrentServlet
     {
         try
         {
+            // Unlike other pages we'll allow date of 0 as we'll show just the calendar
             IntSummaryStatistics stat = PerformanceManager.INSTANCE.getDays( year, month );
-            if( stat.getMin() == 0 && stat.getMax() == 0 )
+
+            Map<String, Object> req = request.getRequestScope();
+            LocalDate startDate = LocalDate.of( year, month, 1 );
+            setDate( req, startDate );
+
+            req.put( "prevMonth", startDate.minusMonths( 1 ) );
+            req.put( "nextMonth", startDate.plusMonths( 1 ) );
+
+            // Setup the calendar
+            req.put( "dow", DayOfWeek.values() );
+            // Day names
+            req.put( "down", Stream.of( DayOfWeek.values() ).
+                     map( d -> d.getDisplayName( TextStyle.SHORT, Locale.ENGLISH ) ).
+                     collect( Collectors.toList() ) );
+
+            // Calendar
+            LocalDate dateEnd = startDate.plusMonths( 1 ).
+                    minusDays( 1 );
+            int end = dateEnd.getDayOfMonth();
+
+            List<LocalDate> days = new ArrayList<>();
+            for( int i = 1; i <= end; i++ )
             {
-                request.sendError( HttpServletResponse.SC_NOT_FOUND );
+                days.add( LocalDate.of( year, month, i ) );
             }
-            else
+            req.put( "calendar", days );
+
+            req.put( "days", stat );
+
+            // Needed for the graphs - only valid if we have data
+            if( stat.getMin() != 0 && stat.getMax() != 0 )
             {
-                Map<String, Object> req = request.getRequestScope();
-                LocalDate date = LocalDate.of( year, month, 1 );
-                setDate( req, date );
-
-                // Setup the calendar
-                req.put( "dow", DayOfWeek.values() );
-                // Day names
-                req.put( "down", Stream.of( DayOfWeek.values() ).
-                         map( d -> d.getDisplayName( TextStyle.SHORT, Locale.ENGLISH ) ).
-                         collect( Collectors.toList() ) );
-
-                // Calendar
-                int end = date.plusMonths( 1).minusDays( 1).getDayOfMonth();
-                List<LocalDate> days = new ArrayList<>();
-                for( int i=1;i<=end;i++)
-                    days.add( LocalDate.of( year, month, i));
-                req.put( "calendar", days);
-
-                req.put( "days", stat );
-                request.renderTile( "performance.ppm.days" );
+                req.put( "operators", OperatorManager.INSTANCE.getOperators() );
+                req.put( "monthppm", PerformanceManager.INSTANCE.getMonthsDailyPPM( year, month ) );
+                req.put( "startDate", TimeUtils.getLocalDateTime( startDate ).
+                         toInstant( ZoneOffset.UTC ).
+                         toEpochMilli() );
+                req.put( "endDate", TimeUtils.getLocalDateTime( dateEnd ).
+                         toInstant( ZoneOffset.UTC ).
+                         toEpochMilli() );
             }
+
+            request.renderTile( "performance.ppm.days" );
         }
         catch( NoSuchElementException |
                SQLException ex )

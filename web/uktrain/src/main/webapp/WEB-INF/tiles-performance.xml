@@ -7,7 +7,7 @@
     <definition name="performance.home" extends="layout.main">
         <put-attribute name="title" value="Rail Operator Performance" />
         <put-attribute name="body" value=".performance.home" />
-        <put-attribute name="javascript" value="/common/jquery.jsp" />
+        <put-attribute name="javascript" value="/common/blank.jsp" />
     </definition>
     <definition name=".performance.home" extends="layout.1col">
         <put-attribute name="center" value="/common/performance/home.jsp" />
@@ -42,6 +42,7 @@
     <definition name="performance.ppm.days" extends="layout.main">
         <put-attribute name="title" value="Public Performance Measure" />
         <put-attribute name="body" value=".performance.ppm.days" />
+        <put-attribute name="javascript" value="/common/jquery_flot.jsp" />
     </definition>
     <definition name=".performance.ppm.days" extends="layout.1col">
         <put-attribute name="center" value="/common/performance/ppm-days.jsp" />
