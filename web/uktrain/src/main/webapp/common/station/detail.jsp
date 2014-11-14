@@ -22,7 +22,7 @@
     <c:forEach var="schedule" items="${departures}">
         <tr>
             <c:forEach var="loc" items="${schedule.locations}">
-                <c:if test="${loc.location.key eq location.tiploc}">
+                <c:if test="${loc.location.key eq location.tiploc and loc.recordType ne 'CR'}">
                     <td align="center"><t:time value="${loc.publicDeparture}"/></td>
                     <td align="center">${loc.platform}</td>
                 </c:if>
