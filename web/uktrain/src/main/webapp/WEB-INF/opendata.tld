@@ -22,7 +22,7 @@
     -->
   <tag>
     <name>time</name>
-    <tag-class>uk.trainwatch.web.LocalTimeTag</tag-class>
+    <tag-class>uk.trainwatch.web.tags.LocalTimeTag</tag-class>
     <body-content>empty</body-content>
     <attribute>
       <name>value</name>
@@ -38,7 +38,7 @@
   </tag>
   <tag>
     <name>stpInd</name>
-    <tag-class>uk.trainwatch.web.StpIndicatorTag</tag-class>
+    <tag-class>uk.trainwatch.web.tags.StpIndicatorTag</tag-class>
     <body-content>empty</body-content>
     <attribute>
       <name>value</name>
@@ -49,7 +49,7 @@
   </tag>
   <tag>
     <name>tiplocName</name>
-    <tag-class>uk.trainwatch.web.TiplocNameTag</tag-class>
+    <tag-class>uk.trainwatch.web.tags.TiplocNameTag</tag-class>
     <body-content>empty</body-content>
     <attribute>
       <name>value</name>
