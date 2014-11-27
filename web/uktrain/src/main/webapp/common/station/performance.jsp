@@ -36,8 +36,8 @@
             <td align="right" style="width:4em;">${stat.delayCount}</td>
             <td align="right" style="width:4em;"><t:delay value="${stat.minDelay}"/></td>
             <td align="right" style="width:4em;"><t:delay value="${stat.maxDelay}"/></td>
-            <td align="right" style="width:4em;"><t:delay value="${stat.aveDelay}"/></td>
             <td align="right" style="width:4em;"><t:delay value="${stat.totalDelay}"/></td>
+            <td align="right" style="width:4em;"><t:delay value="${stat.aveDelay}"/></td>
             <td align="right" style="width:4em;">${stat.earlyCount}</td>
             <td align="right" style="width:4em;"><t:delay value="${stat.maxEarly}"/></td>
         </tr>

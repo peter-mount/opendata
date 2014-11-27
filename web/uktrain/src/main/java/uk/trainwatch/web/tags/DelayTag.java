@@ -34,7 +34,7 @@ public class DelayTag
             int hours = value / 3600;
 
             w.print( String.format(
-                    hours > 0 ? "%1$d:%2$02d%3$s" : mins > 0 ? "%2$d%3$s" : "%3$s",
+                    hours > 0 ? "%1$dh%2$02d%3$s" : mins > 0 ? "%2$d%3$s" : "%3$s",
                     hours,
                     mins,
                     half ? "&frac12;" : "&emsp;"
