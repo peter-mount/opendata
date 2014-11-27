@@ -83,6 +83,7 @@ public enum StationPositionManager
                         map( distanceCalculator ).
                         filter( rangeFilter ).
                         sorted( Distance.COMPARATOR ).
+                        limit( 10 ).
                         collect( Collectors.toList() );
             }
         }
