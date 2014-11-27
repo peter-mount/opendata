@@ -13,7 +13,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -22,13 +21,9 @@ import uk.trainwatch.gis.StationPosition;
 import uk.trainwatch.gis.StationPositionManager;
 import uk.trainwatch.nrod.location.TrainLocation;
 import uk.trainwatch.nrod.location.TrainLocationFactory;
-import uk.trainwatch.nrod.timetable.cif.record.IntermediateLocation;
-import uk.trainwatch.nrod.timetable.cif.record.Location;
-import uk.trainwatch.nrod.timetable.cif.record.OriginLocation;
-import uk.trainwatch.nrod.timetable.cif.record.RecordType;
-import uk.trainwatch.nrod.timetable.cif.record.TerminatingLocation;
-import uk.trainwatch.nrod.timetable.model.Schedule;
+import uk.trainwatch.util.Streams;
 import uk.trainwatch.util.TimeUtils;
+import uk.trainwatch.web.performance.StationPerformance;
 import uk.trainwatch.web.timetable.ScheduleSQL;
 
 /**
@@ -53,23 +48,7 @@ public class StationServlet
         if( loc == null )
         {
             // See if they have used an alternate code
-            loc = TrainLocationFactory.INSTANCE.getTrainLocationByCrs( tiploc );
-            if( loc == null )
-            {
-                loc = TrainLocationFactory.INSTANCE.getTrainLocationByNlc( tiploc );
-            }
-            if( loc == null )
-            {
-                try
-                {
-                    loc = TrainLocationFactory.INSTANCE.getTrainLocationByStanox( Long.parseLong( tiploc ) );
-                }
-                catch( NumberFormatException ex )
-                {
-                    // Treat it as not found
-                    loc = null;
-                }
-            }
+            loc = TrainLocationFactory.INSTANCE.resolveTrainLocation( tiploc );
 
             if( loc == null )
             {
@@ -99,10 +78,11 @@ public class StationServlet
         {
             showMap( req, loc );
             getDepartures( req, loc );
+            getPerformance( req, loc );
         }
         catch( SQLException ex )
         {
-
+            ex.printStackTrace();
         }
 
         request.renderTile( "station.info" );
@@ -147,5 +127,11 @@ public class StationServlet
             req.put( "stationPosition", station );
             req.put( "nearBy", StationPositionManager.INSTANCE.nearby( station, 3 ) );
         }
+    }
+
+    private void getPerformance( Map<String, Object> req, TrainLocation loc )
+            throws SQLException
+    {
+        req.put( "performance", StationPerformance.getStationPerfStat( LocalDate.now(), loc ) );
     }
 }

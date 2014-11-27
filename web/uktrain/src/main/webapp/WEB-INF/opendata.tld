@@ -58,4 +58,15 @@
       <type>java.lang.Object</type>
     </attribute>
   </tag>
+  <tag>
+    <name>delay</name>
+    <tag-class>uk.trainwatch.web.tags.DelayTag</tag-class>
+    <body-content>empty</body-content>
+    <attribute>
+      <name>value</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>int</type>
+    </attribute>
+  </tag>
 </taglib>

@@ -16,9 +16,13 @@ CREATE TABLE perf_stanox_all (
     dt_stanox   BIGINT NOT NULL REFERENCES report.dim_date_stanox(dt_stanox),
     trainCount  INTEGER,
     totalDelay  INTEGER,
+    delayCount  INTEGER,
     minDelay    INTEGER,
     maxDelay    INTEGER,
     aveDelay    INTEGER,
+    earlyCount  INTEGER,
+    maxEarly    INTEGER,
+    ontime      INTEGER,
     PRIMARY KEY (dt_stanox)
 );
 
@@ -35,10 +39,14 @@ CREATE TABLE perf_stanox_toc (
     dt_stanox   BIGINT NOT NULL REFERENCES report.dim_date_stanox(dt_stanox),
     operatorid  INTEGER NOT NULL REFERENCES report.dim_operator(operatorid),
     trainCount  INTEGER,
+    delayCount  INTEGER,
     totalDelay  INTEGER,
     minDelay    INTEGER,
     maxDelay    INTEGER,
     aveDelay    INTEGER,
+    earlyCount  INTEGER,
+    maxEarly    INTEGER,
+    ontime      INTEGER,
     PRIMARY KEY (dt_stanox,operatorid)
 );
 
@@ -59,10 +67,14 @@ CREATE TABLE perf_stanox_toc_class (
     operatorid  INTEGER NOT NULL REFERENCES report.dim_operator(operatorid),
     trainClass  INTEGER,
     trainCount  INTEGER,
+    delayCount  INTEGER,
     totalDelay  INTEGER,
     minDelay    INTEGER,
     maxDelay    INTEGER,
     aveDelay    INTEGER,
+    earlyCount  INTEGER,
+    maxEarly    INTEGER,
+    ontime      INTEGER,
     PRIMARY KEY (dt_stanox,operatorid, trainClass)
 );
 
@@ -88,7 +100,7 @@ CREATE INDEX perf_stanox_toc_class_oc ON perf_stanox_toc_class(operatorid,trainc
 --
 -- ======================================================================
 
-CREATE OR REPLACE FUNCTION perf_stanox
+CREATE OR REPLACE FUNCTION report.perf_stanox
     ( pdts BIGINT, popid INTEGER, ptclass INTEGER, pdelay INTEGER )
 RETURNS VOID AS $$
 DECLARE
@@ -98,51 +110,123 @@ BEGIN
     -- All operators
     SELECT * INTO rec FROM report.perf_stanox_all WHERE dt_stanox = pdts;
     IF FOUND THEN
-        UPDATE report.perf_stanox_all
-            SET trainCount = rec.trainCount + 1,
-                totaldelay = rec.totaldelay + pdelay,
-                minDelay = LEAST( rec.minDelay, pdelay),
-                maxDelay = GREATEST( rec.maxDelay, pdelay),
-                aveDelay = totaldelay / traincount
-            WHERE dt_stanox = pdts;
+        IF pdelay = 0 THEN
+            UPDATE report.perf_stanox_all
+                SET trainCount = rec.trainCount + 1,
+                    ontime = rec.ontime + 1
+                WHERE dt_stanox = pdts;
+        ELSIF pdelay > 0 THEN
+            UPDATE report.perf_stanox_all
+                SET trainCount = rec.trainCount + 1,
+                    delayCount = rec.delayCount + 1,
+                    totaldelay = rec.totaldelay + pdelay,
+                    minDelay = LEAST( rec.minDelay, pdelay),
+                    maxDelay = GREATEST( rec.maxDelay, pdelay),
+                    aveDelay = totaldelay / delayCount
+                WHERE dt_stanox = pdts;
+        ELSE
+            UPDATE report.perf_stanox_all
+                SET trainCount = rec.trainCount + 1,
+                    earlyCount = rec.earlyCount + 1,
+                    maxEarly = GREATEST( rec.maxEarly, -pdelay )
+                WHERE dt_stanox = pdts;
+        END IF;
     ELSE
-        INSERT INTO report.perf_stanox_all
-            (dt_stanox, trainCount, totalDelay, minDelay, maxDelay, aveDelay)
-            VALUES ( pdts, 1, pdelay,  pdelay,  pdelay,  pdelay);
+        IF pdelay = 0 THEN
+            INSERT INTO report.perf_stanox_all
+                (dt_stanox, trainCount, ontime)
+                VALUES ( pdts, 1, 1);
+        ELSIF pdelay > 0 THEN
+            INSERT INTO report.perf_stanox_all
+                (dt_stanox, trainCount, delayCount, totalDelay, minDelay, maxDelay, aveDelay)
+                VALUES ( pdts, 1, 1, pdelay,  pdelay,  pdelay,  pdelay);
+        ELSE
+            INSERT INTO report.perf_stanox_all
+                (dt_stanox, trainCount, earlyCount, maxEarly)
+                VALUES ( pdts, 1, 1, -pdelay);
+        END IF;
     END IF;
 
     -- By operator
     SELECT * INTO rec FROM report.perf_stanox_toc
         WHERE dt_stanox = pdts AND operatorid = popid;
     IF FOUND THEN
-        UPDATE report.perf_stanox_toc
-            SET trainCount = rec.trainCount + 1,
-                totaldelay = rec.totaldelay + pdelay,
-                minDelay = LEAST( rec.minDelay, pdelay),
-                maxDelay = GREATEST( rec.maxDelay, pdelay),
-                aveDelay = totaldelay / traincount
-            WHERE dt_stanox = pdts AND operatorid = popid;
+        IF pdelay = 0 THEN
+            UPDATE report.perf_stanox_toc
+                SET trainCount = rec.trainCount + 1,
+                    ontime = rec.ontime + 1
+                WHERE dt_stanox = pdts AND operatorid = popid;
+        ELSIF pdelay > 0 THEN
+            UPDATE report.perf_stanox_toc
+                SET trainCount = rec.trainCount + 1,
+                    delayCount = rec.delayCount + 1,
+                    totaldelay = rec.totaldelay + pdelay,
+                    minDelay = LEAST( rec.minDelay, pdelay),
+                    maxDelay = GREATEST( rec.maxDelay, pdelay),
+                    aveDelay = totaldelay / delayCount
+                WHERE dt_stanox = pdts AND operatorid = popid;
+        ELSE
+            UPDATE report.perf_stanox_toc
+                SET trainCount = rec.trainCount + 1,
+                    earlycount = rec.earlycount + 1,
+                    maxEarly = GREATEST( rec.maxEarly, -pdelay)
+                WHERE dt_stanox = pdts AND operatorid = popid;
+        END IF;
     ELSE
-        INSERT INTO report.perf_stanox_toc
-            (dt_stanox, operatorid, trainCount, totalDelay, minDelay, maxDelay, aveDelay)
-            VALUES ( pdts, popid, 1, pdelay,  pdelay,  pdelay,  pdelay);
+        IF pdelay = 0 THEN
+            INSERT INTO report.perf_stanox_toc
+                (dt_stanox, operatorid, trainCount, ontime)
+                VALUES ( pdts, popid, 1, 1);
+        ELSIF pdelay > 0 THEN
+            INSERT INTO report.perf_stanox_toc
+                (dt_stanox, operatorid, trainCount, delayCount, totalDelay, minDelay, maxDelay, aveDelay)
+                VALUES ( pdts, popid, 1, 1, pdelay,  pdelay,  pdelay,  pdelay);
+        ELSE
+            INSERT INTO report.perf_stanox_toc
+                (dt_stanox, operatorid, trainCount, earlyCount, maxEarly)
+                VALUES ( pdts, popid, 1, 1, -pdelay);
+        END IF;
     END IF;
 
     -- By operator & class
     SELECT * INTO rec FROM report.perf_stanox_toc_class
         WHERE dt_stanox = pdts AND operatorid = popid AND trainclass = ptclass;
     IF FOUND THEN
-        UPDATE report.perf_stanox_toc_class
-            SET trainCount = rec.trainCount + 1,
-                totaldelay = rec.totaldelay + pdelay,
-                minDelay = LEAST( rec.minDelay, pdelay),
-                maxDelay = GREATEST( rec.maxDelay, pdelay),
-                aveDelay = totaldelay / traincount
-            WHERE dt_stanox = pdts AND operatorid = popid AND trainclass = ptclass;
+        IF pdelay = 0 THEN
+            UPDATE report.perf_stanox_toc_class
+                SET trainCount = rec.trainCount + 1,
+                    ontime = ontime + 1
+                WHERE dt_stanox = pdts AND operatorid = popid AND trainclass = ptclass;
+        ELSIF pdelay > 0 THEN
+            UPDATE report.perf_stanox_toc_class
+                SET trainCount = rec.trainCount + 1,
+                    delayCount = rec.delayCount + 1,
+                    totaldelay = rec.totaldelay + pdelay,
+                    minDelay = LEAST( rec.minDelay, pdelay),
+                    maxDelay = GREATEST( rec.maxDelay, pdelay),
+                    aveDelay = totaldelay / delayCount
+                WHERE dt_stanox = pdts AND operatorid = popid AND trainclass = ptclass;
+        ELSE
+            UPDATE report.perf_stanox_toc_class
+                SET trainCount = rec.trainCount + 1,
+                    earlycount = rec.earlycount + 1,
+                    maxEarly = GREATEST( rec.maxEarly, -pdelay)
+                WHERE dt_stanox = pdts AND operatorid = popid AND trainclass = ptclass;
+        END IF;
     ELSE
-        INSERT INTO report.perf_stanox_toc_class
-            (dt_stanox, operatorid, trainClass, trainCount, totalDelay, minDelay, maxDelay, aveDelay)
-            VALUES ( pdts, popid, ptclass, 1, pdelay,  pdelay,  pdelay,  pdelay);
+        IF pdelay = 0 THEN
+            INSERT INTO report.perf_stanox_toc_class
+                (dt_stanox, operatorid, trainClass, trainCount, ontime)
+                VALUES ( pdts, popid, ptclass, 1, 1);
+        ELSIF pdelay > 0 THEN
+            INSERT INTO report.perf_stanox_toc_class
+                (dt_stanox, operatorid, trainClass, delayCount, trainCount, totalDelay, minDelay, maxDelay, aveDelay)
+                VALUES ( pdts, popid, ptclass, 1, 1, pdelay,  pdelay,  pdelay,  pdelay);
+        ELSE
+            INSERT INTO report.perf_stanox_toc_class
+                (dt_stanox, operatorid, trainClass, trainCount, earlyCount, maxEarly)
+                VALUES ( pdts, popid, ptclass, 1, 1, -pdelay);
+        END IF;
     END IF;
 
 END;

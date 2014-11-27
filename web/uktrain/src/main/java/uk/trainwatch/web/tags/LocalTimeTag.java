@@ -39,7 +39,7 @@ public class LocalTimeTag
 
                 if( working )
                 {
-                    w.print( half ? "&frac12" : " " );
+                    w.print( half ? "&frac12;" : "&emsp;" );
                 }
             }
             catch( IOException ex )

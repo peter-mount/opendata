@@ -23,6 +23,7 @@
         <put-attribute name="center" value=".station.info.center" />
         <put-attribute name="left" value=".station.info.left" />
         <put-attribute name="right" value=".station.info.right" />
+        <put-attribute name="performance" value="/common/station/performance.jsp" />
     </definition>
     <definition name=".station.info.left" template="/common/station/left.jsp">
         <put-attribute name="departures" value="/common/station/departures.jsp" />

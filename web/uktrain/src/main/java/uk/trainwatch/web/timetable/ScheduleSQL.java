@@ -20,7 +20,6 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -77,8 +76,7 @@ public class ScheduleSQL
                 {
                     try
                     {
-                        Context ctx = new InitialContext();
-                        dataSource = (DataSource) ctx.lookup( "java:/comp/env/jdbc/rail" );
+                        dataSource = InitialContext.doLookup( "java:/comp/env/jdbc/rail" );
                     }
                     catch( NamingException ex )
                     {
