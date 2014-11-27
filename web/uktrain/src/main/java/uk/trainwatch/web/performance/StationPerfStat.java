@@ -71,7 +71,8 @@ public class StationPerfStat
         // Sort with "All" first then by operator name
         String an = a.getOperator();
         String bn = b.getOperator();
-        return "All".equals( an ) ? -1 : "All".equals( bn ) ? 1 : an.compareTo( bn );
+        int r = "All".equals( an ) ? -1 : "All".equals( bn ) ? 1 : an.compareTo( bn );
+        return r == 0 ? Integer.compare( a.getTrainClass(), b.getTrainClass() ) : r;
     };
 
     private long stanox;
