@@ -121,8 +121,7 @@ BEGIN
                     delayCount = rec.delayCount + 1,
                     totaldelay = rec.totaldelay + pdelay,
                     minDelay = LEAST( rec.minDelay, pdelay),
-                    maxDelay = GREATEST( rec.maxDelay, pdelay),
-                    aveDelay = totaldelay / delayCount
+                    maxDelay = GREATEST( rec.maxDelay, pdelay)
                 WHERE dt_stanox = pdts;
         ELSE
             UPDATE report.perf_stanox_all
@@ -162,8 +161,7 @@ BEGIN
                     delayCount = rec.delayCount + 1,
                     totaldelay = rec.totaldelay + pdelay,
                     minDelay = LEAST( rec.minDelay, pdelay),
-                    maxDelay = GREATEST( rec.maxDelay, pdelay),
-                    aveDelay = totaldelay / delayCount
+                    maxDelay = GREATEST( rec.maxDelay, pdelay)
                 WHERE dt_stanox = pdts AND operatorid = popid;
         ELSE
             UPDATE report.perf_stanox_toc
@@ -203,8 +201,7 @@ BEGIN
                     delayCount = rec.delayCount + 1,
                     totaldelay = rec.totaldelay + pdelay,
                     minDelay = LEAST( rec.minDelay, pdelay),
-                    maxDelay = GREATEST( rec.maxDelay, pdelay),
-                    aveDelay = totaldelay / delayCount
+                    maxDelay = GREATEST( rec.maxDelay, pdelay)
                 WHERE dt_stanox = pdts AND operatorid = popid AND trainclass = ptclass;
         ELSE
             UPDATE report.perf_stanox_toc_class

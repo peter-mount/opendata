@@ -34,10 +34,20 @@
             <td align="right" style="width:4em;">${stat.trainCount}</td>
             <td align="right" style="width:4em;">${stat.ontime}</td>
             <td align="right" style="width:4em;">${stat.delayCount}</td>
-            <td align="right" style="width:4em;"><t:delay value="${stat.minDelay}"/></td>
-            <td align="right" style="width:4em;"><t:delay value="${stat.maxDelay}"/></td>
-            <td align="right" style="width:4em;"><t:delay value="${stat.totalDelay}"/></td>
-            <td align="right" style="width:4em;"><t:delay value="${stat.aveDelay}"/></td>
+            <c:choose>
+                <c:when test="${stat.delayCount==0}">
+                    <td align="right" style="width:4em;"></td>
+                    <td align="right" style="width:4em;"></td>
+                    <td align="right" style="width:4em;"></td>
+                    <td align="right" style="width:4em;"></td>
+                </c:when>
+                <c:otherwise>
+                    <td align="right" style="width:4em;"><t:delay value="${stat.minDelay}"/></td>
+                    <td align="right" style="width:4em;"><t:delay value="${stat.maxDelay}"/></td>
+                    <td align="right" style="width:4em;"><t:delay value="${stat.totalDelay}"/></td>
+                    <td align="right" style="width:4em;"><t:delay value="${stat.aveDelay}"/></td>
+                </c:otherwise>
+            </c:choose>
             <td align="right" style="width:4em;">${stat.earlyCount}</td>
             <td align="right" style="width:4em;"><t:delay value="${stat.maxEarly}"/></td>
         </tr>

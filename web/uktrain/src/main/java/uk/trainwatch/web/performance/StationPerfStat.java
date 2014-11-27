@@ -8,6 +8,7 @@ package uk.trainwatch.web.performance;
 import java.sql.ResultSet;
 import java.util.Comparator;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import uk.trainwatch.util.sql.SQLFunction;
 
 /**
@@ -27,7 +28,6 @@ public class StationPerfStat
             rs.getInt( "totaldelay" ),
             rs.getInt( "mindelay" ),
             rs.getInt( "maxdelay" ),
-            rs.getInt( "avedelay" ),
             rs.getInt( "earlycount" ),
             rs.getInt( "maxEarly" ),
             rs.getInt( "ontime" )
@@ -42,7 +42,6 @@ public class StationPerfStat
             rs.getInt( "totaldelay" ),
             rs.getInt( "mindelay" ),
             rs.getInt( "maxdelay" ),
-            rs.getInt( "avedelay" ),
             rs.getInt( "earlycount" ),
             rs.getInt( "maxEarly" ),
             rs.getInt( "ontime" )
@@ -57,7 +56,6 @@ public class StationPerfStat
             rs.getInt( "totaldelay" ),
             rs.getInt( "mindelay" ),
             rs.getInt( "maxdelay" ),
-            rs.getInt( "avedelay" ),
             rs.getInt( "earlycount" ),
             rs.getInt( "maxEarly" ),
             rs.getInt( "ontime" )
@@ -83,14 +81,13 @@ public class StationPerfStat
     private int totalDelay;
     private int minDelay;
     private int maxDelay;
-    private int aveDelay;
     private int earlyCount;
     private int maxEarly;
     private int ontime;
 
     public StationPerfStat( long stanox, String operator, int trainClass,
                             int trainCount,
-                            int delayCount, int totalDelay, int minDelay, int maxDelay, int aveDelay,
+                            int delayCount, int totalDelay, int minDelay, int maxDelay,
                             int earlyCount, int maxEarly,
                             int ontime )
     {
@@ -102,7 +99,6 @@ public class StationPerfStat
         this.totalDelay = totalDelay;
         this.minDelay = minDelay;
         this.maxDelay = maxDelay;
-        this.aveDelay = aveDelay;
         this.earlyCount = earlyCount;
         this.maxEarly = maxEarly;
         this.ontime = ontime;
@@ -158,14 +154,10 @@ public class StationPerfStat
         this.maxDelay = maxDelay;
     }
 
+    @XmlTransient
     public int getAveDelay()
     {
-        return aveDelay;
-    }
-
-    public void setAveDelay( int aveDelay )
-    {
-        this.aveDelay = aveDelay;
+        return delayCount == 0 ? 0 : totalDelay / delayCount;
     }
 
     public void setOperator( String operator )
