@@ -30,7 +30,10 @@ public class StationPerfStat
             rs.getInt( "maxdelay" ),
             rs.getInt( "earlycount" ),
             rs.getInt( "maxEarly" ),
-            rs.getInt( "ontime" )
+            rs.getInt( "ontime" ),
+            rs.getInt( "ppm5" ),
+            rs.getInt( "ppm10" ),
+            rs.getInt( "ppm30" )
     );
 
     public static SQLFunction<ResultSet, StationPerfStat> fromSQL_TOC = rs -> new StationPerfStat(
@@ -44,7 +47,10 @@ public class StationPerfStat
             rs.getInt( "maxdelay" ),
             rs.getInt( "earlycount" ),
             rs.getInt( "maxEarly" ),
-            rs.getInt( "ontime" )
+            rs.getInt( "ontime" ),
+            rs.getInt( "ppm5" ),
+            rs.getInt( "ppm10" ),
+            rs.getInt( "ppm30" )
     );
 
     public static SQLFunction<ResultSet, StationPerfStat> fromSQL_TOC_CLASS = rs -> new StationPerfStat(
@@ -58,13 +64,16 @@ public class StationPerfStat
             rs.getInt( "maxdelay" ),
             rs.getInt( "earlycount" ),
             rs.getInt( "maxEarly" ),
-            rs.getInt( "ontime" )
+            rs.getInt( "ontime" ),
+            rs.getInt( "ppm5" ),
+            rs.getInt( "ppm10" ),
+            rs.getInt( "ppm30" )
     );
 
     /**
      * Sort statistics by operator name then class, with operator "All" first
      */
-    public static Comparator<StationPerfStat> COMPARATOR = ( a, b ) ->
+    public static Comparator<? super StationPerfStat> COMPARATOR = ( a, b ) ->
     {
         // Sort with "All" first then by operator name
         String an = a.getOperator();
@@ -84,12 +93,12 @@ public class StationPerfStat
     private int earlyCount;
     private int maxEarly;
     private int ontime;
+    private int ppm5;
+    private int ppm10;
+    private int ppm30;
 
-    public StationPerfStat( long stanox, String operator, int trainClass,
-                            int trainCount,
-                            int delayCount, int totalDelay, int minDelay, int maxDelay,
-                            int earlyCount, int maxEarly,
-                            int ontime )
+    public StationPerfStat( long stanox, String operator, int trainClass, int trainCount, int delayCount, int totalDelay, int minDelay, int maxDelay,
+                            int earlyCount, int maxEarly, int ontime, int ppm5, int ppm10, int ppm30 )
     {
         this.stanox = stanox;
         this.operator = operator;
@@ -102,6 +111,9 @@ public class StationPerfStat
         this.earlyCount = earlyCount;
         this.maxEarly = maxEarly;
         this.ontime = ontime;
+        this.ppm5 = ppm5;
+        this.ppm10 = ppm10;
+        this.ppm30 = ppm30;
     }
 
     public long getStanox()
@@ -218,6 +230,56 @@ public class StationPerfStat
     public void setOntime( int ontime )
     {
         this.ontime = ontime;
+    }
+
+    public int getPpm5()
+    {
+        return ppm5;
+    }
+
+    public int getPpm10()
+    {
+        return ppm10 + ppm5;
+    }
+
+    public int getPpm30()
+    {
+        return ppm30;
+    }
+
+    public int getPpmEarlyPc()
+    {
+        return trainCount == 0 ? 0 : (100 * earlyCount / trainCount);
+    }
+
+    public int getPpm5Pc()
+    {
+        return trainCount == 0 ? 0 : (100 * ppm5 / trainCount);
+    }
+
+    public int getPpm10Pc()
+    {
+        return trainCount == 0 ? 0 : (100 * (ppm5 + ppm10) / trainCount);
+    }
+
+    public int getPpm30Pc()
+    {
+        return trainCount == 0 ? 0 : (100 * ppm30 / trainCount);
+    }
+
+    public int getPpmPc5()
+    {
+        return trainCount == 0 ? 0 : (100 * (ontime + ppm5) / trainCount);
+    }
+
+    public int getPpmPc10()
+    {
+        return trainCount == 0 ? 0 : (100 * (ontime + ppm5 + ppm10) / trainCount);
+    }
+
+    public int getPpmRTT()
+    {
+        return trainCount == 0 ? 0 : (100 * ontime / trainCount);
     }
 
     @Override

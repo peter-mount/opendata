@@ -7,21 +7,18 @@ package uk.trainwatch.web.performance;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import uk.trainwatch.nrod.location.TrainLocation;
 import uk.trainwatch.util.Streams;
 import uk.trainwatch.util.sql.SQL;
-import uk.trainwatch.util.sql.SQLFunction;
 import uk.trainwatch.web.timetable.ScheduleSQL;
 
 /**
@@ -88,13 +85,13 @@ public class StationPerformance
         return (dbDate * 100000) + s;
     }
 
-    public static Collection<StationPerfStat> getStationPerfStat( LocalDate date, TrainLocation loc )
+    public static Map<String, List<StationPerfStat>> getStationPerfStat( LocalDate date, TrainLocation loc )
             throws SQLException
     {
         long stanox = loc.getStanox();
         if( stanox < 1 )
         {
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
 
         long dbDateStanox = getDBDateStanox( date, stanox );
@@ -115,7 +112,11 @@ public class StationPerformance
                         SQL.stream( ps3, StationPerfStat.fromSQL_TOC_CLASS )
                 ).
                         sorted( StationPerfStat.COMPARATOR ).
-                        collect( Collectors.toList() );
+                        collect(
+                                Collectors.groupingBy( StationPerfStat::getOperator, Collectors.toList()
+                                                       //Collectors.groupingBy( StationPerfStat::getTrainClass, Collectors.toList() )
+                                )
+                        );
             }
         }
     }

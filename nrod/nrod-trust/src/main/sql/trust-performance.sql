@@ -14,15 +14,19 @@ DROP TABLE perf_stanox_all CASCADE;
 
 CREATE TABLE perf_stanox_all (
     dt_stanox   BIGINT NOT NULL REFERENCES report.dim_date_stanox(dt_stanox),
-    trainCount  INTEGER,
-    totalDelay  INTEGER,
-    delayCount  INTEGER,
-    minDelay    INTEGER,
-    maxDelay    INTEGER,
+    trainCount  INTEGER DEFAULT 0,
+    totalDelay  INTEGER DEFAULT 0,
+    delayCount  INTEGER DEFAULT 0,
+    minDelay    INTEGER DEFAULT 9999999,
+    maxDelay    INTEGER DEFAULT 0,
     aveDelay    INTEGER,
-    earlyCount  INTEGER,
-    maxEarly    INTEGER,
-    ontime      INTEGER,
+    earlyCount  INTEGER DEFAULT 0,
+    maxEarly    INTEGER DEFAULT 0,
+    ontime      INTEGER DEFAULT 0,
+    ppmearly    INTEGER DEFAULT 0,
+    ppm5        INTEGER DEFAULT 0,
+    ppm10       INTEGER DEFAULT 0,
+    ppm30       INTEGER DEFAULT 0,
     PRIMARY KEY (dt_stanox)
 );
 
@@ -38,15 +42,19 @@ DROP TABLE perf_stanox_toc CASCADE;
 CREATE TABLE perf_stanox_toc (
     dt_stanox   BIGINT NOT NULL REFERENCES report.dim_date_stanox(dt_stanox),
     operatorid  INTEGER NOT NULL REFERENCES report.dim_operator(operatorid),
-    trainCount  INTEGER,
-    delayCount  INTEGER,
-    totalDelay  INTEGER,
-    minDelay    INTEGER,
-    maxDelay    INTEGER,
+    trainCount  INTEGER DEFAULT 0,
+    totalDelay  INTEGER DEFAULT 0,
+    delayCount  INTEGER DEFAULT 0,
+    minDelay    INTEGER DEFAULT 9999999,
+    maxDelay    INTEGER DEFAULT 0,
     aveDelay    INTEGER,
-    earlyCount  INTEGER,
-    maxEarly    INTEGER,
-    ontime      INTEGER,
+    earlyCount  INTEGER DEFAULT 0,
+    maxEarly    INTEGER DEFAULT 0,
+    ontime      INTEGER DEFAULT 0,
+    ppmearly    INTEGER DEFAULT 0,
+    ppm5        INTEGER DEFAULT 0,
+    ppm10       INTEGER DEFAULT 0,
+    ppm30       INTEGER DEFAULT 0,
     PRIMARY KEY (dt_stanox,operatorid)
 );
 
@@ -65,16 +73,19 @@ DROP TABLE perf_stanox_toc_class CASCADE;
 CREATE TABLE perf_stanox_toc_class (
     dt_stanox   BIGINT NOT NULL REFERENCES report.dim_date_stanox(dt_stanox),
     operatorid  INTEGER NOT NULL REFERENCES report.dim_operator(operatorid),
-    trainClass  INTEGER,
-    trainCount  INTEGER,
-    delayCount  INTEGER,
-    totalDelay  INTEGER,
-    minDelay    INTEGER,
-    maxDelay    INTEGER,
+    trainCount  INTEGER DEFAULT 0,
+    totalDelay  INTEGER DEFAULT 0,
+    delayCount  INTEGER DEFAULT 0,
+    minDelay    INTEGER DEFAULT 9999999,
+    maxDelay    INTEGER DEFAULT 0,
     aveDelay    INTEGER,
-    earlyCount  INTEGER,
-    maxEarly    INTEGER,
-    ontime      INTEGER,
+    earlyCount  INTEGER DEFAULT 0,
+    maxEarly    INTEGER DEFAULT 0,
+    ontime      INTEGER DEFAULT 0,
+    ppmearly    INTEGER DEFAULT 0,
+    ppm5        INTEGER DEFAULT 0,
+    ppm10       INTEGER DEFAULT 0,
+    ppm30       INTEGER DEFAULT 0,
     PRIMARY KEY (dt_stanox,operatorid, trainClass)
 );
 
@@ -223,6 +234,41 @@ BEGIN
             INSERT INTO report.perf_stanox_toc_class
                 (dt_stanox, operatorid, trainClass, trainCount, earlyCount, maxEarly)
                 VALUES ( pdts, popid, ptclass, 1, 1, -pdelay);
+        END IF;
+    END IF;
+
+    -- PPM
+    IF pdelay >0 THEN
+        IF pdelay <=300 THEN
+            UPDATE report.perf_stanox_all
+                SET ppm5 = ppm5 + 1
+                WHERE dt_stanox = pdts;
+            UPDATE report.perf_stanox_toc
+                SET ppm5 = ppm5 + 1
+                WHERE dt_stanox = pdts AND operatorid = popid;
+            UPDATE report.perf_stanox_toc_class
+                SET ppm5 = ppm5 + 1
+                WHERE dt_stanox = pdts AND operatorid = popid AND trainclass = ptclass;
+        ELSIF pdelay <=600 THEN
+            UPDATE report.perf_stanox_all
+                SET ppm10 = ppm10 + 1
+                WHERE dt_stanox = pdts;
+            UPDATE report.perf_stanox_toc
+                SET ppm10 = ppm10 + 1
+                WHERE dt_stanox = pdts AND operatorid = popid;
+            UPDATE report.perf_stanox_toc_class
+                SET ppm10 = ppm10 + 1
+                WHERE dt_stanox = pdts AND operatorid = popid AND trainclass = ptclass;
+        ELSIF pdelay >= 1800 THEN
+            UPDATE report.perf_stanox_all
+                SET ppm30 = ppm30 + 1
+                WHERE dt_stanox = pdts;
+            UPDATE report.perf_stanox_toc
+                SET ppm30 = ppm30 + 1
+                WHERE dt_stanox = pdts AND operatorid = popid;
+            UPDATE report.perf_stanox_toc_class
+                SET ppm30 = ppm30 + 1
+                WHERE dt_stanox = pdts AND operatorid = popid AND trainclass = ptclass;
         END IF;
     END IF;
 
