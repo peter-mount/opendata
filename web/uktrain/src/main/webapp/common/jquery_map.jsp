@@ -12,3 +12,4 @@
 <script src="//js.iot.onl/jquery/jquery-ui.js"></script>
 <script src="http://openlayers.org/api/OpenLayers.js"></script>
 <script src="//js.iot.onl/tileserver.min.js"></script>
+<script src="/js/stationmap.js"></script>

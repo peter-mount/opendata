@@ -113,59 +113,18 @@ public class StationServlet
     {
         LocalDateTime dateTime = TimeUtils.getLocalDateTime();
         req.put( "dateTime", dateTime );
-
         LocalDate date = dateTime.toLocalDate();
         req.put( "date", date );
 
-        // Predicate to ensure its within one hour
-        Predicate<LocalDateTime> withinHour = TimeUtils.isWithin( dateTime, dateTime.plusHours( 1 ) );
+        // Now filter to include just PUBLIC trains that depart in the next hour
+        // Note: Don't remove from schedule else timetable in cache is affected
+        req.put( "departures",
+                 ScheduleSQL.getSchedules( loc, date ).
+                 stream().
+                 filter( ScheduleSQL.PUBLIC_TRAIN.and( ScheduleSQL.departuresOnly( loc.getTiploc(), dateTime, 1L ) ) ).
+                 collect( Collectors.toList() )
+        );
 
-        // Filter out departures for the next hour only
-        Predicate<Schedule> departuresOnly = s ->
-        {
-            for( Location l: s.getLocations() )
-            {
-                if( l.getLocation().
-                        getKey().
-                        equals( loc.getTiploc() ) )
-                {
-                    if( l.isPass() )
-                    {
-                        return false;
-                    }
-
-                    // Origin - starts here
-                    if( l.getRecordType() == RecordType.LO )
-                    {
-                        OriginLocation ol = (OriginLocation) l;
-                        return withinHour.test( LocalDateTime.of( date, ol.getPublicDeparture() ) );
-                    }
-
-                    if( l.getRecordType() == RecordType.LI )
-                    {
-                        IntermediateLocation il = (IntermediateLocation) l;
-                        return withinHour.test( LocalDateTime.of( date, il.getPublicDeparture() ) );
-                    }
-
-                    // Terminating, then it's not a departure
-                    if( l.getRecordType() == RecordType.LT )
-                    {
-                        return false;
-                    }
-
-                    // Don't return false here as this may be a CR entry for this location
-                }
-            }
-            // Should not get here, so filter it out
-            return false;
-        };
-
-        // Now remove all but PUBLIC trains that depart in the next hour
-        List<Schedule> departures = ScheduleSQL.getSchedules( loc, date );
-        departures.removeIf( ScheduleSQL.PUBLIC_TRAIN.
-                and( departuresOnly ).
-                negate() );
-        req.put( "departures", departures );
     }
 
     /**

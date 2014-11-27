@@ -8,14 +8,12 @@ package uk.trainwatch.web.timetable;
 import uk.trainwatch.web.servlet.AbstractServlet;
 import uk.trainwatch.web.servlet.ApplicationRequest;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.servlet.ServletConfig;
+import java.time.LocalDate;
+import java.util.Map;
 import javax.servlet.ServletException;
-import javax.sql.DataSource;
+import uk.trainwatch.nrod.location.TrainLocation;
+import uk.trainwatch.nrod.location.TrainLocationFactory;
 
 /**
  * TimeTable home
@@ -25,36 +23,6 @@ import javax.sql.DataSource;
 public abstract class AbstractSearchServlet
         extends AbstractServlet
 {
-
-    private DataSource dataSource;
-
-    protected final DataSource getDataSource()
-    {
-        return dataSource;
-    }
-
-    protected final Connection getConnection()
-            throws SQLException
-    {
-        return dataSource.getConnection();
-    }
-
-    @Override
-    public void init( ServletConfig config )
-            throws ServletException
-    {
-        super.init( config );
-        try
-        {
-            Context ctx = new InitialContext();
-            dataSource = (DataSource) ctx.lookup( "java:/comp/env/jdbc/rail" );
-        }
-        catch( NamingException ex )
-        {
-            throw new ServletException( ex );
-        }
-
-    }
 
     @Override
     protected void doGet( ApplicationRequest request )
@@ -75,5 +43,41 @@ public abstract class AbstractSearchServlet
     protected abstract void doSearch( ApplicationRequest request )
             throws ServletException,
                    IOException;
+
+    protected void doSearch( ApplicationRequest request, String station, LocalDate date )
+            throws ServletException,
+                   IOException
+    {
+
+        TrainLocation loc = TrainLocationFactory.INSTANCE.resolveTrainLocation( station );
+        if( loc == null )
+        {
+            request.getRequestScope().
+                    put( "msg", "The station you have requested is unknown" );
+            showHome( request );
+        }
+        else
+        {
+            try
+            {
+                Map<String, Object> req = request.getRequestScope();
+                req.put( "pageTitle", "UK Time Table" );
+                req.put( "station", loc );
+                req.put( "searchDate", date );
+                req.put( "schedules", ScheduleSQL.getSchedules( loc, date ) );
+
+                request.renderTile( "timetable.search" );
+            }
+            catch( SQLException ex )
+            {
+                log( "Search " + loc + " " + date, ex );
+                request.getRequestScope().
+                        put( "msg", "Something unexpected just went wrong, please try again later." );
+                showHome( request );
+            }
+        }
+    }
+
+    protected abstract void showHome( ApplicationRequest request );
 
 }

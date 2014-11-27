@@ -8,15 +8,11 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="t" uri="http://uktra.in/tld/opendata" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
-<h1>${location.location}</h1>
-
-<a href="/station/?s=${location.locationIndex}">Back to Station Index</a>
-
 <table class="wikitable" width="100%">
-    <caption>Departures in the next hour according to the TimeTable</caption>
+    <caption>Next Departures</caption>
     <tr>
-        <th style="width: 2.5em;">Departs</th>
-        <th>Platform</th>
+        <th style="width: 2.5em;">Depart</th>
+        <th style="width: 1.25+em;">Pl</th>
         <th width="100%">Destination</th>
     </tr>
     <c:forEach var="schedule" items="${departures}">
@@ -39,8 +35,4 @@
         </tr>
     </c:forEach>
 </table>
-
-<c:if test="${not empty stationPosition}">
-    <h2>Local Area Map</h2>
-    <tiles:insertAttribute name="map"/>
-</c:if>
+<a href="/timetable/station/${location.tiploc}">View todays full timetable</a>

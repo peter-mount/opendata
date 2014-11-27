@@ -114,6 +114,44 @@ public enum TrainLocationFactory
     }
 
     /**
+     * Resolve the train location by crs, tiploc, nlc then stanox in that order.
+     * <p>
+     * @param name
+     *             <p>
+     * @return
+     */
+    public TrainLocation resolveTrainLocation( String name )
+    {
+        if( name == null || name.isEmpty() )
+        {
+            return null;
+        }
+
+        TrainLocation loc = getTrainLocationByCrs( name );
+        if( loc == null )
+        {
+            loc = getTrainLocationByTiploc( name );
+        }
+        if( loc == null )
+        {
+            loc = getTrainLocationByNlc( name );
+        }
+        if( loc == null )
+        {
+            try
+            {
+                loc = getTrainLocationByStanox( Long.parseLong( name ) );
+            }
+            catch( NumberFormatException |
+                   NullPointerException ex )
+            {
+                loc = null;
+            }
+        }
+        return loc;
+    }
+
+    /**
      * Returns a {@link TrainLocation} based on its internal id
      * <p/>
      * @param id < p/>

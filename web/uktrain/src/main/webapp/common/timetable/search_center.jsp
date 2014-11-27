@@ -6,7 +6,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="t" uri="http://uktra.in/tld/opendata" %>
-<p>Found ${schedules.size()} trains calling or passing ${station.location} on ${searchDate}</p>
+<p>Found ${schedules.size()} trains calling or passing <a href="/station/${station.tiploc}">${station.location}</a> on ${searchDate}</p>
 
 <table class="wikitable">
     <thead>

@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,10 @@ import javax.sql.DataSource;
 import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.location.TrainLocation;
 import uk.trainwatch.nrod.timetable.cif.record.Association;
+import uk.trainwatch.nrod.timetable.cif.record.IntermediateLocation;
+import uk.trainwatch.nrod.timetable.cif.record.Location;
+import uk.trainwatch.nrod.timetable.cif.record.OriginLocation;
+import uk.trainwatch.nrod.timetable.cif.record.RecordType;
 import uk.trainwatch.nrod.timetable.model.Schedule;
 import uk.trainwatch.nrod.timetable.sql.ScheduleResultSetFactory;
 import uk.trainwatch.util.TimeUtils;
@@ -333,4 +338,59 @@ public class ScheduleSQL
     public static final Predicate<Schedule> PUBLIC_TRAIN = FREIGHT.
             or( CLASS5 ).
             negate();
+
+    /**
+     * Returns a Predicate that will filter a Schedule that runs within a specified number of hours from a date and departs a specified tiploc.
+     * <p>
+     * @param tiploc   Tiploc the train departs from
+     * @param dateTime DateTime of start of period
+     * @param hours    Period duration in hours
+     * <p>
+     * @return Predicate
+     */
+    public static final Predicate<Schedule> departuresOnly( String tiploc, LocalDateTime dateTime, long hours )
+    {
+        LocalDate date = dateTime.toLocalDate();
+
+        Predicate<LocalDateTime> withinHour = TimeUtils.isWithin( dateTime, dateTime.plusHours( hours ) );
+
+        return s ->
+        {
+            for( Location l: s.getLocations() )
+            {
+                if( l.getLocation().
+                        getKey().
+                        equals( tiploc ) )
+                {
+                    if( l.isPass() )
+                    {
+                        return false;
+                    }
+
+                    // Origin - starts here
+                    if( l.getRecordType() == RecordType.LO )
+                    {
+                        OriginLocation ol = (OriginLocation) l;
+                        return withinHour.test( LocalDateTime.of( date, ol.getPublicDeparture() ) );
+                    }
+
+                    if( l.getRecordType() == RecordType.LI )
+                    {
+                        IntermediateLocation il = (IntermediateLocation) l;
+                        return withinHour.test( LocalDateTime.of( date, il.getPublicDeparture() ) );
+                    }
+
+                    // Terminating, then it's not a departure
+                    if( l.getRecordType() == RecordType.LT )
+                    {
+                        return false;
+                    }
+
+                    // Don't return false here as this may be a CR entry for this location
+                }
+            }
+            // Should not get here, so filter it out
+            return false;
+        };
+    }
 }

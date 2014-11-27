@@ -65,26 +65,3 @@
         </tr>
     </c:if>
 </table>
-
-<c:if test="${not empty nearBy}">
-    <table class="wikitable" width="100%">
-        <caption>Near By Stations within 3 miles</caption>
-        <tr>
-            <th>Station</th>
-            <th>Dist<br/>Miles</th>
-        </tr>
-        <c:forEach var="stn" items="${nearBy}">
-            <tr>
-                <td>
-                    <c:choose>
-                        <c:when test="${empty stn.tiploc}">${stn.name}</c:when>
-                        <c:otherwise>
-                            <a href="/station/${stn.tiploc}">${stn.name}</a>
-                        </c:otherwise>
-                    </c:choose>
-                </td>
-                <td align="right"><fmt:formatNumber value="${stn.distance}" pattern="#0.0"/>m</td>
-            </tr>
-        </c:forEach>
-    </table>
-</c:if>

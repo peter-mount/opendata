@@ -10,7 +10,7 @@
         <put-attribute name="javascript" value="/common/blank.jsp" />
     </definition>
     <definition name=".station.home" extends="layout.1col">
-        <put-attribute name="center" value="/common/station/home.jsp" />
+        <put-attribute name="center" value="/common/station/index.jsp" />
     </definition>
     
     <definition name="station.info" extends="layout.main">
@@ -19,15 +19,20 @@
         <put-attribute name="javascript" value="/common/jquery_map.jsp" />
         <put-attribute name="footer" value="layout.footer.map" />
     </definition>
-    <definition name=".station.info" extends="layout.2col-right">
-        <put-attribute name="center" value=".station.info.body" />
+    <definition name=".station.info" template="/common/station/layout.jsp">
+        <put-attribute name="center" value=".station.info.center" />
+        <put-attribute name="left" value=".station.info.left" />
         <put-attribute name="right" value=".station.info.right" />
     </definition>
-    <definition name=".station.info.right" template="/common/station/info.jsp">
-        <put-attribute name="details" value="/common/station/trainLocation.jsp" />
+    <definition name=".station.info.left" template="/common/station/left.jsp">
+        <put-attribute name="departures" value="/common/station/departures.jsp" />
     </definition>
-    <definition name=".station.info.body" template="/common/station/detail.jsp">
+    <definition name=".station.info.center" template="/common/station/center.jsp">
         <put-attribute name="map" value="/common/station/map.jsp" />
+    </definition>
+    <definition name=".station.info.right" template="/common/station/right.jsp">
+        <put-attribute name="details" value="/common/station/details.jsp" />
+        <put-attribute name="nearby" value="/common/station/nearby.jsp" />
     </definition>
     
 </tiles-definitions>
