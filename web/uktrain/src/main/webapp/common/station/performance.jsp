@@ -85,3 +85,4 @@
         </c:forEach>
     </c:forEach>
 </table>
+A definition of what's in this report is described <a href="/Performance/StationPerformance">here</a>.
