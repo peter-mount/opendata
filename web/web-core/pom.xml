@@ -2,40 +2,36 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>uk.trainwatch</groupId>
-        <artifactId>opendata-parent</artifactId>
+        <groupId>uk.trainwatch.web</groupId>
+        <artifactId>web</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     
-    <artifactId>opendata-gis</artifactId>
+    <groupId>uk.trainwatch.web</groupId>
+    <artifactId>web-core</artifactId>
+    <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     
-    <name>Open Data GIS</name>
+    <name>Webapps core</name>
     
-    <description>Various GIS utilities and tables</description>
+    <description>Common code for handling servlets</description>
+    
+    <properties>
+        <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
     
     <dependencies>
         
+        <!-- Open data -->
         <dependency>
             <groupId>uk.trainwatch</groupId>
             <artifactId>opendata-core</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        
-        <dependency>
-            <groupId>org.kohsuke.metainf-services</groupId>
-            <artifactId>metainf-services</artifactId>
-            <version>1.1</version>
-            <optional>true</optional>
-        </dependency>
 
-        <dependency>
-            <groupId>uk.trainwatch.web</groupId>
-            <artifactId>web-core</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
+        <!-- Standard Servlet/JSTL/Tomcat dependencies -->
         
-        <!-- Servlet api -->
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-web-api</artifactId>
@@ -43,17 +39,22 @@
             <scope>provided</scope>
         </dependency>
         
-        <!-- JSR353 Java API for JSON processing - not yet in the JDK -->
         <dependency>
-            <groupId>javax.json</groupId>
-            <artifactId>javax.json-api</artifactId>
-            <version>1.0</version>
+            <groupId>org.apache.tiles</groupId>
+            <artifactId>tiles-extras</artifactId>
+            <version>3.0.4</version>
         </dependency>
         <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.json</artifactId>
+            <groupId>org.apache.tiles</groupId>
+            <artifactId>tiles-jsp</artifactId>
+            <version>3.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tiles</groupId>
+            <artifactId>tiles-request-servlet</artifactId>
             <version>1.0.4</version>
         </dependency>
         
     </dependencies>
+
 </project>

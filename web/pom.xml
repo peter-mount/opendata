@@ -16,6 +16,7 @@
     
     <modules>
         <module>uktrain</module>
+        <module>web-core</module>
     </modules>
     
 </project>

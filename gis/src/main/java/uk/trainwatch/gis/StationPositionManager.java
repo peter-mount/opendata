@@ -8,11 +8,14 @@ package uk.trainwatch.gis;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
+import uk.trainwatch.gis.kml.Placemark;
 import uk.trainwatch.util.sql.SQL;
 
 /**
@@ -89,4 +92,16 @@ public enum StationPositionManager
         }
     }
 
+    public void forEach( Consumer<Placemark> c )
+            throws SQLException
+    {
+        try( Connection con = dataSource.getConnection() )
+        {
+            try( Statement s = con.createStatement() )
+            {
+                SQL.stream( s.executeQuery( "SELECT *, name as \"Name\" FROM gis.stations" ), Placemark.fromSQL ).
+                        forEach( c );
+            }
+        }
+    }
 }

@@ -26,6 +26,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
@@ -56,7 +57,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
  * @link http://balusc.blogspot.com/2007/12/whitespacefilter.html
  * @author Peter Mount reimplemented from scratch to use a custom writer which does the filtering.
  */
-@WebFilter( displayName = "WhitespaceFilter", value = "/*" )
+@WebFilter(displayName = "WhitespaceFilter", value = "/*")
 public class WhitespaceFilter
         implements Filter
 {
@@ -73,14 +74,17 @@ public class WhitespaceFilter
             throws IOException,
                    ServletException
     {
-        if( response instanceof HttpServletResponse )
+        HttpServletRequest req = (HttpServletRequest) request;
+        // Ignore everything under /data/ or /api/
+        String path = req.getServletPath();
+        if( path != null && (path.startsWith( "/data/" ) || path.startsWith( "/api/" )) )
         {
-            HttpServletResponse httpres = (HttpServletResponse) response;
-            chain.doFilter( request, wrapResponse( httpres, createTrimWriter( httpres ) ) );
+            chain.doFilter( request, response );
         }
         else
         {
-            chain.doFilter( request, response );
+            HttpServletResponse httpres = (HttpServletResponse) response;
+            chain.doFilter( request, wrapResponse( httpres, createTrimWriter( httpres ) ) );
         }
     }
 

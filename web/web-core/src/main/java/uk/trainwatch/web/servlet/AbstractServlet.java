@@ -35,8 +35,8 @@ public class AbstractServlet
         }
         catch( Exception ex )
         {
-            req.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage() );
             log( ex.getMessage(), ex );
+            req.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage() );
         }
     }
 
@@ -63,8 +63,8 @@ public class AbstractServlet
         }
         catch( Exception ex )
         {
-            req.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage() );
             log( ex.getMessage(), ex );
+            req.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage() );
         }
     }
 
