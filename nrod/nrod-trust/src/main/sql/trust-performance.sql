@@ -121,7 +121,7 @@ BEGIN
     -- All operators
     SELECT * INTO rec FROM report.perf_stanox_all WHERE dt_stanox = pdts;
     IF FOUND THEN
-        IF pdelay BETWEEN -1 AND 1 THEN
+        IF pdelay BETWEEN -60 AND 60 THEN
             UPDATE report.perf_stanox_all
                 SET trainCount = rec.trainCount + 1,
                     ontime = rec.ontime + 1
@@ -142,7 +142,7 @@ BEGIN
                 WHERE dt_stanox = pdts;
         END IF;
     ELSE
-        IF pdelay BETWEEN -1 AND 1 THEN
+        IF pdelay BETWEEN -60 AND 60 THEN
             INSERT INTO report.perf_stanox_all
                 (dt_stanox, trainCount, ontime)
                 VALUES ( pdts, 1, 1);
@@ -161,7 +161,7 @@ BEGIN
     SELECT * INTO rec FROM report.perf_stanox_toc
         WHERE dt_stanox = pdts AND operatorid = popid;
     IF FOUND THEN
-        IF pdelay = 0 THEN
+        IF pdelay BETWEEN -60 AND 60 THEN
             UPDATE report.perf_stanox_toc
                 SET trainCount = rec.trainCount + 1,
                     ontime = rec.ontime + 1
@@ -182,7 +182,7 @@ BEGIN
                 WHERE dt_stanox = pdts AND operatorid = popid;
         END IF;
     ELSE
-        IF pdelay BETWEEN -1 AND 1 THEN
+        IF pdelay BETWEEN -60 AND 60 THEN
             INSERT INTO report.perf_stanox_toc
                 (dt_stanox, operatorid, trainCount, ontime)
                 VALUES ( pdts, popid, 1, 1);
@@ -201,7 +201,7 @@ BEGIN
     SELECT * INTO rec FROM report.perf_stanox_toc_class
         WHERE dt_stanox = pdts AND operatorid = popid AND trainclass = ptclass;
     IF FOUND THEN
-        IF pdelay BETWEEN -1 AND 1 THEN
+        IF pdelay BETWEEN -60 AND 60 THEN
             UPDATE report.perf_stanox_toc_class
                 SET trainCount = rec.trainCount + 1,
                     ontime = ontime + 1
@@ -222,7 +222,7 @@ BEGIN
                 WHERE dt_stanox = pdts AND operatorid = popid AND trainclass = ptclass;
         END IF;
     ELSE
-        IF pdelay = 0 THEN
+        IF pdelay BETWEEN -60 AND 60 THEN
             INSERT INTO report.perf_stanox_toc_class
                 (dt_stanox, operatorid, trainClass, trainCount, ontime)
                 VALUES ( pdts, popid, ptclass, 1, 1);
