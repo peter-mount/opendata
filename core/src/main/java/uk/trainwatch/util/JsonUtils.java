@@ -176,7 +176,7 @@ public class JsonUtils
         return getInt( o, n, 0 );
     }
 
-    public static int getInt( JsonObject o, String n, int defaultValue )
+    public static Integer getInt( JsonObject o, String n, Integer defaultValue )
     {
         JsonValue v = o.get( n );
         if( v == null )
@@ -189,14 +189,19 @@ public class JsonUtils
                 JsonNumber jn = (JsonNumber) v;
                 return jn.intValue();
             case STRING:
-                JsonString s = (JsonString) v;
+                String s = getString( v );
+                if( s.isEmpty() )
+                {
+                    return defaultValue;
+                }
                 try
                 {
-                    return Integer.parseInt( s.getString() );
+                    return Integer.parseInt( s );
                 }
                 catch( NumberFormatException ex )
                 {
-                    return 0;
+                    LOG.log( Level.INFO, ex, () -> "" + s );
+                    return defaultValue;
                 }
             case TRUE:
                 return 1;
@@ -214,7 +219,7 @@ public class JsonUtils
         return getLong( o, n, 0L );
     }
 
-    public static long getLong( JsonObject o, String n, long defaultValue )
+    public static Long getLong( JsonObject o, String n, Long defaultValue )
     {
         JsonValue v = o.get( n );
         if( v == null )
@@ -227,14 +232,18 @@ public class JsonUtils
                 JsonNumber jn = (JsonNumber) v;
                 return jn.longValue();
             case STRING:
-                JsonString s = (JsonString) v;
+                String s = getString( v );
+                if( s.isEmpty() )
+                {
+                    return defaultValue;
+                }
                 try
                 {
-                    return Long.parseLong( s.getString() );
+                    return Long.parseLong( s );
                 }
                 catch( NumberFormatException ex )
                 {
-                    return 0L;
+                    return defaultValue;
                 }
             case TRUE:
                 return 1L;
@@ -247,7 +256,7 @@ public class JsonUtils
         }
     }
 
-    public static double getDouble( JsonObject o, String n, double defaultValue )
+    public static Double getDouble( JsonObject o, String n, Double defaultValue )
     {
         JsonValue v = o.get( n );
         if( v == null )
@@ -260,14 +269,18 @@ public class JsonUtils
                 JsonNumber jn = (JsonNumber) v;
                 return jn.doubleValue();
             case STRING:
-                JsonString s = (JsonString) v;
+                String s = getString( v );
+                if( s.isEmpty() )
+                {
+                    return defaultValue;
+                }
                 try
                 {
-                    return Double.parseDouble( s.getString() );
+                    return Double.parseDouble( s );
                 }
                 catch( NumberFormatException ex )
                 {
-                    return 0.0;
+                    return defaultValue;
                 }
             case TRUE:
                 return 1.0;
@@ -278,6 +291,21 @@ public class JsonUtils
             default:
                 throw new ClassCastException( "Cannot convert " + v.getClass() + " to Double" );
         }
+    }
+
+    public static String getString( JsonValue v )
+    {
+        String s = null;
+        if( v != null && v.getValueType() != JsonValue.ValueType.NULL )
+        {
+            s = v.toString();
+            if( s.length() > 1 && s.startsWith( "\"" ) && s.endsWith( "\"" ) )
+            {
+                s = s.substring( 1, s.length() - 1 );
+            }
+            s = s.trim();
+        }
+        return s;
     }
 
     public static String getString( JsonObject o, String n )
@@ -316,7 +344,7 @@ public class JsonUtils
         return getBoolean( o, n, false );
     }
 
-    public static boolean getBoolean( JsonObject o, String n, boolean defaultValue )
+    public static Boolean getBoolean( JsonObject o, String n, Boolean defaultValue )
     {
         JsonValue v = o.get( n );
         if( v == null )
@@ -522,7 +550,7 @@ public class JsonUtils
     {
         Objects.requireNonNull( b );
         Objects.requireNonNull( o );
-        o.forEach( (k, v) -> b.add( k, v ) );
+        o.forEach( ( k, v ) -> b.add( k, v ) );
         return b;
     }
 
@@ -584,7 +612,7 @@ public class JsonUtils
         JsonArrayBuilder b = Json.createArrayBuilder();
         if( ary != null && ary.length > 0 )
         {
-            for( Enum<?> a : ary )
+            for( Enum<?> a: ary )
             {
                 b.add( a.toString() );
             }

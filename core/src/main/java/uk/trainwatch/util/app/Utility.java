@@ -15,7 +15,12 @@
  */
 package uk.trainwatch.util.app;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
@@ -42,6 +47,19 @@ public interface Utility
     default boolean parseArgs( CommandLine cmd )
     {
         return true;
+    }
+
+    static List<Path> getArgFileList( CommandLine cmd )
+    {
+        // As commons-cli is pre-generics we have to do this first
+        Collection<String> args = cmd.getArgList();
+
+        return args.stream().
+                map( File::new ).
+                filter( File::exists ).
+                filter( File::canRead ).
+                map( File::toPath ).
+                collect( Collectors.toList() );
     }
 
     @Override

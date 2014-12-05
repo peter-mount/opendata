@@ -15,12 +15,21 @@
  */
 package uk.trainwatch.util.app;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Objects;
+import java.util.function.BiConsumer;
+import java.util.logging.Level;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
+import static uk.trainwatch.util.app.BaseApplication.LOG;
+import uk.trainwatch.util.sql.SQLBiConsumer;
+import uk.trainwatch.util.sql.UncheckedSQLException;
 
 /**
  *
@@ -56,7 +65,8 @@ public abstract class DBUtility
 
         StringBuilder b = new StringBuilder( "jdbc:postgresql:" );
         String host = cmd.getOptionValue( "hostname" );
-        if( host != null && !host.isEmpty() ) {
+        if( host != null && !host.isEmpty() )
+        {
             b.append( "//" ).
                     append( host ).
                     append( '/' );
@@ -71,5 +81,59 @@ public abstract class DBUtility
             throws SQLException
     {
         return DriverManager.getConnection( uri, user, pass );
+    }
+
+    /**
+     * Called by {@link #importFiles(java.util.Collection, uk.trainwatch.util.sql.SQLBiConsumer) } at the start of the import.
+     * <p>
+     * The default is to do nothing.
+     * <p>
+     * @param con
+     *            <p>
+     * @throws SQLException
+     */
+    protected void initDB( Connection con )
+            throws SQLException
+    {
+    }
+
+    /**
+     * Import each file in sequence
+     * <p>
+     * @param files    Collection of {@link Path}'s to import
+     * @param importer {@link SQLBiConsumer} that will import each file
+     * <p>
+     * @throws SQLException
+     */
+    protected final void importFiles( Collection<Path> files, SQLBiConsumer<Connection, Path> importer )
+            throws SQLException
+    {
+        BiConsumer<Connection, Path> consumer = importer.guard();
+
+        try( Connection con = getConnection() )
+        {
+            con.setAutoCommit( false );
+            try
+            {
+                LOG.log( Level.INFO, "Initialising database" );
+                initDB( con );
+
+                files.forEach( f -> consumer.accept( con, f ) );
+
+                // Now this may take a while ;-)
+                LOG.log( Level.INFO, () -> "Committing to database" );
+                con.commit();
+                LOG.log( Level.INFO, () -> "Commit complete. Timetable is now live." );
+            }
+            catch( UncheckedIOException |
+                   SQLException |
+                   UncheckedSQLException ex )
+            {
+                LOG.log( Level.SEVERE, ex, () -> "Commit failed: " + ex.getMessage() );
+
+                LOG.log( Level.INFO, () -> "Rolling back transaction" );
+                con.rollback();
+            }
+        }
     }
 }

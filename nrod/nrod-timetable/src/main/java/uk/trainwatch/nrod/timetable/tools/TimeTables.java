@@ -127,16 +127,8 @@ public class TimeTables
             includeTiploc = true;
         }
 
-        // As commons-cli is pre-generics we have to do this first
-        Collection<String> args = cmd.getArgList();
-
         // The first one will be the CIF name
-        cifFiles = args.stream().
-                map( File::new ).
-                filter( File::exists ).
-                filter( File::canRead ).
-                map( File::toPath ).
-                collect( Collectors.toList() );
+        cifFiles = Utility.getArgFileList( cmd );
 
         return !cifFiles.isEmpty();
     }

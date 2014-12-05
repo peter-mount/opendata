@@ -8,7 +8,6 @@ package uk.trainwatch.util.sql;
 import java.sql.SQLException;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * A variant of a consumer which allows for a SQL exception to be passed through
@@ -39,7 +38,7 @@ public interface SQLConsumer<T>
     default SQLConsumer<T> andThen( SQLConsumer<? super T> after )
     {
         Objects.requireNonNull( after );
-        return (T t) ->
+        return ( T t ) ->
         {
             accept( t );
             after.accept( t );
@@ -58,7 +57,7 @@ public interface SQLConsumer<T>
      */
     static <T, U> SQLBiConsumer<U, T> composeBiConsumer( SQLConsumer<T> c )
     {
-        return (u, t) -> c.accept( t );
+        return ( u, t ) -> c.accept( t );
     }
 
     /**
@@ -66,7 +65,7 @@ public interface SQLConsumer<T>
      * UncheckedSQLException
      * <p>
      * @param <T>
-     * @param c <p>
+     * @param c   <p>
      * @return
      */
     static <T> Consumer<T> guard( SQLConsumer<T> c )
@@ -84,6 +83,11 @@ public interface SQLConsumer<T>
         };
     }
 
+    default Consumer<T> guard()
+    {
+        return guard( this );
+    }
+
     /**
      * Similar to {@link #guard(uk.trainwatch.util.sql.SQLConsumer)} but this will consumer any duplicate key
      * violations. This is useful when importing data from archives but allows us to continue as the database already
@@ -91,7 +95,7 @@ public interface SQLConsumer<T>
      * <p>
      * @param <T>
      * @param c
-     * <p>
+     *            <p>
      * @return
      */
     static <T> Consumer<T> guardIgnoreDuplicates( SQLConsumer<T> c )

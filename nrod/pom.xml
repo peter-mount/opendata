@@ -29,6 +29,7 @@
         <module>nrod-td</module>
         <module>nrod-rtppm</module>
         <module>nrod-timetable</module>
+        <module>nrod-corpus</module>
     </modules>
     
 </project>

@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -72,18 +73,21 @@ public class SQL
 
     /**
      * Utility to prepare a {@link PreparedStatement} from a SQL and arguments
-     * @param c Connection connection
-     * @param sql SQL to use
+     * <p>
+     * @param c    Connection connection
+     * @param sql  SQL to use
      * @param args Arguments for sql
+     * <p>
      * @return PreparedStatement
-     * @throws SQLException 
+     * <p>
+     * @throws SQLException
      */
     public static PreparedStatement prepare( Connection c, String sql, Object... args )
             throws SQLException
     {
         PreparedStatement s = c.prepareStatement( sql );
         int i = 1;
-        for( Object arg : args )
+        for( Object arg: args )
         {
             s.setObject( i++, arg );
         }
@@ -163,7 +167,7 @@ public class SQL
         try( PreparedStatement s = con.prepareStatement(
                 "INSERT INTO " + schema + "." + table + " (id,code) VALUES (?,?)" ) )
         {
-            for( Enum<?> enumValue : enumClass.getEnumConstants() )
+            for( Enum<?> enumValue: enumClass.getEnumConstants() )
             {
                 s.setInt( 1, enumValue.ordinal() );
                 s.setString( 2, enumValue.toString() );
@@ -214,4 +218,35 @@ public class SQL
      * SQLFunction to retrieve the first column of a ResultSet as a String
      */
     public static final SQLFunction<ResultSet, String> STRING_LOOKUP = rs -> rs.getString( 1 );
+
+    public static <T> T wasNull( ResultSet rs, T v )
+            throws SQLException
+    {
+        return rs.wasNull() ? null : v;
+    }
+
+    public static final Integer getInt( ResultSet rs, int c )
+            throws SQLException
+    {
+        return wasNull( rs, rs.getInt( c ) );
+    }
+
+    public static final Integer getInt( ResultSet rs, String c )
+            throws SQLException
+    {
+        return wasNull( rs, rs.getInt( c ) );
+    }
+
+    public static final void setInt( PreparedStatement ps, int c, Integer i )
+            throws SQLException
+    {
+        if( i == null )
+        {
+            ps.setNull( c, Types.INTEGER );
+        }
+        else
+        {
+            ps.setInt( c, i );
+        }
+    }
 }

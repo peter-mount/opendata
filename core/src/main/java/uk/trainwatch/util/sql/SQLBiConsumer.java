@@ -57,7 +57,7 @@ public interface SQLBiConsumer<T, U>
     {
         Objects.requireNonNull( after );
 
-        return (l, r) ->
+        return ( l, r ) ->
         {
             accept( l, r );
             after.accept( l, r );
@@ -75,7 +75,7 @@ public interface SQLBiConsumer<T, U>
      */
     static <T, U> BiConsumer<T, U> guard( SQLBiConsumer<T, U> c )
     {
-        return (t, u) ->
+        return ( t, u ) ->
         {
             try
             {
@@ -95,15 +95,15 @@ public interface SQLBiConsumer<T, U>
      * @param <T>
      * @param <U>
      * @param c
-     * <p>
+     *            <p>
      * @return
-     * <p>
+     *         <p>
      * @throws SQLException
      */
     static <T, U> SQLBiConsumer<T, U> compose( BiConsumer<T, U> c )
             throws SQLException
     {
-        return (t, u) ->
+        return ( t, u ) ->
         {
             try
             {
@@ -114,5 +114,10 @@ public interface SQLBiConsumer<T, U>
                 throw ex.getCause();
             }
         };
+    }
+
+    default BiConsumer<T, U> guard()
+    {
+        return guard( this );
     }
 }
