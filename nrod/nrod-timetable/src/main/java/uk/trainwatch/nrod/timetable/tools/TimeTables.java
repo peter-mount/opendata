@@ -19,7 +19,6 @@ import uk.trainwatch.nrod.timetable.sql.ScheduleDBUpdate;
 import uk.trainwatch.nrod.timetable.sql.TiplocDBUpdate;
 import uk.trainwatch.nrod.timetable.sql.ScheduleLocUpdate;
 import uk.trainwatch.nrod.timetable.sql.AssociationDBUpdate;
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -32,14 +31,12 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.kohsuke.MetaInfServices;
 import uk.trainwatch.nrod.timetable.cif.record.Association;
@@ -76,13 +73,14 @@ import uk.trainwatch.util.sql.UncheckedSQLException;
 import uk.trainwatch.util.app.DBUtility;
 import uk.trainwatch.util.app.Utility;
 import uk.trainwatch.util.sql.SQL;
+import uk.trainwatch.util.sql.SQLBiConsumer;
 import uk.trainwatch.util.sql.SQLConsumer;
 
 /**
  *
  * @author peter
  */
-@MetaInfServices( Utility.class )
+@MetaInfServices(Utility.class)
 public class TimeTables
         extends DBUtility
 {
@@ -108,7 +106,7 @@ public class TimeTables
     }
 
     @Override
-    @SuppressWarnings( "ThrowableInstanceNeverThrown" )
+    @SuppressWarnings("ThrowableInstanceNeverThrown")
     public boolean parseArgs( CommandLine cmd )
     {
         super.parseArgs( cmd );
@@ -137,85 +135,55 @@ public class TimeTables
     public void runUtility()
             throws Exception
     {
-        try( Connection con = getConnection() )
-        {
-            con.setAutoCommit( false );
-            try
-            {
-                if( fullImport )
-                {
-                    fullImport( con );
-                }
-
-                cifFiles.forEach( f -> parseFile( con, f ) );
-
-                // Now this may take a while ;-)
-                LOG.log( Level.INFO, () -> "Committing to database" );
-                con.commit();
-                LOG.log( Level.INFO, () -> "Commit complete. Timetable is now live." );
-            }
-            catch( UncheckedIOException |
-                   SQLException |
-                   UncheckedSQLException ex )
-            {
-                LOG.log( Level.SEVERE, ex, () -> "Commit failed: " + ex.getMessage() );
-
-                LOG.log( Level.INFO, () -> "Rolling back transaction" );
-                con.rollback();
-            }
-        }
+        importFiles( cifFiles, new Parser() );
     }
 
-    /**
-     * Prepare the database for a full import.
-     * <p>
-     * This consists of deleting all data from the database and initialising the enum tables
-     * <p>
-     * @throws InterruptedException
-     * @throws SQLException
-     */
-    private void fullImport( Connection con )
+    @Override
+    protected void initDB( Connection con )
             throws SQLException
     {
-        LOG.log( Level.INFO, "Clearing down Schedule database" );
+        if( fullImport )
+        {
+            LOG.log( Level.INFO, "Clearing down Schedule database" );
 
-        SQL.deleteTable( con, SCHEMA, "schedule_loc" );
+            SQL.deleteTable( con, SCHEMA, "schedule_loc" );
 
-        // Clear down our existing tables
-        Arrays.asList(
-                "schedule",
-                "association",
-                "tiploc",
-                "trainuid",
-                "lastupdate" ).
-                forEach( t -> SQL.deleteIdTable( con, SCHEMA, t ) );
+            // Clear down our existing tables
+            Arrays.asList(
+                    "schedule",
+                    "association",
+                    "tiploc",
+                    "trainuid",
+                    "lastupdate" ).
+                    forEach( t -> SQL.deleteIdTable( con, SCHEMA, t ) );
 
-        // Initialise our enum tables
-        Arrays.asList(
-                ATOCCode.class,
-                ATSCode.class,
-                Activity.class,
-                AssociationCategory.class,
-                AssociationDateIndicator.class,
-                AssociationType.class,
-                BankHolidayRunning.class,
-                BusSec.class,
-                Catering.class,
-                OperatingCharacteristics.class,
-                PowerType.class,
-                Reservations.class,
-                STPIndicator.class,
-                ServiceBranding.class,
-                Sleepers.class,
-                TimingLoad.class,
-                TrainCategory.class,
-                TrainClass.class,
-                TrainStatus.class ).
-                forEach( c -> SQL.updateEnumTable( con, SCHEMA, c ) );
+            // Initialise our enum tables
+            Arrays.asList(
+                    ATOCCode.class,
+                    ATSCode.class,
+                    Activity.class,
+                    AssociationCategory.class,
+                    AssociationDateIndicator.class,
+                    AssociationType.class,
+                    BankHolidayRunning.class,
+                    BusSec.class,
+                    Catering.class,
+                    OperatingCharacteristics.class,
+                    PowerType.class,
+                    Reservations.class,
+                    STPIndicator.class,
+                    ServiceBranding.class,
+                    Sleepers.class,
+                    TimingLoad.class,
+                    TrainCategory.class,
+                    TrainClass.class,
+                    TrainStatus.class ).
+                    forEach( c -> SQL.updateEnumTable( con, SCHEMA, c ) );
 
-        prepareDaysRun( con );
+            prepareDaysRun( con );
 
-        LOG.log( Level.INFO, "Schedule database is now clean" );
+            LOG.log( Level.INFO, "Schedule database is now clean" );
+        }
     }
 
     /**
@@ -254,157 +222,164 @@ public class TimeTables
 
     }
 
-    private void parseFile( Connection con, Path cifFile )
+    private class Parser
+            implements SQLBiConsumer<Connection, Path>
     {
-        Objects.requireNonNull( cifFile, "No CIF file provided" );
 
-        // Strict mode so we fail on an invalid record type
-        final CIFParser parser = new CIFParser( true );
-
-        final Supplier<String> exceptionLogger = () -> "Failed on line " + parser.lineCount()
-                                                       + " position " + parser.position()
-                                                       + "\n" + parser.currentLine( null );
-        try
+        @Override
+        public void accept( Connection con, Path cifFile )
+                throws SQLException
         {
-            // Do the import in one massive transaction
-            con.setAutoCommit( false );
+            Objects.requireNonNull( cifFile, "No CIF file provided" );
 
-            // When did we last run an update
-            LocalDateTime lastUpdate = null;
-            try( Statement s = con.createStatement() )
+            // Strict mode so we fail on an invalid record type
+            final CIFParser parser = new CIFParser( true );
+
+            final Supplier<String> exceptionLogger = () -> "Failed on line " + parser.lineCount()
+                                                           + " position " + parser.position()
+                                                           + "\n" + parser.currentLine( null );
+            try
             {
-                try( ResultSet rs = s.executeQuery(
-                        "SELECT extracted,imported FROM timetable.lastupdate ORDER BY extracted DESC LIMIT 1" ) )
+                // Do the import in one massive transaction
+                con.setAutoCommit( false );
+
+                // When did we last run an update
+                LocalDateTime lastUpdate = null;
+                try( Statement s = con.createStatement() )
                 {
-                    if( rs != null && rs.next() )
+                    try( ResultSet rs = s.executeQuery(
+                            "SELECT extracted,imported FROM timetable.lastupdate ORDER BY extracted DESC LIMIT 1" ) )
                     {
-                        lastUpdate = rs.getTimestamp( 1 ).
-                                toLocalDateTime();
-                        LocalDateTime imported = rs.getTimestamp( 2 ).
-                                toLocalDateTime();
-                        LOG.log( Level.INFO, "Last file extracted {0}, imported {1}", new Object[]
-                         {
-                             lastUpdate, imported
-                        } );
+                        if( rs != null && rs.next() )
+                        {
+                            lastUpdate = rs.getTimestamp( 1 ).
+                                    toLocalDateTime();
+                            LocalDateTime imported = rs.getTimestamp( 2 ).
+                                    toLocalDateTime();
+                            LOG.log( Level.INFO, "Last file extracted {0}, imported {1}", new Object[]
+                             {
+                                 lastUpdate, imported
+                            } );
+                        }
                     }
                 }
-            }
 
-            // Record when we did the update
-            Consumer<Header> header = h ->
-            {
-                try( PreparedStatement ps = con.prepareStatement(
-                        "INSERT INTO timetable.lastupdate (extracted,imported,filename) VALUES (?,?,?)" ) )
+                // Record when we did the update
+                Consumer<Header> header = h ->
                 {
-                    ps.setTimestamp( 1, Timestamp.valueOf( h.getLocalDateTimeOfExtract() ) );
-                    ps.setTimestamp( 2, Timestamp.valueOf( TimeUtils.getLocalDateTime() ) );
-                    ps.setString( 3, h.getCurrentFileRef() );
-                    ps.executeUpdate();
-                }
-                catch( SQLException ex )
+                    try( PreparedStatement ps = con.prepareStatement(
+                            "INSERT INTO timetable.lastupdate (extracted,imported,filename) VALUES (?,?,?)" ) )
+                    {
+                        ps.setTimestamp( 1, Timestamp.valueOf( h.getLocalDateTimeOfExtract() ) );
+                        ps.setTimestamp( 2, Timestamp.valueOf( TimeUtils.getLocalDateTime() ) );
+                        ps.setString( 3, h.getCurrentFileRef() );
+                        ps.executeUpdate();
+                    }
+                    catch( SQLException ex )
+                    {
+                        throw new UncheckedSQLException( ex );
+                    }
+                };
+
+                // The persistance consumers
+                Consumer<Schedule> schedules = Consumers.createIf(
+                        includeSchedules,
+                        () -> SQLConsumer.guard(
+                                new ScheduleDBUpdate( con ) ) );
+
+                Consumer<Schedule> scheduleLocations = Consumers.createIf(
+                        includeSchedules,
+                        () -> SQLConsumer.guard( new ScheduleLocUpdate( con ) ) );
+
+                Consumer<Schedule> scheduleConsumer = Consumers.createIf(
+                        includeSchedules,
+                        () -> Consumers.andThen( schedules,
+                                                 scheduleLocations ) );
+
+                Consumer<Association> associations = Consumers.createIf(
+                        includeAssociations,
+                        () -> SQLConsumer.guard( new AssociationDBUpdate( con ) ) );
+
+                Consumer<TIPLOCAction> tiplocs = Consumers.createIf(
+                        includeTiploc,
+                        () -> SQLConsumer.guard( new TiplocDBUpdate( con ) ) );
+
+                // Now what to do at the end of the import
+                Consumer<TrailerRecord> trailer = t -> LOG.log( Level.INFO,
+                                                                () -> "Processed " + parser.lineCount() + " records." );
+
+                if( includeTiploc )
                 {
-                    throw new UncheckedSQLException( ex );
+                    trailer = trailer.andThen( t -> LOG.log( Level.INFO,
+                                                             () -> "Tiplocs " + tiplocs ) );
                 }
-            };
 
-            // The persistance consumers
-            Consumer<Schedule> schedules = Consumers.createIf(
-                    includeSchedules,
-                    () -> SQLConsumer.guard(
-                            new ScheduleDBUpdate( con ) ) );
+                if( includeAssociations )
+                {
+                    trailer = trailer.andThen( t -> LOG.log( Level.INFO,
+                                                             () -> "Associations " + associations ) );
+                }
 
-            Consumer<Schedule> scheduleLocations = Consumers.createIf(
-                    includeSchedules,
-                    () -> SQLConsumer.guard( new ScheduleLocUpdate( con ) ) );
-
-            Consumer<Schedule> scheduleConsumer = Consumers.createIf(
-                    includeSchedules,
-                    () -> Consumers.andThen( schedules,
-                                             scheduleLocations ) );
-
-            Consumer<Association> associations = Consumers.createIf(
-                    includeAssociations,
-                    () -> SQLConsumer.guard( new AssociationDBUpdate( con ) ) );
-
-            Consumer<TIPLOCAction> tiplocs = Consumers.createIf(
-                    includeTiploc,
-                    () -> SQLConsumer.guard( new TiplocDBUpdate( con ) ) );
-
-            // Now what to do at the end of the import
-            Consumer<TrailerRecord> trailer = t -> LOG.log( Level.INFO,
-                                                            () -> "Processed " + parser.lineCount() + " records." );
-
-            if( includeTiploc )
-            {
-                trailer = trailer.andThen( t -> LOG.log( Level.INFO,
-                                                         () -> "Tiplocs " + tiplocs ) );
-            }
-
-            if( includeAssociations )
-            {
-                trailer = trailer.andThen( t -> LOG.log( Level.INFO,
-                                                         () -> "Associations " + associations ) );
-            }
-
-            if( includeSchedules )
-            {
-                trailer = trailer.andThen( t -> LOG.log( Level.INFO,
-                                                         () -> "Schedules " + schedules + ", locations " + scheduleLocations ) );
-            }
+                if( includeSchedules )
+                {
+                    trailer = trailer.andThen( t -> LOG.log( Level.INFO,
+                                                             () -> "Schedules " + schedules + ", locations " + scheduleLocations ) );
+                }
 
             // Pick the type of builder - if not forming schedules or associations then there's no need to use
-            // the more expensive visitor
-            BasicRecordVisitor builder;
-            if( includeSchedules )
-            {
-                builder = new ScheduleBuilderVisitor(
-                        header,
-                        tiplocs,
-                        associations,
-                        scheduleConsumer,
-                        trailer,
-                        lastUpdate );
+                // the more expensive visitor
+                BasicRecordVisitor builder;
+                if( includeSchedules )
+                {
+                    builder = new ScheduleBuilderVisitor(
+                            header,
+                            tiplocs,
+                            associations,
+                            scheduleConsumer,
+                            trailer,
+                            lastUpdate );
+                }
+                else
+                {
+                    // No schedules so no point in building Schedule objects
+                    builder = new BasicRecordVisitor(
+                            header,
+                            tiplocs,
+                            associations,
+                            trailer,
+                            lastUpdate );
+                }
+
+                // Progress counter for every 50k records
+                Consumer<? super Record> recCount = Consumers.ifThen(
+                        l -> (parser.lineCount() % 50000) == 0,
+                        l -> LOG.log( Level.INFO, () -> "read " + parser.lineCount() + " records." )
+                );
+
+                Files.lines( cifFile ).
+                        map( parser::parse ).
+                        filter( Objects::nonNull ).
+                        peek( recCount ).
+                        forEach( r -> r.accept( builder ) );
+
             }
-            else
+            catch( IOException ex )
             {
-                // No schedules so no point in building Schedule objects
-                builder = new BasicRecordVisitor(
-                        header,
-                        tiplocs,
-                        associations,
-                        trailer,
-                        lastUpdate );
+                LOG.log( Level.SEVERE, exceptionLogger );
+                throw new UncheckedIOException( ex );
+            }
+            catch( SQLException ex )
+            {
+                LOG.log( Level.SEVERE, exceptionLogger );
+                throw new UncheckedSQLException( ex );
+            }
+            catch( Exception ex )
+            {
+                LOG.log( Level.SEVERE, exceptionLogger );
+                throw new RuntimeException( ex );
             }
 
-            // Progress counter for every 50k records
-            Consumer<? super Record> recCount = Consumers.ifThen(
-                    l -> (parser.lineCount() % 50000) == 0,
-                    l -> LOG.log( Level.INFO, () -> "read " + parser.lineCount() + " records." )
-            );
-
-            Files.lines( cifFile ).
-                    map( parser::parse ).
-                    filter( Objects::nonNull ).
-                    peek( recCount ).
-                    forEach( r -> r.accept( builder ) );
-
         }
-        catch( IOException ex )
-        {
-            LOG.log( Level.SEVERE, exceptionLogger );
-            throw new UncheckedIOException( ex );
-        }
-        catch( SQLException ex )
-        {
-            LOG.log( Level.SEVERE, exceptionLogger );
-            throw new UncheckedSQLException( ex );
-        }
-        catch( Exception ex )
-        {
-            LOG.log( Level.SEVERE, exceptionLogger );
-            throw new RuntimeException( ex );
-        }
-
     }
 
 }

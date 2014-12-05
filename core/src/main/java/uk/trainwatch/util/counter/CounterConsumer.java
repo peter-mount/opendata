@@ -7,6 +7,8 @@ package uk.trainwatch.util.counter;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A simple consumer which will keep a count of the number of times it's called.
@@ -41,5 +43,16 @@ public final class CounterConsumer<T>
     public void reset()
     {
         counter.set( 0 );
+    }
+    
+    public Consumer<T> logEvery(int range,Logger log)
+    {
+        return o ->
+            {
+                if( (counter.get() % range) == 0 )
+                {
+                    log.log( Level.INFO, () -> "Imported " + counter.get() );
+                }
+            };
     }
 }

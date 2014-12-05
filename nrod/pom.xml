@@ -30,6 +30,7 @@
         <module>nrod-rtppm</module>
         <module>nrod-timetable</module>
         <module>nrod-corpus</module>
+        <module>nrod-smart</module>
     </modules>
     
 </project>

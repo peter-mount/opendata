@@ -123,7 +123,7 @@ public abstract class DBUtility
                 // Now this may take a while ;-)
                 LOG.log( Level.INFO, () -> "Committing to database" );
                 con.commit();
-                LOG.log( Level.INFO, () -> "Commit complete. Timetable is now live." );
+                LOG.log( Level.INFO, () -> "Commit complete." );
             }
             catch( UncheckedIOException |
                    SQLException |
