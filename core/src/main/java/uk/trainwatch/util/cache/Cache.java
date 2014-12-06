@@ -14,10 +14,16 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collector;
+import uk.trainwatch.util.CollectorUtils;
 import uk.trainwatch.util.DaemonThreadFactory;
+import uk.trainwatch.util.Functions;
+import uk.trainwatch.util.LocalDateTimeRange;
 import uk.trainwatch.util.sql.ConcurrentSQLHashMap;
 import uk.trainwatch.util.sql.SQLBiConsumer;
 import uk.trainwatch.util.sql.SQLBiFunction;
@@ -103,10 +109,8 @@ public class Cache<K, V>
      */
     private void expire( LocalDateTime expires )
     {
-        LOG.log( Level.FINE, () -> "Size before: " + size() );
         map.values().
-                removeIf( e -> e.isBefore( expires ) );
-        LOG.log( Level.INFO, () -> "Size after: " + size() );
+                removeIf( e -> !e.isAfter( expires ) );
     }
 
     /**
@@ -118,16 +122,18 @@ public class Cache<K, V>
     {
         if( size() > maxSize )
         {
-            LOG.log( Level.INFO, () -> "expiring as above " + maxSize + " currently " + size() );
             synchronized( this )
             {
+                LocalDateTimeRange range = new LocalDateTimeRange();
                 while( size() > maxSize )
                 {
+                    range.reset();
                     map.values().
                             stream().
                             map( CacheEntry::getEntered ).
-                            min( LocalDateTime::compareTo ).
-                            ifPresent( dt -> expire( dt.plusMinutes( 2l ) ) );
+                            forEach( range );
+
+                    range.ifPresent( r -> expire( r.getMin() ) );
                 }
             }
         }
@@ -218,39 +224,64 @@ public class Cache<K, V>
 
     public void forEach( BiConsumer<? super K, ? super V> action )
     {
-        map.forEach( (k, v) -> action.accept( k, getV( v ) ) );
+        map.forEach( ( k, v ) -> action.accept( k, getV( v ) ) );
     }
 
     public void forEachSQL( SQLBiConsumer<? super K, ? super V> action )
             throws SQLException
     {
-        map.forEachSQL( (k, v) -> action.accept( k, getV( v ) ) );
+        map.forEachSQL( ( k, v ) -> action.accept( k, getV( v ) ) );
     }
 
     public V computeIfAbsent( K key, Function<? super K, ? extends V> mappingFunction )
     {
-        return getV( map.computeIfAbsent( key, k -> getC( mappingFunction.apply( k ) ) ) );
+        try
+        {
+            return getV( map.computeIfAbsent( key, k -> getC( mappingFunction.apply( k ) ) ) );
+        }
+        finally
+        {
+            expire();
+        }
     }
 
     public V computeIfPresent( K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction )
     {
-        expire();
-        return getV( map.computeIfPresent( key, (k, v) -> getC( remappingFunction.apply( k, getV( v ) ) ) ) );
+        try
+        {
+            return getV( map.computeIfPresent( key, ( k, v ) -> getC( remappingFunction.apply( k, getV( v ) ) ) ) );
+        }
+        finally
+        {
+            expire();
+        }
     }
 
     public V compute( K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction )
     {
-        expire();
-        return getV( map.compute( key, (k, v) -> getC( remappingFunction.apply( k, getV( v ) ) ) ) );
+        try
+        {
+            return getV( map.compute( key, ( k, v ) -> getC( remappingFunction.apply( k, getV( v ) ) ) ) );
+        }
+        finally
+        {
+            expire();
+        }
     }
 
     public V merge( K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction )
     {
-        expire();
-        return getV(
-                map.merge( key, getC( value ),
-                           (o, v) -> getC( remappingFunction.apply( getV( o ), getV( v ) ) ) )
-        );
+        try
+        {
+            return getV(
+                    map.merge( key, getC( value ),
+                               ( o, v ) -> getC( remappingFunction.apply( getV( o ), getV( v ) ) ) )
+            );
+        }
+        finally
+        {
+            expire();
+        }
     }
 
     public void forEachSQL( SQLConsumer<? super V> action )
@@ -262,26 +293,284 @@ public class Cache<K, V>
     public V computeSQLIfAbsent( K key, SQLSupplier<? extends V> mappingFunction )
             throws SQLException
     {
-        return getV( map.computeSQLIfAbsent( key, () -> getC( mappingFunction.get() ) ) );
+        try
+        {
+            return getV( map.computeSQLIfAbsent( key, () -> getC( mappingFunction.get() ) ) );
+        }
+        finally
+        {
+            expire();
+        }
     }
 
     public V computeSQLIfPresent( K key, SQLBiFunction<? super K, ? super V, ? extends V> remappingFunction )
             throws SQLException
     {
-        return getV( map.computeSQLIfPresent( key, (k, v) -> getC( remappingFunction.apply( k, getV( v ) ) ) ) );
+        try
+        {
+            return getV( map.computeSQLIfPresent( key, ( k, v ) -> getC( remappingFunction.apply( k, getV( v ) ) ) ) );
+        }
+        finally
+        {
+            expire();
+        }
     }
 
     public V computeSQL( K key, SQLBiFunction<? super K, ? super V, ? extends V> remappingFunction )
             throws SQLException
     {
-        return getV( map.computeSQL( key, (k, v) -> getC( remappingFunction.apply( k, getV( v ) ) ) ) );
+        try
+        {
+            return getV( map.computeSQL( key, ( k, v ) -> getC( remappingFunction.apply( k, getV( v ) ) ) ) );
+        }
+        finally
+        {
+            expire();
+        }
     }
 
     public V mergeSQL( K key, V value, SQLBiFunction<? super V, ? super V, ? extends V> remappingFunction )
             throws SQLException
     {
-        return getV( map.
-                mergeSQL( key, getC( value ), (o, v) -> getC( remappingFunction.apply( getV( o ), getV( v ) ) ) ) );
+        try
+        {
+            return getV( map.
+                    mergeSQL( key, getC( value ), ( o, v ) -> getC( remappingFunction.apply( getV( o ), getV( v ) ) ) ) );
+        }
+        finally
+        {
+            expire();
+        }
+    }
+
+    /**
+     * Call a Consumer with a value in the cache only if it's present.
+     * <p>
+     * @param k Key
+     * @param c Consumer
+     */
+    public void ifPresent( K k, Consumer<V> c )
+    {
+        CacheEntry<K, V> e = map.get( k );
+        if( e != null )
+        {
+            c.accept( getV( e ) );
+        }
+    }
+
+    /**
+     * Call a BiConsumer with a value in the cache only if it's present.
+     * <p>
+     * @param k Key
+     * @param c BiConsumer
+     */
+    public void ifPresent( K k, BiConsumer<K, V> c )
+    {
+        CacheEntry<K, V> e = map.get( k );
+        if( e != null )
+        {
+            c.accept( k, getV( e ) );
+        }
+    }
+
+    /**
+     * Call a Consumer with they key if it's not present in the cache.
+     * <p>
+     * @param k Key
+     * @param c Consumer
+     */
+    public void ifAbsent( K k, Consumer<K> c )
+    {
+        if( !map.containsKey( k ) )
+        {
+            c.accept( k );
+        }
+    }
+
+    /**
+     * Call a BiConsumer with the cache and key if the key is not present in the cache.
+     * <p>
+     * @param k Key
+     * @param c Consumer
+     */
+    public void ifAbsent( K k, BiConsumer<Cache<K, V>, K> c )
+    {
+        if( !map.containsKey( k ) )
+        {
+            c.accept( this, k );
+        }
+    }
+
+    /**
+     * Computes a value if it's not present in the cache and then if the cache entry is present passes the final value to a Consumer.
+     * <p>
+     * If the cache does not contain an entry the mapping function is used to create a new one. If the function returns a non-null entry then the cache is
+     * updated.
+     * <p>
+     * The consumer is only called if the entry is not null.
+     * <p>
+     * @param k Key
+     * @param m Mapping function to create the new value.
+     * @param c Consumer
+     */
+    public void compute( K k, Function<? super K, ? extends V> m, Consumer<V> c )
+    {
+        V v = computeIfAbsent( k, m );
+        if( v != null )
+        {
+            c.accept( v );
+        }
+    }
+
+    /**
+     * Computes a value if it's not present in the cache and then if the cache entry is present passes the final value to a BiConsumer.
+     * <p>
+     * If the cache does not contain an entry the mapping function is used to create a new one. If the function returns a non-null entry then the cache is
+     * updated.
+     * <p>
+     * The consumer is only called if the entry is not null.
+     * <p>
+     * @param k Key
+     * @param m Mapping function to create the new value.
+     * @param c Consumer
+     */
+    public void compute( K k, Function<? super K, ? extends V> m, BiConsumer<K, V> c )
+    {
+        V v = computeIfAbsent( k, m );
+        if( v != null )
+        {
+            c.accept( k, v );
+        }
+    }
+
+    /**
+     * Pass a cache value to a Consumer with the value in the cache
+     * <p>
+     * @param <T>     Type to consume
+     * @param kMapper Mapping function to convert T into the cache key
+     * @param c       Consumer if the value exists in the cache
+     * <p>
+     * @return Consumer
+     */
+    public <T> Consumer<T> consume( Function<T, K> kMapper, Consumer<V> c )
+    {
+        return t -> ifPresent( kMapper.apply( t ), c );
+    }
+
+    /**
+     * Pass a cache value to a BiConsumer with the value in the cache
+     * <p>
+     * @param <T>     Type to consume
+     * @param kMapper Mapping function to convert T into the cache key
+     * @param c       BiConsumer if the value exists in the cache
+     * <p>
+     * @return BiConsumer
+     */
+    public <T> Consumer<T> consume( Function<T, K> kMapper, BiConsumer<K, V> c )
+    {
+        return t -> ifPresent( kMapper.apply( t ), c );
+    }
+
+    /**
+     * Pass a cache value to a Consumer if it's present in the cache
+     * <p>
+     * @param <T>     Type to consume
+     * @param kMapper Mapping function to convert T into the cache key
+     * @param c       Consumer if the value exists in the cache
+     * <p>
+     * @return Consumer
+     */
+    public <T> Consumer<T> consumeIfPresent( Function<T, K> kMapper, Consumer<V> c )
+    {
+        return t -> ifPresent( kMapper.apply( t ), c );
+    }
+
+    /**
+     * Pass a cache value to a BiConsumer if it's present in the cache
+     * <p>
+     * @param <T>     Type to consume
+     * @param kMapper Mapping function to convert T into the cache key
+     * @param c       BiConsumer if the value exists in the cache
+     * <p>
+     * @return BiConsumer
+     */
+    public <T> Consumer<T> consumeIfPresent( Function<T, K> kMapper, BiConsumer<K, V> c )
+    {
+        return t -> ifPresent( kMapper.apply( t ), c );
+    }
+
+    /**
+     * Pass the key to a Consumer if it's absent in the cache
+     * <p>
+     * @param <T>     Type to consume
+     * @param kMapper Mapping function to convert T into the cache key
+     * @param c       Consumer if the key is absent
+     * <p>
+     * @return Consumer
+     */
+    public <T> Consumer<T> consumeIfAbsent( Function<T, K> kMapper, Consumer<K> c )
+    {
+        return t -> ifAbsent( kMapper.apply( t ), c );
+    }
+
+    /**
+     * Pass the key to a BiConsumer if it's absent in the cache
+     * <p>
+     * @param <T>     Type to consume
+     * @param kMapper Mapping function to convert T into the cache key
+     * @param c       BiConsumer if the key is absent
+     * <p>
+     * @return BiConsumer
+     */
+    public <T> Consumer<T> consumeIfAbsent( Function<T, K> kMapper, BiConsumer<Cache<K, V>, K> c )
+    {
+        return t -> ifAbsent( kMapper.apply( t ), c );
+    }
+
+    /**
+     * Returns a {@link Collector} that will populate this cache
+     * <p>
+     * @param <T>         Type of input into the collector
+     * @param keyMapper   Mapping function to generate the key from T
+     * @param valueMapper Mapping function to generate the value from T
+     * <p>
+     * @return Collector
+     */
+    public <T> Collector<T, ?, V> collect( Function<T, K> keyMapper, Function<T, V> valueMapper )
+    {
+        return collect( keyMapper, valueMapper, Functions.writeOnceBinaryOperator() );
+    }
+
+    /**
+     * Returns a {@link Collector} that will populate this cache
+     * <p>
+     * @param <T>         Type of input into the collector
+     * @param keyMapper   Mapping function to generate the key from T
+     * @param valueMapper Mapping function to generate the value from T
+     * <p>
+     * @return Collector
+     */
+    public <T> Collector<T, K, V> collect( Function<T, K> keyMapper, Function<T, V> valueMapper, BinaryOperator<K> combiner )
+    {
+        return CollectorUtils.collector( () -> null,
+                                         ( n, t ) -> computeIfAbsent( keyMapper.apply( t ), k -> valueMapper.apply( t ) ),
+                                         combiner,
+                                         CollectorUtils.IDENTITY_CHARACTERISTICS );
+    }
+
+    /**
+     * Returns a {@link Collector} that will populate this cache
+     * <p>
+     * @param keyMapper Mapping function to generate the key from the value
+     * <p>
+     * @return Collector
+     */
+    public Collector<V, ?, V> collect( Function<V, K> keyMapper )
+    {
+        return CollectorUtils.
+                identityCollector( () -> null,
+                                   ( n, t ) -> computeIfAbsent( keyMapper.apply( t ), k -> t ),
+                                   Functions.writeOnceBinaryOperator() );
     }
 
     private static class CacheEntry<K, V>
@@ -316,6 +605,10 @@ public class Cache<K, V>
             return entered.isBefore( other );
         }
 
+        public boolean isAfter( ChronoLocalDateTime<?> other )
+        {
+            return entered.isAfter( other );
+        }
     }
 
 }
