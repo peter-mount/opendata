@@ -17,23 +17,23 @@ public class Smart
 
     public static final SQLResultSetHandler<Smart> fromSQL = rs -> new Smart(
             rs.getLong( 1 ),
-            rs.getString( 2 ),
-            rs.getString( 2 ),
-            rs.getString( 2 ),
-            rs.getString( 2 ),
-            rs.getString( 2 ),
-            rs.getInt( 2 ),
-            rs.getString( 2 ),
-            SmartEvent.getType( rs.getString( 2 ) ),
-            rs.getString( 2 ),
-            rs.getInt( 2 ),
-            rs.getString( 2 ),
-            StepType.getType( rs.getString( 2 ) ),
-            rs.getString( 2 )
+            SmartManager.INSTANCE.getArea( rs.getLong( 2 ) ),
+            SmartManager.INSTANCE.getBerth( rs.getLong( 3 ) ),
+            SmartManager.INSTANCE.getBerth( rs.getLong( 4 ) ),
+            SmartManager.INSTANCE.getLine( rs.getLong( 5 ) ),
+            SmartManager.INSTANCE.getLine( rs.getLong( 6 ) ),
+            rs.getInt( 7 ),
+            rs.getString( 8 ),
+            SmartEvent.getType( rs.getString( 9 ) ),
+            rs.getString( 10 ),
+            rs.getInt( 11 ),
+            rs.getString( 12 ),
+            StepType.getType( rs.getString( 13 ) ),
+            rs.getString( 14 )
     );
 
     private final long id;
-    private final String area;
+    private final SmartArea area;
     private final String fromBerth;
     private final String toBerth;
     private final String fromLine;
@@ -47,7 +47,7 @@ public class Smart
     private final StepType stepType;
     private final String comment;
 
-    public Smart( long id, String area, String fromBerth, String toBerth, String fromLine, String toLine, int berthOffset, String platform, SmartEvent event,
+    public Smart( long id, SmartArea area, String fromBerth, String toBerth, String fromLine, String toLine, int berthOffset, String platform, SmartEvent event,
                   String route, int stanox, String stanme, StepType stepType, String comment )
     {
         this.id = id;
@@ -71,7 +71,7 @@ public class Smart
         return id;
     }
 
-    public String getArea()
+    public SmartArea getArea()
     {
         return area;
     }
@@ -179,6 +179,12 @@ public class Smart
                && Objects.equals( this.stanme, other.stanme )
                && this.stepType == other.stepType
                && Objects.equals( this.comment, other.comment );
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Smart{" + "id=" + id + ", area=" + getArea() + ", fromBerth=" + getFromBerth() + ", toBerth=" + getToBerth() + ", fromLine=" + getFromLine() + ", toLine=" + getToLine() + ", berthOffset=" + berthOffset + ", platform=" + platform + ", event=" + event + ", route=" + route + ", stanox=" + stanox + ", stanme=" + stanme + ", stepType=" + stepType + ", comment=" + comment + '}';
     }
 
 }
