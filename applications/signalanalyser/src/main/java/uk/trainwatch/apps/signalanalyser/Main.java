@@ -92,7 +92,7 @@ public class Main
         router.put( "SG", sMonitor );
         router.put( "SH", sMonitor );
 
-        activemq.registerTopicConsumer( "TD_KENT_MCC_SIG_AREA", Consumers.guard(
+        activemq.registerTopicConsumer( "TD_ALL_SIG_AREA", Consumers.guard(
                                         msg -> Stream.of( msg ).
                                         map( JMS.toText ).
                                         filter( Objects::nonNull ).

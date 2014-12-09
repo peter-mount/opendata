@@ -48,12 +48,12 @@ public class NetworkMapper
     /**
      * Max number of adds between writes, overrides time limit
      */
-    private static final int MAX_ADD_BETWEEN_WRITES = 50;
+    private static final int MAX_ADD_BETWEEN_WRITES = 100;
 
     /**
      * Location of file to write
      */
-    private static final String OUTPUT = "/usr/local/opendata/tmp/mapping/td.txt";
+    private static final String OUTPUT = "/usr/local/networkrail/tdmap";
 
     private static final Logger LOG = Logger.getLogger( NetworkMapper.class.getName() );
 
@@ -65,20 +65,21 @@ public class NetworkMapper
             throws IOException
     {
         // Load in the current definition
-        File file = new File( OUTPUT );
-        if( file.exists() ) {
-            LOG.log( Level.INFO, () -> "Reading " + file );
-            try( BufferedReader r = new BufferedReader( new FileReader( file ) ) ) {
-                r.lines().
-                        map( l -> l.split( " " ) ).
-                        forEach( s -> {
-                            Set<String> dest = getBerth( s[0], s[1] );
-                            for( int i = 2; i < s.length; i++ ) {
-                                dest.add( s[i] );
-                            }
-                        } );
-            }
-        }
+// FIXME replace as each area is a directory now
+//        File file = new File( OUTPUT );
+//        if( file.exists() ) {
+//            LOG.log( Level.INFO, () -> "Reading " + file );
+//            try( BufferedReader r = new BufferedReader( new FileReader( file ) ) ) {
+//                r.lines().
+//                        map( l -> l.split( " " ) ).
+//                        forEach( s -> {
+//                            Set<String> dest = getBerth( s[0], s[1] );
+//                            for( int i = 2; i < s.length; i++ ) {
+//                                dest.add( s[i] );
+//                            }
+//                        } );
+//            }
+//        }
 
         lastWrite = LocalDateTime.now();
     }
@@ -122,50 +123,63 @@ public class NetworkMapper
             f1.renameTo( f2 );
         }
     }
-    
+
+    private File backup( File dir )
+    {
+        // Backup last 9 versions
+        File file = new File( dir, "td-9.txt" );
+        File f2;
+        for( int i = 8; i > 0; i-- ) {
+            f2 = file;
+            file = new File( dir, "td-" + i + ".txt" );
+            backup( file, f2 );
+        }
+
+        f2 = file;
+        file = new File( dir, "td.txt" );
+        backup( file, f2 );
+        return file;
+    }
+
     private void write()
     {
         LocalDateTime now = LocalDateTime.now();
         if( addCount >= MAX_ADD_BETWEEN_WRITES
                 || Duration.between( lastWrite, now ).
                 toMinutes() >= MAX_DURATION_BETWEEN_WRITES ) {
-            // Backup last 9 versions
-            File file = new File( OUTPUT + ".9" );
-            File f2;
-            for( int i = 8; i > 0; i-- ) {
-                f2 = file;
-                file = new File( OUTPUT + "." + i );
-                backup( file, f2 );
-            }
+            LOG.log( Level.INFO, "Writing current map" );
+            networkMap.keySet().
+                    stream().
+                    sorted().
+                    forEach( area -> {
+                        File dir = new File( OUTPUT );
+                        dir = new File( dir, area );
+                        if( dir.mkdirs() ) {
+                            LOG.log( Level.INFO, "Created {0}", dir );
+                        }
+                        File file = backup( dir );
+                        LOG.log( Level.FINE, "Writing {0}", file );
+                        try( PrintWriter w = new PrintWriter( new FileWriter( file ) ) ) {
+                            networkMap.get( area ).
+                            entrySet().
+                            stream().
+                            sorted( (a, b) -> a.getKey().
+                                    compareTo( b.getKey() ) ).
+                            forEach( e -> w.printf( "%s %s %s\n",
+                                                    area,
+                                                    e.getKey(),
+                                                    e.getValue().
+                                                    stream().
+                                                    collect( Collectors.joining( " " ) ) )
+                            );
+                        } catch( IOException ex ) {
+                            LOG.log( Level.SEVERE, "Failed to write " + file, ex );
+                        }
+                    }
+                    );
 
-            f2 = file;
-            file = new File( OUTPUT );
-            backup( file, f2 );
-
-            LOG.log( Level.INFO, "Writing {0}", file.getName() );
-            try( PrintWriter w = new PrintWriter( new FileWriter( file ) ) ) {
-                networkMap.keySet().
-                        stream().
-                        sorted().
-                        forEach( area -> networkMap.get( area ).
-                                entrySet().
-                                stream().
-                                sorted( (a, b) -> a.getKey().
-                                        compareTo( b.getKey() ) ).
-                                forEach( e -> w.printf( "%s %s %s\n",
-                                                        area,
-                                                        e.getKey(),
-                                                        e.getValue().
-                                                        stream().
-                                                        collect( Collectors.joining( " " ) ) )
-                                )
-                        );
-
-                lastWrite = now;
-                addCount = 0;
-            } catch( IOException ex ) {
-                LOG.log( Level.SEVERE, "Failed to write " + file, ex );
-            }
+            lastWrite = now;
+            addCount = 0;
         }
     }
 }
