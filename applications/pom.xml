@@ -21,6 +21,7 @@
         <module>archiver</module>
         <module>analysis</module>
         <module>networkrail</module>
+        <module>signalanalyser</module>
         <module>utilities</module>
     </modules>
     
