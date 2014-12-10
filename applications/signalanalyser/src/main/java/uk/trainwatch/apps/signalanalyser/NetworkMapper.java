@@ -65,21 +65,23 @@ public class NetworkMapper
             throws IOException
     {
         // Load in the current definition
-// FIXME replace as each area is a directory now
-//        File file = new File( OUTPUT );
-//        if( file.exists() ) {
-//            LOG.log( Level.INFO, () -> "Reading " + file );
-//            try( BufferedReader r = new BufferedReader( new FileReader( file ) ) ) {
-//                r.lines().
-//                        map( l -> l.split( " " ) ).
-//                        forEach( s -> {
-//                            Set<String> dest = getBerth( s[0], s[1] );
-//                            for( int i = 2; i < s.length; i++ ) {
-//                                dest.add( s[i] );
-//                            }
-//                        } );
-//            }
-//        }
+        File dir = new File( OUTPUT );
+        for( File areaDir : dir.listFiles( (d, n) -> !n.startsWith( "." ) && n.length() == 2 ) ) {
+            File file = new File( areaDir, "td.txt" );
+            if( file.exists() ) {
+                LOG.log( Level.INFO, () -> "Reading " + file );
+                try( BufferedReader r = new BufferedReader( new FileReader( file ) ) ) {
+                    r.lines().
+                            map( l -> l.split( " " ) ).
+                            forEach( s -> {
+                                Set<String> dest = getBerth( s[0], s[1] );
+                                for( int i = 2; i < s.length; i++ ) {
+                                    dest.add( s[i] );
+                                }
+                            } );
+                }
+            }
+        }
 
         lastWrite = LocalDateTime.now();
     }

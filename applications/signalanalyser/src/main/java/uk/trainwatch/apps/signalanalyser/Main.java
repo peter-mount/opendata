@@ -26,6 +26,8 @@ import java.util.stream.Stream;
 import javax.json.JsonObject;
 import javax.json.JsonStructure;
 import uk.trainwatch.apachemq.RemoteActiveMQConnection;
+import uk.trainwatch.rabbitmq.RabbitConnection;
+import uk.trainwatch.rabbitmq.RabbitMQ;
 import uk.trainwatch.util.Consumers;
 import uk.trainwatch.util.JMS;
 import uk.trainwatch.util.JsonUtils;
@@ -41,34 +43,24 @@ public class Main
         extends Application
 {
 
-    private RemoteActiveMQConnection activemq;
+    private RabbitConnection rabbitmq;
 
     @Override
     protected void setupBrokers()
             throws IOException
     {
-        Properties p = loadProperties( "networkrail.properties" );
-        activemq = new RemoteActiveMQConnection(
-                p.getProperty( "server" ),
-                Integer.parseInt( p.getProperty( "port", "61619" ) ),
-                p.getProperty( "clientid", p.getProperty( "username" ) ),
-                p.getProperty( "username" ),
-                p.getProperty( "password" )
-        );
-    }
+        Properties p = loadProperties( "rabbit.properties" );
 
-    @Override
-    protected void start()
-    {
-        super.start();
-        activemq.start();
+        rabbitmq = new RabbitConnection( p.getProperty( "username" ),
+                                         p.getProperty( "password" ),
+                                         p.getProperty( "host" ) );
     }
 
     @Override
     protected void stop()
     {
         super.stop();
-        activemq.stop();
+        rabbitmq.close();
     }
 
     @Override
@@ -92,27 +84,18 @@ public class Main
         router.put( "SG", sMonitor );
         router.put( "SH", sMonitor );
 
-        activemq.registerTopicConsumer( "TD_ALL_SIG_AREA", Consumers.guard(
-                                        msg -> Stream.of( msg ).
-                                        map( JMS.toText ).
-                                        filter( Objects::nonNull ).
-                                        peek( rawMonitor ).
-                                        //peek(rawPublisher).
-                                        map( JsonUtils.parseJsonArray ).
-                                        flatMap( JsonUtils::<JsonObject>stream ).
-                                        flatMap( o -> o.values().
-                                                stream() ).
-                                        map( JsonUtils.getObject ).
-                                        filter( Objects::nonNull ).
-                                        peek( tdMonitor ).
-                                        //
-                                        forEach( m -> {
-                                            Consumer<? super JsonObject> c = router.get( m.getString( "msg_type" ) );
-                                            if( c != null ) {
-                                                c.accept( m );
-                                            }
-                                        } )
-                                ) );
+        RabbitMQ.queueDurableStream( rabbitmq,
+                                     "signal.map.all",
+                                     "nr.td.area.#",
+                                     Consumers.guard(
+                                             s -> s.map( RabbitMQ.toString ).
+                                             map( JsonUtils.parseJsonObject ).
+                                             filter( Objects::nonNull ).
+                                             filter( Objects::nonNull ).
+                                             peek( tdMonitor ).
+                                             forEach( m -> router.get( m.getString( "msg_type" ) ) )
+                                     )
+        );
     }
 
     public static void main( String... args )

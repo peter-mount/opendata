@@ -82,13 +82,11 @@ public class JsonUtils
      */
     public static JsonStructure decode( String s )
     {
-        if( s == null || s.isEmpty() )
-        {
+        if( s == null || s.isEmpty() ) {
             return null;
         }
         final StringReader r = new StringReader( Objects.requireNonNull( s ) );
-        try( JsonReader jr = Json.createReader( r ) )
-        {
+        try( JsonReader jr = Json.createReader( r ) ) {
             return jr.read();
         }
     }
@@ -102,8 +100,7 @@ public class JsonUtils
     public static String encode( JsonStructure s )
     {
         final StringWriter w = new StringWriter();
-        try( JsonWriter jw = Json.createWriter( w ) )
-        {
+        try( JsonWriter jw = Json.createWriter( w ) ) {
             jw.write( s );
             return w.toString();
         }
@@ -122,8 +119,7 @@ public class JsonUtils
     }
 
     /**
-     * Get the named JsonArray from a JsonObject. Unlike {@link JsonObject#getJsonArray(java.lang.String)} if null would
-     * be returned we return an empty instance
+     * Get the named JsonArray from a JsonObject. Unlike {@link JsonObject#getJsonArray(java.lang.String)} if null would be returned we return an empty instance
      * <p>
      * @param o    JsonObject
      * @param name name
@@ -148,11 +144,28 @@ public class JsonUtils
      */
     public static <T extends JsonValue> Stream<T> stream( JsonArray a )
     {
-        if( a == null || a.isEmpty() )
-        {
+        if( a == null || a.isEmpty() ) {
             return Stream.empty();
         }
         return (Stream<T>) a.stream();
+    }
+
+    /**
+     * Return a stream from a JsonArray.
+     * <p>
+     * If the array is null or empty then an empty stream is returned.
+     * <p>
+     * @param <T> type
+     * @param o   array
+     * <p>
+     * @return Stream, never null
+     */
+    public static <T extends JsonValue> Stream<T> stream( JsonObject o )
+    {
+        if( o == null || o.isEmpty() ) {
+            return Stream.empty();
+        }
+        return (Stream<T>) o.values().stream();
     }
 
     /**
@@ -179,27 +192,21 @@ public class JsonUtils
     public static Integer getInt( JsonObject o, String n, Integer defaultValue )
     {
         JsonValue v = o.get( n );
-        if( v == null )
-        {
+        if( v == null ) {
             return defaultValue;
         }
-        switch( v.getValueType() )
-        {
+        switch( v.getValueType() ) {
             case NUMBER:
                 JsonNumber jn = (JsonNumber) v;
                 return jn.intValue();
             case STRING:
                 String s = getString( v );
-                if( s.isEmpty() )
-                {
+                if( s.isEmpty() ) {
                     return defaultValue;
                 }
-                try
-                {
+                try {
                     return Integer.parseInt( s );
-                }
-                catch( NumberFormatException ex )
-                {
+                } catch( NumberFormatException ex ) {
                     LOG.log( Level.INFO, ex, () -> "" + s );
                     return defaultValue;
                 }
@@ -222,27 +229,21 @@ public class JsonUtils
     public static Long getLong( JsonObject o, String n, Long defaultValue )
     {
         JsonValue v = o.get( n );
-        if( v == null )
-        {
+        if( v == null ) {
             return defaultValue;
         }
-        switch( v.getValueType() )
-        {
+        switch( v.getValueType() ) {
             case NUMBER:
                 JsonNumber jn = (JsonNumber) v;
                 return jn.longValue();
             case STRING:
                 String s = getString( v );
-                if( s.isEmpty() )
-                {
+                if( s.isEmpty() ) {
                     return defaultValue;
                 }
-                try
-                {
+                try {
                     return Long.parseLong( s );
-                }
-                catch( NumberFormatException ex )
-                {
+                } catch( NumberFormatException ex ) {
                     return defaultValue;
                 }
             case TRUE:
@@ -259,27 +260,21 @@ public class JsonUtils
     public static Double getDouble( JsonObject o, String n, Double defaultValue )
     {
         JsonValue v = o.get( n );
-        if( v == null )
-        {
+        if( v == null ) {
             return defaultValue;
         }
-        switch( v.getValueType() )
-        {
+        switch( v.getValueType() ) {
             case NUMBER:
                 JsonNumber jn = (JsonNumber) v;
                 return jn.doubleValue();
             case STRING:
                 String s = getString( v );
-                if( s.isEmpty() )
-                {
+                if( s.isEmpty() ) {
                     return defaultValue;
                 }
-                try
-                {
+                try {
                     return Double.parseDouble( s );
-                }
-                catch( NumberFormatException ex )
-                {
+                } catch( NumberFormatException ex ) {
                     return defaultValue;
                 }
             case TRUE:
@@ -296,11 +291,9 @@ public class JsonUtils
     public static String getString( JsonValue v )
     {
         String s = null;
-        if( v != null && v.getValueType() != JsonValue.ValueType.NULL )
-        {
+        if( v != null && v.getValueType() != JsonValue.ValueType.NULL ) {
             s = v.toString();
-            if( s.length() > 1 && s.startsWith( "\"" ) && s.endsWith( "\"" ) )
-            {
+            if( s.length() > 1 && s.startsWith( "\"" ) && s.endsWith( "\"" ) ) {
                 s = s.substring( 1, s.length() - 1 );
             }
             s = s.trim();
@@ -316,12 +309,10 @@ public class JsonUtils
     public static String getString( JsonObject o, String n, String defaultValue )
     {
         JsonValue v = o.get( n );
-        if( v == null )
-        {
+        if( v == null ) {
             return defaultValue;
         }
-        switch( v.getValueType() )
-        {
+        switch( v.getValueType() ) {
             case NUMBER:
                 JsonNumber jn = (JsonNumber) v;
                 return jn.toString();
@@ -347,12 +338,10 @@ public class JsonUtils
     public static Boolean getBoolean( JsonObject o, String n, Boolean defaultValue )
     {
         JsonValue v = o.get( n );
-        if( v == null )
-        {
+        if( v == null ) {
             return defaultValue;
         }
-        switch( v.getValueType() )
-        {
+        switch( v.getValueType() ) {
             case NUMBER:
                 JsonNumber jn = (JsonNumber) v;
                 return !jn.bigIntegerValue().
@@ -373,12 +362,10 @@ public class JsonUtils
 
     public static Date getDate( JsonValue v )
     {
-        if( v == null )
-        {
+        if( v == null ) {
             return null;
         }
-        switch( v.getValueType() )
-        {
+        switch( v.getValueType() ) {
             case NUMBER:
                 return new Date( ((JsonNumber) v).longValue() );
             case STRING:
@@ -399,12 +386,10 @@ public class JsonUtils
 
     public static Time getTime( JsonValue v )
     {
-        if( v == null )
-        {
+        if( v == null ) {
             return null;
         }
-        switch( v.getValueType() )
-        {
+        switch( v.getValueType() ) {
             case NUMBER:
                 return new Time( ((JsonNumber) v).longValue() );
             case STRING:
@@ -426,17 +411,13 @@ public class JsonUtils
     public static Timestamp getTimestamp( JsonObject map, String key )
     {
         String dt = getString( map, key );
-        if( dt == null || dt.isEmpty() )
-        {
+        if( dt == null || dt.isEmpty() ) {
             return null;
         }
 
-        try
-        {
+        try {
             return new Timestamp( Long.parseLong( dt ) );
-        }
-        catch( NumberFormatException nfe )
-        {
+        } catch( NumberFormatException nfe ) {
             // The database can send us time with a timezone offset so strip it out
             // FIXME later account for this or better still implement proper timestamp handling
             int i = dt.indexOf( "+" );
@@ -444,23 +425,18 @@ public class JsonUtils
 //            {
 //                i = dt.lastIndexOf( "-" );
 //            }
-            if( i > -1 )
-            {
+            if( i > -1 ) {
                 dt = dt.substring( 0, i );
             }
 
             // We need a time
-            if( !dt.contains( " " ) || !dt.contains( ":" ) )
-            {
+            if( !dt.contains( " " ) || !dt.contains( ":" ) ) {
                 dt = dt + " 00:00:00";
             }
 
-            try
-            {
+            try {
                 return Timestamp.valueOf( dt );
-            }
-            catch( Exception e )
-            {
+            } catch( Exception e ) {
                 LOG.log( Level.SEVERE, "Timestamp " + dt, e );
                 return null;
             }
@@ -550,19 +526,17 @@ public class JsonUtils
     {
         Objects.requireNonNull( b );
         Objects.requireNonNull( o );
-        o.forEach( ( k, v ) -> b.add( k, v ) );
+        o.forEach( (k, v) -> b.add( k, v ) );
         return b;
     }
 
     public static LocalTime getLocalTime( JsonObject o, String n )
     {
         JsonValue v = o.get( n );
-        if( v == null )
-        {
+        if( v == null ) {
             return null;
         }
-        switch( v.getValueType() )
-        {
+        switch( v.getValueType() ) {
             case STRING:
                 return TimeUtils.getLocalTime( ((JsonString) v).getString() );
 
@@ -610,10 +584,8 @@ public class JsonUtils
     public static JsonArrayBuilder getArray( Enum<?> ary[] )
     {
         JsonArrayBuilder b = Json.createArrayBuilder();
-        if( ary != null && ary.length > 0 )
-        {
-            for( Enum<?> a: ary )
-            {
+        if( ary != null && ary.length > 0 ) {
+            for( Enum<?> a : ary ) {
                 b.add( a.toString() );
             }
         }
@@ -635,8 +607,7 @@ public class JsonUtils
     /**
      * Create a {@link JsonString}.
      * <p>
-     * This is here mainly to support {@link #createJsonValue(java.lang.String)} as the {@link Json} class does not
-     * provide a way of generating this.
+     * This is here mainly to support {@link #createJsonValue(java.lang.String)} as the {@link Json} class does not provide a way of generating this.
      * <p>
      * @param s String
      * <p>

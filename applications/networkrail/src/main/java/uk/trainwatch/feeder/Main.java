@@ -16,8 +16,10 @@
 package uk.trainwatch.feeder;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.stream.Stream;
@@ -44,6 +46,8 @@ public class Main
     private RabbitConnection rabbitmq;
 
     private RemoteActiveMQConnection activemq;
+
+    private final Map<String, Consumer<? super JsonStructure>> tdPublishers = new ConcurrentHashMap<>();
 
     @Override
     protected void setupBrokers()
@@ -76,12 +80,9 @@ public class Main
     protected void stop()
     {
         super.stop();
-        try
-        {
+        try {
             activemq.stop();
-        }
-        finally
-        {
+        } finally {
             rabbitmq.close();
         }
     }
@@ -119,6 +120,33 @@ public class Main
                                         // Pass to the main route
                                         peek( mvtMonitor ).
                                         forEach( mvtPublisher )
+                                ) );
+
+        // TD feed
+        Consumer<String> rawTdMonitor = RateMonitor.log( LOG, "recieve nr.td raw" );
+        Consumer<String> rawTdPublisher = RabbitMQ.stringConsumer( rabbitmq, "nr.td.all" );
+        Consumer<JsonObject> tdMonitor = RateMonitor.log( LOG, "recieve nr.td.area" );
+        activemq.registerTopicConsumer( "TD_ALL_SIG_AREA", Consumers.guard( msg -> Stream.of( msg ).
+                                        map( JMS.toText ).
+                                        filter( Objects::nonNull ).
+                                        // peek will submit the raw text to rabbit
+                                        peek( rawTdMonitor ).
+                                        peek( rawTdPublisher ).
+                                        // Parse and then unbatch
+                                        map( JsonUtils.parseJsonArray ).
+                                        // Stream of array elements
+                                        flatMap( JsonUtils::<JsonObject>stream ).
+                                        // Stream of object property values
+                                        flatMap( JsonUtils::<JsonObject>stream ).
+                                        map( JsonUtils.getObject ).
+                                        filter( Objects::nonNull ).
+                                        peek( tdMonitor ).
+                                        // Route to the individual signalling area
+                                        forEach( td -> tdPublishers.computeIfAbsent( td.getString( "area_id" ),
+                                                                                     area -> RabbitMQ.jsonConsumer( rabbitmq, "nr.td.area." + area )
+                                                ).
+                                                accept( td )
+                                        )
                                 ) );
     }
 
