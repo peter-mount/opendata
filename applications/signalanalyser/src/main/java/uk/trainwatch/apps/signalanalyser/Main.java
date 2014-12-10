@@ -22,14 +22,11 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.logging.Level;
-import java.util.stream.Stream;
 import javax.json.JsonObject;
 import javax.json.JsonStructure;
-import uk.trainwatch.apachemq.RemoteActiveMQConnection;
 import uk.trainwatch.rabbitmq.RabbitConnection;
 import uk.trainwatch.rabbitmq.RabbitMQ;
 import uk.trainwatch.util.Consumers;
-import uk.trainwatch.util.JMS;
 import uk.trainwatch.util.JsonUtils;
 import uk.trainwatch.util.app.Application;
 import static uk.trainwatch.util.app.BaseApplication.loadProperties;
@@ -71,7 +68,9 @@ public class Main
         Consumer<String> rawMonitor = RateMonitor.log( LOG, "receive nr.td.raw" );
         Consumer<? super JsonStructure> tdMonitor = RateMonitor.log( LOG, "receive nr.td.m" );
 
-        Consumer<? super JsonObject> cMonitor = new NetworkMapper().andThen( RateMonitor.log( LOG, "receive nr.td.c" ) );
+        Consumer<? super JsonObject> cMonitor = new NetworkMapper().
+                andThen( new NetworkTracker() ).
+                andThen( RateMonitor.log( LOG, "receive nr.td.c" ) );
 
         Consumer<? super JsonObject> sMonitor = RateMonitor.log( LOG, "receive nr.td.s" );
 
@@ -91,9 +90,9 @@ public class Main
                                              s -> s.map( RabbitMQ.toString ).
                                              map( JsonUtils.parseJsonObject ).
                                              filter( Objects::nonNull ).
-                                             filter( Objects::nonNull ).
                                              peek( tdMonitor ).
-                                             forEach( m -> router.get( m.getString( "msg_type" ) ) )
+                                             forEach( m -> router.get( m.getString( "msg_type" ) ).
+                                                     accept( m ) )
                                      )
         );
     }
