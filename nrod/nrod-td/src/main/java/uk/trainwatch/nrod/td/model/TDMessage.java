@@ -15,8 +15,11 @@
  */
 package uk.trainwatch.nrod.td.model;
 
+import java.util.Date;
+
 /**
  * Base class for all TD message types
+ * <p>
  * @author Peter T Mount
  */
 public abstract class TDMessage
@@ -39,6 +42,11 @@ public abstract class TDMessage
     public final long getTime()
     {
         return time;
+    }
+
+    public final Date getDate()
+    {
+        return new Date( time );
     }
 
     public final void setTime( long time )

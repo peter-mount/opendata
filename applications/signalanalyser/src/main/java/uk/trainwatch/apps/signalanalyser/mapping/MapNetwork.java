@@ -13,52 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.trainwatch.apps.signalanalyser;
+package uk.trainwatch.apps.signalanalyser.mapping;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import javax.json.JsonObject;
 import javax.json.JsonStructure;
-import uk.trainwatch.rabbitmq.RabbitConnection;
+import uk.trainwatch.apps.signalanalyser.AbstractApp;
 import uk.trainwatch.rabbitmq.RabbitMQ;
 import uk.trainwatch.util.Consumers;
 import uk.trainwatch.util.JsonUtils;
-import uk.trainwatch.util.app.Application;
-import static uk.trainwatch.util.app.BaseApplication.loadProperties;
 import uk.trainwatch.util.counter.RateMonitor;
 
 /**
- *
+ * Simple application to receive the entire TD feed and build up a simple map of berths used and the relationships between them when movements happen.
+ * <p>
+ * This mapping data can then be used to help build up a signalling diagram.
+ * <p>
  * @author peter
  */
-public class Main
-        extends Application
+public class MapNetwork
+        extends AbstractApp
 {
-
-    private RabbitConnection rabbitmq;
-
-    @Override
-    protected void setupBrokers()
-            throws IOException
-    {
-        Properties p = loadProperties( "rabbit.properties" );
-
-        rabbitmq = new RabbitConnection( p.getProperty( "username" ),
-                                         p.getProperty( "password" ),
-                                         p.getProperty( "host" ) );
-    }
-
-    @Override
-    protected void stop()
-    {
-        super.stop();
-        rabbitmq.close();
-    }
 
     @Override
     protected void setupApplication()
@@ -83,7 +63,7 @@ public class Main
         router.put( "SG", sMonitor );
         router.put( "SH", sMonitor );
 
-        RabbitMQ.queueDurableStream( rabbitmq,
+        RabbitMQ.queueDurableStream( getRabbitmq(),
                                      "signal.map.all",
                                      "nr.td.area.#",
                                      Consumers.guard(
@@ -103,7 +83,7 @@ public class Main
     {
         LOG.log( Level.INFO, "Initialising Network Rail Signal Analyser" );
 
-        new Main().run();
+        new MapNetwork().run();
     }
 
 }

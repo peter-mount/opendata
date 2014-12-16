@@ -15,13 +15,25 @@
  */
 package uk.trainwatch.nrod.td.model;
 
+import java.util.function.Consumer;
+
 /**
- * Visitor used by all TD message types
+ * Visitor used by all TD message types. This visitor is also a {@link Consumer} which will pass the visitor to the received object.
  * <p>
  * @author Peter T Mount
  */
 public interface TDVisitor
+        extends Consumer<TDMessage>
 {
+
+    @Override
+    default void accept( TDMessage t )
+    {
+        if( t != null )
+        {
+            t.accept( this );
+        }
+    }
 
     default void visit( BerthStep s )
     {

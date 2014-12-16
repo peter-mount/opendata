@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+<tiles-definitions>
+    
+    <definition name="signal.home" extends="layout.main">
+        <put-attribute name="title" value="Signal Map Index" />
+        <put-attribute name="body" value=".signal.home" />
+        <put-attribute name="javascript" value="/common/blank.jsp" />
+    </definition>
+    <definition name=".signal.home" extends="layout.1col">
+        <put-attribute name="center" value="/common/signal/index.jsp" />
+    </definition>
+    
+    <definition name="signal.map" extends="layout.main">
+        <put-attribute name="title" value="Signal Map" />
+        <put-attribute name="body" value=".signal.map" />
+        <put-attribute name="javascript" value="/common/signal/javascript.jsp" />
+    </definition>
+    <definition name=".signal.map" extends="layout.2col-left">
+        <put-attribute name="left" value="/common/signal/left.jsp" />
+        <put-attribute name="center" value="/common/signal/map.jsp" />
+    </definition>
+    
+</tiles-definitions>

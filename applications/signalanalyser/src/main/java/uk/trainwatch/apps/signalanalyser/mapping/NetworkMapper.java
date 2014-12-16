@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.trainwatch.apps.signalanalyser;
+package uk.trainwatch.apps.signalanalyser.mapping;
 
 import java.io.BufferedReader;
 import java.io.File;
