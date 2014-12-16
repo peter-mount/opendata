@@ -41,7 +41,7 @@ public interface SQLFunction<T, R>
     default <V> SQLFunction<V, R> compose( SQLFunction<? super V, ? extends T> before )
     {
         Objects.requireNonNull( before );
-        return (V v) -> apply( before.apply( v ) );
+        return ( V v ) -> apply( before.apply( v ) );
     }
 
     /**
@@ -61,7 +61,7 @@ public interface SQLFunction<T, R>
     default <V> SQLFunction<T, V> andThen( SQLFunction<? super R, ? extends V> after )
     {
         Objects.requireNonNull( after );
-        return (T t) -> after.apply( apply( t ) );
+        return ( T t ) -> after.apply( apply( t ) );
     }
 
     /**
@@ -90,12 +90,26 @@ public interface SQLFunction<T, R>
     }
 
     /**
+     * Guard's this SQLFunction by ensuring that any {@link SQLException} is wrapped in an {@link UncheckedSQLException}
+     * wrapping it in a {@link Function}.
+     * <p>
+     * @return function
+     */
+    default Function<T, R> guard()
+    {
+        return guard( this );
+    }
+
+    /**
      * Composes a new SQLFunction so that if an UncheckedSQLException is thrown then the original SQLException is rethrown.
+     * <p>
      * @param <T>
      * @param <R>
      * @param f
+     *            <p>
      * @return
-     * @throws SQLException 
+     *         <p>
+     * @throws SQLException
      */
     static <T, R> SQLFunction<T, R> compose( Function<T, R> f )
             throws SQLException

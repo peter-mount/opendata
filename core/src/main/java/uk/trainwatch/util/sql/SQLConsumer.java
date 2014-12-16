@@ -83,6 +83,12 @@ public interface SQLConsumer<T>
         };
     }
 
+    /**
+     * Wraps a SQLConsumer with a Consumer which allows for any SQLException to be converted into an
+     * UncheckedSQLException
+     * <p>
+     * @return consumer
+     */
     default Consumer<T> guard()
     {
         return guard( this );

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Peter T Mount.
+ * Copyright 2014 peter.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,23 @@
 package uk.trainwatch.util.sql;
 
 import uk.trainwatch.util.AbstractSpliterator;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  *
- * @author Peter T Mount
+ * @author peter
+ * @param <T>
  */
-class ResultSetSpliterator<T>
+public class SQLSupplierSpliterator<T>
         extends AbstractSpliterator<T>
 {
 
-    private final ResultSet resultSet;
-    private final SQLFunction<ResultSet, T> factory;
+    private final SQLSupplier<T> supplier;
 
-    /**
-     *
-     * @param resultSet {@link ResultSet} to iterate over
-     * @param factory   {@link Function} that will take a ResultSet row and produce some object
-     */
-    public ResultSetSpliterator( ResultSet resultSet, SQLFunction<ResultSet, T> factory )
+    public SQLSupplierSpliterator( SQLSupplier<T> supplier )
     {
-        this.resultSet = resultSet;
-        this.factory = factory;
+        this.supplier = supplier;
     }
 
     @Override
@@ -48,12 +40,14 @@ class ResultSetSpliterator<T>
     {
         try
         {
-            if( resultSet.next() )
+            T v = supplier.get();
+            if( v == null )
             {
-                action.accept( factory.apply( resultSet ) );
-                return true;
+                return false;
             }
-            return false;
+
+            action.accept( v );
+            return true;
         }
         catch( SQLException ex )
         {

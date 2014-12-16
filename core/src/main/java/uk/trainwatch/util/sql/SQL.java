@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -47,6 +48,7 @@ public class SQL
      */
     public static <T> Stream<T> stream( ResultSet rs, SQLFunction<ResultSet, T> factory )
     {
+        Objects.requireNonNull( factory );
         if( rs == null )
         {
             return Stream.empty();
@@ -68,7 +70,24 @@ public class SQL
     public static <T> Stream<T> stream( PreparedStatement s, SQLFunction<ResultSet, T> factory )
             throws SQLException
     {
+        Objects.requireNonNull( s );
         return stream( s.executeQuery(), factory );
+    }
+
+    /**
+     * Returns a stream from a {@link SQLSupplier}.
+     * <p>
+     * The stream will end when the supplier returns null.
+     * <p>
+     * @param <T> Type returned by the supplier
+     * @param s   supplier
+     * <p>
+     * @return stream
+     */
+    public static <T> Stream<T> stream( SQLSupplier<T> s )
+    {
+        Objects.requireNonNull( s );
+        return StreamSupport.stream( new SQLSupplierSpliterator<>( s ), false );
     }
 
     /**
@@ -85,13 +104,31 @@ public class SQL
     public static PreparedStatement prepare( Connection c, String sql, Object... args )
             throws SQLException
     {
-        PreparedStatement s = c.prepareStatement( sql );
+        Objects.requireNonNull( c );
+        return setParameters( c.prepareStatement( sql ), args );
+    }
+
+    /**
+     * Set the parameters of a {@link PreparedStatement} to a variable set of arguments
+     * <p>
+     * @param ps   PreparedStatement
+     * @param args Arguments to set
+     * <p>
+     * @return PreparedStatement
+     * <p>
+     * @throws SQLException on error
+     */
+    public static PreparedStatement setParameters( PreparedStatement ps, Object... args )
+            throws SQLException
+    {
+        Objects.requireNonNull( ps );
+        Objects.requireNonNull( args );
         int i = 1;
         for( Object arg: args )
         {
-            s.setObject( i++, arg );
+            ps.setObject( i++, arg );
         }
-        return s;
+        return ps;
     }
 
     /**

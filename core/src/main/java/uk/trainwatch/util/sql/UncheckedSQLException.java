@@ -35,7 +35,7 @@ public class UncheckedSQLException
      * Constructs an instance of this class.
      * <p>
      * @param message the detail message, can be null
-     * @param cause the {@code IOException}
+     * @param cause   the {@code IOException}
      * <p>
      * @throws NullPointerException if the cause is {@code null}
      */
@@ -72,6 +72,7 @@ public class UncheckedSQLException
      * <p>
      * @throws InvalidObjectException if the object is invalid or has a cause that is not an {@code IOException}
      */
+    @SuppressWarnings("ThrowableResultIgnored")
     private void readObject( ObjectInputStream s )
             throws IOException,
                    ClassNotFoundException

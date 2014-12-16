@@ -13,6 +13,7 @@ import java.sql.SQLException;
  * Implementation of {@link SQLResultSetHandler} which caches the {@link ResultSetMetaData} object
  * <p>
  * @author peter
+ * @param <T>
  */
 public abstract class CachingSQLResultSetHandler<T>
         implements SQLResultSetHandler<T>

@@ -22,6 +22,8 @@ import java.util.Map;
  * An implementation of {@link HashMap} with {@link SQLMap}
  * <p>
  * @author Peter T Mount
+ * @param <K>
+ * @param <V>
  */
 public class SQLHashMap<K, V>
         extends HashMap<K, V>

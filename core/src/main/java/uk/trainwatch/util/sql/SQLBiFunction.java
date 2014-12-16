@@ -14,8 +14,9 @@ import java.util.function.Function;
  * A variant of a BiFunction which allows for a SQL exception to be passed through
  * <p>
  * @param <T> Key/Source value
- * @param <V> Return value
- * <p>
+ * @param <U>
+ * @param <R>
+ *            <p>
  * @author Peter T Mount
  */
 @FunctionalInterface
@@ -40,7 +41,7 @@ public interface SQLBiFunction<T, U, R>
     default <V> SQLBiFunction<T, U, V> andThen( SQLFunction<? super R, ? extends V> after )
     {
         Objects.requireNonNull( after );
-        return (T t, U u) -> after.apply( apply( t, u ) );
+        return ( T t, U u ) -> after.apply( apply( t, u ) );
     }
 
     /**
@@ -48,6 +49,7 @@ public interface SQLBiFunction<T, U, R>
      * wrapping it in a {@link Function}.
      * <p>
      * @param <T>
+     * @param <U>
      * @param <R>
      * @param f   a
      * <p>
@@ -55,7 +57,7 @@ public interface SQLBiFunction<T, U, R>
      */
     static <T, U, R> BiFunction<T, U, R> guard( SQLBiFunction<T, U, R> f )
     {
-        return (t, u) ->
+        return ( t, u ) ->
         {
             try
             {
@@ -69,6 +71,17 @@ public interface SQLBiFunction<T, U, R>
     }
 
     /**
+     * Guard's this SQLFunction by ensuring that any {@link SQLException} is wrapped in an {@link UncheckedSQLException}
+     * wrapping it in a {@link Function}.
+     * <p>
+     * @return
+     */
+    default BiFunction<T, U, R> guard()
+    {
+        return guard( this );
+    }
+
+    /**
      * Composes a new SQLBiFunction so that if an UncheckedSQLException is thrown then the original SQLException is
      * rethrown.
      * <p>
@@ -76,15 +89,15 @@ public interface SQLBiFunction<T, U, R>
      * @param <U>
      * @param <R>
      * @param f
-     * <p>
+     *            <p>
      * @return
-     * <p>
+     *         <p>
      * @throws SQLException
      */
     static <T, U, R> SQLBiFunction<T, U, R> compose( BiFunction<T, U, R> f )
             throws SQLException
     {
-        return (t, u) ->
+        return ( t, u ) ->
         {
             try
             {

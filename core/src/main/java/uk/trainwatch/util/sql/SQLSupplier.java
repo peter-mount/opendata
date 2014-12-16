@@ -23,8 +23,10 @@ public interface SQLSupplier<T>
 
     /**
      * Guards a SQLSupplier so that SQLExceptions are handled correctly
+     * <p>
      * @param <T>
-     * @param s SQLSupplier
+     * @param s   SQLSupplier
+     * <p>
      * @return Supplier
      */
     static <T> Supplier<T> guard( SQLSupplier<T> s )
@@ -42,12 +44,20 @@ public interface SQLSupplier<T>
         };
     }
 
+    default Supplier<T> guard()
+    {
+        return guard( this );
+    }
+
     /**
      * Composes a new SQLSupplier so that if any UncheckedSQLExceptions thrown then the original SQLException is rethrown.
+     * <p>
      * @param <T>
      * @param c
+     * <p>
      * @return
-     * @throws SQLException 
+     * <p>
+     * @throws SQLException
      */
     static <T> SQLSupplier<T> compose( Supplier<T> c )
             throws SQLException

@@ -18,7 +18,6 @@ package uk.trainwatch.util.sql;
 import java.sql.SQLException;
 import java.util.Objects;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 /**
  *
