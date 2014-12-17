@@ -32,29 +32,31 @@ var plotSignalMap = function (map) {
     a = SignalMap.line(a, 0, y2, 10, y2);
     map.path(a);
 
+    map.station(1, y1, "Borough Green\n& Wrotham");
     map.berth(1, y1, 'M153');
     map.berth(1, y2, 'M152');
 
-    map.station(4, y1, "Borough Green\n& Wrotham");
     // Down
-    map.berth(2, y1, 'M161');
+    map.berth(3, y1, 'M161');
     map.berth(4, y1, 'M163');
+    map.berth(5, y1, 'M165');
 
     map.station(6, y1, "West\nMalling");
-    map.berth(6, y1, 'M165');
+    map.berth(6, y1, 'M167');
+    map.berth(6, y2, 'M166');
 
     map.station(7, y1, "East\nMalling");
-    map.berth(7, y1, 'M167');
+    map.berth(7, y1, 'M169');
+    map.berth(7, y2, 'M168');
 
     map.station(9, y1, "Barming");
-    map.berth(9, y1, 'M169');
+    map.berth(9, y1, 'M171');
+    map.berth(9, y2, 'M170');
 
     // Up
-    map.berth(2, y2, 'M160');
+    map.berth(3, y2, 'M160');
     map.berth(4, y2, 'M162');
-    map.berth(6, y2, 'M164');
-    map.berth(7, y2, 'M166');
-    map.berth(9, y2, 'M168');
+    map.berth(5, y2, 'M164');
 
     y1 += 5;
     y2 = y1 + 1;
@@ -76,7 +78,7 @@ var plotSignalMap = function (map) {
     a = SignalMap.points(a, 4, y1, y1 - 1);
     a = SignalMap.line(a, 5, y1 - 1, 6, y1 - 1);
     // Spur
-    a = SignalMap.points(a, 3, y1, y2);
+    a = SignalMap.points(a, 2, y1, y2);
     a = SignalMap.line(a, 4, y2, 7.5, y2);
     a = SignalMap.points(a, 7, y2, y1);
     // Up
@@ -91,9 +93,9 @@ var plotSignalMap = function (map) {
     map.path(a);
 
     // Down
-    map.berth(1, y1, 'M171');
-    map.berth(2, y1, 'M019');
-    map.berth(3, y1, 'M004');
+    map.berth(1, y1, 'M019');
+    map.berth(1, y2, 'M172');
+    map.berth(2, y1, 'M004');
     map.berth(6, y1, 'M014');
     // M021 is Platform 2
     map.berth(7, y1, 'M021');
@@ -103,15 +105,13 @@ var plotSignalMap = function (map) {
     map.berth(6, y1 - 1, 'M189');
     map.platform(5, y1 - 0.5, 3, '3', '2');
 
-    // Spur between M019 & M025? except it has M004 in it?
+    // Loop between M172 & M025
     map.berth(6, y2, 'M023');
 
     // Up / Platform 1
-    map.berth(1, y2, 'M170');
-    map.berth(2, y2, 'M172');
     map.berth(6, y2 + 1, 'M041');
     map.berth(9, y2, 'M045');
-    map.platform(4.5, y2 + 0.5, 3.5, '1');
+    map.platform(4.5, y2 + 1.5, 3.5, '1');
 
     // Down
     y1 += 5;
