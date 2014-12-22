@@ -15,6 +15,7 @@
         <module>nrod</module>
         <module>web</module>
         <module>gis</module>
+        <module>ogl</module>
     </modules>
     
     <properties>

@@ -16,16 +16,21 @@
 package uk.trainwatch.util.sql;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import uk.trainwatch.util.TimeUtils;
 
 /**
  * A suite of JDBC utilities
@@ -49,8 +54,7 @@ public class SQL
     public static <T> Stream<T> stream( ResultSet rs, SQLFunction<ResultSet, T> factory )
     {
         Objects.requireNonNull( factory );
-        if( rs == null )
-        {
+        if( rs == null ) {
             return Stream.empty();
         }
         return StreamSupport.stream( new ResultSetSpliterator<>( rs, factory ), false );
@@ -124,8 +128,7 @@ public class SQL
         Objects.requireNonNull( ps );
         Objects.requireNonNull( args );
         int i = 1;
-        for( Object arg: args )
-        {
+        for( Object arg : args ) {
             ps.setObject( i++, arg );
         }
         return ps;
@@ -154,12 +157,9 @@ public class SQL
     public static void deleteTable( Connection con, String schema, String table )
     {
         LOG.log( Level.INFO, () -> "Deleting " + schema + "." + table );
-        try( Statement s = con.createStatement() )
-        {
+        try( Statement s = con.createStatement() ) {
             s.execute( "DELETE FROM " + schema + "." + table );
-        }
-        catch( SQLException ex )
-        {
+        } catch( SQLException ex ) {
             throw new UncheckedSQLException( ex );
         }
     }
@@ -174,12 +174,9 @@ public class SQL
     public static void resetSequence( Connection con, String schema, String sequence )
     {
         LOG.log( Level.INFO, () -> "Resetting sequence " + schema + "." + sequence );
-        try( Statement s = con.createStatement() )
-        {
+        try( Statement s = con.createStatement() ) {
             s.execute( "ALTER SEQUENCE " + schema + "." + sequence + " RESTART WITH 1" );
-        }
-        catch( SQLException ex )
-        {
+        } catch( SQLException ex ) {
             throw new UncheckedSQLException( ex );
         }
     }
@@ -202,17 +199,13 @@ public class SQL
 
         LOG.log( Level.INFO, () -> "Reinitialising enum mapping table " + schema + "." + table );
         try( PreparedStatement s = con.prepareStatement(
-                "INSERT INTO " + schema + "." + table + " (id,code) VALUES (?,?)" ) )
-        {
-            for( Enum<?> enumValue: enumClass.getEnumConstants() )
-            {
+                "INSERT INTO " + schema + "." + table + " (id,code) VALUES (?,?)" ) ) {
+            for( Enum<?> enumValue : enumClass.getEnumConstants() ) {
                 s.setInt( 1, enumValue.ordinal() );
                 s.setString( 2, enumValue.toString() );
                 s.executeUpdate();
             }
-        }
-        catch( SQLException ex )
-        {
+        } catch( SQLException ex ) {
             throw new UncheckedSQLException( ex );
         }
     }
@@ -230,12 +223,9 @@ public class SQL
     public static long currval( Connection con, String sequence )
             throws SQLException
     {
-        try( Statement s = con.createStatement() )
-        {
-            try( ResultSet rs = s.executeQuery( "SELECT currval('timetable.schedule_id_seq')" ) )
-            {
-                if( rs != null && rs.next() )
-                {
+        try( Statement s = con.createStatement() ) {
+            try( ResultSet rs = s.executeQuery( "SELECT currval('timetable.schedule_id_seq')" ) ) {
+                if( rs != null && rs.next() ) {
                     return rs.getLong( 1 );
                 }
             }
@@ -277,14 +267,72 @@ public class SQL
     public static final void setInt( PreparedStatement ps, int c, Integer i )
             throws SQLException
     {
-        if( i == null )
-        {
+        if( i == null ) {
             ps.setNull( c, Types.INTEGER );
-        }
-        else
-        {
+        } else {
             ps.setInt( c, i );
         }
     }
 
+    public static LocalDate getLocalDate( ResultSet rs, String n )
+            throws SQLException
+    {
+        return getLocalDate( rs.getDate( n ) );
+    }
+
+    public static LocalDate getLocalDate( ResultSet rs, int i )
+            throws SQLException
+    {
+        return getLocalDate( rs.getDate( i ) );
+    }
+
+    public static LocalDate getLocalDate( Date dt )
+            throws SQLException
+    {
+        if( dt == null ) {
+            return null;
+        }
+        return TimeUtils.getLocalDate( dt.getTime() );
+    }
+
+    private static void setLocalDate( PreparedStatement ps, int i, LocalDate ld )
+            throws SQLException
+    {
+        if( ld == null ) {
+            ps.setNull( i, Types.DATE );
+        } else {
+            ps.setDate( i, Date.valueOf( ld ) );
+        }
+    }
+
+    public static LocalDateTime getLocalDateTime( ResultSet rs, String n )
+            throws SQLException
+    {
+        return getLocalDateTime( rs.getTimestamp( n ) );
+    }
+
+    public static LocalDateTime getLocalDateTime( ResultSet rs, int i )
+            throws SQLException
+    {
+        return getLocalDateTime( rs.getTimestamp( i ) );
+    }
+
+    public static LocalDateTime getLocalDateTime( Timestamp ts )
+            throws SQLException
+    {
+        if( ts == null ) {
+            return null;
+        }
+        return TimeUtils.getLocalDateTime( ts.getTime() );
+    }
+
+    public static void setLocalDateTime( PreparedStatement ps, int i, LocalDateTime ldt )
+            throws SQLException
+    {
+        if( ldt == null ) {
+            ps.setNull( i, Types.TIMESTAMP );
+        } else {
+            ps.setTimestamp( i, Timestamp.valueOf( ldt ) );
+        }
+    }
 }
