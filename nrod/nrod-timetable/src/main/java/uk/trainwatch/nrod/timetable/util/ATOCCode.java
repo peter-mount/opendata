@@ -9,11 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Two-character codes devised by the Association of Train Operating Companies to identify the operator of individual
- * trains.
+ * Two-character codes devised by the Association of Train Operating Companies to identify the operator of individual trains.
  * <p>
- * These codes do not appear on TSDB, but are generated in CIF from each train’s Train Service Code using a look-up
- * table.
+ * These codes do not appear on TSDB, but are generated in CIF from each train’s Train Service Code using a look-up table.
  * <p>
  * @author Peter T Mount
  */
@@ -31,7 +29,7 @@ public enum ATOCCode
     /**
      * /* Chiltern Railway Co.
      */
-    CH( "CH", "Chiltern Railway Co." ),
+    CH( "CH", "Chiltern Railway" ),
     /**
      * /* East Midlands Trains
      */
@@ -39,11 +37,11 @@ public enum ATOCCode
     /**
      * /* Eurostar (UK)
      */
-    ES( "ES", "Eurostar (UK)" ),
+    ES( "ES", "Eurostar" ),
     /**
      * /* First Capital Connect
      */
-    FC( "FC", "First Capital Connect" ),
+    FC( "FC", "First Capital Connect (Defunct)" ),
     /**
      * /* Grand Central
      */
@@ -53,11 +51,11 @@ public enum ATOCCode
      * <p>
      * This is a new operator since 2014 so not in the CIF End User Specification dated 2010
      */
-    GN( "GN", "Great Northern" ),
+    GN( "GN", "Govia Thameslink Railway (Great Northern)" ),
     /**
      * /* Grand Central
      */
-    GR( "GR", "Grand Central" ),
+    GR( "GR", "East Coast" ),
     /**
      * /* First Great Western
      */
@@ -81,13 +79,13 @@ public enum ATOCCode
     /**
      * /* Island Line
      */
-    IL( "IL", "Island Line" ),
+    IL( "IL", "Island Lines" ),
     /**
      * /* National Express East Anglia
      * <p>
      * TODO check as this has been Abellio Greater Anglia since 2012?
      */
-    LE( "LE", "National Express East Anglia" ),
+    LE( "LE", "Abelio Greater Anglia" ),
     /**
      * /* London Midland
      */
@@ -107,7 +105,7 @@ public enum ATOCCode
     /**
      * /* Northern
      */
-    NT( "NT", "Northern" ),
+    NT( "NT", "Northern Rail" ),
     /**
      * /* North Yorkshire Moors Railway
      */
@@ -133,7 +131,7 @@ public enum ATOCCode
      * <p>
      * TODO confirm, this is not in the CIR EUS 2010
      */
-    TL( "TL", "ThamesLink" ),
+    TL( "TL", "Govia Thameslink Railway (Thameslink)" ),
     /**
      * /* First TransPennine Express
      */
@@ -141,7 +139,7 @@ public enum ATOCCode
     /**
      * /* Tyne & Wear Metro
      */
-    TW( "TW", "Tyne & Wear Metro" ),
+    TW( "TW", "Nexus (Tyne & Wear Metro)" ),
     /**
      * /* Virgin Trains
      */
@@ -149,7 +147,7 @@ public enum ATOCCode
     /**
      * /* West Coast Railway Co.
      */
-    WR( "WR", "West Coast Railway Co." ),
+    WR( "WR", "West Coast Railway" ),
     /**
      * /* Cross Country
      */
@@ -161,14 +159,14 @@ public enum ATOCCode
     /**
      * Unknown. Usualy caused by a new operator
      */
-    UNKNOWN( "??", "Unknown" );
+    UNKNOWN( "??", "Unknown" ),
+    // New entries post the last full import must be added last otherwise it will break the DB
+    DC( "DC", "Devon and Cornwall Railway" );
 
     private static final Map<String, ATOCCode> CODES = new HashMap<>();
 
-    static
-    {
-        for( ATOCCode bhx : values() )
-        {
+    static {
+        for( ATOCCode bhx : values() ) {
             CODES.put( bhx.code, bhx );
         }
     }
