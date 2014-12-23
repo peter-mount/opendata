@@ -10,6 +10,7 @@ import java.awt.event.InputEvent;
 import javax.swing.AbstractAction;
 import javax.swing.KeyStroke;
 import uk.trainwatch.nrod.signalmapeditor.Project;
+import uk.trainwatch.nrod.signalmapeditor.map.SaveMap;
 import uk.trainwatch.nrod.signalmapeditor.map.SignalMap;
 import uk.trainwatch.nrod.signalmapeditor.utils.ThreadQueue;
 
@@ -34,8 +35,7 @@ public class SaveAction
     @Override
     public void actionPerformed( ActionEvent e )
     {
-        SignalMap map = Project.INSTANCE.getMap();
-        ThreadQueue.executeLater( () -> map.save() );
+        ThreadQueue.executeLater( new SaveMap( Project.INSTANCE.getMap() ) );
     }
 
     @Override
@@ -45,5 +45,4 @@ public class SaveAction
                 getFile() != null && newValue );
     }
 
-    
 }

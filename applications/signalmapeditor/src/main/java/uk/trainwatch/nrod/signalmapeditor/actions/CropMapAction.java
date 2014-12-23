@@ -24,6 +24,7 @@ public class CropMapAction
     public CropMapAction()
     {
         super( "Crop map" );
+        putValue( SHORT_DESCRIPTION, "Crops the map so there's no wasted space around the borders" );
     }
 
     @Override
@@ -32,6 +33,7 @@ public class CropMapAction
         ThreadQueue.executeLater( () -> {
             SignalMap map = Project.INSTANCE.getMap();
 
+            // Find the minimum X & Y coordinates
             int minX = map.streamBerths().
                     map( Berth::getX ).
                     min( Integer::compare ).
@@ -42,12 +44,14 @@ public class CropMapAction
                     min( Integer::compare ).
                     orElse( 0 );
 
+            // Move all nodes up and left by that amount
             map.forEach( ( i, b ) -> {
                 b.setX( b.getX() - minX );
                 b.setY( b.getY() - minY );
             } );
 
-            ThreadQueue.executeSwingLater( () -> MainFrame.frame.repaint() );
+            // Reset the map dimension allowing for the reduced size
+            map.resetDimension( true );
         } );
     }
 

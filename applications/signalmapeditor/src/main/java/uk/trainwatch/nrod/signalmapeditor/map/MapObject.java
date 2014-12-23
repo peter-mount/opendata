@@ -8,6 +8,7 @@ package uk.trainwatch.nrod.signalmapeditor.map;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.function.Consumer;
 import uk.trainwatch.nrod.signalmapeditor.utils.ThreadQueue;
 
 /**
@@ -15,17 +16,18 @@ import uk.trainwatch.nrod.signalmapeditor.utils.ThreadQueue;
  * <p>
  * @author peter
  */
-public class AbstractMapObject
-        implements PropertyChangeListener
+public abstract class MapObject
+        implements PropertyChangeListener,
+                   Consumer<MapVisitor>
 {
 
     private transient final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport( this );
 
-    public AbstractMapObject()
+    public MapObject()
     {
     }
 
-    public AbstractMapObject( PropertyChangeListener l )
+    public MapObject( PropertyChangeListener l )
     {
         addPropertyChangeListener( l );
     }
@@ -57,24 +59,21 @@ public class AbstractMapObject
 
     protected final void firePropertyChange( String propertyName, Object oldValue, Object newValue )
     {
-        if( oldValue != newValue )
-        {
+        if( oldValue != newValue ) {
             ThreadQueue.executeSwingLater( () -> propertyChangeSupport.firePropertyChange( propertyName, oldValue, newValue ) );
         }
     }
 
     protected final void firePropertyChange( String propertyName, int oldValue, int newValue )
     {
-        if( oldValue != newValue )
-        {
+        if( oldValue != newValue ) {
             ThreadQueue.executeSwingLater( () -> propertyChangeSupport.firePropertyChange( propertyName, oldValue, newValue ) );
         }
     }
 
     protected final void firePropertyChange( String propertyName, boolean oldValue, boolean newValue )
     {
-        if( oldValue != newValue )
-        {
+        if( oldValue != newValue ) {
             ThreadQueue.executeSwingLater( () -> propertyChangeSupport.firePropertyChange( propertyName, oldValue, newValue ) );
         }
     }
@@ -90,4 +89,8 @@ public class AbstractMapObject
         // Pass it on
         firePropertyChange( evt );
     }
+
+    @Override
+    public abstract void accept( MapVisitor v );
+
 }

@@ -31,14 +31,14 @@ public class SignalCaptureImporter
 
     public SignalCaptureImporter()
     {
-        super( "Import Signal Capture" );
+        super( "Import Signal Capture Logs" );
+        putValue( SHORT_DESCRIPTION, "Imports a map from a Signal capture log file" );
     }
 
     @Override
     public void actionPerformed( ActionEvent e )
     {
-        if( MainFrame.fileChooser.showOpenDialog( MainFrame.frame ) == JFileChooser.APPROVE_OPTION )
-        {
+        if( MainFrame.fileChooser.showOpenDialog( MainFrame.frame ) == JFileChooser.APPROVE_OPTION ) {
             File file = MainFrame.fileChooser.getSelectedFile();
             MainFrame.setStatus( "Importing file " + file );
             // Run the import in a background thread, leaving Swing to run the UI
@@ -48,8 +48,7 @@ public class SignalCaptureImporter
 
     private void importFile( File file )
     {
-        try( BufferedReader r = new BufferedReader( new FileReader( file ) ) )
-        {
+        try( BufferedReader r = new BufferedReader( new FileReader( file ) ) ) {
             // Reset the map with nothing in it
             Project.INSTANCE.newMap();
 
@@ -68,8 +67,7 @@ public class SignalCaptureImporter
 
             MainFrame.setStatus( "Import complete" );
         }
-        catch( IOException ex )
-        {
+        catch( IOException ex ) {
             MainFrame.setStatus( "Import failed: " + ex.getMessage() );
             ex.printStackTrace();
         }
@@ -82,24 +80,20 @@ public class SignalCaptureImporter
 
     private Line decodeLine( String l )
     {
-        if( l.length() > 26 )
-        {
+        if( l.length() > 26 ) {
             String dt = l.substring( 0, 19 );
             String s[] = l.substring( 26 ).
                     replaceAll( "([ ]+)", " " ).
                     split( " " );
-            switch( s[0] )
-            {
+            switch( s[0] ) {
                 case "Initialising":
                     return new Area( dt, s[s.length - 1] );
 
                 case "Move":
-                    if( ignore( s[2] ) )
-                    {
+                    if( ignore( s[2] ) ) {
                         return new Put( s[4] );
                     }
-                    else if( ignore( s[4] ) )
-                    {
+                    else if( ignore( s[4] ) ) {
                         return new Put( s[2] );
                     }
                     return new Move( s[2], s[4] );
@@ -153,11 +147,9 @@ public class SignalCaptureImporter
     private static Berth newBerth( String id, int x, Map<String, Berth> map, SignalMap signalMap )
     {
         return map.computeIfAbsent( id,
-                                    k ->
-                                    {
+                                    k -> {
                                         int y = 0;
-                                        while( present( map, x, y ) )
-                                        {
+                                        while( present( map, x, y ) ) {
                                             y++;
                                         }
                                         return new Berth( id, x, y, signalMap );

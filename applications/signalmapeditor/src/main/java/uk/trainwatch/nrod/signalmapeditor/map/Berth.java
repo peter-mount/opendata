@@ -9,6 +9,7 @@ import java.beans.PropertyChangeListener;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  *
@@ -19,38 +20,26 @@ public class Berth
 {
 
     /**
-     * The Signal berth id
-     */
-    public static final String PROP_ID = "berth_id";
-    /**
      * The current occupier (not stored in the final xml)
      */
     public static final String PROP_TEXT = "berth_text";
-    private String id;
     private transient String text;
     private final Set<Berth> outBerths = new HashSet<>();
     private final Set<Berth> inBerths = new HashSet<>();
 
-    public Berth()
-    {
-    }
-
     public Berth( String id )
     {
-        this.id = id;
+        super( id );
     }
 
     public Berth( String id, int x, int y )
     {
-        this( id );
-        setX( x );
-        setY( y );
+        super( id, x, y );
     }
 
     public Berth( String id, int x, int y, PropertyChangeListener l )
     {
-        super( x, y, l );
-        this.id = id;
+        super( id, x, y, l );
     }
 
     public Set<Berth> getOutBerths()
@@ -61,6 +50,11 @@ public class Berth
     public void forEachOutBerth( Consumer<Berth> c )
     {
         outBerths.forEach( c );
+    }
+
+    public Stream<Berth> streamOutBerths()
+    {
+        return outBerths.stream();
     }
 
     public Set<Berth> getInBerths()
@@ -107,26 +101,9 @@ public class Berth
         firePropertyChange( PROP_TEXT, oldText, text );
     }
 
-    /**
-     * Get the value of id
-     *
-     * @return the value of id
-     */
-    public String getId()
+    @Override
+    public void accept( MapVisitor v )
     {
-        return id;
+        v.visit( this );
     }
-
-    /**
-     * Set the value of id
-     *
-     * @param id new value of id
-     */
-    public void setId( String id )
-    {
-        String oldId = this.id;
-        this.id = id;
-        firePropertyChange( PROP_ID, oldId, id );
-    }
-
 }

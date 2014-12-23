@@ -72,6 +72,7 @@ public enum Project
     @Override
     public void propertyChange( PropertyChangeEvent evt )
     {
+        System.out.println( evt.getPropertyName() + " " + evt.getOldValue() + " -> " + evt.getNewValue() );
         setChanged( true );
 
         // Pass it on

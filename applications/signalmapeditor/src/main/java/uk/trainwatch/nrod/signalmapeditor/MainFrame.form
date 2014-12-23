@@ -60,13 +60,19 @@
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
                   <Connection code="new CropMapAction()" type="code"/>
                 </Property>
-                <Property name="toolTipText" type="java.lang.String" value=""/>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="jMenuItem10">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
                   <Connection code="new MoveMapDownAction()" type="code"/>
+                </Property>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItem12">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="new MoveMapRightAction()" type="code"/>
                 </Property>
               </Properties>
             </MenuItem>
@@ -83,9 +89,6 @@
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
                   <Connection code="new SignalCaptureImporter()" type="code"/>
                 </Property>
-                <Property name="mnemonic" type="int" value="67"/>
-                <Property name="text" type="java.lang.String" value="Import Signal Capture"/>
-                <Property name="toolTipText" type="java.lang.String" value="Creates a map from a signal capture file"/>
               </Properties>
             </MenuItem>
           </SubComponents>

@@ -5,28 +5,18 @@
  */
 package uk.trainwatch.nrod.signalmapeditor.map;
 
+import java.awt.Dimension;
+import java.beans.PropertyChangeEvent;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Reader;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import uk.trainwatch.nrod.signalmapeditor.MainFrame;
 import uk.trainwatch.nrod.signalmapeditor.Project;
 import uk.trainwatch.util.Functions;
-import uk.trainwatch.util.JsonUtils;
 
 /**
  * A signal map
@@ -34,7 +24,7 @@ import uk.trainwatch.util.JsonUtils;
  * @author peter
  */
 public class SignalMap
-        extends AbstractMapObject
+        extends MapObject
 {
 
     public static final String PROP_FILE = "map_file";
@@ -42,18 +32,66 @@ public class SignalMap
     public static final String PROP_AREA = "map_area";
     public static final String PROP_AUTHOR = "map_author";
     public static final String PROP_VERSION = "map_version";
-    public static final String PROP_BERTHS = "map_berths";
-    private final Map<String, Berth> berths = new ConcurrentHashMap<>();
+    public static final String PROP_NODES = "map_node";
+    public static final String PROP_NOTES = "map_notes";
+    public static final String PROP_DIMENSION = "map_dimension";
+
+    private final Map<String, Node> nodes = new ConcurrentHashMap<>();
 
     private File file;
     private String title;
     private String area;
     private String author;
     private String version;
-
     private String notes;
 
-    public static final String PROP_NOTES = "notes";
+    private volatile Dimension dimension;
+
+    @Override
+    public void propertyChange( PropertyChangeEvent evt )
+    {
+        // If a coordinate changes then reset dimension
+        String n = evt.getPropertyName();
+        if( Node.PROP_DIMENSION.equals( evt.getPropertyName() ) ) {
+            Dimension d = (Dimension) evt.getNewValue();
+            if( d.getWidth() > dimension.getWidth() || d.getHeight() > dimension.getHeight() ) {
+                resetDimension();
+            }
+        }
+        super.propertyChange( evt );
+    }
+
+    public Dimension getDimension()
+    {
+        if( dimension == null ) {
+            resetDimension();
+        }
+        return dimension;
+    }
+
+    public void resetDimension()
+    {
+        resetDimension( false );
+    }
+
+    public void resetDimension( boolean forceResize )
+    {
+        Dimension oldDimension = dimension;
+        dimension = Project.INSTANCE.getMap().
+                streamBerths().
+                parallel().
+                map( Node::getDimension ).
+                reduce( // Use the old as the basis - prevents us from reducing in size. forceResize allows reduction in size
+                        oldDimension == null || forceResize ? new Dimension() : oldDimension,
+                        // Only replace the accumulator if we know b is outside a on one dimension
+                        ( a, b ) -> a.getWidth() >= b.getWidth() && a.getHeight() >= b.getHeight()
+                                    ? a
+                                    : new Dimension( (int) Math.max( a.getWidth(), b.getWidth() ), (int) Math.max( a.getHeight(), b.getHeight() ) ),
+                        // Combine to a new Dimension that will fit both a & b
+                        ( a, b ) -> new Dimension( (int) Math.max( a.getWidth(), b.getWidth() ), (int) Math.max( a.getHeight(), b.getHeight() ) )
+                );
+        firePropertyChange( PROP_DIMENSION, oldDimension, dimension );
+    }
 
     public File getFile()
     {
@@ -179,24 +217,19 @@ public class SignalMap
         firePropertyChange( PROP_TITLE, oldTitle, title );
     }
 
-    public Map<String, Berth> getBerths()
+    public Node removeNode( String id )
     {
-        return berths;
-    }
-
-    public Berth removeBerth( String id )
-    {
-        Berth b = berths.remove( id );
+        Node b = nodes.remove( id );
         if( b != null ) {
             b.removePropertyChangeListener( this );
-            firePropertyChange( PROP_BERTHS, id, null );
+            firePropertyChange( PROP_NODES, id, null );
         }
         return b;
     }
 
     public Collection<String> getBerthIds()
     {
-        return berths.keySet();
+        return nodes.keySet();
     }
 
     public Berth newBerth( String id )
@@ -206,7 +239,7 @@ public class SignalMap
 
     public Berth newBerth( String id, int x, int y )
     {
-        firePropertyChange( PROP_BERTHS, null, id );
+        firePropertyChange( PROP_NODES, null, id );
         int y1 = y;
         while( present( x, y1 ) ) {
             y1++;
@@ -216,22 +249,25 @@ public class SignalMap
 
     public Berth getBerth( String id )
     {
-        return berths.get( id );
+        Node node = nodes.get( id );
+        return node instanceof Berth ? (Berth) node : null;
     }
 
     public Berth getOrCreateBerth( String id )
     {
-        return berths.computeIfAbsent( id, this::newBerth );
+        Node node = nodes.computeIfAbsent( id, this::newBerth );
+        return node instanceof Berth ? (Berth) node : null;
     }
 
     public Berth getOrCreateBerth( String id, int x, int y )
     {
-        return berths.computeIfAbsent( id, k -> newBerth( id, x, y ) );
+        Node node = nodes.computeIfAbsent( id, k -> newBerth( id, x, y ) );
+        return node instanceof Berth ? (Berth) node : null;
     }
 
     public void clear()
     {
-        Iterator<Berth> it = berths.values().
+        Iterator<Node> it = nodes.values().
                 iterator();
         while( it.hasNext() ) {
             it.next().
@@ -240,28 +276,53 @@ public class SignalMap
         }
     }
 
-    public void forEach( BiConsumer<? super String, ? super Berth> action )
+    public void forEach( BiConsumer<? super String, ? super Node> action )
     {
-        berths.forEach( action );
+        nodes.forEach( action );
+    }
+
+    public Stream<? super Node> streamNodes()
+    {
+        return nodes.values().
+                stream();
     }
 
     public Stream<Berth> streamBerths()
     {
-        return berths.values().
-                stream();
+        return streamNodes().
+                map( Functions.castTo( Berth.class ) ).
+                filter( Objects::nonNull );
+    }
+
+    public Stream<? super LineNode> streamLines()
+    {
+        return streamNodes().
+                map( Functions.castTo( LineNode.class ) ).
+                filter( Objects::nonNull );
     }
 
     public boolean present( int x, int y )
     {
-        return berths.values().
+        return nodes.values().
                 stream().
                 anyMatch( b -> b.getX() == x && b.getY() == y );
     }
 
+    public <T extends Node> T getNodeAt( int x, int y )
+    {
+        return (T) nodes.values().
+                stream().
+                filter( b -> b.getX() == x && b.getY() == y ).
+                findAny().
+                orElse( null );
+    }
+
     public Berth getBerthAt( int x, int y )
     {
-        return berths.values().
+        return nodes.values().
                 stream().
+                map( Functions.castTo( Berth.class ) ).
+                filter( Objects::nonNull ).
                 filter( b -> b.getX() == x && b.getY() == y ).
                 findAny().
                 orElse( null );
@@ -270,104 +331,17 @@ public class SignalMap
     public void addAll( Collection<Berth> c )
     {
         c.forEach( b -> {
-            berths.put( b.getId(), b );
+            nodes.put( b.getId(), b );
             b.addPropertyChangeListener( this );
         } );
         // Dummy notification to notify listeners we have changed
-        firePropertyChange( PROP_BERTHS, null, "" );
+        firePropertyChange( PROP_NODES, null, "" );
     }
 
-    public JsonObject toJson()
+    @Override
+    public void accept( MapVisitor v )
     {
-        JsonArrayBuilder bb = Json.createArrayBuilder();
-        forEach( ( i, b ) -> bb.add( Json.createObjectBuilder().
-                add( "berth", b.getId() ).
-                add( "x", b.getX() ).
-                add( "y", b.getY() ).
-                add( "next", b.getOutBerths().
-                     stream().
-                     map( Berth::getId ).
-                     collect( Collectors.joining( "," ) ) )
-        ) );
-
-        return Json.createObjectBuilder().
-                add( "area", Objects.toString( area, "" ) ).
-                add( "title", Objects.toString( title, "" ) ).
-                add( "author", Objects.toString( author, "" ) ).
-                add( "version", Objects.toString( version, "" ) ).
-                add( "notes", Objects.toString( notes, "" ) ).
-                add( "berths", bb ).
-                build();
+        v.visit( this );
     }
 
-    public void save()
-    {
-        if( file == null ) {
-            return;
-        }
-
-        try {
-            MainFrame.setStatus( "Saving " + file );
-
-            File f = new File( file.getParent(), file.getName() + ".bak" );
-            if( f.exists() ) {
-                f.delete();
-            }
-            file.renameTo( f );
-
-            try( FileWriter w = new FileWriter( file ) ) {
-                w.write( JsonUtils.toString.apply( toJson() ) );
-                w.flush();
-            }
-
-            Project.INSTANCE.setChanged( false );
-            MainFrame.setStatus( "Saved " + file );
-        }
-        catch( IOException ex ) {
-            ex.printStackTrace();
-        }
-    }
-
-    public void open( File file )
-    {
-        try( Reader r = new FileReader( file ) ) {
-
-            try( JsonReader jr = Json.createReader( r ) ) {
-                JsonObject o = (JsonObject) jr.read();
-                clear();
-                setFile( file );
-                setArea( o.getString( "area" ) );
-                setAuthor( o.getString( "author" ) );
-                setNotes( o.getString( "notes" ) );
-                setTitle( o.getString( "title" ) );
-                setVersion( o.getString( "version" ) );
-
-                // Read in the berths
-                Map<String, Berth> newBerths = o.getJsonArray( "berths" ).
-                        stream().
-                        map( Functions.castTo( JsonObject.class ) ).
-                        map( bo -> new Berth( bo.getString( "berth" ), bo.getInt( "x" ), bo.getInt( "y" ) ) ).
-                        collect( Collectors.toMap( Berth::getId, Function.identity() ) );
-
-                // Join them to each other
-                o.getJsonArray( "berths" ).
-                        stream().
-                        map( Functions.castTo( JsonObject.class ) ).
-                        filter( bo -> !"".equals( bo.getString( "next" ) ) ).
-                        forEach( bo -> {
-                            Berth b = newBerths.get( bo.getString( "berth" ) );
-                            String next = bo.getString( "next" );
-                            for( String id: next.split( "," ) ) {
-                                b.join( newBerths.get( id ) );
-                            }
-                        } );
-
-                // Buld add
-                addAll( newBerths.values() );
-            }
-        }
-        catch( IOException ex ) {
-            ex.printStackTrace();
-        }
-    }
 }

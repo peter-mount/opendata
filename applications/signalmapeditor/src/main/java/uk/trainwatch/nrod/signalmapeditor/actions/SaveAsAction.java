@@ -14,6 +14,7 @@ import javax.swing.JFileChooser;
 import javax.swing.KeyStroke;
 import uk.trainwatch.nrod.signalmapeditor.MainFrame;
 import uk.trainwatch.nrod.signalmapeditor.Project;
+import uk.trainwatch.nrod.signalmapeditor.map.SaveMap;
 import uk.trainwatch.nrod.signalmapeditor.map.SignalMap;
 import uk.trainwatch.nrod.signalmapeditor.utils.ThreadQueue;
 
@@ -39,7 +40,7 @@ public class SaveAsAction
             SignalMap map = Project.INSTANCE.getMap();
             map.setFile( file );
             // Run the import in a background thread, leaving Swing to run the UI
-            ThreadQueue.executeLater( () -> map.save() );
+            ThreadQueue.executeLater( new SaveMap( map ) );
         }
     }
 }

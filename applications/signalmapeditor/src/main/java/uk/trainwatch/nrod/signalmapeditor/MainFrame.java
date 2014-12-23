@@ -11,6 +11,7 @@ import java.util.Objects;
 import javax.swing.JFileChooser;
 import uk.trainwatch.nrod.signalmapeditor.actions.CropMapAction;
 import uk.trainwatch.nrod.signalmapeditor.actions.MoveMapDownAction;
+import uk.trainwatch.nrod.signalmapeditor.actions.MoveMapRightAction;
 import uk.trainwatch.nrod.signalmapeditor.actions.NewAction;
 import uk.trainwatch.nrod.signalmapeditor.actions.OpenAction;
 import uk.trainwatch.nrod.signalmapeditor.actions.QuitAction;
@@ -18,6 +19,7 @@ import uk.trainwatch.nrod.signalmapeditor.actions.SaveAction;
 import uk.trainwatch.nrod.signalmapeditor.actions.SaveAsAction;
 import uk.trainwatch.nrod.signalmapeditor.map.SignalMap;
 import uk.trainwatch.nrod.signalmapeditor.tools.SignalCaptureImporter;
+import uk.trainwatch.nrod.signalmapeditor.utils.ThreadQueue;
 
 /**
  *
@@ -84,6 +86,7 @@ public class MainFrame
         jMenu2 = new javax.swing.JMenu();
         jMenuItem9 = new javax.swing.JMenuItem();
         jMenuItem10 = new javax.swing.JMenuItem();
+        jMenuItem12 = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
         jMenuItem8 = new javax.swing.JMenuItem();
         jMenu4 = new javax.swing.JMenu();
@@ -230,11 +233,13 @@ public class MainFrame
         jMenu2.setText("Edit");
 
         jMenuItem9.setAction(new CropMapAction());
-        jMenuItem9.setToolTipText("");
         jMenu2.add(jMenuItem9);
 
         jMenuItem10.setAction(new MoveMapDownAction());
         jMenu2.add(jMenuItem10);
+
+        jMenuItem12.setAction(new MoveMapRightAction());
+        jMenu2.add(jMenuItem12);
 
         jMenuBar1.add(jMenu2);
 
@@ -242,9 +247,6 @@ public class MainFrame
         jMenu3.setText("Tools");
 
         jMenuItem8.setAction(new SignalCaptureImporter());
-        jMenuItem8.setMnemonic('C');
-        jMenuItem8.setText("Import Signal Capture");
-        jMenuItem8.setToolTipText("Creates a map from a signal capture file");
         jMenu3.add(jMenuItem8);
 
         jMenuBar1.add(jMenu3);
@@ -279,42 +281,27 @@ public class MainFrame
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
-        try
-        {
-            for( javax.swing.UIManager.LookAndFeelInfo info: javax.swing.UIManager.getInstalledLookAndFeels() )
-            {
-                if( "Nimbus".equals( info.getName() ) )
-                {
+        try {
+            for( javax.swing.UIManager.LookAndFeelInfo info: javax.swing.UIManager.getInstalledLookAndFeels() ) {
+                if( "Nimbus".equals( info.getName() ) ) {
                     javax.swing.UIManager.setLookAndFeel( info.getClassName() );
                     break;
                 }
             }
         }
-        catch( ClassNotFoundException ex )
-        {
-            java.util.logging.Logger.getLogger( MainFrame.class.getName() ).
-                    log( java.util.logging.Level.SEVERE, null, ex );
-        }
-        catch( InstantiationException ex )
-        {
-            java.util.logging.Logger.getLogger( MainFrame.class.getName() ).
-                    log( java.util.logging.Level.SEVERE, null, ex );
-        }
-        catch( IllegalAccessException ex )
-        {
-            java.util.logging.Logger.getLogger( MainFrame.class.getName() ).
-                    log( java.util.logging.Level.SEVERE, null, ex );
-        }
-        catch( javax.swing.UnsupportedLookAndFeelException ex )
-        {
+        catch( ClassNotFoundException |
+               InstantiationException |
+               IllegalAccessException |
+               javax.swing.UnsupportedLookAndFeelException ex ) {
             java.util.logging.Logger.getLogger( MainFrame.class.getName() ).
                     log( java.util.logging.Level.SEVERE, null, ex );
         }
         //</editor-fold>
 
+        //</editor-fold>
+
         /* Create and display the form */
-        EventQueue.invokeLater( () ->
-        {
+        ThreadQueue.executeSwingLater( () -> {
             frame = new MainFrame();
             frame.project.newMap();
             frame.setVisible( true );
@@ -323,23 +310,20 @@ public class MainFrame
 
     public static void setStatus( String s )
     {
-        EventQueue.invokeLater( () -> frame.status.setText( Objects.toString( s, "" ) ) );
+        ThreadQueue.executeSwingLater( () -> frame.status.setText( Objects.toString( s, "" ) ) );
     }
 
     public static void setXY( int x, int y )
     {
-        EventQueue.invokeLater( () ->
-        {
+        ThreadQueue.executeSwingLater( () -> {
             float x1 = x / 50.0f, y1 = y / 25.0f;
-            if( x < 0 || y < 0 )
-            {
+            if( x < 0 || y < 0 ) {
                 frame.xLabel.setText( "" );
                 frame.yLabel.setText( "" );
             }
-            else
-            {
-                frame.xLabel.setText( String.format( "%0.1f", x1 ) );
-                frame.yLabel.setText( String.format( "%0.1f", y1 ) );
+            else {
+                frame.xLabel.setText( String.format( "%.1f", x1 ) );
+                frame.yLabel.setText( String.format( "%.1f", y1 ) );
             }
         } );
     }
@@ -359,6 +343,7 @@ public class MainFrame
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem10;
     private javax.swing.JMenuItem jMenuItem11;
+    private javax.swing.JMenuItem jMenuItem12;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JMenuItem jMenuItem4;
