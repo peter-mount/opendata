@@ -23,6 +23,7 @@
         <module>networkrail</module>
         <module>signalanalyser</module>
         <module>utilities</module>
+        <module>signalmapeditor</module>
     </modules>
     
 </project>
