@@ -5,10 +5,8 @@
  */
 package uk.trainwatch.nrod.signalmapeditor.map;
 
-import java.beans.PropertyChangeListener;
-
 /**
- * A line segment
+ * A simple line segment linking two Nodes
  * <p>
  * @author peter
  */
@@ -19,10 +17,10 @@ public class Line
     public static final String PROP_FROM = "line_from";
     public static final String PROP_TO = "line_to";
 
-    private Berth from;
-    private Berth to;
+    private Node from;
+    private Node to;
 
-    public Line( Berth from, Berth to )
+    public Line( Node from, Node to )
     {
         super( from.getX(), from.getY() );
         this.from = from;
@@ -51,26 +49,26 @@ public class Line
         v.visit( this );
     }
 
-    public Berth getFrom()
+    public Node getFrom()
     {
         return from;
     }
 
-    public void setFrom( Berth from )
+    public void setFrom( Node from )
     {
-        Berth oldFrom = from;
+        Node oldFrom = from;
         this.from = from;
         firePropertyChange( PROP_FROM, oldFrom, from );
     }
 
-    public Berth getTo()
+    public Node getTo()
     {
         return to;
     }
 
-    public void setTo( Berth to )
+    public void setTo( Node to )
     {
-        Berth oldTo = to;
+        Node oldTo = to;
         this.to = to;
         firePropertyChange( PROP_TO, oldTo, to );
     }

@@ -7,6 +7,7 @@ package uk.trainwatch.nrod.signalmapeditor.map;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.beans.PropertyChangeListener;
 import uk.trainwatch.nrod.signalmapeditor.Constants;
 
@@ -36,6 +37,7 @@ public abstract class Node
     private int x;
     private int y;
     private volatile Dimension dimension;
+    private volatile Rectangle rectangle;
 
     public Node( String id )
     {
@@ -148,8 +150,23 @@ public abstract class Node
         return dimension;
     }
 
+    public Rectangle getRectangle()
+    {
+        if( rectangle == null ) {
+            resetDimension();
+        }
+        return rectangle;
+    }
+
+    protected Rectangle createRectangle()
+    {
+        return new Rectangle( Constants.getX( x ), Constants.getY( y ), getWidth() * Constants.COLUMN_WIDTH, getHeight() * Constants.ROW_HEIGHT );
+    }
+
     private void resetDimension()
     {
+        rectangle = createRectangle();
+
         Dimension oldDimension = dimension;
         dimension = new Dimension( Constants.getX( x + getWidth() + 1 ), Constants.getY( y + getHeight() + 1 ) );
         firePropertyChange( PROP_DIMENSION, oldDimension, dimension );

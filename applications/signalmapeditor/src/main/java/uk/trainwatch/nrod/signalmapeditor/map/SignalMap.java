@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.stream.Stream;
 import uk.trainwatch.nrod.signalmapeditor.Project;
 import uk.trainwatch.util.Functions;
@@ -54,7 +56,7 @@ public class SignalMap
         String n = evt.getPropertyName();
         if( Node.PROP_DIMENSION.equals( evt.getPropertyName() ) ) {
             Dimension d = (Dimension) evt.getNewValue();
-            if( d.getWidth() > dimension.getWidth() || d.getHeight() > dimension.getHeight() ) {
+            if( d == null || dimension == null || d.getWidth() > dimension.getWidth() || d.getHeight() > dimension.getHeight() ) {
                 resetDimension();
             }
         }
@@ -74,6 +76,19 @@ public class SignalMap
         resetDimension( false );
     }
 
+    /**
+     * Reduction Combiner function that will combine two Dimensions into one which contains both
+     */
+    private static final BinaryOperator<Dimension> DIMENSION_COMBINER = ( a, b ) -> new Dimension( (int) Math.max( a.getWidth(), b.getWidth() ),
+                                                                                                   (int) Math.max( a.getHeight(), b.getHeight() ) );
+    /**
+     * Reduction Accumulator which will efficiently replace the existing accumulator with one that combines the two if the dimension would grow.
+     */
+    private static final BiFunction<Dimension, Dimension, Dimension> DIMENSION_ACCUMULATOR
+                                                                     = ( a, b ) -> a.getWidth() >= b.getWidth() && a.getHeight() >= b.getHeight()
+                                                                                   ? a
+                                                                                   : DIMENSION_COMBINER.apply( a, b );
+
     public void resetDimension( boolean forceResize )
     {
         Dimension oldDimension = dimension;
@@ -81,15 +96,8 @@ public class SignalMap
                 streamBerths().
                 parallel().
                 map( Node::getDimension ).
-                reduce( // Use the old as the basis - prevents us from reducing in size. forceResize allows reduction in size
-                        oldDimension == null || forceResize ? new Dimension() : oldDimension,
-                        // Only replace the accumulator if we know b is outside a on one dimension
-                        ( a, b ) -> a.getWidth() >= b.getWidth() && a.getHeight() >= b.getHeight()
-                                    ? a
-                                    : new Dimension( (int) Math.max( a.getWidth(), b.getWidth() ), (int) Math.max( a.getHeight(), b.getHeight() ) ),
-                        // Combine to a new Dimension that will fit both a & b
-                        ( a, b ) -> new Dimension( (int) Math.max( a.getWidth(), b.getWidth() ), (int) Math.max( a.getHeight(), b.getHeight() ) )
-                );
+                // Use the old as the basis - prevents us from reducing in size. forceResize allows reduction in size
+                reduce( oldDimension == null || forceResize ? new Dimension() : oldDimension, DIMENSION_ACCUMULATOR, DIMENSION_COMBINER );
         firePropertyChange( PROP_DIMENSION, oldDimension, dimension );
     }
 
@@ -334,6 +342,10 @@ public class SignalMap
             nodes.put( b.getId(), b );
             b.addPropertyChangeListener( this );
         } );
+        
+        // As we've added to nodes directly (to reduce property change events) we must reset the map dimension
+        resetDimension();
+        
         // Dummy notification to notify listeners we have changed
         firePropertyChange( PROP_NODES, null, "" );
     }

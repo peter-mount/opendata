@@ -52,7 +52,7 @@ public class OpenMap
                         map( bo -> new Berth( bo.getString( "berth" ), bo.getInt( "x" ), bo.getInt( "y" ) ) ).
                         collect( Collectors.toMap( Berth::getId, Function.identity() ) );
 
-                // Lines - new format
+                // Lines
                 o.getJsonArray( "lines" ).
                         stream().
                         map( Functions.castTo( JsonObject.class ) ).
@@ -63,6 +63,16 @@ public class OpenMap
                             Line l = new Line( from, to );
                             newBerths.put( l.getId(), l );
                             from.join( l );
+                        } );
+
+                // Text
+                o.getJsonArray( "lines" ).
+                        stream().
+                        map( Functions.castTo( JsonObject.class ) ).
+                        filter( bo -> "Text".equals( bo.getString( "type" ) ) ).
+                        forEach( bo -> {
+                            Text t = new Text( bo.getInt( "x" ), bo.getInt( "y" ), bo.getString( "text" ) );
+                            newBerths.put( t.getId(), t );
                         } );
 
                 // Buld add

@@ -5,11 +5,13 @@
  */
 package uk.trainwatch.nrod.signalmapeditor.map;
 
+import java.awt.Rectangle;
 import java.beans.PropertyChangeListener;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import uk.trainwatch.nrod.signalmapeditor.Constants;
 
 /**
  *
@@ -86,6 +88,14 @@ public class Berth
         String oldText = this.text;
         this.text = text;
         firePropertyChange( PROP_TEXT, oldText, text );
+    }
+
+    @Override
+    protected Rectangle createRectangle()
+    {
+        // This represents the bounds of the berth not the actual grid
+        return new Rectangle( Constants.getX( getX() ) + 10, Constants.getY( getY() ) + 5,
+                              (getWidth() * Constants.COLUMN_WIDTH) - 20, (getHeight() * Constants.ROW_HEIGHT) - 10 );
     }
 
     @Override

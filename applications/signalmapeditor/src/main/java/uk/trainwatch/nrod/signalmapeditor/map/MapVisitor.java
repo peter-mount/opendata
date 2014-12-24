@@ -31,7 +31,6 @@ public interface MapVisitor
 
     default void visit( SignalMap map )
     {
-
     }
 
     default void visit( Berth b )
@@ -43,6 +42,10 @@ public interface MapVisitor
     }
 
     default void visit( Points p )
+    {
+    }
+
+    default void visit( Text t )
     {
     }
 }

@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An enumeration representing how text is aligned horizontally.
@@ -43,19 +45,16 @@ public enum TextAlignment
     public static TextAlignment valueOfWithDefault( String name,
                                                     TextAlignment defaultAlignment )
     {
-        try
-        {
+        try {
             return name == null ? defaultAlignment : TextAlignment.valueOf(
                     name.toUpperCase() );
         }
-        catch( Exception e )
-        {
+        catch( Exception e ) {
             return defaultAlignment;
         }
     }
 
-    public double drawEmbossedString( final Graphics g, final String src,
-                                      final Rectangle2D rect )
+    public double drawEmbossedString( final Graphics g, final String src, final Rectangle2D rect )
     {
         return drawEmbossedString(
                 g,
@@ -72,7 +71,7 @@ public enum TextAlignment
      *
      * @param g     Graphics
      * @param fm    FontMetrics of current font
-     * @param s     String to draw
+     * @param src   String to draw
      * @param left  coordinate to fit the string
      * @param width maximum line width of the string
      * @param y     coordinate of top of line
@@ -113,7 +112,7 @@ public enum TextAlignment
      *
      * @param g     Graphics
      * @param fm    FontMetrics of current font
-     * @param s     String to draw
+     * @param src   String to draw
      * @param left  coordinate to fit the string
      * @param width maximum line width of the string
      * @param y     coordinate of top of line
@@ -129,41 +128,49 @@ public enum TextAlignment
             final double width )
     {
         double w = fm.stringWidth( src );
-        if( w > width )
-        {
+        if( w > width || src.contains( "\n" ) ) {
             // Split the line
-            String t = src;
-            String s = t;
-            double y1 = y;
+            String s = src;
+            List<String> lines = new ArrayList<>();
 
-            while( s.length() > 0 )
-            {
-                // Split on space
-                while( w > width && t.lastIndexOf( ' ' ) > -1 )
-                {
+            while( s.length() > 0 ) {
+                String t = s;
+                
+                // Split on new line
+                while( t.indexOf( '\n' ) > -1 ) {
+                    t = t.substring( 0, t.indexOf( '\n' ) );
+                    w = fm.stringWidth( t );
+                }
+
+                // Split on space if too wide
+                while( w > width && t.lastIndexOf( ' ' ) > -1 ) {
                     t = t.substring( 0, t.lastIndexOf( ' ' ) );
                     w = fm.stringWidth( t );
                 }
-                if( w > width )
-                {
+
+                if( w > width ) {
                     // Split by character
-                    while( w > width )
-                    {
+                    while( w > width ) {
                         t = t.substring( 0, t.length() - 1 );
                         w = fm.stringWidth( t );
                     }
                     s = s.substring( t.length() );
                 }
-                else
-                {
+                else if( t.length() < s.length() ) {
                     // Remove the space from the string
                     s = s.substring( t.length() + 1 );
                 }
-
-                y1 = drawStringImpl( g, fm, t, left, y1, width );
-
-                s = t;
+                else {
+                    s = "";
+                }
+                
+                lines.add( t );
                 w = fm.stringWidth( s );
+            }
+
+            double y1 = y - ((double) lines.size() * fm.getHeight() / 2.0);
+            for( String t: lines ) {
+                y1 = drawStringImpl( g, fm, t, left, y1, width );
             }
 
             return y1;
@@ -181,8 +188,7 @@ public enum TextAlignment
             final double y,
             final double width )
     {
-        switch( this )
-        {
+        switch( this ) {
             case CENTER:
             case CENTRE:
                 g.drawString(
