@@ -30,7 +30,6 @@ public class Text
 
     public String getText()
     {
-        System.out.println( "text=\"" + text + "\"" );
         return text;
     }
 

@@ -6,7 +6,6 @@
 package uk.trainwatch.nrod.signalmapeditor;
 
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.util.Objects;
 import javax.swing.JFileChooser;
 import uk.trainwatch.nrod.signalmapeditor.actions.CropMapAction;
@@ -19,6 +18,7 @@ import uk.trainwatch.nrod.signalmapeditor.actions.SaveAction;
 import uk.trainwatch.nrod.signalmapeditor.actions.SaveAsAction;
 import uk.trainwatch.nrod.signalmapeditor.map.SignalMap;
 import uk.trainwatch.nrod.signalmapeditor.tools.SignalCaptureImporter;
+import uk.trainwatch.nrod.signalmapeditor.tools.live.LiveSignalHandler;
 import uk.trainwatch.nrod.signalmapeditor.utils.ThreadQueue;
 
 /**
@@ -255,13 +255,10 @@ public class MainFrame
         jMenu4.setText("Run");
         jMenu4.setToolTipText("");
 
-        jMenuItem6.setMnemonic('S');
-        jMenuItem6.setText("Start");
+        jMenuItem6.setAction(LiveSignalHandler.INSTANCE.getStartAction());
         jMenu4.add(jMenuItem6);
 
-        jMenuItem7.setMnemonic('S');
-        jMenuItem7.setText("Stop");
-        jMenuItem7.setEnabled(false);
+        jMenuItem7.setAction(LiveSignalHandler.INSTANCE.getStopAction());
         jMenu4.add(jMenuItem7);
 
         jMenuBar1.add(jMenu4);
