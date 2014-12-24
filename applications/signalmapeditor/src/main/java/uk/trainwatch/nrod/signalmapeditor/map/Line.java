@@ -16,25 +16,63 @@ public class Line
         extends LineNode
 {
 
-    public Line()
+    public static final String PROP_FROM = "line_from";
+    public static final String PROP_TO = "line_to";
+
+    private Berth from;
+    private Berth to;
+
+    public Line( Berth from, Berth to )
     {
-        super();
+        super( from.getX(), from.getY() );
+        this.from = from;
+        this.to = to;
     }
 
-    public Line( int x, int y )
+    @Override
+    public int getWidth()
     {
-        super( x, y );
+        return (int) (to.getDimension().
+                      getWidth() - from.getDimension().
+                      getWidth());
     }
 
-    public Line( int x, int y, PropertyChangeListener l )
+    @Override
+    public int getHeight()
     {
-        super( x, y, l );
+        return (int) (to.getDimension().
+                      getHeight() - from.getDimension().
+                      getHeight());
     }
 
     @Override
     public void accept( MapVisitor v )
     {
         v.visit( this );
+    }
+
+    public Berth getFrom()
+    {
+        return from;
+    }
+
+    public void setFrom( Berth from )
+    {
+        Berth oldFrom = from;
+        this.from = from;
+        firePropertyChange( PROP_FROM, oldFrom, from );
+    }
+
+    public Berth getTo()
+    {
+        return to;
+    }
+
+    public void setTo( Berth to )
+    {
+        Berth oldTo = to;
+        this.to = to;
+        firePropertyChange( PROP_TO, oldTo, to );
     }
 
 }

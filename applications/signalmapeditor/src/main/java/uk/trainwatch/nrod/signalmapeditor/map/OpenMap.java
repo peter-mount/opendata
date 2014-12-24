@@ -5,7 +5,6 @@
  */
 package uk.trainwatch.nrod.signalmapeditor.map;
 
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -47,23 +46,23 @@ public class OpenMap
                 map.setVersion( o.getString( "version" ) );
 
                 // Read in the berths
-                Map<String, Berth> newBerths = o.getJsonArray( "berths" ).
+                Map<String, Node> newBerths = o.getJsonArray( "berths" ).
                         stream().
                         map( Functions.castTo( JsonObject.class ) ).
                         map( bo -> new Berth( bo.getString( "berth" ), bo.getInt( "x" ), bo.getInt( "y" ) ) ).
                         collect( Collectors.toMap( Berth::getId, Function.identity() ) );
 
-                // Join them to each other
-                o.getJsonArray( "berths" ).
+                // Lines - new format
+                o.getJsonArray( "lines" ).
                         stream().
                         map( Functions.castTo( JsonObject.class ) ).
-                        filter( bo -> !"".equals( bo.getString( "next" ) ) ).
+                        filter( bo -> "Line".equals( bo.getString( "type" ) ) ).
                         forEach( bo -> {
-                            Berth b = newBerths.get( bo.getString( "berth" ) );
-                            String next = bo.getString( "next" );
-                            for( String id: next.split( "," ) ) {
-                                b.join( newBerths.get( id ) );
-                            }
+                            Berth from = (Berth) newBerths.get( bo.getString( "from" ) );
+                            Berth to = (Berth) newBerths.get( bo.getString( "to" ) );
+                            Line l = new Line( from, to );
+                            newBerths.put( l.getId(), l );
+                            from.join( l );
                         } );
 
                 // Buld add

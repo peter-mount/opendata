@@ -113,17 +113,20 @@ public class SaveMap
         berths.add( Json.createObjectBuilder().
                 add( "berth", b.getId() ).
                 add( "x", b.getX() ).
-                add( "y", b.getY() ).
-                add( "next", b.getOutBerths().
-                     stream().
-                     map( Berth::getId ).
-                     collect( Collectors.joining( "," ) ) )
+                add( "y", b.getY() )
         );
     }
 
     @Override
     public void visit( Line l )
     {
+        lines.add( Json.createObjectBuilder().
+                add( "type", "Line" ).
+                add( "from", l.getFrom().
+                     getId() ).
+                add( "to", l.getTo().
+                     getId() )
+        );
     }
 
     @Override

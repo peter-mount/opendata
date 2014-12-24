@@ -24,8 +24,7 @@ public class Berth
      */
     public static final String PROP_TEXT = "berth_text";
     private transient String text;
-    private final Set<Berth> outBerths = new HashSet<>();
-    private final Set<Berth> inBerths = new HashSet<>();
+    private final Set<LineNode> outBerths = new HashSet<>();
 
     public Berth( String id )
     {
@@ -42,41 +41,29 @@ public class Berth
         super( id, x, y, l );
     }
 
-    public Set<Berth> getOutBerths()
+    public Set<? super LineNode> getOutBerths()
     {
         return outBerths;
     }
 
-    public void forEachOutBerth( Consumer<Berth> c )
+    public void forEachOutBerth( Consumer<? super LineNode> c )
     {
         outBerths.forEach( c );
     }
 
-    public Stream<Berth> streamOutBerths()
+    public Stream<? super LineNode> streamOutBerths()
     {
         return outBerths.stream();
     }
 
-    public Set<Berth> getInBerths()
+    public void join( LineNode line )
     {
-        return inBerths;
+        outBerths.add( line );
     }
 
-    public void forEachInBerth( Consumer<Berth> c )
-    {
-        inBerths.forEach( c );
-    }
-
-    public void join( Berth to )
-    {
-        outBerths.add( to );
-        to.inBerths.add( this );
-    }
-
-    public void unjoin( Berth to )
+    public void unjoin( LineNode to )
     {
         outBerths.remove( to );
-        to.inBerths.remove( this );
     }
 
     /**

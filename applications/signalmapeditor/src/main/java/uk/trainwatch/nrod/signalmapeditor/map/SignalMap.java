@@ -188,8 +188,6 @@ public class SignalMap
      */
     public void setArea( String area )
     {
-        System.out.printf( "area \"%s\" -> \"%s\"\n", this.area, area );
-
         String oldArea = this.area;
         this.area = area;
         firePropertyChange( PROP_AREA, oldArea, area );
@@ -294,7 +292,7 @@ public class SignalMap
                 filter( Objects::nonNull );
     }
 
-    public Stream<? super LineNode> streamLines()
+    public Stream<LineNode> streamLines()
     {
         return streamNodes().
                 map( Functions.castTo( LineNode.class ) ).
@@ -305,6 +303,8 @@ public class SignalMap
     {
         return nodes.values().
                 stream().
+                map( Functions.castTo( Berth.class ) ).
+                filter( Objects::nonNull ).
                 anyMatch( b -> b.getX() == x && b.getY() == y );
     }
 
@@ -328,7 +328,7 @@ public class SignalMap
                 orElse( null );
     }
 
-    public void addAll( Collection<Berth> c )
+    public void addAll( Collection<Node> c )
     {
         c.forEach( b -> {
             nodes.put( b.getId(), b );

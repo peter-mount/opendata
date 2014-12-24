@@ -18,6 +18,8 @@ import javax.swing.JFileChooser;
 import uk.trainwatch.nrod.signalmapeditor.MainFrame;
 import uk.trainwatch.nrod.signalmapeditor.Project;
 import uk.trainwatch.nrod.signalmapeditor.map.Berth;
+import uk.trainwatch.nrod.signalmapeditor.map.Line;
+import uk.trainwatch.nrod.signalmapeditor.map.Node;
 import uk.trainwatch.nrod.signalmapeditor.map.SignalMap;
 import uk.trainwatch.nrod.signalmapeditor.utils.ThreadQueue;
 
@@ -55,7 +57,7 @@ public class SignalCaptureImporter
             SignalMap signalMap = Project.INSTANCE.getMap();
 
             // Visit each parsed line building the new map
-            Map<String, Berth> map = new HashMap<>();
+            Map<String, Node> map = new HashMap<>();
             r.lines().
                     map( this::decodeLine ).
                     filter( Objects::nonNull ).
@@ -78,7 +80,7 @@ public class SignalCaptureImporter
         return "COUT".equals( id ) || "STIN".equals( id );
     }
 
-    private Line decodeLine( String l )
+    private LogEntry decodeLine( String l )
     {
         if( l.length() > 26 ) {
             String dt = l.substring( 0, 19 );
@@ -109,14 +111,14 @@ public class SignalCaptureImporter
         return null;
     }
 
-    private static interface Line
+    private static interface LogEntry
     {
 
-        void visit( Map<String, Berth> map, SignalMap signalMap );
+        void visit( Map<String, Node> map, SignalMap signalMap );
     }
 
     private static class Area
-            implements Line
+            implements LogEntry
     {
 
         private final String dt;
@@ -129,7 +131,7 @@ public class SignalCaptureImporter
         }
 
         @Override
-        public void visit( Map<String, Berth> map, SignalMap signalMap )
+        public void visit( Map<String, Node> map, SignalMap signalMap )
         {
             signalMap.setArea( area );
             signalMap.setTitle( "Imported signal map for " + area );
@@ -137,27 +139,28 @@ public class SignalCaptureImporter
         }
     }
 
-    public static boolean present( Map<String, Berth> map, int x, int y )
+    public static boolean present( Map<String, Node> map, int x, int y )
     {
         return map.values().
                 stream().
                 anyMatch( b -> b.getX() == x && b.getY() == y );
     }
 
-    private static Berth newBerth( String id, int x, Map<String, Berth> map, SignalMap signalMap )
+    private static Berth newBerth( String id, int x, Map<String, Node> map, SignalMap signalMap )
     {
-        return map.computeIfAbsent( id,
-                                    k -> {
-                                        int y = 0;
-                                        while( present( map, x, y ) ) {
-                                            y++;
-                                        }
-                                        return new Berth( id, x, y, signalMap );
-                                    } );
+        Node n = map.computeIfAbsent( id,
+                                      k -> {
+                                          int y = 0;
+                                          while( present( map, x, y ) ) {
+                                              y++;
+                                          }
+                                          return new Berth( id, x, y, signalMap );
+                                      } );
+        return n instanceof Berth ? (Berth) n : null;
     }
 
     private static class Move
-            implements Line
+            implements LogEntry
     {
 
         private final String from;
@@ -170,16 +173,16 @@ public class SignalCaptureImporter
         }
 
         @Override
-        public void visit( Map<String, Berth> map, SignalMap signalMap )
+        public void visit( Map<String, Node> map, SignalMap signalMap )
         {
             Berth fromBerth = newBerth( from, 0, map, signalMap );
-            fromBerth.join( newBerth( to, fromBerth.getX() + 1, map, signalMap ) );
+            fromBerth.join( new Line( fromBerth, newBerth( to, fromBerth.getX() + 1, map, signalMap ) ) );
         }
 
     }
 
     private static class Put
-            implements Line
+            implements LogEntry
     {
 
         private final String berth;
@@ -190,7 +193,7 @@ public class SignalCaptureImporter
         }
 
         @Override
-        public void visit( Map<String, Berth> map, SignalMap signalMap )
+        public void visit( Map<String, Node> map, SignalMap signalMap )
         {
             newBerth( berth, 0, map, signalMap );
         }

@@ -17,7 +17,10 @@ import uk.trainwatch.nrod.signalmapeditor.map.Berth;
 import uk.trainwatch.nrod.signalmapeditor.map.MapVisitor;
 import uk.trainwatch.nrod.signalmapeditor.utils.TextAlignment;
 import static uk.trainwatch.nrod.signalmapeditor.Constants.*;
+import uk.trainwatch.nrod.signalmapeditor.map.Line;
+import uk.trainwatch.nrod.signalmapeditor.map.LineNode;
 import uk.trainwatch.nrod.signalmapeditor.map.SignalMap;
+import uk.trainwatch.util.Functions;
 
 /**
  * Handles the rendering of the map within the editor
@@ -85,18 +88,10 @@ class MapRenderer
     {
         paintGrid();
 
-        g.setStroke( new BasicStroke( 0.0f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND ) );
-        g.setColor( Color.GRAY );
-        m.streamBerths().
-                forEach( b -> {
-                    b.forEachOutBerth( b2 -> g.drawLine( Constants.getX( b ) + ROW_HEIGHT,
-                                                         Constants.getY( b ) + ROW_CENTER,
-                                                         Constants.getX( b2 ) + COLUMN_CENTER,
-                                                         Constants.getY( b2 ) + ROW_CENTER ) );
-                } );
+        m.streamLines().
+                forEach( this );
 
         g.setStroke( new BasicStroke( 0.0f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND ) );
-
         m.streamBerths().
                 forEach( this );
     }
@@ -124,4 +119,17 @@ class MapRenderer
                                          50.0 );
     }
 
+    @Override
+    public void visit( Line l )
+    {
+        g.setStroke( new BasicStroke( 0.0f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND ) );
+        g.setColor( Color.GRAY );
+
+        Berth from = l.getFrom();
+        Berth to = l.getTo();
+        g.drawLine( Constants.getX( from ) + ROW_HEIGHT,
+                    Constants.getY( from ) + ROW_CENTER,
+                    Constants.getX( to ) + COLUMN_CENTER,
+                    Constants.getY( to ) + ROW_CENTER );
+    }
 }
