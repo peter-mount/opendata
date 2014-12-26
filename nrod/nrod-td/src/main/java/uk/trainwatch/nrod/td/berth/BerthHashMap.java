@@ -21,6 +21,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Stream;
+import uk.trainwatch.util.sql.KeyValue;
 
 /**
  * A {@link BerthMap} holding the signalling berth's within a signalling area
@@ -94,6 +96,14 @@ public class BerthHashMap
     public void forEach( BiConsumer<? super String, ? super String> action )
     {
         map.forEach( action );
+    }
+
+    @Override
+    public Stream<KeyValue<String, String>> stream()
+    {
+        return map.entrySet().
+                stream().
+                map( KeyValue::new );
     }
 
     @Override

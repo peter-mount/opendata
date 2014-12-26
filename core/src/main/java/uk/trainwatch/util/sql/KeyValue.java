@@ -33,7 +33,7 @@ public class KeyValue<K, V>
      * Mapping function that returns a {@link KeyValue} keyed by an integer and a String value
      */
     public static final SQLResultSetHandler<KeyValue<Integer, String>> INTEGER_STRING = rs -> new KeyValue<>( rs.getInt( 1 ), rs.getString( 2 ) );
-    
+
     /**
      * Mapping function that returns a {@link KeyValue} keyed by a long and a String value
      */
@@ -42,6 +42,11 @@ public class KeyValue<K, V>
     private final K key;
     private final int hashCode;
     private final V value;
+
+    public KeyValue( Map.Entry<K, V> e )
+    {
+        this( e.getKey(), e.getValue() );
+    }
 
     public KeyValue( K key, V value )
     {
@@ -69,8 +74,7 @@ public class KeyValue<K, V>
     @Override
     public boolean equals( Object obj )
     {
-        if( obj == null || getClass() != obj.getClass() )
-        {
+        if( obj == null || getClass() != obj.getClass() ) {
             return false;
         }
         final KeyValue<?, ?> other = (KeyValue<?, ?>) obj;

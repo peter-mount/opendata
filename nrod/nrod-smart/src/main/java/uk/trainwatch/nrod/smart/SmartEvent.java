@@ -7,11 +7,13 @@ package uk.trainwatch.nrod.smart;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
  * @author peter
  */
+@XmlRootElement
 public enum SmartEvent
 {
 
@@ -23,12 +25,17 @@ public enum SmartEvent
 
     private static final Map<String, SmartEvent> TYPES = new HashMap<>();
 
-    static
-    {
-        for( SmartEvent e: values() )
-        {
+    private static final SmartEvent IDS[] = values();
+
+    static {
+        for( SmartEvent e: values() ) {
             TYPES.put( e.getType(), e );
         }
+    }
+
+    public static SmartEvent getId( int i )
+    {
+        return i < 0 || i >= IDS.length ? null : IDS[i];
     }
 
     public static SmartEvent getType( String t )

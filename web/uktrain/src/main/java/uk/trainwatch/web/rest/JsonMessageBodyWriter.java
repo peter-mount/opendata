@@ -16,7 +16,6 @@
 package uk.trainwatch.web.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
@@ -64,7 +63,7 @@ public class JsonMessageBodyWriter
     {
         new ObjectMapper().
                 // Comment INDENT_OUTPUT on public site, this is used during development only
-                configure( SerializationFeature.INDENT_OUTPUT, true ).
+                //configure( SerializationFeature.INDENT_OUTPUT, true ).
                 writeValue( outputStream, target );
     }
 }

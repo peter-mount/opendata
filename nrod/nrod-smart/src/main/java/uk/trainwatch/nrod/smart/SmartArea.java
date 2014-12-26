@@ -5,13 +5,16 @@
  */
 package uk.trainwatch.nrod.smart;
 
+import java.util.Comparator;
 import java.util.Objects;
+import javax.xml.bind.annotation.XmlRootElement;
 import uk.trainwatch.util.sql.SQLResultSetHandler;
 
 /**
  *
  * @author peter
  */
+@XmlRootElement(name = "area")
 public class SmartArea
 {
 
@@ -21,6 +24,9 @@ public class SmartArea
             rs.getString( 3 )
     );
 
+    public static final Comparator<SmartArea> COMPARATOR = ( a, b ) -> a.getArea().
+            compareTo( b.getArea() );
+
     private final long id;
     private final String area;
     private final String comment;
@@ -28,7 +34,7 @@ public class SmartArea
     public SmartArea( long id, String area, String comment )
     {
         this.id = id;
-        this.area = area;
+        this.area = Objects.requireNonNull( area );
         this.comment = comment;
     }
 
@@ -44,7 +50,7 @@ public class SmartArea
 
     public String getComment()
     {
-        return comment;
+        return Objects.toString( comment, "" );
     }
 
     @Override
@@ -59,8 +65,7 @@ public class SmartArea
     @Override
     public boolean equals( Object obj )
     {
-        if( obj == null || getClass() != obj.getClass() )
-        {
+        if( obj == null || getClass() != obj.getClass() ) {
             return false;
         }
         final SmartArea other = (SmartArea) obj;

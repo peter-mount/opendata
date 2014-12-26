@@ -6,12 +6,14 @@ package uk.trainwatch.nrod.location;
 
 import java.sql.ResultSet;
 import java.util.Comparator;
+import javax.xml.bind.annotation.XmlRootElement;
 import uk.trainwatch.util.sql.SQLFunction;
 
 /**
  *
  * @author peter
  */
+@XmlRootElement
 public class TrainLocation
         implements Comparable<TrainLocation>
 {

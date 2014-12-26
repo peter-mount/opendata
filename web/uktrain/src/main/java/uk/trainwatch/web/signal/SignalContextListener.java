@@ -63,7 +63,7 @@ public class SignalContextListener
             if( "europa".equals( localHost ) )
             {
                 // Dev, connect to prod for data but only request a single area to keep volumne down.
-                configure( "nr.td.area.MA", "signal.map.dev", true );
+                configure( "nr.td.area.CT", "signal.map.dev", true );
             }
             else
             {

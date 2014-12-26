@@ -208,7 +208,7 @@ public enum TrainLocationFactory
      */
     public TrainLocation getTrainLocationByStanox( long stanox )
     {
-        return get( new TrainLocationID( stanox ) );
+        return get( new Stanox( stanox ) );
     }
 
     /**

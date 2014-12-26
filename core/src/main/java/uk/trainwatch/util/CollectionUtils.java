@@ -27,6 +27,7 @@ import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Some additional utilities to compliment those in {@link Collections}
@@ -68,7 +69,7 @@ public class CollectionUtils
      * <p>
      * @param <E>
      * @param values
-     * <p>
+     *               <p>
      * @return
      */
     public static <E extends Enum<E>> Set<E> asUnmodifiableEnumSet( E... values )
@@ -123,8 +124,7 @@ public class CollectionUtils
      */
     public static <K, V, M extends Map<K, V>> BinaryOperator<M> mergeMaps( BinaryOperator<V> mergeFunction )
     {
-        return ( m1, m2 ) ->
-        {
+        return ( m1, m2 ) -> {
             m2.entrySet().
                     forEach( e -> m1.merge( e.getKey(), e.getValue(), mergeFunction ) );
             return m1;
@@ -143,8 +143,7 @@ public class CollectionUtils
     public static <K, V> void ifPresent( Map<? extends K, ? extends V> m, K k, Consumer<V> c )
     {
         V v = m.get( k );
-        if( v != null )
-        {
+        if( v != null ) {
             c.accept( v );
         }
     }
@@ -161,8 +160,7 @@ public class CollectionUtils
     public static <K, V> void ifPresent( Map<? extends K, ? extends V> m, K k, BiConsumer<K, V> c )
     {
         V v = m.get( k );
-        if( v != null )
-        {
+        if( v != null ) {
             c.accept( k, v );
         }
     }
@@ -178,8 +176,7 @@ public class CollectionUtils
      */
     public static <K, V> void ifAbsent( Map<? extends K, ? extends V> m, K k, Consumer<K> c )
     {
-        if( !m.containsKey( k ) )
-        {
+        if( !m.containsKey( k ) ) {
             c.accept( k );
         }
     }
@@ -195,8 +192,7 @@ public class CollectionUtils
      */
     public static <K, V> void ifAbsent( Map<? extends K, ? extends V> m, K k, BiConsumer<Map<? extends K, ? extends V>, K> c )
     {
-        if( !m.containsKey( k ) )
-        {
+        if( !m.containsKey( k ) ) {
             c.accept( m, k );
         }
     }
@@ -213,7 +209,7 @@ public class CollectionUtils
      * <p>
      * @return Consumer
      */
-    public <T, K, V> Consumer<T> consumeIfPresent( Map<? extends K, ? extends V> m, Function<T, K> kMapper, Consumer<V> c )
+    public static <T, K, V> Consumer<T> consumeIfPresent( Map<? extends K, ? extends V> m, Function<T, K> kMapper, Consumer<V> c )
     {
         return t -> ifPresent( m, kMapper.apply( t ), c );
     }
@@ -230,7 +226,7 @@ public class CollectionUtils
      * <p>
      * @return Consumer
      */
-    public <T, K, V> Consumer<T> consumeIfPresent( Map<? extends K, ? extends V> m, Function<T, K> kMapper, BiConsumer<K, V> c )
+    public static <T, K, V> Consumer<T> consumeIfPresent( Map<? extends K, ? extends V> m, Function<T, K> kMapper, BiConsumer<K, V> c )
     {
         return t -> ifPresent( m, kMapper.apply( t ), c );
     }
@@ -247,7 +243,7 @@ public class CollectionUtils
      * <p>
      * @return Consumer
      */
-    public <T, K, V> Consumer<T> consumeIfAbsent( Map<? extends K, ? extends V> m, Function<T, K> kMapper, Consumer<K> c )
+    public static <T, K, V> Consumer<T> consumeIfAbsent( Map<? extends K, ? extends V> m, Function<T, K> kMapper, Consumer<K> c )
     {
         return t -> ifAbsent( m, kMapper.apply( t ), c );
     }
@@ -264,8 +260,25 @@ public class CollectionUtils
      * <p>
      * @return Consumer
      */
-    public <T, K, V> Consumer<T> consumeIfAbsent( Map<? extends K, ? extends V> m, Function<T, K> kMapper, BiConsumer<Map<? extends K, ? extends V>, K> c )
+    public static <T, K, V> Consumer<T> consumeIfAbsent( Map<? extends K, ? extends V> m, Function<T, K> kMapper, BiConsumer<Map<? extends K, ? extends V>, K> c )
     {
         return t -> ifAbsent( m, kMapper.apply( t ), c );
     }
+
+    /**
+     * Inverts a map by generating a new map who's keys are the values in the original map and it's values the keys.
+     * <p>
+     * @param <K> Type of Key in original map
+     * @param <V> Type of value in original map
+     * @param m   Map to invert
+     * <p>
+     * @return Map who's keys and values are swapped
+     */
+    public static <K, V> Map<V, K> invertMap( Map<K, V> m )
+    {
+        return m.entrySet().
+                stream().
+                collect( Collectors.toMap( Map.Entry::getValue, Map.Entry::getKey ) );
+    }
+
 }

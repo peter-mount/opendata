@@ -6,12 +6,14 @@
 package uk.trainwatch.nrod.smart;
 
 import java.util.Objects;
+import javax.xml.bind.annotation.XmlRootElement;
 import uk.trainwatch.util.sql.SQLResultSetHandler;
 
 /**
  *
  * @author peter
  */
+@XmlRootElement(name = "smart")
 public class Smart
 {
 
@@ -24,11 +26,11 @@ public class Smart
             SmartManager.INSTANCE.getLine( rs.getLong( 6 ) ),
             rs.getInt( 7 ),
             rs.getString( 8 ),
-            SmartEvent.getType( rs.getString( 9 ) ),
+            SmartEvent.getId( rs.getInt( 9 ) ),
             rs.getString( 10 ),
             rs.getInt( 11 ),
             rs.getString( 12 ),
-            StepType.getType( rs.getString( 13 ) ),
+            StepType.getId( rs.getInt( 13 ) ),
             rs.getString( 14 )
     );
 
@@ -160,8 +162,7 @@ public class Smart
     @Override
     public boolean equals( Object obj )
     {
-        if( obj == null || getClass() != obj.getClass() )
-        {
+        if( obj == null || getClass() != obj.getClass() ) {
             return false;
         }
         final Smart other = (Smart) obj;

@@ -20,6 +20,8 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
+import uk.trainwatch.util.sql.KeyValue;
 
 /**
  * A Map of berths within an area
@@ -34,7 +36,8 @@ public interface BerthMap
      * <p>
      * @param berth Berth
      * @param code  head code
-     * @return 
+     * <p>
+     * @return
      */
     BerthMap put( String berth, String code );
 
@@ -99,6 +102,8 @@ public interface BerthMap
      */
     Set<String> berthSet();
 
+    Stream<KeyValue<String, String>> stream();
+
     /**
      * Run a {@link BiConsumer} against each occupied Berth.
      * <p>
@@ -137,8 +142,7 @@ public interface BerthMap
     default void consumeIfPresent( String berth, Consumer<String> c )
     {
         String code = get( berth );
-        if( code != null )
-        {
+        if( code != null ) {
             c.accept( code );
         }
     }
@@ -152,8 +156,7 @@ public interface BerthMap
     default void consumeIfPresent( String berth, BiConsumer<String, String> c )
     {
         String code = get( berth );
-        if( code != null )
-        {
+        if( code != null ) {
             c.accept( berth, code );
         }
     }
