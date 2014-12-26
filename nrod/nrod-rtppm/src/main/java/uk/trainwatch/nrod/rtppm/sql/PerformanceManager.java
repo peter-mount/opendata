@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import uk.trainwatch.util.TimeUtils;
@@ -74,12 +75,10 @@ public enum PerformanceManager
             throws SQLException
     {
         try( Connection con = dataSource.getConnection();
-             Statement s = con.createStatement() )
-        {
+             Statement s = con.createStatement() ) {
             IntSummaryStatistics stat = new IntSummaryStatistics();
             ResultSet rs = s.executeQuery( "SELECT min(d.year),max(d.year) FROM datetime.dim_date d INNER JOIN rtppm.daily r ON d.dt_id=r.dt" );
-            if( rs.next() )
-            {
+            if( rs.next() ) {
                 stat.accept( rs.getInt( 1 ) );
                 stat.accept( rs.getInt( 2 ) );
             }
@@ -92,13 +91,11 @@ public enum PerformanceManager
     {
         try( Connection con = dataSource.getConnection();
              PreparedStatement s = con.prepareStatement(
-                     "SELECT min(d.month),max(d.month) FROM datetime.dim_date d INNER JOIN rtppm.daily r ON d.dt_id=r.dt WHERE d.year=?" ) )
-        {
+                     "SELECT min(d.month),max(d.month) FROM datetime.dim_date d INNER JOIN rtppm.daily r ON d.dt_id=r.dt WHERE d.year=?" ) ) {
             s.setInt( 1, year );
             IntSummaryStatistics stat = new IntSummaryStatistics();
             ResultSet rs = s.executeQuery();
-            if( rs.next() )
-            {
+            if( rs.next() ) {
                 stat.accept( rs.getInt( 1 ) );
                 stat.accept( rs.getInt( 2 ) );
             }
@@ -111,14 +108,12 @@ public enum PerformanceManager
     {
         try( Connection con = dataSource.getConnection();
              PreparedStatement s = con.prepareStatement(
-                     "SELECT min(d.day),max(d.day) FROM datetime.dim_date d INNER JOIN rtppm.daily r ON d.dt_id=r.dt WHERE d.year=? AND d.month=?" ) )
-        {
+                     "SELECT min(d.day),max(d.day) FROM datetime.dim_date d INNER JOIN rtppm.daily r ON d.dt_id=r.dt WHERE d.year=? AND d.month=?" ) ) {
             s.setInt( 1, year );
             s.setInt( 2, month );
             IntSummaryStatistics stat = new IntSummaryStatistics();
             ResultSet rs = s.executeQuery();
-            if( rs.next() )
-            {
+            if( rs.next() ) {
                 stat.accept( rs.getInt( 1 ) );
                 stat.accept( rs.getInt( 2 ) );
             }
@@ -141,8 +136,7 @@ public enum PerformanceManager
     {
         try( Connection con = dataSource.getConnection();
              PreparedStatement s = con.prepareStatement(
-                     "SELECT d.dt, p.operator,p.ppm FROM rtppm.daily p INNER JOIN datetime.dim_date d ON d.dt_id=p.dt WHERE d.year=? AND d.month=? ORDER BY p.dt" ) )
-        {
+                     "SELECT d.dt, p.operator,p.ppm FROM rtppm.daily p INNER JOIN datetime.dim_date d ON d.dt_id=p.dt WHERE d.year=? AND d.month=? ORDER BY p.dt" ) ) {
             s.setInt( 1, year );
             s.setInt( 2, month );
             return SQL.stream( s, rs -> new DailyPPM( rs.getDate( 1 ), rs.getInt( 2 ), rs.getInt( 3 ) ) ).
@@ -161,11 +155,24 @@ public enum PerformanceManager
     {
         try( Connection con = dataSource.getConnection();
              PreparedStatement s = con.prepareStatement(
-                     "SELECT p.* FROM rtppm.daily p INNER JOIN rtppm.operator o ON p.operator=o.id WHERE dt=? ORDER BY o.display" ) )
-        {
+                     "SELECT p.* FROM rtppm.daily p INNER JOIN rtppm.operator o ON p.operator=o.id WHERE dt=? ORDER BY o.display" ) ) {
             s.setLong( 1, TimeUtils.toDBDate.apply( date ) );
             return SQL.stream( s, OperatorDailyPerformance.fromSQL ).
                     collect( Collectors.toList() );
+        }
+    }
+
+    public Optional<OperatorDailyPerformance> getOperatorPerformance( int id, LocalDate date )
+            throws SQLException
+    {
+        try( Connection con = dataSource.getConnection();
+             PreparedStatement s = SQL.prepare( con,
+                                                "SELECT p.* FROM rtppm.daily p INNER JOIN rtppm.operator o ON p.operator=o.id WHERE dt=? and o.id=?",
+                                                TimeUtils.toDBDate.apply( date ),
+                                                id
+             ) ) {
+            return SQL.stream( s, OperatorDailyPerformance.fromSQL ).
+                    findAny();
         }
     }
 
@@ -182,8 +189,7 @@ public enum PerformanceManager
             throws SQLException
     {
         try( Connection con = dataSource.getConnection();
-             PreparedStatement s = con.prepareStatement( "SELECT * FROM rtppm.daily WHERE dt BETWEEN ? AND ? AND operator=? ORDER BY dt_id" ) )
-        {
+             PreparedStatement s = con.prepareStatement( "SELECT * FROM rtppm.daily WHERE dt BETWEEN ? AND ? AND operator=? ORDER BY dt_id" ) ) {
             // The start of the month
             LocalDate startDate = TimeUtils.getLocalDate( Instant.from( date ).
                     truncatedTo( ChronoUnit.MONTHS ) );
