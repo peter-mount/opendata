@@ -28,7 +28,6 @@ public class Schema
     {
         if( !p.isEmpty() )
         {
-            System.out.printf( "\"%s\"\n", p.getName() );
             w.writeStartElement( "Schema" );
             w.writeAttribute( "name", p.getName() );
             w.writeAttribute( "id", p.getName() );

@@ -20,10 +20,12 @@ public class GIS
      * An approximation of converting miles in latitude into degrees
      */
     public static final double MILES_TO_DEGREES = 0.014492;
+    public static final double DEGREES_TO_MILES = 1.0/MILES_TO_DEGREES;
     /**
      * Conversion from km to Miles
      */
     public static final double KM_TO_MILES = 0.621371;
+    public static final double MILES_TO_KM = 1.0/KM_TO_MILES;
     /**
      * The earth's radius in km
      */

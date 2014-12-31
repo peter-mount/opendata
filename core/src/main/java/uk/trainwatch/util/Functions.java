@@ -38,8 +38,7 @@ public class Functions
      */
     public static <T> BinaryOperator<T> throwingBinaryOperator()
     {
-        return ( u, v ) ->
-        {
+        return ( u, v ) -> {
             throw new IllegalStateException( String.format( "Duplicate key %s", u ) );
         };
     }
@@ -91,18 +90,14 @@ public class Functions
      */
     public static <T> Class<T> forName( String n )
     {
-        if( n == null || n.isEmpty() )
-        {
+        if( n == null || n.isEmpty() ) {
             return null;
         }
-        else
-        {
-            try
-            {
+        else {
+            try {
                 return (Class<T>) Class.forName( n );
             }
-            catch( ClassNotFoundException ex )
-            {
+            catch( ClassNotFoundException ex ) {
                 return null;
             }
         }
@@ -133,21 +128,18 @@ public class Functions
      */
     public static <T> T newInstance( Class<T> clazz )
     {
-        if( clazz == null )
-        {
+        if( clazz == null ) {
             return null;
         }
-        else
-        {
-            try
-            {
+        else {
+            try {
                 return clazz.newInstance();
             }
             catch( InstantiationException |
-                   IllegalAccessException ex )
-            {
+                   IllegalAccessException ex ) {
                 return null;
             }
         }
     }
+
 }

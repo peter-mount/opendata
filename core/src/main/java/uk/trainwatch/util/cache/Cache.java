@@ -28,6 +28,7 @@ import uk.trainwatch.util.sql.ConcurrentSQLHashMap;
 import uk.trainwatch.util.sql.SQLBiConsumer;
 import uk.trainwatch.util.sql.SQLBiFunction;
 import uk.trainwatch.util.sql.SQLConsumer;
+import uk.trainwatch.util.sql.SQLFunction;
 import uk.trainwatch.util.sql.SQLSupplier;
 
 /**
@@ -120,13 +121,10 @@ public class Cache<K, V>
      */
     private void expire()
     {
-        if( size() > maxSize )
-        {
-            synchronized( this )
-            {
+        if( size() > maxSize ) {
+            synchronized( this ) {
                 LocalDateTimeRange range = new LocalDateTimeRange();
-                while( size() > maxSize )
-                {
+                while( size() > maxSize ) {
                     range.reset();
                     map.values().
                             stream().
@@ -235,51 +233,43 @@ public class Cache<K, V>
 
     public V computeIfAbsent( K key, Function<? super K, ? extends V> mappingFunction )
     {
-        try
-        {
+        try {
             return getV( map.computeIfAbsent( key, k -> getC( mappingFunction.apply( k ) ) ) );
         }
-        finally
-        {
+        finally {
             expire();
         }
     }
 
     public V computeIfPresent( K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction )
     {
-        try
-        {
+        try {
             return getV( map.computeIfPresent( key, ( k, v ) -> getC( remappingFunction.apply( k, getV( v ) ) ) ) );
         }
-        finally
-        {
+        finally {
             expire();
         }
     }
 
     public V compute( K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction )
     {
-        try
-        {
+        try {
             return getV( map.compute( key, ( k, v ) -> getC( remappingFunction.apply( k, getV( v ) ) ) ) );
         }
-        finally
-        {
+        finally {
             expire();
         }
     }
 
     public V merge( K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction )
     {
-        try
-        {
+        try {
             return getV(
                     map.merge( key, getC( value ),
                                ( o, v ) -> getC( remappingFunction.apply( getV( o ), getV( v ) ) ) )
             );
         }
-        finally
-        {
+        finally {
             expire();
         }
     }
@@ -293,12 +283,10 @@ public class Cache<K, V>
     public V computeSQLIfAbsent( K key, SQLSupplier<? extends V> mappingFunction )
             throws SQLException
     {
-        try
-        {
+        try {
             return getV( map.computeSQLIfAbsent( key, () -> getC( mappingFunction.get() ) ) );
         }
-        finally
-        {
+        finally {
             expire();
         }
     }
@@ -306,12 +294,21 @@ public class Cache<K, V>
     public V computeSQLIfPresent( K key, SQLBiFunction<? super K, ? super V, ? extends V> remappingFunction )
             throws SQLException
     {
-        try
-        {
+        try {
             return getV( map.computeSQLIfPresent( key, ( k, v ) -> getC( remappingFunction.apply( k, getV( v ) ) ) ) );
         }
-        finally
-        {
+        finally {
+            expire();
+        }
+    }
+
+    public V computeSQLIfAbsent( K key, SQLFunction<? super K, ? extends V> mappingFunction )
+            throws SQLException
+    {
+        try {
+            return getV( map.computeSQLIfAbsent( key, k -> getC( mappingFunction.apply( k ) ) ) );
+        }
+        finally {
             expire();
         }
     }
@@ -319,12 +316,10 @@ public class Cache<K, V>
     public V computeSQL( K key, SQLBiFunction<? super K, ? super V, ? extends V> remappingFunction )
             throws SQLException
     {
-        try
-        {
+        try {
             return getV( map.computeSQL( key, ( k, v ) -> getC( remappingFunction.apply( k, getV( v ) ) ) ) );
         }
-        finally
-        {
+        finally {
             expire();
         }
     }
@@ -332,13 +327,11 @@ public class Cache<K, V>
     public V mergeSQL( K key, V value, SQLBiFunction<? super V, ? super V, ? extends V> remappingFunction )
             throws SQLException
     {
-        try
-        {
+        try {
             return getV( map.
                     mergeSQL( key, getC( value ), ( o, v ) -> getC( remappingFunction.apply( getV( o ), getV( v ) ) ) ) );
         }
-        finally
-        {
+        finally {
             expire();
         }
     }
@@ -352,8 +345,7 @@ public class Cache<K, V>
     public void ifPresent( K k, Consumer<V> c )
     {
         CacheEntry<K, V> e = map.get( k );
-        if( e != null )
-        {
+        if( e != null ) {
             c.accept( getV( e ) );
         }
     }
@@ -367,8 +359,7 @@ public class Cache<K, V>
     public void ifPresent( K k, BiConsumer<K, V> c )
     {
         CacheEntry<K, V> e = map.get( k );
-        if( e != null )
-        {
+        if( e != null ) {
             c.accept( k, getV( e ) );
         }
     }
@@ -381,8 +372,7 @@ public class Cache<K, V>
      */
     public void ifAbsent( K k, Consumer<K> c )
     {
-        if( !map.containsKey( k ) )
-        {
+        if( !map.containsKey( k ) ) {
             c.accept( k );
         }
     }
@@ -395,8 +385,7 @@ public class Cache<K, V>
      */
     public void ifAbsent( K k, BiConsumer<Cache<K, V>, K> c )
     {
-        if( !map.containsKey( k ) )
-        {
+        if( !map.containsKey( k ) ) {
             c.accept( this, k );
         }
     }
@@ -416,8 +405,7 @@ public class Cache<K, V>
     public void compute( K k, Function<? super K, ? extends V> m, Consumer<V> c )
     {
         V v = computeIfAbsent( k, m );
-        if( v != null )
-        {
+        if( v != null ) {
             c.accept( v );
         }
     }
@@ -437,8 +425,7 @@ public class Cache<K, V>
     public void compute( K k, Function<? super K, ? extends V> m, BiConsumer<K, V> c )
     {
         V v = computeIfAbsent( k, m );
-        if( v != null )
-        {
+        if( v != null ) {
             c.accept( k, v );
         }
     }

@@ -84,6 +84,29 @@ public interface SQLMap<K, V>
         }
     }
 
+    /**
+     * Variant of {@link #computeIfAbsent(java.lang.Object, java.util.function.Function)} which allows for a SQL
+     * statement to be executed but allows for the passing of any {@link SQLException}
+     * <p>
+     * @param key
+     * @param mappingFunction <p>
+     * @return <p>
+     * @throws SQLException
+     */
+    default V computeSQLIfAbsent( K key, SQLFunction<? super K,? extends V> mappingFunction )
+            throws SQLException
+    {
+        try
+        {
+            return computeIfAbsent( key, k -> SQLFunction.guard( mappingFunction ).
+                                    apply(k) );
+        }
+        catch( UncheckedSQLException ex )
+        {
+            throw ex.getCause();
+        }
+    }
+
     default V computeSQL( K key, SQLBiFunction<? super K, ? super V, ? extends V> remappingFunction )
             throws SQLException
     {

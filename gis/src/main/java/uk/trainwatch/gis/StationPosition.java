@@ -6,7 +6,12 @@
 package uk.trainwatch.gis;
 
 import java.sql.ResultSet;
+import java.util.Comparator;
 import java.util.Objects;
+import java.util.function.Function;
+import javax.json.Json;
+import javax.json.JsonObjectBuilder;
+import uk.trainwatch.util.Comparators;
 import uk.trainwatch.util.sql.SQLFunction;
 
 /**
@@ -25,6 +30,32 @@ public class StationPosition
             rs.getString( 5 )
     );
 
+    /**
+     * Function to convert a StationPosition into a JsonObjectBuilder.
+     * <p>
+     * This does not include the distance.
+     */
+    public static final Function<StationPosition, JsonObjectBuilder> toJsonObject = s -> Json.createObjectBuilder().
+            add( "id", s.getId() ).
+            add( "name", s.getName() ).
+            add( "tiploc", s.getTiploc() ).
+            add( "longitude", s.getLongitude() ).
+            add( "latitude", s.getLatitude() );
+    /**
+     * Function to convert a StationPosition into a JsonObjectBuilder.
+     * <p>
+     * This does include the distance.
+     */
+    public static final Function<StationPosition, JsonObjectBuilder> toJsonObjectWithDistance = s -> toJsonObject.apply( s ).
+            add( "distance", s.getDistance() );
+
+    public static final Comparator<StationPosition> NAME_COMPARATOR = ( a, b ) -> Comparators.compareTo( a,
+                                                                                                         b,
+                                                                                                         ( a1, b1 ) -> Comparators.compareTo( a1.getName(),
+                                                                                                                                              b1.getName() ),
+                                                                                                         ( a1, b1 ) -> Comparators.compareTo( a1.getTiploc(),
+                                                                                                                                              b1.getTiploc() ) );
+
     private long id;
     private String name;
     private double latitude;
@@ -39,10 +70,16 @@ public class StationPosition
     public StationPosition( long id, String name, double latitude, double longitude, String tiploc )
     {
         this.id = id;
-        this.name = name;
+        this.name = Objects.toString( name, "" );
         this.latitude = latitude;
         this.longitude = longitude;
-        this.tiploc = tiploc;
+        this.tiploc = Objects.toString( tiploc, "" );
+    }
+
+    StationPosition( StationPosition pos, double distance )
+    {
+        this( pos.id, pos.name, pos.latitude, pos.longitude, pos.tiploc );
+        this.distance = distance;
     }
 
     public long getId()
@@ -113,27 +150,28 @@ public class StationPosition
     public int hashCode()
     {
         int hash = 7;
-        hash = 53 * hash + (int) (this.id ^ (this.id >>> 32));
-        hash = 53 * hash + Objects.hashCode( this.name );
         hash = 53 * hash + (int) (Double.doubleToLongBits( this.latitude ) ^ (Double.doubleToLongBits( this.latitude ) >>> 32));
         hash = 53 * hash + (int) (Double.doubleToLongBits( this.longitude ) ^ (Double.doubleToLongBits( this.longitude ) >>> 32));
-        hash = 53 * hash + Objects.hashCode( this.tiploc );
+        hash = 53 * hash + (int) (Double.doubleToLongBits( this.distance ) ^ (Double.doubleToLongBits( this.distance ) >>> 32));
         return hash;
     }
 
     @Override
     public boolean equals( Object obj )
     {
-        if( obj == null || getClass() != obj.getClass() )
-        {
+        if( obj == null || getClass() != obj.getClass() ) {
             return false;
         }
         final StationPosition other = (StationPosition) obj;
-        return this.id == other.id
-               || Objects.equals( this.name, other.name )
-               || Objects.equals( this.name, other.tiploc )
-               || Double.doubleToLongBits( this.latitude ) == Double.doubleToLongBits( other.latitude )
-               || Double.doubleToLongBits( this.longitude ) == Double.doubleToLongBits( other.longitude );
+        return Double.doubleToLongBits( this.latitude ) == Double.doubleToLongBits( other.latitude )
+               || Double.doubleToLongBits( this.longitude ) == Double.doubleToLongBits( other.longitude )
+               || Double.doubleToLongBits( this.distance ) == Double.doubleToLongBits( other.distance );
+    }
+
+    @Override
+    public String toString()
+    {
+        return "StationPosition[name=\"" + name + "\", tiploc=\"" + tiploc + "\", lat=\"" + latitude + "\", long=\"" + longitude + "\", distance=" + distance + "]";
     }
 
 }

@@ -98,7 +98,6 @@ public class Placemark
 
     public void add( String k, Object v )
     {
-        System.out.printf( "add \"%s\" -> \"%s\"\n", k, v );
         String key = k;
         switch( key )
         {
