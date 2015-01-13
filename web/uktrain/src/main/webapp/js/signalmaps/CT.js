@@ -24,7 +24,7 @@ var SignalAreaMap = (function () {
     }
 
     SignalAreaMap.width = 12;
-    SignalAreaMap.height = 28;
+    SignalAreaMap.height = 45;
 
     SignalAreaMap.plot = function (map) {
 
@@ -62,6 +62,7 @@ var SignalAreaMap = (function () {
         map.path(a);
 
         map.station(1, y1 - 0.5, "St Pancras International");
+        map.station(10, y2 + 4.3, "A");
 
         // Label the two types of platforms
         var patt = {
@@ -98,6 +99,8 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a, 0, y2, 10, y2);
         map.path(a);
 
+        map.station(0, y2 + 0.3, "A");
+
         map.berth(2, y1, '033C');
         map.berth(3, y1, '037C');
         map.berth(4, y1, '045C');
@@ -116,6 +119,8 @@ var SignalAreaMap = (function () {
         map.berth(8, y2, '710C');
         map.berth(9, y2, '712C');
 
+        map.station(10, y2 + 0.3, "B");
+
         y1 = y1 + 3;
         y2 = y1 + 1;
         a = SignalMap.down([], 0, y1);
@@ -125,6 +130,8 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a, 0, y1, 10, y1);
         a = SignalMap.line(a, 0, y2, 10, y2);
         map.path(a);
+
+        map.station(0, y2 + 0.3, "B");
 
         map.berth(1, y1, '711C');
         map.berth(2, y1, '055C');
@@ -146,6 +153,8 @@ var SignalAreaMap = (function () {
         map.berth(8, y2, '724C');
         map.berth(9, y2, '726C');
 
+        map.station(10, y2 + 0.3, "C");
+
         y1 = y1 + 3;
         y2 = y1 + 1;
         a = SignalMap.down([], 0, y1);
@@ -155,6 +164,8 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a, 0, y1, 10, y1);
         a = SignalMap.line(a, 0, y2, 10, y2);
         map.path(a);
+
+        map.station(0, y2 + 0.3, "C");
 
         map.berth(1, y1, '733C');
         map.berth(2, y1, '735C');
@@ -176,6 +187,8 @@ var SignalAreaMap = (function () {
         map.berth(8, y2, '102C');
         map.berth(9, y2, '106C');
 
+        map.station(10, y2 + 0.3, "D");
+
         y1 = y1 + 3;
         y2 = y1 + 1;
         a = SignalMap.down([], 0, y1);
@@ -185,6 +198,8 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a, 0, y1, 10, y1);
         a = SignalMap.line(a, 0, y2, 10, y2);
         map.path(a);
+
+        map.station(0, y2 + 0.3, "D");
 
         map.berth(1, y1, '751C');
         map.berth(2, y1, '753C');
@@ -192,9 +207,6 @@ var SignalAreaMap = (function () {
         map.berth(4, y1, '757C');
         map.berth(5, y1, '121C');
         map.berth(6, y1, '127C');
-        map.berth(7, y1, '151C');
-        map.berth(8, y1, '165C');
-        map.berth(9, y1, '761C');
 
         map.berth(1, y2, '748C');
         map.berth(2, y2, '750C');
@@ -202,70 +214,244 @@ var SignalAreaMap = (function () {
         map.berth(4, y2, '754C');
         map.berth(5, y2, '756C');
 
+        map.station(10, y2 + 0.3, "E");
+
+        y1 = y1 + 4;
+        y2 = y1 + 1;
+        a = SignalMap.down([], 0, y1);
+        a = SignalMap.up(a, 0, y2);
+        a = SignalMap.down(a, 10, y1);
+        a = SignalMap.up(a, 10, y2);
+        a = SignalMap.line(a, 0, y1, 10, y1);
+        a = SignalMap.line(a, 0, y2, 10, y2);
+        // Ebbsfleet bypass?
+        a = SignalMap.points(a, 1.5, y2, y2 + 1);
+        a = SignalMap.line(a, 2.5, y2 + 1, 6, y2 + 1);
+        a = SignalMap.points(a, 5.5, y2 + 1, y2);
+        // Domestic into Ebbsfleet from Gravesend
+        a = SignalMap.points(a, 1, y2, y2 + 1);
+        a = SignalMap.points(a, 1.5, y2 + 1, y2 + 2);
+        a = SignalMap.line(a, 2.5, y2 + 2, 7.75, y2 + 2);
+        a = SignalMap.up(a, 7.75, y2 + 2);
+        // Domestic out to gravesend
+        a = SignalMap.points(a, 0, y1, y1 - 1);
+        a = SignalMap.line(a, 1, y1 - 1, 5, y1 - 1);
+        a = SignalMap.down(a, 5, y1 - 1);
+
+        map.path(a);
+
+        map.station(0, y2 + 0.3, "E");
+
+        // Split to Ebbsfleet? Seen on a maidstone east
+        map.berth(2, y1 - 1, '133C');
+        map.berth(3, y1 - 1, '181C');
+        map.berth(4, y1 - 1, 'N477');
+        map.station(5.75, y1 - 0.2, "to Gravesend");
+
+        map.berth(2, y1, '151C');
+        map.berth(3, y1, '165C');
+        map.berth(4, y1, '761C');
+        map.berth(5, y1, '207C');
+        map.berth(6, y1, '213C');
+        map.berth(7, y1, '223C');
+        map.berth(8, y1, '411C');
+        map.berth(9, y1, '231C');
+
+        map.berth(8, y1, '');
+        map.berth(9, y1, '');
+
+        map.berth(1, y2, '116C');
+
+        map.berth(3, y2, '120C');
+        map.berth(4, y2, '122C');
+        map.berth(4, y2 + 1, '124C');
+
+        map.berth(5, y2, '140C');
+        map.berth(5, y2 + 1, '142C');
+
+        map.berth(7, y2, '172C');
+        map.berth(8, y2, '762C');
+
+        map.station(9, y1, "Southfleet\nJunction");
+        map.berth(9, y2, '206C');
+
+        map.berth(4, y2 + 2, '126C');
+        map.berth(5, y2 + 2, '150C');
+        map.berth(6, y2 + 2, '182C');
+
+        map.berth(7, y2 + 2, '0430');
+        map.station(8.5, y2 + 2.8, "from Gravesend");
+
+        map.station(10, y2 + 0.3, "F");
+
+        y1 = y1 + 5;
+        y2 = y1 + 1;
+        a = SignalMap.down([], 0, y1);
+        a = SignalMap.up(a, 0, y2);
+        a = SignalMap.down(a, 10, y1);
+        a = SignalMap.up(a, 10, y2);
+        a = SignalMap.line(a, 0, y1, 10, y1);
+        a = SignalMap.line(a, 0, y2, 10, y2);
+        map.path(a);
+
+        map.station(0, y2 + 0.3, "F");
+
+        map.berth(1, y2, '762C');
+        map.berth(2, y2, '206C');
+        map.berth(3, y2, '212C');
+
+        // Check which one
+        map.station(4.5, y1, "Nashenden\nCrossover");
+        map.berth(4, y1, '421C');
+        map.berth(5, y1, '431C');
+        map.berth(4, y2, '226C');
+        map.berth(5, y2, '232C');
+
+        map.berth(5, y1, '251C');
+        map.berth(6, y2, '246C');
+        map.berth(7, y2, '422C');
+
+        // Check which one
+        map.station(8.5, y1, "Crismill\nCrossover");
+        map.berth(8, y1, '261C');
+        map.berth(9, y1, '271C');
+        map.berth(8, y2, '252C');
+        map.berth(9, y2, '256C');
+
+        map.station(10, y2 + 0.3, "G");
+
         y1 = y1 + 3;
         y2 = y1 + 1;
         a = SignalMap.down([], 0, y1);
         a = SignalMap.up(a, 0, y2);
         a = SignalMap.down(a, 10, y1);
         a = SignalMap.up(a, 10, y2);
-        a = SignalMap.up(a, 10, y2 + 1);
         a = SignalMap.line(a, 0, y1, 10, y1);
         a = SignalMap.line(a, 0, y2, 10, y2);
-        a = SignalMap.points(a, 1, y2, y2 + 1);
-        a = SignalMap.line(a, 2, y2 + 1, 10, y2 + 1);
         map.path(a);
 
-        map.berth(1, y1, '207C');
-        map.berth(2, y1, '213C');
-        map.berth(3, y1, '223C');
-        map.berth(4, y1, '411C');
-        map.berth(5, y1, '231C');
-        map.berth(6, y1, '421C');
-        map.berth(7, y1, '');
-        map.berth(8, y1, '');
-        map.berth(9, y1, '');
+        map.station(0, y2 + 0.3, "G");
 
-        map.berth(1, y2, '116C');
+        // Check which one
+        map.station(1, y1, "Lenham Heath\nLoop");
+        map.berth(1, y1, '275C');
+        map.berth(1, y2, '266C');
 
-        map.berth(3, y2, '124C');
-        map.berth(4, y2, '142C');
-        map.berth(5, y2, '172C');
-        map.berth(6, y2, '762C');
-        map.berth(7, y2, '206C');
-        map.berth(8, y2, '762C');
-        map.berth(9, y2, '172C');
+        map.station(3.5, y1, "Lenham Heath Crossover");
+        map.berth(3, y1, '285C');
+        map.berth(3, y2, '276C');
+        map.berth(4, y1, '299C');
+        map.berth(4, y2, '282C');
 
-        map.berth(3, y2 + 1, '126C');
-        map.berth(4, y2 + 1, '150C');
-        map.berth(5, y2 + 1, '182C');
+        map.berth(7, y1, '301C');
+        map.berth(7, y2, '296C');
 
-//        map.berth(3,y2,'');
-//        map.berth(4,y2,'');
-//        map.berth(5,y2,'');
-//        map.berth(6,y2,'');
-//        map.berth(7,y2,'');
-//        map.berth(8,y2,'');
-//        map.berth(9,y2,'');
+        // Check which one on another service, 
+        //map.station(6, y1, "Ashford East\nJunction");
+        map.berth(8, y2, '442C');
 
+        map.station(10, y2 + 0.3, "H");
 
-//        y1 = y1+5;
-//        y2 = y1 + 1;
-//        a = SignalMap.down([], 0, y1);
-//        a = SignalMap.up(a, 0, y2);
-//        a = SignalMap.down(a, 10, y1);
-//        a = SignalMap.up(a, 10, y2);
-//        a = SignalMap.line(a, 0, y1, 10, y1);
-//        a = SignalMap.line(a, 0, y2, 10, y2);
-//        map.path(a);
-//        map.berth(1,y2,'');
-//        map.berth(2,y2,'');
-//        map.berth(3,y2,'');
-//        map.berth(4,y2,'');
-//        map.berth(5,y2,'');
-//        map.berth(6,y2,'');
-//        map.berth(7,y2,'');
-//        map.berth(8,y2,'');
-//        map.berth(9,y2,'');
+        y1 = y1 + 3;
+        y2 = y1 + 1;
+        a = SignalMap.down([], 0, y1);
+        a = SignalMap.up(a, 0, y2);
+        a = SignalMap.down(a, 10, y1);
+        a = SignalMap.up(a, 10, y2);
+        a = SignalMap.line(a, 0, y1, 10, y1);
+        a = SignalMap.line(a, 0, y2, 10, y2);
+        // Ashford P4
+        a = SignalMap.down(a, 2, y2 + 2);
+        a = SignalMap.up(a, 2, y2 + 3);
+        a = SignalMap.down(a, 8.75, y2 + 1);
+        a = SignalMap.up(a, 8.75, y2 + 2);
+        a = SignalMap.line(a, 0.75, y2 + 1, 8.75, y2 + 1);
+        a = SignalMap.line(a, 4.5, y2 + 2, 8.75, y2 + 2);
+
+        a = SignalMap.points(a, 3.25, y1, y2);
+        a = SignalMap.points(a, 3.75, y2, y2 + 1);
+        a = SignalMap.points(a, 4.25, y2 + 1, y2 + 2);
+
+        a = SignalMap.points(a, 7.75, y2, y1);
+        a = SignalMap.points(a, 7.25, y2 + 1, y2);
+        a = SignalMap.points(a, 6.75, y2 + 2, y2 + 1);
+        // Spur onto HS1
+        a = SignalMap.points(a, -0.25, y2, y2 + 1);
+        // Main line west
+        a = SignalMap.line(a, 2, y2 + 2, 4, y2 + 2);
+        a = SignalMap.points(a, 3.5, y2 + 2, y2 + 1);
+        a = SignalMap.line(a, 2, y2 + 3, 4, y2 + 3);
+        a = SignalMap.points(a, 3.5, y2 + 3, y2 + 2);
+
+        map.path(a);
+
+        map.station(0, y2 + 0.3, "H");
+
+        map.station(1.25, y2 + 3.5, "to Maidstone\n& Tonbridge");
+        map.station(9.5, y2 + 2.5, "to Canterbury\n& Dover");
+
+        // Ashford West Junction, not east!
+        map.berth(1.5, y2, '304C');
+        map.berth(1.5, y2 + 1, '302C');
+
+        map.station(2, y1, "Ashford West\nJunction");
+        map.berth(2.5, y1, '451C');
+        map.berth(2.5, y2, '452C');
+
+        map.berth(3.5, y1, '455C');
+        map.berth(3.5, y2, '460C');
+        map.berth(3.5, y2 + 1, '312C');
+
+        // Ashford Int, in from 455C, out to 331C
+        map.station(6.25, y1, "Ashford International");
+        map.platform(5.25, y1 + 2.5, 2, '', '');
+        map.berth(5.75, y1 + 2, '0947');
+        map.berth(6.75, y1 + 2, '0669');
+        map.berth(5.75, y1 + 3, '0672');
+        map.berth(6.75, y1 + 3, '0954');
+
+        map.station(9.25, y1, "Ashford East\nJunction");
+        map.berth(9.25, y1, '313C');
+        map.berth(9.25, y2, '462C');
+
+        map.station(10, y2 + 0.3, "I");
+
+        y1 = y1 + 6;
+        y2 = y1 + 1;
+        a = SignalMap.down([], 0, y1);
+        a = SignalMap.up(a, 0, y2);
+        a = SignalMap.down(a, 10, y1);
+        a = SignalMap.up(a, 10, y2);
+        a = SignalMap.line(a, 0, y1, 10, y1);
+        a = SignalMap.line(a, 0, y2, 10, y2);
+        map.path(a);
+
+        map.station(0, y2 + 0.3, "I");
+
+        map.station(1, y1, "Westenhanger\nCrossovers");
+        map.berth(1, y1, '323C');
+        map.berth(1, y2, '326C');
+
+        map.station(3.5, y1, "Dollands Moor West Junction");
+        map.berth(3, y1, '331C');
+        map.berth(3, y2, '332C');
+
+        map.berth(4, y1, '335C');
+        map.berth(4, y2, '334C');
+
+        map.berth(5, y2, '340C');
+
+        map.berth(6, y1, '481C');
+        map.berth(6, y2, '482C');
+
+        map.berth(7, y1, '361C');
+        map.berth(7, y2, '362C');
+        map.station(9, y1, "Eurotunnel Boundary");
+        // Eurotunnel Boundary
+        map.station(10, y2 + 0.25, "to Calais");
+        map.berth(9, y1, 'E834');
+        map.berth(9, y2, 'ET05');
+
     };
 
     return SignalAreaMap;
