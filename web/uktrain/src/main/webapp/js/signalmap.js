@@ -43,7 +43,7 @@ var SignalMap = (function () {
         this.area = area;
         this.title = title;
         this.berths = {};
-        this.paper = Raphael($(id)[0], SignalMap.pw(12), SignalMap.ph(18));
+        this.paper = Raphael($(id)[0], SignalMap.pw(SignalAreaMap.width), SignalMap.ph(SignalAreaMap.height));
     }
 
     SignalMap.pw = function (x) {
@@ -87,7 +87,7 @@ var SignalMap = (function () {
         if (typeof n2 !== 'undefined')
             this.paper.text(SignalMap.px(x + (w / 2)), SignalMap.py(y) + 4, n2).
                     attr('font-size', '7px');
-    }
+    };
 
     SignalMap.prototype.berth = function (x, y, name) {
         this.berths[name] = new Berth(this.paper, x, y, name);
@@ -96,7 +96,6 @@ var SignalMap = (function () {
     SignalMap.points = function (ary, x1, y1, y2) {
         var px1 = SignalMap.px(x1 + 0.5), px2 = SignalMap.px(x1 + 1);
         var py1 = SignalMap.py(y1), py2 = SignalMap.py(y2);
-        var pcx = SignalMap.px(x1 + 0.5);
         return ary.concat(['M', px1, py1, 'L', px2, py2]);
     };
 
@@ -133,6 +132,17 @@ var SignalMap = (function () {
             'M', px1 + 2.5, py1 - 5,
             'L', px1 - 2.5, py1,
             'L', px1 + 2.5, py1 + 5,
+            'Z'
+        ]);
+    };
+
+    SignalMap.buffer = function (ary, x, y) {
+        var px1 = SignalMap.px(x), py1 = SignalMap.py(y);
+        return ary.concat([
+            'M', px1 + 1, py1 - 5,
+            'L', px1 + 1, py1 + 5,
+            'L', px1 - 1, py1 + 5,
+            'L', px1 - 1, py1 - 5,
             'Z'
         ]);
     };
