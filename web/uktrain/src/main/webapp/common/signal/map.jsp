@@ -11,7 +11,7 @@
 <script>
     $(document).ready(function () {
        var map = new SignalMap('#map', '${area.area}', '${area.comment}');
-       plotSignalMap(map);
+       SignalAreaMap.plot(map);
        map.update(map);
     });
 </script>
