@@ -64,7 +64,7 @@ var SignalAreaMap = (function () {
         map.berth(2.5, y1, 'H429');
         map.berth(2.5, y2, 'H436');
 
-        map.station(4, y1 - 0.5, "Robbertsbridge");
+        map.station(4, y1 - 0.5, "Robertsbridge");
         map.platform(3.5, y1 - 0.5, 1, '2', '');
         map.platform(3.5, y2 + 0.5, 1, '', '1');
         map.berth(4, y1, 'H018');
