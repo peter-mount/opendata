@@ -161,7 +161,9 @@ public enum ATOCCode
      */
     UNKNOWN( "??", "Unknown" ),
     // New entries post the last full import must be added last otherwise it will break the DB
-    DC( "DC", "Devon and Cornwall Railway" );
+    DC( "DC", "Devon and Cornwall Railway" ),
+    CS( "CS", "Caledonian Sleeper" ),
+    XR( "XR", "Crossrail" );
 
     private static final Map<String, ATOCCode> CODES = new HashMap<>();
 
