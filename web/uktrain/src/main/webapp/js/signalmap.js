@@ -6,10 +6,29 @@
 
 var Berth = (function () {
 
-    function Berth(paper, x, y, name) {
+    /**
+     * 
+     * @param {type} paper
+     * @param {type} x
+     * @param {type} y
+     * @param {type} name
+     * @param {type} mode 0=standard, 1 for right, 2 for left (not used 3=both left & right)
+     * @returns {signalmap_L7.Berth}
+     */
+    function Berth(paper, x, y, name, mode) {
         this.name = name;
+        this.mode = typeof mode === 'undefined' ? 0 : mode;
         var w = 5 * name.length, x1 = SignalMap.px(x), y1 = SignalMap.py(y);
-        this.rect = paper.rect(x1 - w, y1 - 8, 2 * w, 16);
+        //this.rect = paper.rect(x1 - w, y1 - 8, 2 * w, 16);
+
+        var ary = ['M', x1 - w, y1 - 8, 'L', x1 + w, y1 - 8];
+        if ((mode & 1) === 1)
+            ary = ary.concat(['L', x1 + w + 4, y1]);
+        ary = ary.concat(['L', x1 + w, y1 + 8, 'L', x1 - w, y1 + 8]);
+        if ((mode & 2) === 2)
+            ary = ary.concat(['L', x1 - w - 4, y1]);
+        //ary = ary.concat(['L', x1 - w, y1 - 8]);
+        this.rect = paper.path(ary.concat(['Z']));
         this.text = paper.text(x1, y1, name).attr('font-size', '10px');
         this.clear();
     }
@@ -72,7 +91,7 @@ var SignalMap = (function () {
     };
 
     SignalMap.prototype.station = function (x, y, name) {
-        this.paper.text(SignalMap.px(x), SignalMap.py(y) - 20, name).
+        return this.paper.text(SignalMap.px(x), SignalMap.py(y) - 20, name).
                 attr({
                     'font-size': '8px'
                 });
@@ -90,7 +109,15 @@ var SignalMap = (function () {
     };
 
     SignalMap.prototype.berth = function (x, y, name) {
-        this.berths[name] = new Berth(this.paper, x, y, name);
+        this.berths[name] = new Berth(this.paper, x, y, name, 0);
+    };
+
+    SignalMap.prototype.berthr = function (x, y, name) {
+        this.berths[name] = new Berth(this.paper, x, y, name, 1);
+    };
+
+    SignalMap.prototype.berthl = function (x, y, name) {
+        this.berths[name] = new Berth(this.paper, x, y, name, 2);
     };
 
     SignalMap.points = function (ary, x1, y1, y2) {
