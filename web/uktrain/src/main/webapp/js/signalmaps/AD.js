@@ -22,7 +22,7 @@ var SignalAreaMap = (function () {
     }
 
     SignalAreaMap.width = 13.5;
-    SignalAreaMap.height = 70;
+    SignalAreaMap.height = 95;
 
     SignalAreaMap.plot = function (map) {
 
@@ -41,6 +41,10 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a, 0, y2 + 1, 10, y2 + 1);
         a = SignalMap.line(a, 0, y2 + 2, 10, y2 + 2);
         a = SignalMap.line(a, 5.75, y1 + 1, 6.25, y1);
+        a = SignalMap.down(a, 10, y1);
+        a = SignalMap.up(a, 10, y2);
+        a = SignalMap.down(a, 10, y2 + 1);
+        a = SignalMap.up(a, 10, y2 + 2);
         map.path(a);
 
         map.berthr(1, y1, '0001');
@@ -76,6 +80,9 @@ var SignalAreaMap = (function () {
         map.platform(6.5, y1 - 0.5, 2, '', '4');
         map.platform(6.5, y2 + 0.5, 2, '2', '3');
         map.platform(6.5, y2 + 2.5, 2, '1', '');
+
+        map.station(10, y1 + 1.25, 'A');
+        map.station(10, y2 + 2.25, 'A');
 
         // Chislehurst junction & Petts Wood
         y1 = y1 + 8;
@@ -123,6 +130,9 @@ var SignalAreaMap = (function () {
 
         map.path(a);
 
+        map.station(0, y1 + 1.25, 'A');
+        map.station(0, y2 + 2.25, 'A');
+
         map.berthl(3, y1 - 1, '0020');
         map.berthr(4, y1 - 1, 'V209');
 
@@ -156,6 +166,9 @@ var SignalAreaMap = (function () {
         map.berthr(9.25, y2 + 1, '0043');
         map.berthl(9.25, y2 + 2, '0036');
         map.platform(8.75, y1 + 2.5, 1, '2', '1');
+
+        map.station(10, y1 + 1.25, 'B');
+        map.station(10, y2 + 2.25, 'B');
 
         // Orpington
         y1 = y1 + 12;
@@ -204,6 +217,9 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a, 7.25, y2 + 3, 11, y2 + 3);
 
         map.path(a);
+
+        map.station(0, y1 + 1.25, 'B');
+        map.station(0, y2 + 2.25, 'B');
 
         map.berthl(1, y2, '0042');
         map.berthl(1, y2 + 2, '0044');
@@ -284,6 +300,8 @@ var SignalAreaMap = (function () {
         map.platform(7.5, y2 + 0.5, 2, '4', '3');
         map.platform(7.5, y2 + 2.5, 4, '2', '1');
 
+        map.station(11.5, y2 + 2.25, 'C');
+
         // Chelsfield to Knockholt
         y1 = y1 + 7;
         y2 = y1 + 1;
@@ -296,6 +314,8 @@ var SignalAreaMap = (function () {
         a = SignalMap.up(a, 10, y2);
 
         map.path(a);
+
+        map.station(0, y1 + 1.25, 'C');
 
         map.berthl(1, y1, '2014');
         map.berthl(1, y2, '0066');
@@ -324,6 +344,8 @@ var SignalAreaMap = (function () {
         map.berthr(9, y1, '0079');
         map.berthl(9, y2, '0076');
 
+        map.station(10, y1 + 1.25, 'D');
+
         // Dunton Green
         y1 = y1 + 4;
         y2 = y1 + 1;
@@ -335,6 +357,8 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a, 0, y2, 10, y2);
         a = SignalMap.up(a, 10, y2);
         map.path(a);
+
+        map.station(0, y1 + 1.25, 'D');
 
         map.berthr(1.5, y1, '0081');
         map.berthl(1, y2, '0078');
@@ -363,6 +387,8 @@ var SignalAreaMap = (function () {
 
         map.berthr(9, y1, '0095');
         map.berthl(9, y2, '0094');
+
+        map.station(10, y1 + 1.25, 'E');
 
         // Sevenoaks & Bat-n-Ball
         y1 = y1 + 8;
@@ -408,6 +434,9 @@ var SignalAreaMap = (function () {
 
         map.path(a);
 
+        map.station(-0.75, y1 - 1.75, 'VC');
+        map.station(0, y1 + 1.25, 'E');
+
         map.berthr(1, y1, '0097');
         map.berthl(1, y2, '0096');
 
@@ -448,6 +477,8 @@ var SignalAreaMap = (function () {
         map.berthr(3, y1 - 3, '0329');
         map.berthr(3, y1 - 2, '2037');
 
+        map.station(11, y1 + 2, 'F');
+
         // Hildenborough
         y1 = y1 + 5;
         y2 = y1 + 1;
@@ -470,6 +501,8 @@ var SignalAreaMap = (function () {
         a = SignalMap.up(a, 0, y2 + 1);
 
         map.path(a);
+
+        map.station(0, y1 + 2, 'F');
 
         map.berthl(2, y1 - 1, '2022');
         map.berth(3, y1 - 1, 'R022');
@@ -496,6 +529,8 @@ var SignalAreaMap = (function () {
         map.berthl(10.5, y2, '0124');
         map.platform(10, y1 - 0.5, 1, '', '2');
         map.platform(10, y2 + 0.5, 1, '1', '');
+
+        map.station(11.25, y1 + 1.25, 'F');
 
         // Tonbridge sidings
         y1 = y1 + 4;
@@ -591,36 +626,38 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a, 3.8, y2, 3.9, y1);
 
         // to P3/4
-        a = SignalMap.line(a, 6.2, y1, 6.4, y1-1);
+        a = SignalMap.line(a, 6.2, y1, 6.4, y1 - 1);
         a = SignalMap.line(a, 6.4, y1 - 1, 12, y1 - 1);
 
         // to P1/2
-        a = SignalMap.line(a, 6.2, y2, 6.4, y2+1);
-        a = SignalMap.line(a, 6.4, y2+1, 12, y2+1);
+        a = SignalMap.line(a, 6.2, y2, 6.4, y2 + 1);
+        a = SignalMap.line(a, 6.4, y2 + 1, 12, y2 + 1);
         // P1
-        a = SignalMap.line(a,8.6,y2+1,9,y2+2);
-        a = SignalMap.line(a,8.6,y2+2,9,y2+1);
-        a = SignalMap.line(a, 4.5, y2+2, 12, y2+2);
-        a = SignalMap.line(a, 4.5, y2+1, 6, y2+1);
-        a = SignalMap.line(a, 6, y2+1, 6.25, y2+2);
+        a = SignalMap.line(a, 8.6, y2 + 1, 9, y2 + 2);
+        a = SignalMap.line(a, 8.6, y2 + 2, 9, y2 + 1);
+        a = SignalMap.line(a, 4.5, y2 + 2, 12, y2 + 2);
+        a = SignalMap.line(a, 4.5, y2 + 1, 6, y2 + 1);
+        a = SignalMap.line(a, 6, y2 + 1, 6.25, y2 + 2);
 
         a = SignalMap.line(a, 7, y1 - 2, 7.5, y1 - 2);
         a = SignalMap.line(a, 7.5, y1 - 2, 7.7, y1 - 1);
         a = SignalMap.line(a, 7.9, y1 - 1, 8.1, y1 - 2);
         a = SignalMap.line(a, 8.1, y1 - 2, 12, y1 - 2);
 
-        a = SignalMap.line(a, 11.2,y2+2, 11.4,y2+1);
-        a = SignalMap.line(a, 11.2,y2+1, 11.4,y2);
-        
+        a = SignalMap.line(a, 11.2, y2 + 2, 11.4, y2 + 1);
+        a = SignalMap.line(a, 11.2, y2 + 1, 11.4, y2);
+
         // P1/2 Xing
-        a = SignalMap.line(a, 11.2,y1, 11.6,y1-1);
-        a = SignalMap.line(a, 11.2,y1-1, 11.6,y1);
-        
+        a = SignalMap.line(a, 11.2, y1, 11.6, y1 - 1);
+        a = SignalMap.line(a, 11.2, y1 - 1, 11.6, y1);
+
         // to redhill
-        a = SignalMap.line(a,8,y1,7,y2+4);
-        a = SignalMap.line(a,8.25,y1+1,7.5,y2+4);
-        
+        a = SignalMap.line(a, 8, y1, 7, y2 + 4);
+        a = SignalMap.line(a, 8.25, y1 + 1, 7.5, y2 + 4);
+
         map.path(a);
+
+        map.station(0, y1 + 1.25, 'F');
 
         map.berthr(1.5, y1, '0133');
         map.berthl(1, y2, '0126');
@@ -633,40 +670,300 @@ var SignalAreaMap = (function () {
         map.berthl(4.5, y2, '0130');
 
         map.berthr(5.5, y2, '0143');
-        
-        map.berth(7,y1-2,'2063');
-        map.berthr(7,y1-1,'0139');
-        map.berthr(7,y1,'0141');
-        map.berthl(7,y1+1,'0134');
-        map.berthl(7,y1+2,'0136');
-        
-        map.station(4.5,y2+3.5,'West Yard');
-        map.berth(4.5,y2+1,'2059');
-        map.berth(4.5,y2+2,'2061');
-        map.station(7.25,y2+5.5,'to Redhill\n& sidings');
-        
+
+        map.berth(7, y1 - 2, '2063');
+        map.berthr(7, y1 - 1, '0139');
+        map.berthr(7, y1, '0141');
+        map.berthl(7, y1 + 1, '0134');
+        map.berthl(7, y1 + 2, '0136');
+
+        map.station(4.5, y2 + 3.5, 'West Yard');
+        map.berth(4.5, y2 + 1, '2059');
+        map.berth(4.5, y2 + 2, '2061');
+        map.station(7.25, y2 + 5.5, 'to Redhill\n& sidings');
+
         // Tonbridge
-        map.station(10,y1-2,"Tonbridge");
+        map.station(10, y1 - 2, "Tonbridge");
         // P4
-        map.berthl(8.6,y1-2,'F146');
-        map.berthl(9.6,y1-2,'A146');
-        map.berthl(10.6,y1-2,'B146');
-        map.berth(11.6,y1-2,'R146');
+        map.berthl(8.6, y1 - 2, 'F146');
+        map.berthl(9.6, y1 - 2, 'A146');
+        map.berthl(10.6, y1 - 2, 'B146');
+        map.berth(11.6, y1 - 2, 'R146');
         // P3
-        map.berthl(9.6,y1-1,'0148');
-        map.berthr(10.6,y1-1,'0155');
+        map.berthl(9.6, y1 - 1, '0148');
+        map.berthr(10.6, y1 - 1, '0155');
         // passthrough
-        map.berthl(9.6,y1,'2030');
-        map.berthr(10.6,y1,'0157');
-        map.berthl(9.6,y2,'0150');
+        map.berthl(9.6, y1, '2030');
+        map.berthr(10.6, y1, '0157');
+        map.berthl(9.6, y2, '0150');
         // P2
-        map.berthl(9.6,y2+1,'0152');
-        map.berthr(10.6,y2+1,'0159');
+        map.berthl(9.6, y2 + 1, '0152');
+        map.berthr(10.6, y2 + 1, '0159');
         // P1
-        map.berthl(9.6,y2+2,'0154');
-        map.berthr(10.6,y2+2,'0161');
-        map.platform(9.1,y1-1.5,2,'4','3');
-        map.platform(9.1,y2+1.5,2,'2','1');
+        map.berthl(9.6, y2 + 2, '0154');
+        map.berthr(10.6, y2 + 2, '0161');
+        map.platform(9.1, y1 - 1.5, 2, '4', '3');
+        map.platform(9.1, y2 + 1.5, 2, '2', '1');
+
+        //
+        y1 = y1 + 8;
+        y2 = y1 + 1;
+        a = SignalMap.line([], 0, y1 - 1, 9.6, y1 - 1);
+        a = SignalMap.line(a, 6.8, y1, 7.2, y1 - 1);
+        a = SignalMap.line(a, 6.8, y1 - 1, 7.2, y1);
+        a = SignalMap.line(a, 9.6, y1 - 1, 9.9, y1);
+
+        a = SignalMap.line(a, 0, y1, 12, y1);
+        a = SignalMap.down(a, 12, y1);
+
+        a = SignalMap.line(a, 0, y2, 12, y2);
+        a = SignalMap.up(a, 12, y2);
+
+        a = SignalMap.line(a, 0, y2 + 1, 6.8, y2 + 1);
+        a = SignalMap.line(a, 6.8, y2 + 1, 7.2, y2);
+
+        a = SignalMap.line(a, 0, y2 + 2, 1, y2 + 2);
+        a = SignalMap.line(a, 1, y2 + 2, 1.3, y2 + 1);
+
+        a = SignalMap.line(a, 4.1, y2 + 1, 4.3, y2 + 2);
+        a = SignalMap.line(a, 4.3, y2 + 2, 5, y2 + 2);
+
+        a = SignalMap.line(a, 2, y1, 3, y1 + 4);
+        a = SignalMap.line(a, 3, y1 + 4, 8, y1 + 4);
+        a = SignalMap.down(a, 8, y1 + 4);
+
+        a = SignalMap.line(a, 2, y1 + 1, 3, y2 + 4);
+        a = SignalMap.line(a, 3, y2 + 4, 8, y2 + 4);
+        a = SignalMap.up(a, 8, y2 + 4);
+
+        map.path(a);
+
+        map.berthl(5, y1 - 1, '2032');
+        map.berthl(5, y1, '0160');
+        map.berthl(5, y2, '0162');
+        map.berthl(5, y2 + 1, '0164');
+        map.berthl(5, y2 + 2, '2036');
+        map.station(6.3, y2 + 2.8, 'Engineers Sidings');
+
+        map.berthr(6, y1 - 1, '1063');
+        map.berthr(6, y1, '1065');
+
+        map.station(8.5, y1 - 1, 'P.O. Sidings');
+        map.berthl(8, y1 - 1, '0166');
+        map.berthr(9, y1 - 1, '0167');
+
+        map.berthl(11, y1, '168X');
+        map.berthl(11, y2, '0170');
+
+        // To tunbridge wells
+        map.berthr(4, y1 + 4, '0401');
+        map.berthl(4, y2 + 4, '0400');
+
+        map.berthr(5, y1 + 4, 'X403');
+        map.berthl(5, y2 + 4, '0402');
+
+        map.berthr(6, y1 + 4, '0403');
+        map.berthl(6, y2 + 4, '0404');
+
+        map.berthl(7, y2 + 4, '0406');
+        map.station(8.75, y2 + 4.25, 'TE Tunbridge Wells');
+
+        map.station(12, y1 + 1.25, 'G');
+
+        //
+        y1 = y1 + 7;
+        y2 = y1 + 1;
+        a = SignalMap.line([], 0, y1, 8, y1);
+        a = SignalMap.line(a, 0, y2, 8, y2);
+        a = SignalMap.down(a, 0, y1);
+        a = SignalMap.down(a, 8, y1);
+        a = SignalMap.up(a, 0, y2);
+        a = SignalMap.up(a, 8, y2);
+
+        map.path(a);
+
+        map.station(0, y1 + 1.25, 'G');
+
+        map.berthr(1, y1, '0169');
+        map.berthl(1, y2, '0172');
+
+        map.berthr(2, y1, '0171');
+        map.berthl(2, y2, '0174');
+
+        map.berthr(3, y1, '0173');
+        map.berthl(3, y2, '0176');
+
+        map.berthr(4, y1, '0175');
+        map.berthl(4, y2, '0178');
+
+        map.berthr(5, y1, '0177');
+        map.berthl(5, y2, '0180');
+
+        map.berthr(6, y1, '0179');
+        map.berthl(6, y2, '0182');
+
+        map.berthr(7, y1, '0181');
+        map.berthr(7, y2, '0183X');
+
+        map.station(8, y1 + 1.25, 'H');
+
+        // Paddock Wood
+        y1 = y1 + 7;
+        y2 = y1 + 1;
+        a = SignalMap.line([], 0, y1, 12, y1);
+        a = SignalMap.line(a, 0, y2, 12, y2);
+        a = SignalMap.down(a, 0, y1);
+        a = SignalMap.down(a, 12, y1);
+        a = SignalMap.up(a, 0, y2);
+        a = SignalMap.up(a, 12, y2);
+
+        a = SignalMap.buffer(a, 1, y1 - 1);
+        a = SignalMap.line(a, 1, y1 - 1, 2, y1 - 1);
+        a = SignalMap.line(a, 2, y1 - 1, 2.2, y1);
+
+        a = SignalMap.line(a, 1.7, y2, 1.9, y1);
+        a = SignalMap.line(a, 2, y1, 2.2, y2);
+
+        a = SignalMap.line(a, 4, y1 - 2, 12, y1 - 2);
+
+        a = SignalMap.line(a, 3.8, y1, 4, y1 - 1);
+        a = SignalMap.line(a, 4, y1 - 1, 7.5, y1 - 1);
+        a = SignalMap.line(a, 7, y1 - 1, 7.2, y1);
+
+        a = SignalMap.line(a, 7, y1 - 3, 7.8, y1 - 3);
+        a = SignalMap.line(a, 7.8, y1 - 3, 8, y1 - 2);
+
+        a = SignalMap.line(a, 7.5, y1 - 1, 7.8, y1 - 2);
+        a = SignalMap.line(a, 8.2, y1 - 2, 8.4, y1 - 1);
+        a = SignalMap.line(a, 8.4, y1 - 1, 12, y1 - 1);
+
+        a = SignalMap.down(a, 12, y1 - 2);
+        a = SignalMap.up(a, 12, y1 - 1);
+
+        a = SignalMap.line(a, 3.8, y2, 4, y2 + 1);
+        a = SignalMap.line(a, 4, y2 + 1, 9, y2 + 1);
+        a = SignalMap.line(a, 7, y2 + 1, 7.2, y2);
+
+        map.path(a);
+
+        map.station(0, y1 + 1.25, 'H');
+
+        map.berthr(1, y2, '2071');
+
+        map.station(5.5, y1 - 2, 'Paddock Wood');
+        map.berth(4, y1 - 2, 'R195');
+        map.berthl(5, y1 - 2, 'B195');
+        map.berthl(5, y1 - 1, '0184');
+        map.berthl(5, y1, '0186');
+        map.berthl(5, y2, '0188');
+        map.berthl(5, y2 + 1, '0190');
+
+        map.berthr(6, y1 - 2, 'A195');
+        map.berthr(6, y1 - 1, '0197');
+        map.berthr(6, y1, '0199');
+        map.berthr(6, y2, '201X');
+        map.berthr(6, y2 + 1, '203X');
+
+        map.berth(7, y1 - 2, 'F195');
+
+        map.platform(4.5, y1 - 1.5, 2, '3', '2');
+        map.platform(4.5, y2 + 0.5, 2, '1', '');
+
+        map.station(7, y1 - 3, 'Keylands sidings');
+        map.berth(7, y1 - 3, '2085');
+
+        map.station(8.25, y2 + 2.25, 'Engineers sidings');
+
+        map.berthl(8, y1, '200X');
+        map.berthl(8, y2, '0202');
+
+        map.berthr(9, y1, '0205');
+        map.berthl(9, y2, '0204');
+
+        map.berthr(10, y1, '0207');
+        map.berthl(10, y2, '0206');
+
+        map.berthr(11, y1, '0209');
+        map.berthl(11, y2, '0208');
+
+        map.station(1.5, y1 - 1, 'Down siding');
+
+        // Valley line
+        map.berthl(9, y1 - 2, '2086');
+        map.berthl(9, y1 - 1, '0251');
+
+        map.berthr(10, y1 - 2, '2052');
+
+        map.berthr(11, y1 - 2, 'D101');
+        map.berthl(11, y1 - 1, '0253');
+
+        map.station(12, y1 - 2, 'to Beltring');
+        map.station(12, y1 - .75, 'ZR');
+
+        map.station(12, y1 + 1.25, 'J');
+        map.station(12, y1 + 2.5, 'to Ashford');
+
+        y1 = y1 + 4;
+        y2 = y1 + 1;
+        a = SignalMap.line([], 0, y1, 12, y1);
+        a = SignalMap.line(a, 0, y2, 12, y2);
+        a = SignalMap.down(a, 0, y1);
+        a = SignalMap.up(a, 0, y2);
+        a = SignalMap.down(a, 12, y1);
+        a = SignalMap.up(a, 12, y2);
+        map.path(a);
+
+        map.station(0, y1 + 1.25, 'J');
+
+        map.berthr(1, y1, '0211');
+        map.berthl(1, y2, '0210');
+
+        map.berthr(2, y1, '0213');
+        map.berthl(2, y2, '0212');
+
+        map.berthr(3, y1, '0215');
+        map.berthl(3, y2, '0214');
+
+        map.berthr(4, y1, '0217');
+        map.berthl(4, y2, '0216');
+
+        map.berthr(5, y1, '0219');
+        map.berthl(5, y2, '0218');
+
+        map.berthr(6, y1, '0221');
+        map.berthl(6, y2, '0584');
+
+        map.berthr(7, y1, '0591');
+        map.berthl(7, y2, '0586');
+
+        map.berthr(8, y1, '0593');
+        map.berthl(8, y2, '0588');
+
+        map.berthr(9, y1, '0595');
+        map.berthl(9, y2, '0590');
+
+        map.berthr(10, y1, '0219');
+        map.berthl(10, y2, '0592');
+
+        map.berthr(11, y1, '0219');
+        map.berthl(11, y2, '0594');
+
+        map.station(12, y1 + 1.25, 'K');
+
+        y1 = y1 + 3;
+        y2 = y1 + 1;
+        a = SignalMap.line([], 0, y1, 3, y1);
+        a = SignalMap.line(a, 0, y2, 3, y2);
+        a = SignalMap.down(a, 0, y1);
+        a = SignalMap.up(a, 0, y2);
+        a = SignalMap.down(a, 3, y1);
+        a = SignalMap.up(a, 3, y2);
+        map.path(a);
+        map.station(0, y1 + 1.25, 'K');
+        map.berthl(1, y2, '0596');
+        map.berthl(2, y2, '0598');
+        map.station(3, y1 + 1.25, 'A2');
+
     };
 
     return SignalAreaMap;
