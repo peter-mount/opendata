@@ -22,7 +22,7 @@ var SignalAreaMap = (function () {
     }
 
     SignalAreaMap.width = 13;
-    SignalAreaMap.height = 47;
+    SignalAreaMap.height = 47+8;
 
     SignalAreaMap.plot = function (map) {
         var y1,y2,a;
@@ -73,6 +73,8 @@ var SignalAreaMap = (function () {
         map.berthr(9,y1,'4981');
         map.berthl(9,y2,'4968');
 
+        map.station(10.2,y1+1.3,'A');
+        
         y1=y1+5+4;
         y2 = y1 + 1;
         a = SignalMap.down([], 0, y1);
@@ -130,6 +132,8 @@ var SignalAreaMap = (function () {
         
         map.path(a);
 
+        map.station(-0.2,y1+1.3,'A');
+        
         map.station(5,y1-3,'Ramsgate E.M.U.D.');
         map.station(1,y1-2,'Depot Reception\nWest');
         map.berthr(1,y1-2,'4983');
@@ -162,6 +166,8 @@ var SignalAreaMap = (function () {
         
         map.station(7.25,y2+2.8,'New sidings');
 
+        map.station(10.2,y1+1.3,'B');
+        
         y1=y1+5;
         y2 = y1 + 1;
         a = SignalMap.down([], 0, y1);
@@ -172,6 +178,8 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a, 0, y2, 10, y2);
 
         map.path(a);
+        
+        map.station(-0.2,y1+1.3,'B');
         
         map.berthr(1,y1,'5152');
         map.berthl(1,y2,'5143');
@@ -202,6 +210,8 @@ var SignalAreaMap = (function () {
         map.berthr(8.5,y1,'5134');
         map.berthl(9,y2,'5125');
 
+        map.station(10.2,y1+1.3,'C');
+        
         y1=y1+5;
         y2 = y1 + 1;
         a = SignalMap.down([], 0, y1);
@@ -232,6 +242,8 @@ var SignalAreaMap = (function () {
         
         map.path(a);
         
+        map.station(-0.2,y1+1.3,'C');
+        
         map.berthr(1,y1,'5132');
         map.berthl(1.5,y2,'5123');
         
@@ -255,6 +267,8 @@ var SignalAreaMap = (function () {
         map.berthr(9.25,y1,'5116');
         map.berthl(9.25,y2,'5107');
 
+        map.station(10.2,y1+1.3,'D');
+        
         y1=y1+4;
         y2 = y1 + 1;
         a = SignalMap.down([], 0, y1);
@@ -265,6 +279,8 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a, 0, y2, 10, y2);
 
         map.path(a);
+        
+        map.station(-0.2,y1+1.3,'D');
         
         map.station(1,y1,'Westgate-on-Sea');
         map.platform(0.5,y1-0.5,1,'','1');
@@ -298,6 +314,8 @@ var SignalAreaMap = (function () {
         map.berthr(9,y1,'5096');
         map.berthl(9,y2,'5083');
 
+        map.station(10.2,y1+1.3,'E');
+        
         y1=y1+4;
         y2 = y1 + 1;
         a = SignalMap.down([], 0, y1);
@@ -310,6 +328,8 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a,4,y2,4.25,y1);
 
         map.path(a);
+        
+        map.station(-0.2,y1+1.3,'E');
         
         map.berthr(1,y1,'5094');
         map.berthl(1,y2,'5081');
@@ -341,6 +361,8 @@ var SignalAreaMap = (function () {
         map.berthr(9,y1,'5076');
         map.berthl(9,y2,'5063');
         
+        map.station(10.2,y1+1.3,'F');
+        
         y1=y1+4;
         y2 = y1 + 1;
         a = SignalMap.down([], 0, y1);
@@ -351,6 +373,8 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a, 0, y2, 7, y2);
 
         map.path(a);
+        
+        map.station(-0.2,y1+1.3,'F');
         
         map.berthr(1,y1,'5074');
         map.berthl(1,y2,'5061');
@@ -368,6 +392,8 @@ var SignalAreaMap = (function () {
         map.berthl(5,y2,'5051');
         
         map.berthr(6,y2,'5060');
+        
+        map.station(7.2,y1+1.3,'G');
         
         // Faversham
         y1=y1+7;
@@ -413,7 +439,10 @@ var SignalAreaMap = (function () {
 
         map.path(a);
         
-        map.station(-0.2,y1-1.5,'CBW');
+        map.station(1,y1-3,'to Canterbury East');
+        
+        map.station(-0.2,y1-1.5,'J');
+        map.station(-0.2,y1+1.3,'G');
         
         map.berthr(4,y1-4,'4346');
         map.berthr(4,y1-3,'4348');
@@ -436,6 +465,8 @@ var SignalAreaMap = (function () {
         map.berthr(10.4,y1,'4326');
         map.berthl(10.4,y2,'4325');
     
+        map.station(11.2,y1+1.3,'H');
+        
         y1=y1+4;
         y2 = y1 + 1;
         a = SignalMap.down([], 0, y1);
@@ -448,6 +479,8 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a,4,y2,4.25,y1);
 
         map.path(a);
+        
+        map.station(-0.2,y1+1.3,'H');
         
         map.berthr(1,y1,'4324');
         map.berthl(1,y2,'4323');
@@ -481,6 +514,114 @@ var SignalAreaMap = (function () {
         map.berthr(10,y1,'4302');
         map.berthl(10,y2,'4303');
 
+        map.station(11.2,y1+1.3,'ZR');
+        
+        // ================================
+        // Canterbury East Line Starts Here
+        
+        y1=y1+4;
+        y2 = y1 + 1;
+        a = SignalMap.down([], 0, y1);
+        a = SignalMap.up(a, 0, y2);
+        a = SignalMap.down(a, 8, y1);
+        a = SignalMap.up(a, 8,y2);
+        a = SignalMap.line(a, 0, y1, 8, y1);
+        a = SignalMap.line(a, 0, y2, 8, y2);
+        
+        a = SignalMap.line(a,4,y2,4.25,y1);
+
+        map.path(a);
+        
+        map.station(-0.2,y1+1.3,'J');
+        
+        map.station(1,y1,'to Faversham');
+        
+        map.berthr(1,y1,'4343');
+        map.berthl(1,y2,'4354');
+        
+        map.station(2,y1,'Selling');
+        map.platform(1.5,y1-0.5,1,'','2');
+        map.platform(1.5,y2+0.5,1,'1','');
+        
+        map.berthr(3,y1,'4355');
+        map.berthl(3,y2,'4366');
+        
+        map.berthr(5,y1,'4411');
+        map.berthl(5,y2,'4404');
+        map.berthr(5,y2+1,'4417');
+        
+        map.station(6.5,y1,'Canterbury East');
+        map.platform(5.5,y1-0.5,2,'','2');
+        map.platform(5.5,y2+0.5,2,'1','');
+        map.berthl(6,y1,'4428');
+        map.berthr(7,y1,'4419');
+        map.berthl(7,y2,'4424');
+        
+        map.station(8.2,y1+1.3,'K');
+        
+        y1=y1+4;
+        y2 = y1 + 1;
+        a = SignalMap.down([], 0, y1);
+        a = SignalMap.up(a, 0, y2);
+        a = SignalMap.down(a, 11.75, y1);
+        a = SignalMap.up(a, 11.75,y2);
+        a = SignalMap.line(a, 0, y1, 11.75, y1);
+        a = SignalMap.line(a, 0, y2, 11.75, y2);
+        
+        map.path(a);
+        
+        a = SignalMap.line([], 10, y1 - 1, 10, y1 + 0.5);
+        a = SignalMap.line(a, 10, y1 + 0.5, 11.65, y1 + 0.5);
+        a = SignalMap.line(a, 11.65, y1 + 0.5, 11.65, y2 + 1);
+        map.path(a).attr({
+            fill: '#f66',
+            stroke: '#f66',
+            'stroke-dasharray': '5,5'
+        });
+        map.station(10, y1-0.5, 'EK - ZA').attr({
+            fill: '#f66'
+        });
+
+        map.station(-0.2,y1+1.3,'K');
+        
+        map.berthl(1,y2,'4432');
+        
+        map.station(2,y1,'Bekesbourne');
+        map.platform(1.5,y1-0.5,1,'','2');
+        map.platform(1.5,y2+0.5,1,'1','');
+        
+        map.station(3.5,y1,'Adisham');
+        map.platform(3,y1-0.5,1,'','2');
+        map.platform(3,y2+0.5,1,'1','');
+        map.berthr(5.5,y1,'4425');
+        map.berthl(5,y2,'4446');
+        
+        map.station(5,y1,'Aylesham');
+        map.platform(4.5,y1-0.5,1,'','2');
+        map.platform(4.5,y2+0.5,1,'1','');
+        
+        map.station(6.5,y1,'Snowdown');
+        map.platform(6,y1-0.5,1,'','2');
+        map.platform(6,y2+0.5,1,'1','');
+        
+        map.berthr(7,y1,'4455');
+        map.berthl(7,y2,'4450');
+        
+        map.station(8.5,y1,'Shepherds Well');
+        map.platform(7.5,y1-0.5,2,'','2');
+        map.platform(7.5,y2+0.5,2,'1','');
+        map.berthl(8,y1,'4454');
+        map.berthr(9,y1,'4463');
+        map.berthl(8,y2,'4452');
+        
+        map.berthl(10,y2,'4466');
+        
+        map.station(11,y1,'Kearsney');
+        map.platform(10.5,y1-0.5,1,'','2');
+        map.platform(10.5,y2+0.5,1,'1','');
+        map.berthr(11,y1,'YE35');
+        map.berthl(11,y2,'4470');
+        
     };
 
     return SignalAreaMap;
