@@ -21,8 +21,8 @@ var SignalAreaMap = (function () {
     function SignalAreaMap() {
     }
 
-    SignalAreaMap.width = 12;
-    SignalAreaMap.height = 70;
+    SignalAreaMap.width = 13;
+    SignalAreaMap.height = 47;
 
     SignalAreaMap.plot = function (map) {
         var y1,y2,a;
@@ -374,10 +374,10 @@ var SignalAreaMap = (function () {
         y2 = y1 + 1;
         a = SignalMap.down([], 0, y1);
         a = SignalMap.up(a, 0, y2);
-        a = SignalMap.down(a, 10, y1);
-        a = SignalMap.up(a, 10, y2);
-        a = SignalMap.line(a, 0, y1, 10, y1);
-        a = SignalMap.line(a, 0, y2, 10, y2);
+        a = SignalMap.down(a, 11, y1);
+        a = SignalMap.up(a, 11, y2);
+        a = SignalMap.line(a, 0, y1, 11, y1);
+        a = SignalMap.line(a, 0, y2, 11, y2);
         
         a = SignalMap.line(a, 1,y2,1.25,y1);
         
@@ -433,47 +433,53 @@ var SignalAreaMap = (function () {
         map.berthr(8,y2,'4336');
         map.berthr(8,y2+1,'4338');
 
+        map.berthr(10.4,y1,'4326');
+        map.berthl(10.4,y2,'4325');
+    
         y1=y1+4;
         y2 = y1 + 1;
         a = SignalMap.down([], 0, y1);
         a = SignalMap.up(a, 0, y2);
-        a = SignalMap.down(a, 10, y1);
-        a = SignalMap.up(a, 10, y2);
-        a = SignalMap.line(a, 0, y1, 10, y1);
-        a = SignalMap.line(a, 0, y2, 10, y2);
+        a = SignalMap.down(a, 11, y1);
+        a = SignalMap.up(a, 11,y2);
+        a = SignalMap.line(a, 0, y1, 11, y1);
+        a = SignalMap.line(a, 0, y2, 11, y2);
         
         a = SignalMap.line(a,4,y2,4.25,y1);
 
         map.path(a);
         
-        map.berthr(1,y1,'4326');
-        map.berthl(1,y2,'4325');
+        map.berthr(1,y1,'4324');
+        map.berthl(1,y2,'4323');
     
-        map.berthr(2,y1,'4324');
-        map.berthl(2,y2,'4323');
+        map.berthr(2,y1,'4322');
+        map.berthl(2.5,y2,'4321');
     
-        map.berthr(3,y1,'4322');
-        map.berthl(3.5,y2,'4321');
+        map.berthr(3,y1,'4320');
+        map.berthl(3.5,y2,'4317');
     
-        map.berthr(4,y1,'4320');
-        map.berthl(4.5,y2,'4317');
+        map.berthr(4,y1,'4316');
+        map.berthl(4.5,y2,'4315');
     
-        map.berthr(5,y1,'4316');
-        map.berthl(5.5,y2,'4315');
+        map.berthr(5,y1,'4314');
     
-        map.berthr(6,y1,'4314');
+        map.station(6,y1,'Teynham');
+        map.platform(5.5,y1-0.5,1,'','1');
+        map.platform(5.5,y2+0.5,1,'2','');
+        map.berthr(6,y1,'4312');
+        map.berthl(6,y2,'4313');
     
-        map.station(7,y1,'Teynham');
-        map.platform(6.5,y1-0.5,1,'','1');
-        map.platform(6.5,y2+0.5,1,'2','');
-        map.berthr(7,y1,'4312');
-        map.berthl(7,y2,'4313');
+        map.berthr(7,y1,'4308');
+        map.berthl(7,y2,'4311');
     
-        map.berthr(8,y1,'4308');
-        map.berthl(8,y2,'4311');
+        map.berthr(8,y1,'4306');
+        map.berthl(8,y2,'4307');
     
-        map.berthr(9,y1,'4306');
-        map.berthl(9,y2,'4307');
+        map.berthr(9,y1,'4304');
+        map.berthl(9,y2,'4305');
+    
+        map.berthr(10,y1,'4302');
+        map.berthl(10,y2,'4303');
 
     };
 
