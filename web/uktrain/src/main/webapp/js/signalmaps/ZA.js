@@ -520,6 +520,8 @@ var SignalAreaMap = (function () {
         
         // Folkestone
         map.station(1,y1,'Folkstone Central');
+        map.platform(0.5,y1-0.5,1,'','2');
+        map.platform(0.5,y2+0.5,1,'1','');
         map.berthr(1,y1,'A913');
         map.berthl(1,y2,'A915');
         
