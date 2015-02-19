@@ -973,9 +973,9 @@ var SignalAreaMap = (function () {
         map.station(9.75,y1,'Woolwich Arsenal');
         map.platform(9.25,y1-0.5,1,'','1');
         map.platform(9.25,y2+0.5,1,'2','');
-        map.berthl(9.75,y1,'L444');
+        map.berthr(9.75,y1,'L444');
         map.berthl(9.75,y2,'L441');
-        map.berthr(10.75,y2,'L439');
+        map.berthl(10.75,y2,'L439');
     };
 
     return SignalAreaMap;
