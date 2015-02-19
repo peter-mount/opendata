@@ -601,7 +601,7 @@ var SignalAreaMap = (function () {
         map.station(6,y1,'New Eltham');
         map.platform(5.5,y1-0.5,1,'','1');
         map.platform(5.5,y2+0.5,1,'2','');
-        map.berthl(6,y1,'0310');
+        map.berthr(6,y1,'0310');
         map.berthl(6,y2,'0309');
         
         map.berthr(7,y1,'0308');
@@ -610,7 +610,7 @@ var SignalAreaMap = (function () {
         map.station(8,y1,'Mottingham');
         map.platform(7.5,y1-0.5,1,'','1');
         map.platform(7.5,y2+0.5,1,'2','');
-        map.berthl(8,y1,'0306');
+        map.berthr(8,y1,'0306');
         map.berthl(8,y2,'0305');
         
         map.berthr(9,y1,'0304');
