@@ -132,7 +132,7 @@ var SignalAreaMap = (function () {
 
         for(i=1;i<10;i++) {
             map.berthr(i,y1,'0'+(619+(2*i)));
-            map.berthr(i,y2,'0'+(620+(2*i)));
+            map.berthl(i,y2,'0'+(620+(2*i)));
         }
         
         map.station(6.5,y1,'Pluckley');
