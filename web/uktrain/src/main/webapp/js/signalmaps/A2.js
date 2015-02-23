@@ -21,8 +21,8 @@ var SignalAreaMap = (function () {
     function SignalAreaMap() {
     }
 
-    SignalAreaMap.width = 18;//13
-    SignalAreaMap.height = 90;
+    SignalAreaMap.width = 18;
+    SignalAreaMap.height = 105;
 
     SignalAreaMap.plot = function (map) {
 
@@ -317,7 +317,12 @@ var SignalAreaMap = (function () {
         
         a = SignalMap.line(a, 1, y2+1, 1.25, y2+2);
         a = SignalMap.line(a, 1.5, y2+2, 1.75, y2+3);
-        a = SignalMap.line(a, 1.75, y2+3, 10, y2+3);
+        // to AD appledore
+        a = SignalMap.line(a, 1.75, y2+3, 12, y2+3);
+        a = SignalMap.line(a, 9, y2+3, 9.25, y2+4);
+        a = SignalMap.line(a, 9.25, y2+4, 12, y2+4);
+        a = SignalMap.down(a,12,y2+3);
+        a = SignalMap.up(a,12,y2+4);
         
         a = SignalMap.line(a, 3, y2, 3.25, y1);
         a = SignalMap.line(a, 3, y2+1, 3.25, y2+2);
@@ -330,8 +335,7 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a, 7.25, y2+2, 7.5, y2+1);
         a = SignalMap.line(a, 7.75, y2+1, 8, y2);
         a = SignalMap.line(a, 8.25, y2, 9, y1-2);
-        
-        
+                
         // Up Sidings
         a = SignalMap.line(a,6,y2+3,6.5,y2+5);
         a = SignalMap.line(a,6.25,y2+4,8,y2+4);
@@ -392,6 +396,12 @@ var SignalAreaMap = (function () {
         map.station(10.2,y1-1.7,'G');
         map.station(10.2,y1+0.3,'H');
         map.station(10.2,y2+2.3,'H');
+        
+        map.berthr(10,y2+3,'0891');
+        map.berthr(10,y2+4,'0892');
+        map.berthr(11,y2+3,'0893');
+        map.station(12.2,y2+4.3,'AD');
+        map.station(13,y2+4.3,'to Appledore');
         
         y1=y1+9;
         y2=y1+1;
@@ -692,6 +702,9 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a,5.5,y2+1,7,y2+1);
         
         map.path(a);
+        
+        map.station(-0.2,y1+1.3,'M');
+        
         map.station(1.5,y1-4,'to Dollands Moor\nWest Jn (CTRL)');
         map.station(0.5,y1-3.2,'CT');
         map.berthr(1.5,y1-4,'471C');
@@ -812,18 +825,116 @@ var SignalAreaMap = (function () {
         i+=2.25;
         map.berthl(i,y2,'0918');
         map.station(i+0.8,y1+1.3,'ZA');
+
+        // CT
+        y1=y1+5;
+        y2=y1+1;
+        a = SignalMap.line([],0,y1-1,2,y1-1);
+        a = SignalMap.buffer(a,2,y1-1);
+        a = SignalMap.line(a,1,y1-1,1.25,y1);
+        a = SignalMap.line(a,1.5,y1-1,1.75,y1);
+        a = SignalMap.line(a,1.5,y1,1.75,y2);
+        a = SignalMap.line(a,0,y1,14.5,y1);
+        a = SignalMap.line(a,0,y2,8,y2);
+        a = SignalMap.line(a,7.25,y2,7.5,y1);
+        a = SignalMap.line(a,7.5,y2,7.75,y2+1);
+        a = SignalMap.buffer(a,8,y2);
+
+        a = SignalMap.line(a,8.25,y2+1,8.75,y1);
+        a = SignalMap.line(a,10.25,y1,10.75,y2+1);
+        a = SignalMap.line(a,12.25,y2+1,12.75,y1);
         
-//        a = SignalMap.line([], 1.5, y1 - 1, 1.5, y1 + 0.5);
-//        a = SignalMap.line(a, 1.5, y1 + 0.5, 4, y1 + 0.5);
-//        a = SignalMap.line(a, 4, y1 + 0.5, 4, y2 + 1);
-//        map.path(a).attr({
-//            fill: '#f66',
-//            stroke: '#f66',
-//            'stroke-dasharray': '5,5'
-//        });
-//        map.station(1.5, y1-0.5, 'AD - TE').attr({
-//            fill: '#f66'
-//        });
+        // to CT
+        a=SignalMap.line(a,0,y1-2,4.25,y1-2);
+        a=SignalMap.line(a,4.25,y1-2,4.75,y1);
+        a=SignalMap.line(a,0,y2+1,14.5,y2+1);
+        a=SignalMap.line(a,4.75,y2,5,y2+1);
+        
+        map.path(a);
+        map.station(-0.2,y1-1.2,'CT');
+        map.station(-0.2,y1-0.2,'N');
+        map.station(-0.2,y1+0.8,'P');
+        map.station(-0.2,y1+1.8,'P');
+        map.station(-0.2,y1+2.8,'CT');
+        
+        map.berthl(3,y1,'0832');
+        map.berthr(4,y1,'363C');
+        map.berthl(3,y2,'0830');
+        map.berthr(4,y2,'365C');
+
+        map.berthl(6,y1,'366C');
+        map.berthl(6,y2,'364C');
+        map.berthl(6,y2+1,'362C');
+
+        map.berthl(9.5,y1,'ET04');
+        map.berthl(9.5,y2+1,'ET05');
+        map.berthl(11.5,y1,'ET50');
+        map.berthl(11.5,y2+1,'ET09');
+        map.berthl(13.5,y1,'ET50');
+        map.berthl(13.5,y2+1,'ET09');
+        
+        map.station(14.7,y1+0.8,'R');
+        map.station(14.7,y1+2.8,'R');
+        
+        y1=y1+5;
+        y2=y1+1;
+        a = SignalMap.line([],0,y1,9.25,y1);
+        a = SignalMap.line(a,0,y2,9.25,y2);
+        a = SignalMap.line(a,0.25,y2,0.5,y1);
+        
+        map.path(a);
+        map.station(-0.2,y1+1.4,'R');
+        map.berthl(1.5,y1,'ET06');
+        map.berthl(1.5,y2,'ET11');
+        map.berthl(2.5,y2,'ET13');
+        
+        map.berthl(3.5,y1,'ET08');
+        map.berthl(3.5,y2,'ET15');
+        map.berthl(4.5,y2,'ET17');
+        
+        map.berthl(5.5,y1,'ET10');
+        map.berthl(5.5,y2,'ET19');
+        map.berthl(6.5,y2,'ET21');
+        
+        map.berthl(7.5,y1,'ET12');
+        map.berthl(7.5,y2,'ET23');
+        map.berthl(8.5,y2,'ET25');
+        
+        map.station(9.7,y1+1.4,'S');
+        
+        y1=y1+3;
+        y2=y1+1;
+        a = SignalMap.line([],0,y1,14,y1);
+        a = SignalMap.line(a,0,y2,14,y2);
+        // uk X
+        a = SignalMap.line(a,0.5,y1,0.75,y2);
+        a = SignalMap.line(a,0.5,y2,0.75,y1);
+        // french X
+        a = SignalMap.line(a,13.5,y1,13.75,y2);
+        a = SignalMap.line(a,13.5,y2,13.75,y1);
+        
+        map.path(a);
+        map.station(-0.2,y1+1.4,'S');
+        map.station(0.75,y1,'UK Crossover');
+        map.station(6,y1,'Approach berths');
+        for(i=4;i<=15;i++) {
+            map.berth(i-2.5,y1,'S'+(200+i));
+            map.berth(i-2.5,y2,'S'+(100+i));
+        }
+        map.station(13.5,y1,'French Crossover');
+        map.station(14.2,y1+1.4,'T');
+        
+        y1=y1+3;
+        y2=y1+1;
+        a = SignalMap.line([],0,y1,12.75,y1);
+        a = SignalMap.line(a,0,y2,12.75,y2);
+        map.path(a);
+        map.station(-0.2,y1+1.4,'T');
+        for(i=4;i<=15;i++) {
+            map.berth(i-3.25,y1,'S'+(400+i));
+            map.berth(i-3.25,y2,'S'+(300+i));
+        }
+        map.station(13,y1+1.4,'SNCF');
     };
 
     return SignalAreaMap;
