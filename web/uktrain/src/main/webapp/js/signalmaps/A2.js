@@ -763,6 +763,55 @@ var SignalAreaMap = (function () {
         map.berthl(13,y2,'0822');
         map.station(14.2,y2+0.4,'P');
         map.station(7.2,y2+2.4,'Q');
+
+        // Folkestone
+        y1=y1+5;
+        y2=y1+1;
+        a = SignalMap.line([],0,y1,14,y1);
+        a = SignalMap.line(a,0,y2,14,y2);
+        a = SignalMap.down(a,14,y1);
+        a=SignalMap.up(a,14,y2);
+        map.path(a);
+        map.station(-0.2,y1+1.3,'Q');
+
+        i=1;
+        map.berthl(i,y1,'0762');
+        map.berthr(i+1,y1,'0761');
+        map.berthl(i,y2,'0760');
+        map.berthr(i+1,y2,'0763');
+        
+        i+=2.5;
+        map.berthl(i,y1,'0904');
+        map.berthr(i+1,y1,'0901');
+        map.berthl(i,y2,'0902');
+        map.berthr(i+1,y2,'0903');
+        
+        i+=2.5;
+        map.berthl(i,y1,'0908');
+        map.berthr(i+1,y1,'0905');
+        map.berthl(i,y2,'0906');
+        map.berthr(i+1,y2,'0907');
+        
+        i+=2.5;
+        map.station(i+0.5,y1,'Folkstone West');
+        map.platform(i-0.5,y1-0.5,2,'','2');
+        map.platform(i-0.5,y2+0.5,2,'1','');
+        map.berthl(i,y1,'0912');
+        map.berthr(i+1,y1,'0909');
+        map.berthl(i,y2,'0910');
+        map.berthr(i+1,y2,'0911');
+        
+        i+=2.5;
+        map.station(i+0.5,y1,'Folkstone Central');
+        map.platform(i-0.5,y1+0.5,2,'B','A');
+        map.berthl(i,y1,'0916');
+        map.berthr(i+1,y1,'0913');
+        map.berthl(i,y2,'0914');
+        map.berthr(i+1,y2,'0915');
+        
+        i+=2.25;
+        map.berthl(i,y2,'0918');
+        map.station(i+0.8,y1+1.3,'ZA');
         
 //        a = SignalMap.line([], 1.5, y1 - 1, 1.5, y1 + 0.5);
 //        a = SignalMap.line(a, 1.5, y1 + 0.5, 4, y1 + 0.5);
