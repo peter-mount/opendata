@@ -398,7 +398,7 @@ var SignalAreaMap = (function () {
         map.station(10.2,y2+2.3,'H');
         
         map.berthr(10,y2+3,'0891');
-        map.berthr(10,y2+4,'0892');
+        map.berthl(10,y2+4,'0892');
         map.berthr(11,y2+3,'0893');
         map.station(12.2,y2+4.3,'AD');
         map.station(13,y2+4.3,'to Appledore');
@@ -602,9 +602,9 @@ var SignalAreaMap = (function () {
         
         i+=2.4;
         map.berthl(i,y1,'0750');
-        map.berthl(i,y2,'0752');
-        map.berthr(i+1,y1,'0751');
-        map.berthr(i+1,y2,'0753');
+        map.berthl(i,y2,'0748');
+        map.berthr(i+1,y1,'0747');
+        map.berthr(i+1,y2,'0749');
         
         i+=2.4;
         map.station(i+0.5,y1,'Sandling');
@@ -769,9 +769,9 @@ var SignalAreaMap = (function () {
         map.station(14.5,y1-4.5,'Dollands Moor L.H.S.');
         map.berthl(12.5,y1-7,'2166');
         map.berthl(14,y1-7,'2160');
-        map.berthl(15,y1-7,'SPR1');
+        map.berth(15,y1-7,'SPR1');
         map.berthl(14,y1-6,'2162');
-        map.berthl(15,y1-6,'SPR2');
+        map.berth(15,y1-6,'SPR2');
         
         map.berthl(13,y2,'0822');
         map.station(14.2,y2+0.4,'P');
