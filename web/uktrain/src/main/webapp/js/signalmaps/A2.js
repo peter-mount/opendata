@@ -21,7 +21,7 @@ var SignalAreaMap = (function () {
     function SignalAreaMap() {
     }
 
-    SignalAreaMap.width = 13;
+    SignalAreaMap.width = 18;//13
     SignalAreaMap.height = 90;
 
     SignalAreaMap.plot = function (map) {
@@ -612,33 +612,84 @@ var SignalAreaMap = (function () {
         map.berthr(i+1,y2,'0757');
         
         // Dollands Moor
-        y1=y1+11;
+        y1=y1+14;
         y2=y1+1;
-        a = SignalMap.line([],0,y1,10,y1);
-        a = SignalMap.line(a,0,y2,10,y2);
+        a = SignalMap.line([],0,y1,14,y1);
+        a = SignalMap.line(a,0,y2,14,y2);
         a = SignalMap.line(a,0.5,y2,0.75,y1);
         
-        a = SignalMap.line(a,3.25,y1-2,4.75,y1-8);
-        a = SignalMap.line(a,3.75,y1-1,5,y1-6);
+        a = SignalMap.line(a,3.25,y1-2,5,y1-9);
+        a = SignalMap.line(a,3.75,y1-1,5.25,y1-7);
         
-        a = SignalMap.line(a,4.75,y1-8,10,y1-8);
-        a = SignalMap.line(a,4.5,y1-7,10,y1-7);
-        a = SignalMap.line(a,5,y1-6,10,y1-6);
+        a = SignalMap.buffer(a,8,y1-11);
+        a = SignalMap.line(a,8,y1-11,9.5,y1-11);
+        a = SignalMap.line(a,9.5,y1-11,10,y1-10);
+        
+        a = SignalMap.line(a,6.75,y1-9,7,y1-10);
+        a = SignalMap.line(a,7,y1-10,10.25,y1-10);
+        a = SignalMap.line(a,10.25,y1-10,10.5,y1-9);
+        
+        
+        a = SignalMap.line(a,5,y1-9,16,y1-9);
+        
+        a = SignalMap.line(a,4.75,y1-8,11.5,y1-8);
+        a = SignalMap.line(a,11.5,y1-8,11.75,y1-9);
+        
+        a = SignalMap.buffer(a,15.5,y1-7);
+        a = SignalMap.line(a,5.25,y1-7,15.5,y1-7);
+        a = SignalMap.line(a,5,y1-6,11.5,y1-6);
+        
+        a = SignalMap.line(a,11.5,y1-6,11.75,y1-7);
         
         a = SignalMap.line(a,1,y1,1.5,y1-2);
         a = SignalMap.line(a,1.5,y1-2,3.25,y1-2);
         a = SignalMap.line(a,0.75,y1-4,3.75,y1-4);
         
-        SignalMap.buffer(a,1.75,y1-3);
+        a=SignalMap.buffer(a,1.75,y1-3);
         a = SignalMap.line(a,1.75,y1-3,3.5,y1-3);
         
-        SignalMap.buffer(a,1.25,y1-1);
+        a=SignalMap.buffer(a,1.5,y1-1);
         a = SignalMap.line(a,1.5,y1-1,3.75,y1-1);
         a = SignalMap.line(a,3.5,y2,3.75,y1);
         
         // to 2150
-        a = SignalMap.line(a,5,y1-4,10,y1-4);
-        a = SignalMap.line(a,4.75,y1-3,10,y1-3);
+        a = SignalMap.line(a,5.25,y1-5,11.5,y1-5);
+        a = SignalMap.line(a,11.5,y1-5,12,y1-3);
+        
+        a = SignalMap.line(a,5,y1-4,7.75,y1-4);
+        a = SignalMap.line(a,7.75,y1-4,8,y1-5);
+        a = SignalMap.line(a,10.5,y1-4,11.75,y1-4);
+        
+        a = SignalMap.line(a,4.5,y1-2,5.25,y1-5);
+
+        // to 0796
+        a = SignalMap.line(a,4,y1-2,12,y1-2);
+        // to 0804
+        a = SignalMap.line(a,4.75,y1-2,5,y1-3);
+        a = SignalMap.line(a,5,y1-3,12,y1-3);
+        a = SignalMap.line(a,12,y1-3,12.75,y1-6);
+        a = SignalMap.line(a,12.75,y1-6,15.5,y1-6);
+        a = SignalMap.buffer(a,15.5,y1-6);
+        a = SignalMap.line(a,11.5,y1-3,11.75,y1-2);
+        
+        a = SignalMap.line(a,13.25,y1-7,13.75,y1-9);
+        a = SignalMap.line(a,13.125,y1-6,13.325,y1-7);
+        a = SignalMap.line(a,13.125,y1-7,13.325,y1-6);
+        
+        a = SignalMap.line(a,11.25,y1-1,11.5,y1-2);
+        a = SignalMap.line(a,12,y1-2,12.25,y1-1);
+        a = SignalMap.line(a,12.5,y1-1,12.75,y1);
+        
+        // to 0796
+        a = SignalMap.line(a,4.25,y1,4.5,y1-1);
+        a = SignalMap.line(a,4.5,y1-1,12.5,y1-1);
+        a = SignalMap.line(a,5,y1-1,5.25,y1-2);
+
+        // to Folkstone
+        a = SignalMap.line(a,5,y2,5.5,y2+2);
+        a = SignalMap.line(a,5.5,y2+2,7,y2+2);
+        a = SignalMap.line(a,5,y1,5.5,y2+1);
+        a = SignalMap.line(a,5.5,y2+1,7,y2+1);
         
         map.path(a);
         map.station(1.5,y1-4,'to Dollands Moor\nWest Jn (CTRL)');
@@ -650,15 +701,68 @@ var SignalAreaMap = (function () {
         map.berth(2,y1-1,'SPUR');
         map.berthr(3,y1-1,'2153');
         
-        map.berthl(5.75,y1-8,'0818');
-        map.berthl(5.75,y1-7,'0816');
-        map.berthl(5.75,y1-6,'0814');
-        map.berthl(5.75,y1-5,'0808');
+        map.berthl(6,y1-9,'0818');
+        map.berthl(6,y1-8,'0816');
+        map.berthl(6,y1-7,'0814');
+        map.berthl(6,y1-6,'0808');
         
-        map.berthl(5.75,y1-4,'2150');
-        map.berthr(6.75,y1-4,'2155');
-        map.berthl(5.75,y1-3,'2146');
-        map.berthr(6.75,y1-3,'2147');
+        map.berthl(6,y1-5,'2150');
+        map.berthr(7,y1-5,'2155');
+        map.berthl(8.75,y1-5,'2152');
+        map.berthr(10.5,y1-5,'2167');
+        map.berthl(6,y1-4,'2146');
+        map.berthr(7,y1-4,'2147');
+        
+        map.berth(8.75,y1-11,'2161');
+        map.berthl(7.75,y1-10,'2156');
+        map.berthr(8.75,y1-10,'2163');
+        
+        map.berthl(7.75,y1-9,'2154');
+        map.berth(8.75,y1-9,'SDG6');
+        map.berthr(9.75,y1-9,'2165');
+        map.berthr(11,y1-9,'0795');
+
+        map.berth(8.75,y1-8,'SDG5');
+        map.berthr(10.5,y1-8,'0797');
+
+        map.berth(8.75,y1-7,'SDG4');
+        map.berthr(10.5,y1-7,'0799');
+        
+        map.berth(8.75,y1-6,'SDG3');
+        map.berthr(10.5,y1-6,'0803');
+        
+        map.station(9,y1-3,'Dollands Moor Sidings');
+        map.berth(10.5,y1-4,'2171');
+
+        map.berthl(7,y1-3,'0804');
+        map.berth(8.75,y1-3,'SDG2');
+        map.berthr(10.5,y1-3,'0807');
+
+        map.berthl(7,y1-2,'0798');
+        map.berth(8.75,y1-2,'SDG1');
+        map.berthr(10.5,y1-2,'0809');
+
+        map.berthl(7,y1-1,'0796');
+        map.berth(8.75,y1-1,'THRU');
+        map.berthr(10.5,y1-1,'0813');
+
+        map.berthl(7,y1,'0794');
+        map.berthl(7,y2,'0792');
+
+        map.berthl(12.5,y1-9,'2158');
+        map.berthl(15,y1-9,'2164');
+        map.station(16.2,y1-8.2,'N');
+        
+        map.station(14.5,y1-4.5,'Dollands Moor L.H.S.');
+        map.berthl(12.5,y1-7,'2166');
+        map.berthl(14,y1-7,'2160');
+        map.berthl(15,y1-7,'SPR1');
+        map.berthl(14,y1-6,'2162');
+        map.berthl(15,y1-6,'SPR2');
+        
+        map.berthl(13,y2,'0822');
+        map.station(14.2,y2+0.4,'P');
+        map.station(7.2,y2+2.4,'Q');
         
 //        a = SignalMap.line([], 1.5, y1 - 1, 1.5, y1 + 0.5);
 //        a = SignalMap.line(a, 1.5, y1 + 0.5, 4, y1 + 0.5);
