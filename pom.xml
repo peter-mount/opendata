@@ -12,10 +12,11 @@
         <module>applications</module>
         <module>brokers</module>
         <module>core</module>
-        <module>nrod</module>
-        <module>web</module>
         <module>gis</module>
+        <module>nrod</module>
         <module>ogl</module>
+        <module>osgb</module>
+        <module>web</module>
     </modules>
     
     <properties>
