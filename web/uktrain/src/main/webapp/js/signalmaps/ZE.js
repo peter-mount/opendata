@@ -169,9 +169,11 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a,8,y2,8.25,y1);
         map.path(a);
         
-        map.station(-0.2, y1 - 0.7, 'C');
+        map.station(-0.2, y1 - 0.7, 'A');
         map.station(1,y1-2,'to Bexhill');
-        map.berthr(1,y1-2,'DB20');
+        
+        // DB20 is on map but appears to be old bexhill not new panel
+        //map.berthr(1,y1-2,'DB20');
         
         map.station(-0.2, y1 + 1.3, 'D');
         map.station(1,y2+2,'to Polegate');
