@@ -288,7 +288,7 @@ var SignalAreaMap = (function () {
         map.berthr(1,y1,'5114');
         map.berthl(1,y2,'5101');
         
-        map.station(2.5,y1,'Westgate-on-Sea');
+        map.station(2.5,y1,'Birchington-on-Sea');
         map.platform(2,y1-0.5,1,'','1');
         map.platform(2,y2+0.5,1,'2','');
         map.berthr(2.5,y1,'5112');
