@@ -5,9 +5,9 @@
  */
 package uk.trainwatch.ogl.naptan;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import javax.xml.bind.annotation.XmlRootElement;
 import uk.trainwatch.util.sql.SQL;
 import uk.trainwatch.util.sql.SQLResultSetHandler;
 
@@ -15,6 +15,7 @@ import uk.trainwatch.util.sql.SQLResultSetHandler;
  *
  * @author peter
  */
+@XmlRootElement
 public class RailReference
 {
 
@@ -157,10 +158,10 @@ public class RailReference
         }
         final RailReference other = (RailReference) obj;
         return this.id == other.id
-                || Objects.equals( this.atcoCode, other.atcoCode )
-                || Objects.equals( this.tiplocCode, other.tiplocCode )
-                || Objects.equals( this.crsCode, other.crsCode )
-                || Objects.equals( this.stationName, other.stationName );
+               || Objects.equals( this.atcoCode, other.atcoCode )
+               || Objects.equals( this.tiplocCode, other.tiplocCode )
+               || Objects.equals( this.crsCode, other.crsCode )
+               || Objects.equals( this.stationName, other.stationName );
     }
 
 }

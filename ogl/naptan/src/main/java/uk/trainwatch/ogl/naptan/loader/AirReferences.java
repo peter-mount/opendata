@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.commons.csv.CSVRecord;
 import uk.trainwatch.ogl.naptan.AirReference;
 import uk.trainwatch.util.TimeUtils;
@@ -21,21 +22,22 @@ import uk.trainwatch.util.sql.SQLConsumer;
  *
  * @author peter
  */
-class AirReferences
+@XmlRootElement
+public class AirReferences
         extends BaseImporter<AirReference>
 {
 
     private static final String INSERT_SQL
-            = "INSERT INTO " + SCHEMA + ".naptan_air ("
-            + "atcoCode, iataCode,"
-            + "Name, NameLang,"
-            + "creationdt,modificationdt,"
-            + "revisionNumber,modification"
-            + ") VALUES ("
-            + "?,?,"
-            + "?,?,"
-            + "?,?,"
-            + "?,?)";
+                                = "INSERT INTO " + SCHEMA + ".naptan_air ("
+                                  + "atcoCode, iataCode,"
+                                  + "Name, NameLang,"
+                                  + "creationdt,modificationdt,"
+                                  + "revisionNumber,modification"
+                                  + ") VALUES ("
+                                  + "?,?,"
+                                  + "?,?,"
+                                  + "?,?,"
+                                  + "?,?)";
 
     public AirReferences( Path path )
     {
