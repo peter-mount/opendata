@@ -18,9 +18,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -43,7 +44,7 @@ public class CodePointImport
         extends DBUtility {
 
     private static final Logger LOG = Logger.getLogger(CodePointImport.class.getName());
-    private static final String SCHEMA = "reference";
+    private static final String SCHEMA = "gis";
 
     private static final String CP_SQL = "INSERT INTO " + SCHEMA + ".codepoint "
             + "(postcode,pqi,eastings,northings,country,county,district,ward,nhsregion,nhsha)"
@@ -52,24 +53,25 @@ public class CodePointImport
     private Consumer<Path> consumer;
     private List<Path> cifFiles;
     private int lineCount;
-    private boolean codes;
     private File codeFile;
+    private File nhsCodeFile;
 
     private Map<String, Integer> codeLookup = new HashMap<>();
+    private Map<String, Integer> nhsLookup = new HashMap<>();
 
     public CodePointImport() {
         super();
-        getOptions().addOption("codes", "c", true, "Import codes from file");
+        getOptions().
+                addOption("codes", "c", true, "Import codes from file").
+                addOption("nhs", "n", true, "Import nhs codes from file");
     }
 
     @Override
     public boolean parseArgs(CommandLine cmd) {
         super.parseArgs(cmd);
 
-        codes = cmd.hasOption('c');
-        if (codes) {
-            codeFile = new File(cmd.getOptionValue('c'));
-        }
+        codeFile = new File(cmd.getOptionValue('c'));
+        nhsCodeFile = new File(cmd.getOptionValue('n'));
 
         cifFiles = Utility.getArgFileList(cmd);
 
@@ -93,35 +95,53 @@ public class CodePointImport
 
         lineCount = 0;
 
-        try (CSVParser p = new CSVParser(new FileReader(codeFile), CSVFormat.EXCEL)) {
-            if (codes) {
-                SQL.deleteIdTable(con, SCHEMA, "codepoint_code");
+        SQL.deleteIdTable(con, SCHEMA, "codepoint_code");
 
-                LOG.log(Level.INFO, () -> "Importing " + codeFile + " into code table");
-                con.setAutoCommit(false);
+        LOG.log(Level.INFO, () -> "Importing " + codeFile + " into code table");
+        con.setAutoCommit(false);
 
-                try (Statement s = con.createStatement()) {
-                    s.executeUpdate("INSERT INTO " + SCHEMA + ".codepoint_code VALUES (0,'','')");
-                }
-
-                try (PreparedStatement ps = con.prepareStatement("INSERT INTO " + SCHEMA + ".codepoint_code (code,name) VALUES(?,?)")) {
-
-                    p.getRecords().forEach(SQLConsumer.guard(r -> SQL.executeUpdate(ps, r.get(1), r.get(0))));
-                    con.commit();
-                    LOG.log(Level.INFO, () -> "Imported " + p.getRecordNumber() + " entries into code table");
-                } catch (SQLException ex) {
-                    con.rollback();
-                    throw new UncheckedSQLException(ex);
-                }
-            }
-        } catch (IOException ex) {
-            throw new UncheckedIOException(ex);
-        }
+        importCode(con, "codepoint_code", r -> r.get(1), r -> r.get(0), codeFile);
+        importCode(con, "codepoint_nhs", r -> r.get(0), r -> r.get(1), nhsCodeFile);
 
         try (Statement s = con.createStatement()) {
             LOG.log(Level.INFO, "Loading lookup table");
             codeLookup = SQL.stream(s.executeQuery("SELECT code,id FROM " + SCHEMA + ".codepoint_code"), rs -> new KeyValue<>(rs.getString(1), rs.getInt(2))).
                     collect(KeyValue.toMap());
+
+            nhsLookup = SQL.stream(s.executeQuery("SELECT code,id FROM " + SCHEMA + ".codepoint_nhs"), rs -> new KeyValue<>(rs.getString(1), rs.getInt(2))).
+                    collect(KeyValue.toMap());
+        }
+    }
+
+    private void importCode(Connection con,
+            String table,
+            Function<CSVRecord, String> code,
+            Function<CSVRecord, String> name,
+            File file) throws SQLException {
+
+        try (CSVParser p = new CSVParser(new FileReader(file), CSVFormat.EXCEL)) {
+            LOG.log(Level.INFO, () -> "Clearing down " + table);
+
+            SQL.deleteIdTable(con, SCHEMA, table);
+            try (Statement s = con.createStatement()) {
+                s.executeUpdate("INSERT INTO " + SCHEMA + "." + table + " VALUES (0,'','')");
+            }
+
+            try (PreparedStatement ps = con.prepareStatement("INSERT INTO " + SCHEMA + "." + table + " (code,name) VALUES(?,?)")) {
+
+                p.getRecords().forEach(
+                        SQLConsumer.guard(r -> SQL.executeUpdate(ps, code.apply(r), name.apply(r)))
+                );
+
+                con.commit();
+
+                LOG.log(Level.INFO, () -> "Imported " + p.getRecordNumber() + " entries into code table");
+            }
+        } catch (SQLException ex) {
+            con.rollback();
+            throw new UncheckedSQLException(ex);
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
         }
     }
 
@@ -152,8 +172,8 @@ public class CodePointImport
                                         codeLookup.getOrDefault(pc.getCounty(), 0),
                                         codeLookup.getOrDefault(pc.getDistrict(), 0),
                                         codeLookup.getOrDefault(pc.getWard(), 0),
-                                        codeLookup.getOrDefault(pc.getNhsRegion(), 0),
-                                        codeLookup.getOrDefault(pc.getNhs(), 0)
+                                        nhsLookup.getOrDefault(pc.getNhsRegion(), 0),
+                                        nhsLookup.getOrDefault(pc.getNhs(), 0)
                                 );
                             }));
                 }
