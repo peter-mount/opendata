@@ -24,7 +24,7 @@ var SignalAreaMap = (function () {
     }
 
     SignalAreaMap.width = 15;
-    SignalAreaMap.height = 65;
+    SignalAreaMap.height = 100;
 
     SignalAreaMap.update = function(map, y1){
         var a = SignalMap.line([], 0, y1, 13, y1);
@@ -480,8 +480,153 @@ var SignalAreaMap = (function () {
         
         map.station(-0.2, y2 + 0.3, "J");
         
+        map.berthl(1,y1,'754C');
+        map.berthl(1,y2,'854C');
         
-        y1 = y1 + 3;
+        map.berthr(2,y1,'757C');
+        map.berthl(3,y2,'756C');
+        
+        map.berthr(6,y1,'121C');
+        map.berthr(6,y2,'123C');
+        
+        map.berthl(8,y1,'118C');
+        map.berthl(8,y2,'116C');
+        map.berthr(9,y1,'531C');
+        map.berthr(9,y2,'533C');
+        
+        map.station(11.2, y2 + 0.3, "K");
+        
+        // Ebbsfleet Intl
+        y1=y1+3;
+        y2=y1+6;
+        a = SignalMap.line([],0,y1,10,y1);
+        a = SignalMap.line(a,1,y1,1.25,y1+1);
+        a = SignalMap.line(a,1.25,y1+1,10,y1+1);
+        a = SignalMap.line(a,1.5,y1+1,2,y1+3);
+        a = SignalMap.line(a,3,y1+3,3.5,y1+1);
+
+        // to Gravesend?
+        a = SignalMap.line(a,3.75,y1+1,4,y1+2);
+        a = SignalMap.line(a,4,y1+2,6.75,y1+2);
+        a = SignalMap.line(a,1.5,y1+3,6.75,y1+3);
+        a = SignalMap.line(a,6.25,y1+2,6.5,y1+3);
+        
+        a = SignalMap.line(a,3.5,y1+3,3.75,y1+4);
+        a = SignalMap.line(a,3.75,y1+4,10,y1+4);
+        
+        a = SignalMap.line(a,7,y1+4,7.25,y1+5);
+        
+        a = SignalMap.line(a,3.5,y2,3.75,y1+5);
+        a = SignalMap.line(a,3.75,y1+5,10,y1+5);
+        
+        a = SignalMap.line(a,0,y2,10,y2);
+        a = SignalMap.line(a,1,y2,1.5,y1+3);
+        
+        a = SignalMap.line(a,7,y1+1,7.5,y1+3);
+        a = SignalMap.line(a,7.5,y1+3,10,y1+3);
+        a = SignalMap.line(a,9,y1+4,9.25,y1+3);
+        
+        map.path(a);
+        
+        map.station(-0.2, y1 + 0.8, "K");
+        map.station(-0.2, y2 + 0.8, "K");
+        
+        map.berthr(2.5,y1+1,'127C');
+        
+        map.berthl(5,y1+2,'130C');
+        map.berthl(5,y1+3,'126C');
+        map.berthl(5,y1+4,'124C');
+        map.berthl(5,y1+5,'122C');
+        map.berthl(5,y1+6,'120C');
+        
+        map.berthr(6,y1+4,'137C');
+        map.berthr(6,y1+5,'139C');
+        
+        map.berthr(8.5,y1+3,'151C');
+        map.berthr(8,y1+5,'857C');
+        map.berthr(9,y1+1,'759C');
+        
+        map.station(6.8, y1+  3.3, "L1");
+        map.station(10.2, y1+  1.3, "L2");
+        map.station(10.2, y1+  4.3, "L3");
+        map.station(10.2, y1+  6.3, "L4");
+        
+        y1=y1+8;
+        a = SignalMap.line([],0,y1,9,y1);
+        a = SignalMap.line(a,0,y1+1,9,y1+1);
+        a = SignalMap.down(a,9,y1);
+        a = SignalMap.up(a,9,y1+1);
+        a = SignalMap.line(a,3.75,y1,4,y1+1);
+        a = SignalMap.line(a,3.75,y1+1,4,y1);
+        
+        a = SignalMap.line(a,0,y1+2,5,y1+2);
+        a = SignalMap.line(a,0,y1+3,4.5,y1+3);
+        a = SignalMap.line(a,4.5,y1+3,4.75,y1+2);
+        a = SignalMap.line(a,5,y1+2,6,y1+6);
+        a = SignalMap.line(a,6,y1+6,8.5,y1+6);
+        
+        a = SignalMap.line(a,0,y1+4,4,y1+4);
+        a = SignalMap.line(a,0,y1+5,4.75,y1+5);
+        a = SignalMap.line(a,0,y1+6,5,y1+6);
+        a = SignalMap.line(a,0,y1+7,8.5,y1+7);
+        a = SignalMap.line(a,4,y1+4,4.25,y1+3);
+        a = SignalMap.line(a,4.125,y1+3.5,4.375,y1+3.5);
+        a = SignalMap.line(a,4.375,y1+3.5,5.25,y1+7);
+        a = SignalMap.line(a,6.25,y1+6,6.5,y1+7);
+        map.path(a);
+                
+        a = SignalMap.line([], 7, y1 - 1, 7, y1 + 2);
+        map.path(a).attr({
+            fill: '#f66',
+            stroke: '#f66',
+            'stroke-dasharray': '5,5'
+        });
+        map.station(7, y1-0.5, 'CT - NK').attr({
+            fill: '#f66'
+        });
+        map.station(9.2, y1+  1.3, "to Gravesend").attr({
+            fill: '#f66'
+        });
+
+        map.station(2.5,y1,'Ebbsfleet Intl');
+        map.station(-0.2, y1+  1.3, "L1");
+        map.berthl(2,y1,'152C');
+        map.berthr(3,y1,'133C');
+        map.berthr(6,y1,'181C');
+        map.berthr(8,y1,'N477');
+        
+        map.berthl(2,y1+1,'150C');
+        map.berthr(3,y1+1,'135C');
+        map.berthl(5,y1+1,'182C');
+        map.berthr(6,y1+1,'183C');
+        map.berthl(8,y1+1,'0430');
+        
+        map.station(-0.2, y1+  3.3, "L2");
+        map.berthl(2,y1+2,'148C');
+        map.berthr(3,y1+2,'161C');
+        
+        map.berthl(2,y1+3,'146C');
+        map.berthr(3,y1+3,'163C');
+        
+        map.station(-0.2, y1+  5.3, "L3");
+        map.berthl(2,y1+4,'144C');
+        map.berthr(3,y1+4,'165C');
+        
+        map.berthl(2,y1+5,'142C');
+        map.berthr(3,y1+5,'167C');
+        
+        map.station(-0.2, y1+  7.3, "L4");
+        map.berthl(2,y1+6,'140C');
+        map.berthr(3,y1+6,'169C');
+        
+        map.berthr(3,y1+7,'171C');
+        
+        map.berthl(7.5,y1+6,'174C');
+        map.berthl(7.5,y1+7,'172C');
+        
+        map.station(8.7, y1+  7.3, "M");
+        
+        y1 = y1 + 3+6;
         y1=SignalAreaMap.update(map,y1);
 //        //======================================
 //        y1 = y1 + 3+3;
