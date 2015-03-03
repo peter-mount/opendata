@@ -246,5 +246,27 @@ var SignalMap = (function () {
         }, 10000);
     };
 
+    SignalMap.updateNotice = function(map) {
+        map.station(7, 0, 'This signal map is currently being updated with new information.\nSome berths may be in error whilst updates are being made').attr({
+            fill: '#f66'
+        });
+    };
+
+    SignalMap.update = function(map, y1){
+        var a = SignalMap.line([], 0, y1, 13, y1);
+        map.path(a).attr({
+            fill: '#f66',
+            stroke: '#f66',
+            'stroke-dasharray': '5,5'
+        });
+        map.station(6, y1+0.5, 'Above this line has been updated').attr({
+            fill: '#f66'
+        });
+        map.station(6, y1+1.25, 'Below this line pending updates').attr({
+            fill: '#f66'
+        });
+        return y1+2;
+    };
+
     return SignalMap;
 })();
