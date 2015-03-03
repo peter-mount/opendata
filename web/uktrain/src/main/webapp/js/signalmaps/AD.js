@@ -924,6 +924,9 @@ var SignalAreaMap = (function () {
         map.berthr(3, y1, '0215');
         map.berthl(3, y2, '0214');
 
+        map.station(4,y1,'Marden');
+        map.platform(3.5,y1-0.5,1,'','2');
+        map.platform(3.5,y2+0.5,1,'1','');
         map.berthr(4, y1, '0217');
         map.berthl(4, y2, '0216');
 
@@ -939,6 +942,9 @@ var SignalAreaMap = (function () {
         map.berthr(8, y1, '0593');
         map.berthl(8, y2, '0588');
 
+        map.station(9,y1,'Staplehurst');
+        map.platform(8.5,y1-0.5,1,'','2');
+        map.platform(8.5,y2+0.5,1,'1','');
         map.berthr(9, y1, '0595');
         map.berthl(9, y2, '0590');
 
