@@ -21,24 +21,18 @@ var SignalAreaMap = (function () {
     function SignalAreaMap() {
     }
 
-    SignalAreaMap.width = 12;
-    SignalAreaMap.height = 18;
-
-    SignalAreaMap.plot = function (map) {
-
-        // Down line
-        var y1, y2, a;
-
-        // OTF-MDE Down line
-        y1 = 0;
-        y2 = y1 + 1;
-        a = SignalMap.down([], 0, y1);
+    SignalAreaMap.map1 = function(map,y1) {
+	if(map) {
+	var y2 = y1 + 1;
+        var a = SignalMap.down([], 0, y1);
         a = SignalMap.up(a, 0, y2);
         a = SignalMap.down(a, 10, y1);
         a = SignalMap.up(a, 10, y2);
         a = SignalMap.line(a, 0, y1, 10, y1);
         a = SignalMap.line(a, 0, y2, 10, y2);
         map.path(a);
+
+	    map.station(-0.2,y1+1.3,'A');
 
         map.station(1, y1, "Borough Green\n& Wrotham");
         map.berth(1, y1, 'M153');
@@ -65,8 +59,13 @@ var SignalAreaMap = (function () {
         map.berth(3, y2, 'M160');
         map.berth(4, y2, 'M162');
         map.berth(5, y2, 'M164');
+	}
 
-        y1 += 5;
+	return 5;
+    };
+
+    SignalAreaMap.map2 = function(map,y1) {
+	if(map) {
         y2 = y1 + 1;
 
         // Add the river medway
@@ -121,8 +120,13 @@ var SignalAreaMap = (function () {
         map.berth(9, y2, 'M045');
         map.platform(4.5, y2 + 1.5, 3.5, '1');
 
-        // Down
-        y1 += 5;
+	    map.station(10.2,y1+1.3,'A');
+	}
+	return 5;
+    };
+
+    SignalAreaMap.map3=function(map,y1) {
+	if(map) {
         y2 = y1 + 1;
         a = SignalMap.down([], 0, y1);
         a = SignalMap.up(a, 0, y2);
@@ -133,6 +137,7 @@ var SignalAreaMap = (function () {
         a = SignalMap.points(a, 0, y1, y2);
         map.path(a);
 
+	    map.station(-0.2,y1+1.3,'A');
         map.station(2, y1, "Bearsted");
         map.berth(2, y1, 'M191');
         map.berth(2, y2, 'M192');
@@ -157,8 +162,13 @@ var SignalAreaMap = (function () {
         map.berth(5, y2, 'M194');
         map.berth(6, y2, 'M196');
         map.berth(9, y2, 'M204');
+	    map.station(10.2,y1+1.3,'B');
+	}
+	return 4;
+    };
 
-        y1 += 4;
+    SignalAreaMap.map4 = function(map,y1) {
+	if(map) {
         y2 = y1 + 1;
         a = SignalMap.down([], 0, y1);
         a = SignalMap.up(a, 0, y2);
@@ -168,6 +178,7 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a, 0, y2, 10, y2);
         map.path(a);
 
+	    map.station(-0.2,y1+1.3,'B');
 
         // Up
         map.berth(2, y2, 'M210');
@@ -186,6 +197,33 @@ var SignalAreaMap = (function () {
         map.berth(9, y1, 'M223');
         map.berth(8, y2, 'M218');
         map.berth(9, y2, 'M224');
+	    map.station(10.2,y1+1.3,'A2');
+	}
+	return 4;
+    };
+
+    // Each section in order on main map
+    SignalAreaMap.sections = [
+	SignalAreaMap.map1,
+	SignalAreaMap.map2,
+	SignalAreaMap.map3,
+	SignalAreaMap.map4
+    ];
+    // Width
+    SignalAreaMap.width = 12;
+    // Total height of all sections
+    SignalAreaMap.height = 0;
+    $.each(SignalAreaMap.sections,function(i,v) {
+	SignalAreaMap.height+=v(undefined,SignalAreaMap.height);
+    });
+
+    // Plot the entire map
+    SignalAreaMap.plot = function (map) {
+	var y1=0;
+	$.each(SignalAreaMap.sections,function(i,v) {
+	    y1+=v(map,y1);
+	});
+
     };
 
     return SignalAreaMap;
