@@ -176,7 +176,7 @@ var SignalMap = (function () {
 
     SignalMap.prototype.update = function (map) {
         $.ajax({
-            url: '/signal/data/occupiedBerths/' + map.area,
+            url: '/api/rail/1/signal/occupied/' + map.area,
             type: 'GET',
             dataType: 'json',
             async: true,
@@ -198,28 +198,10 @@ var SignalMap = (function () {
         });
 
         // Plot current berths
-        $.each(v.berths, function (k, v) {
+        $.each(v, function (k, v) {
             var b = map.berths[k];
             if (typeof b !== 'undefined')
                 b.set(v);
-        });
-
-        // The movements
-        var rm = $('#recentMovement').empty();
-        $.each(v.recent, function (k, v) {
-            var t = v.type;
-            var tr = $('<tr></tr>').
-                    append($('<td></td>').text(v.time)).
-                    append($('<td></td>').text(v.descr)).
-                    append($('<td></td>').text(t));
-            if (t === 'CA') {
-                tr.append($('<td></td>').text(v.from)).append($('<td></td>').text(v.to));
-            } else if (t === 'CB') {
-                tr.append($('<td></td>').text(v.from)).append($('<td></td>'));
-            } else if (t === 'CC') {
-                tr.append($('<td></td>')).append($('<td></td>').text(v.to));
-            }
-            rm.append(tr);
         });
 
         // Queue the next update
@@ -241,6 +223,9 @@ var SignalMap = (function () {
     };
 
     SignalMap.prototype.queueUpdate = function (map) {
+	// Hide table showing movements until restored
+	$('#recentMovement').parent().empty();
+
         setTimeout(function () {
             map.update(map);
         }, 10000);
