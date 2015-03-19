@@ -10,7 +10,10 @@
                         <div id="map"></div>
                         <div class="mapAttr">
                             Map imagery &copy;2012-${requestScope.year} Peter Mount,
+                            contains OS data &copy; Crown copyright 2015
+                            <%--
                             data &copy; <a href="http://openstreetmap.org/">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>.<br/>
+                            --%>
                         </div>
                     </div>
                     <script>

@@ -8,8 +8,21 @@ var StationMap = function (long, lat) {
         layers: [],
         controls: []
     });
-    var layer = new OpenLayers.Layer.OpenTransportMaps('Street Map', 'osm', true);
+    //var layer = new OpenLayers.Layer.MapLu('Street Map', 'osm', true);
+    var layer = new OpenLayers.Layer.GeoWebCache({
+        name:'OSGB',gridSetId:'osgb',isBaseLayer:true
+    });
     map.addLayer(layer);
     map.setBaseLayer(layer);
-    map.setCenter(new OpenLayers.LonLat(long, lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject()), 16);
+    
+    map.addLayer(new OpenLayers.Layer.GeoWebCache({
+        name:'OSGB Buildings',gridSetId:'osgb:building',isBaseLayer:false
+    }));
+    map.addLayer(new OpenLayers.Layer.GeoWebCache({
+        name:'OSGB Road',gridSetId:'osgb_road',isBaseLayer:false
+    }));
+    map.addLayer(new OpenLayers.Layer.GeoWebCache({
+        name:'OSGB Rail',gridSetId:'osgb_rail',isBaseLayer:false
+    }));
+    map.setCenter(new OpenLayers.LonLat(long, lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject()), 15);
 };

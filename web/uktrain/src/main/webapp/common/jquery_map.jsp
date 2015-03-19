@@ -10,6 +10,7 @@
 <script src="//js.iot.onl/jquery/jquery.js"></script>
 <script src="//js.iot.onl/menu_jquery.js"></script>
 <script src="//js.iot.onl/jquery/jquery-ui.js"></script>
-<script src="http://openlayers.org/api/OpenLayers.js"></script>
-<script src="//js.iot.onl/tileserver.min.js"></script>
+<script src="/js/OpenLayers.js"></script>
+<script src="/js/tileserver.js"></script>
+<script src="/js/GeoWebCache.js"></script>
 <script src="/js/stationmap.js"></script>
