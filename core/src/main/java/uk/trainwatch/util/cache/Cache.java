@@ -100,7 +100,7 @@ public class Cache<K, V>
         expire( expiry );
 
         final long end = size();
-        LOG.log( Level.INFO, () -> "Expired " + (size - end) + " entries. Now have " + end );
+        LOG.log( size != end ? Level.INFO : Level.FINE, () -> "Expired " + (size - end) + " entries. Now have " + end );
     }
 
     /**
