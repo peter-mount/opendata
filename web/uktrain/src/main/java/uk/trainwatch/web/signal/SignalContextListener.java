@@ -60,18 +60,11 @@ public class SignalContextListener
             String localHost = InetAddress.getLocalHost().
                     getHostName();
 
-            if( "europa".equals( localHost ) )
-            {
-                // Dev, connect to prod for data but only request a single area to keep volumne down.
-                configure( "nr.td.area.CT", "signal.map.dev", true );
-            }
-            else
-            {
-                configure( "nr.td.area.#", "signal.map.live", true );
-            }
-        }
-        catch( NamingException |
-               UnknownHostException ex )
+            boolean dev = "europa".equals( localHost ) || "phoebe".equals( localHost );
+            // Dev, connect to prod for data but only request a single area to keep volumne down.
+            configure( dev ? "nr.td.area.A3" : "nr.td.area.#", "signal.map", true );
+        } catch( NamingException |
+                UnknownHostException ex )
         {
             LOG.log( Level.SEVERE, null, ex );
         }
@@ -111,8 +104,7 @@ public class SignalContextListener
         if( durable )
         {
             RabbitMQ.queueDurableStream( rabbitConnection, queueName, routingKey, consumer );
-        }
-        else
+        } else
         {
             RabbitMQ.queueStream( rabbitConnection, queueName, routingKey, consumer );
         }

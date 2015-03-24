@@ -16,7 +16,9 @@
         <td width="50%" valign="top"><tiles:insertAttribute name="center"/></td>
         <td width="25%" valign="top"><tiles:insertAttribute name="right"/></td>
     </tr>
+    <%-- Removed performance stats
     <tr>
         <td colspan="3"><tiles:insertAttribute name="performance"/></td>
     </tr>
+    --%>
 </table>
