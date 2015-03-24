@@ -35,8 +35,8 @@ OpenLayers.Layer.MapLu = OpenLayers.Class(OpenLayers.Layer.OSM, {
 
         OpenLayers.Layer.OSM.prototype.initialize.apply(this, [
             name,
-            //['//tiles.' + location.hostname + '/mapnik/' + layer + '/${z}/${x}/${y}.png'],
-            ['//dev.map.lu/tiles/mapnik/' + layer + '/${z}/${x}/${y}.png'],
+            //['//tiles.' + location.hostname + '/' + layer + '/${z}/${x}/${y}.png'],
+            ['/tiles/mapnik/' + layer + '/${z}/${x}/${y}.png'],
             {
                 numZoomLevels: 19,
                 buffer: 0,

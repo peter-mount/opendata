@@ -78,7 +78,6 @@ public class StationServlet
         {
             showMap( req, loc );
             getDepartures( req, loc );
-            getPerformance( req, loc );
         }
         catch( SQLException ex )
         {
@@ -127,11 +126,5 @@ public class StationServlet
             req.put( "stationPosition", station );
             req.put( "nearBy", StationPositionManager.INSTANCE.nearby( station, 3 ) );
         }
-    }
-
-    private void getPerformance( Map<String, Object> req, TrainLocation loc )
-            throws SQLException
-    {
-        req.put( "performance", StationPerformance.getStationPerfStat( LocalDate.now(), loc ) );
     }
 }
