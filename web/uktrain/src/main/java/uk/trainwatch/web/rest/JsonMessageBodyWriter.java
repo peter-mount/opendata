@@ -20,15 +20,18 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonStructure;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
+import uk.trainwatch.rabbitmq.RabbitMQ;
 
 /**
- * Custom {@link MessageBodyWriter} which generates proper json output, specifically lists are not wrapped in another
- * object.
+ * Custom {@link MessageBodyWriter} which generates proper json output, specifically lists are not wrapped in another object.
  * <p>
  * Src: <a
  * href="http://stackoverflow.com/questions/2199453/how-can-i-customize-serialization-of-a-list-of-jaxb-objects-to-json#3143214">StackOverflow</a>
@@ -43,27 +46,46 @@ public class JsonMessageBodyWriter
 
     @Override
     public long getSize( Object obj, Class type, Type genericType,
-                         Annotation[] annotations, MediaType mediaType )
+            Annotation[] annotations, MediaType mediaType )
     {
         return -1;
     }
 
     @Override
     public boolean isWriteable( Class type, Type genericType,
-                                Annotation annotations[], MediaType mediaType )
+            Annotation annotations[], MediaType mediaType )
     {
         return true;
     }
 
     @Override
     public void writeTo( Object target, Class type, Type genericType,
-                         Annotation[] annotations, MediaType mediaType,
-                         MultivaluedMap httpHeaders, OutputStream outputStream )
+            Annotation[] annotations, MediaType mediaType,
+            MultivaluedMap httpHeaders, OutputStream outputStream )
             throws IOException
     {
-        new ObjectMapper().
-                // Comment INDENT_OUTPUT on public site, this is used during development only
-                //configure( SerializationFeature.INDENT_OUTPUT, true ).
-                writeValue( outputStream, target );
+        Object t = target;
+
+        // Handle Json builders by building the new target
+        if( t instanceof JsonObjectBuilder )
+        {
+            t = ((JsonObjectBuilder) t).build();
+        } else if( t instanceof JsonArrayBuilder )
+        {
+            t = ((JsonArrayBuilder) t).build();
+        }
+
+        // Handle json by converting into a string
+        if( t instanceof JsonStructure )
+        {
+            outputStream.write( RabbitMQ.jsonToBytes.apply( (JsonStructure) t ) );
+        } else
+        {
+            // Normal mapper
+            new ObjectMapper().
+                    // Comment INDENT_OUTPUT on public site, this is used during development only
+                    //configure( SerializationFeature.INDENT_OUTPUT, true ).
+                    writeValue( outputStream, t );
+        }
     }
 }
