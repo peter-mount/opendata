@@ -18,6 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.json.JsonObjectBuilder;
 import javax.sql.DataSource;
 import uk.trainwatch.io.format.PsvReader;
 import uk.trainwatch.util.sql.SQL;
@@ -44,15 +45,15 @@ public enum TrainLocationFactory
         {
             PsvReader.load( getClass().
                     getResourceAsStream( "location.psv" ),
-                            s -> s.length < 12 ? null : new TrainLocation(
-                                            s[0].isEmpty() ? 0 : Long.parseLong( s[0] ),
-                                            s[1],
-                                            s[2],
-                                            s[3],
-                                            s[4],
-                                            s[5].isEmpty() ? 0 : Long.parseLong( s[5] ),
-                                            s[9]
-                                    )
+                    s -> s.length < 12 ? null : new TrainLocation(
+                                    s[0].isEmpty() ? 0 : Long.parseLong( s[0] ),
+                                    s[1],
+                                    s[2],
+                                    s[3],
+                                    s[4],
+                                    s[5].isEmpty() ? 0 : Long.parseLong( s[5] ),
+                                    s[9]
+                            )
             ).
                     forEach( loc ->
                             {
@@ -63,8 +64,7 @@ public enum TrainLocationFactory
                                 map.put( new Tiploc( loc.getTiploc() ), loc );
                     }
                     );
-        }
-        catch( IOException ex )
+        } catch( IOException ex )
         {
             throw new UncheckedIOException( ex );
         }
@@ -74,7 +74,7 @@ public enum TrainLocationFactory
      * Allows us to reload from the timetable
      * <p>
      * @param dataSource
-     *                   <p>
+     * <p>
      * @throws SQLException
      */
     void reload( DataSource dataSource )
@@ -117,7 +117,7 @@ public enum TrainLocationFactory
      * Resolve the train location by crs, tiploc, nlc then stanox in that order.
      * <p>
      * @param name
-     *             <p>
+     * <p>
      * @return
      */
     public TrainLocation resolveTrainLocation( String name )
@@ -141,9 +141,8 @@ public enum TrainLocationFactory
             try
             {
                 loc = getTrainLocationByStanox( Long.parseLong( name ) );
-            }
-            catch( NumberFormatException |
-                   NullPointerException ex )
+            } catch( NumberFormatException |
+                    NullPointerException ex )
             {
                 loc = null;
             }
@@ -247,4 +246,9 @@ public enum TrainLocationFactory
                 sorted( TrainLocation.COMPARATOR );
     }
 
+    public static JsonObjectBuilder getJsonByStanox( long stanox )
+    {
+        TrainLocation l = INSTANCE.getTrainLocationByStanox( stanox );
+        return l == null ? null : l.toJson();
+    }
 }

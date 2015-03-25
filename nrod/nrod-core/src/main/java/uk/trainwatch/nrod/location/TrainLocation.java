@@ -6,6 +6,8 @@ package uk.trainwatch.nrod.location;
 
 import java.sql.ResultSet;
 import java.util.Comparator;
+import javax.json.Json;
+import javax.json.JsonObjectBuilder;
 import javax.xml.bind.annotation.XmlRootElement;
 import uk.trainwatch.util.sql.SQLFunction;
 
@@ -78,8 +80,7 @@ public class TrainLocation
     /**
      * Does this location have data associated with it
      * <p/>
-     * @return
-     * @deprecated
+     * @return @deprecated
      */
     @Deprecated
     public boolean isData()
@@ -90,8 +91,7 @@ public class TrainLocation
     /**
      * Is this location also a delayed monitoring point
      * <p/>
-     * @return
-     * @deprecated
+     * @return @deprecated
      */
     @Deprecated
     public boolean isDelay_monitor_point()
@@ -165,5 +165,26 @@ public class TrainLocation
     public int compareTo( TrainLocation o )
     {
         return location.compareToIgnoreCase( o.getLocation() );
+    }
+
+    /**
+     * Returns this instance as a {@link JsonObjectBuilder}
+     *
+     * @return
+     */
+    public JsonObjectBuilder toJson()
+    {
+        JsonObjectBuilder o = Json.createObjectBuilder().
+                add( "location", (location == null || location.isEmpty()) ? "" : location ).
+                add( "stanox", stanox );
+        if( crs != null && !crs.isEmpty() )
+        {
+            o.add( "crs", crs );
+        }
+        if( tiploc != null && !tiploc.isEmpty() )
+        {
+            o.add( "tiploc", tiploc );
+        }
+        return o;
     }
 }
