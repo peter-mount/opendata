@@ -16,7 +16,7 @@
     <definition name="trust.trains" extends="layout.main">
         <put-attribute name="title" value="Trust Trains" />
         <put-attribute name="body" value=".trust.trains" />
-        <put-attribute name="javascript" value="/common/signal/javascript.jsp" />
+        <put-attribute name="javascript" value="/common/trust/javascript.jsp" />
     </definition>
     <definition name=".trust.trains" extends="layout.1col">
         <put-attribute name="center" value="/common/trust/trains.jsp" />

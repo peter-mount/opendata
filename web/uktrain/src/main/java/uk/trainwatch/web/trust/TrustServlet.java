@@ -6,9 +6,11 @@
 package uk.trainwatch.web.trust;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import uk.trainwatch.web.servlet.AbstractServlet;
@@ -19,7 +21,10 @@ import uk.trainwatch.web.servlet.ApplicationRequest;
  * <p>
  * @author peter
  */
-@WebServlet(name = "TrustServlet", urlPatterns = {"/trust", "/trust/*"})
+@WebServlet( name = "TrustServlet", urlPatterns =
+{
+    "/trust", "/trust/*"
+} )
 public class TrustServlet
         extends AbstractServlet
 {
@@ -29,15 +34,16 @@ public class TrustServlet
     @Override
     protected void doGet( ApplicationRequest request )
             throws ServletException,
-                   IOException
+            IOException
     {
         String pathInfo = request.getPathInfo();
         LOG.log( Level.INFO, () -> "pathInfo \"" + pathInfo + "\"" );
 
-        if( pathInfo == null || "/".equals( pathInfo ) ) {
+        if( pathInfo == null || "/".equals( pathInfo ) )
+        {
             doIndex( request );
-        }
-        else {
+        } else
+        {
             doToc( request, Integer.parseInt( pathInfo.substring( 1 ) ) );
         }
     }
@@ -58,7 +64,6 @@ public class TrustServlet
     {
         Map<String, Object> request = req.getRequestScope();
         request.put( "toc", toc );
-        request.put( "trains", TrustCache.INSTANCE.getTrains( toc ) );
         req.renderTile( "trust.trains" );
     }
 }
