@@ -5,8 +5,10 @@
  */
 package uk.trainwatch.web.trust;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import uk.trainwatch.util.TimeUtils;
 
 /**
  * Base details of a train in Trust
@@ -37,6 +39,23 @@ public class AbstractTrust
     protected final synchronized void touch()
     {
         touched = LocalDateTime.now();
+    }
+
+    /**
+     * touch the object only if t represents a time after the last time it was touched.
+     *
+     * @param t
+     */
+    protected final synchronized void touch( long t )
+    {
+        LocalDateTime now = TimeUtils.getLocalDateTime( t );
+        if( touched != null && touched.isBefore( now ) )
+        {
+            touched = now;
+        } else
+        {
+            touched = LocalDateTime.now();
+        }
     }
 
     /**
@@ -77,7 +96,8 @@ public class AbstractTrust
     @Override
     public final boolean equals( Object obj )
     {
-        if( obj == null || getClass() != obj.getClass() ) {
+        if( obj == null || getClass() != obj.getClass() )
+        {
             return false;
         }
         final AbstractTrust other = (AbstractTrust) obj;

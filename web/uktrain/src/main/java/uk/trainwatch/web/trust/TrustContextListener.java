@@ -5,8 +5,6 @@
  */
 package uk.trainwatch.web.trust;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Timer;
@@ -61,7 +59,8 @@ public class TrustContextListener
         LOG.log( Level.INFO, () -> "Connecting to MQ" );
 
         // Connect to rabbitmq
-        try {
+        try
+        {
             rabbitConnection = new RabbitConnection(
                     InitialContext.doLookup( "java:/comp/env/rabbit/uktrain/user" ),
                     InitialContext.doLookup( "java:/comp/env/rabbit/uktrain/password" ),
@@ -71,18 +70,14 @@ public class TrustContextListener
             Consumer<TrustMovement> consumer = m -> TrustCache.INSTANCE.getTrust( m.getToc_id(), m.getTrain_id() ).
                     accept( m );
 
-            String localHost = InetAddress.getLocalHost().
-                    getHostName();
-
-            RabbitMQ.queueDurableStream( rabbitConnection, "trust.status." + localHost, "nr.trust.mvt", s -> s.
-                                         map( RabbitMQ.toString ).
-                                         map( JsonUtils.parseJsonObject ).
-                                         map( TrustMovementFactory.INSTANCE ).
-                                         filter( Objects::nonNull ).
-                                         forEach( consumer.andThen( RateMonitor.log( LOG, "Receive Trust" ) ) ) );
-        }
-        catch( NamingException |
-               UnknownHostException ex ) {
+            RabbitMQ.queueDurableStream( rabbitConnection, "trust.status", "nr.trust.mvt", s -> s.
+                    map( RabbitMQ.toString ).
+                    map( JsonUtils.parseJsonObject ).
+                    map( TrustMovementFactory.INSTANCE ).
+                    filter( Objects::nonNull ).
+                    forEach( consumer.andThen( RateMonitor.log( LOG, "Receive Trust" ) ) ) );
+        } catch( NamingException ex )
+        {
             Logger.getLogger( TrustContextListener.class.getName() ).
                     log( Level.SEVERE, null, ex );
             throw new SQLException( ex );
@@ -96,14 +91,17 @@ public class TrustContextListener
     {
         LOG.log( Level.INFO, "Shutting down Trust" );
 
-        try {
-            if( rabbitConnection != null ) {
+        try
+        {
+            if( rabbitConnection != null )
+            {
                 rabbitConnection.close();
                 rabbitConnection = null;
             }
-        }
-        finally {
-            if( timer != null ) {
+        } finally
+        {
+            if( timer != null )
+            {
                 timer.cancel();
                 timer = null;
             }

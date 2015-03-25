@@ -6,6 +6,8 @@
 package uk.trainwatch.web.trust;
 
 import java.util.function.Consumer;
+import uk.trainwatch.nrod.location.TrainLocation;
+import uk.trainwatch.nrod.location.TrainLocationFactory;
 import uk.trainwatch.nrod.trust.model.ChangeOfIdentity;
 import uk.trainwatch.nrod.trust.model.ChangeOfOrigin;
 import uk.trainwatch.nrod.trust.model.TrainActivation;
@@ -24,12 +26,14 @@ public class Trust
         implements Consumer< TrustMovement>
 {
 
+    private TrainLocation location;
     private TrainActivation activation;
     private TrainMovement movement;
     private TrainCancellation cancellation;
     private ChangeOfOrigin changeOfOrigin;
     private ChangeOfIdentity changeOfIdentity;
     private TrainReinstatement reinstatement;
+    private TrainStatus status = TrainStatus.INITIAL;
 
     public Trust( int toc, String id )
     {
@@ -66,30 +70,65 @@ public class Trust
     {
         return reinstatement;
     }
+
+    public synchronized TrainStatus getStatus()
+    {
+        return status;
+    }
+
+    public synchronized TrainLocation getLocation()
+    {
+        return location;
+    }
 //</editor-fold>
+
+    public synchronized boolean hasMovement()
+    {
+        return movement != null;
+    }
+
+    public synchronized long getDelay()
+    {
+        return movement == null ? 0L : movement.getDelay();
+    }
+
+    private void touch( long t, long s )
+    {
+        touch( t );
+        location = TrainLocationFactory.INSTANCE.getTrainLocationByStanox( s );
+    }
 
     @Override
     public synchronized void accept( TrustMovement t )
     {
-        if( t instanceof TrainMovement ) {
+        if( t instanceof TrainMovement )
+        {
             movement = (TrainMovement) t;
-        }
-        else if( t instanceof TrainActivation ) {
+            status = TrainStatus.getByDelay( movement.getDelay() );
+            touch( movement.getActual_timestamp(), movement.getLoc_stanox() );
+        } else if( t instanceof TrainActivation )
+        {
             activation = (TrainActivation) t;
-        }
-        else if( t instanceof TrainCancellation ) {
+            status = TrainStatus.ACTIVATED;
+            touch( activation.getCreation_timestamp(), activation.getSched_origin_stanox() );
+        } else if( t instanceof TrainCancellation )
+        {
             cancellation = (TrainCancellation) t;
-        }
-        else if( t instanceof ChangeOfOrigin ) {
+            status = TrainStatus.CANCELLED;
+            touch( cancellation.getCanx_timestamp(), cancellation.getLoc_stanox() );
+        } else if( t instanceof ChangeOfOrigin )
+        {
             changeOfOrigin = (ChangeOfOrigin) t;
-        }
-        else if( t instanceof ChangeOfIdentity ) {
+            touch( changeOfOrigin.getCoo_timestamp(), changeOfOrigin.getLoc_stanox() );
+        } else if( t instanceof ChangeOfIdentity )
+        {
             changeOfIdentity = (ChangeOfIdentity) t;
-        }
-        else if( t instanceof TrainReinstatement ) {
+            touch( changeOfIdentity.getEvent_timestamp() );
+        } else if( t instanceof TrainReinstatement )
+        {
             reinstatement = (TrainReinstatement) t;
+            touch( reinstatement.getReinstatement_timestamp(), reinstatement.getLoc_stanox() );
         }
-        touch();
     }
 
 }
