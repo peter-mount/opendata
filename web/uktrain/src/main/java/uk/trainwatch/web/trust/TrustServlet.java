@@ -64,6 +64,7 @@ public class TrustServlet
     {
         Map<String, Object> request = req.getRequestScope();
         request.put( "toc", toc );
+        request.put( "tocs", TrustCache.INSTANCE.getTocs() );
         req.renderTile( "trust.trains" );
     }
 }

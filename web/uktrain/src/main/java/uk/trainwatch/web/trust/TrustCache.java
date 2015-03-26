@@ -11,8 +11,12 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import uk.trainwatch.nrod.rtppm.sql.Operator;
+import uk.trainwatch.nrod.rtppm.sql.OperatorManager;
 
 /**
  * Handles the storage of current data
@@ -38,7 +42,7 @@ public enum TrustCache
      * <p>
      * @param toc
      * @param trainId
-     *                <p>
+     * <p>
      * @return
      */
     public Trust getTrust( int toc, String trainId )
@@ -54,9 +58,14 @@ public enum TrustCache
      * <p>
      * @return
      */
-    public Collection<Integer> getTocs()
+    public Map<Integer, String> getTocs()
     {
-        return new TreeSet<>( trains.keySet() );
+        return trains.keySet().stream().
+                collect( Collectors.toMap( Function.identity(), id ->
+                                {
+                                    Operator o = OperatorManager.INSTANCE.getOperator( id );
+                                    return o == null ? String.valueOf( id ) : o.getDisplay();
+                } ) );
     }
 
     /**
@@ -80,7 +89,8 @@ public enum TrustCache
         final LocalDateTime expiryTime = LocalDateTime.now().
                 minusHours( MAX_AGE_HOURS );
 
-        trains.forEach( ( toc, tocTrains ) -> {
+        trains.forEach( ( toc, tocTrains ) ->
+        {
             final long initialSize = tocTrains.size();
             log.log( Level.FINE, () -> "Expiring cache for toc " + toc + " size " + initialSize );
 
@@ -89,7 +99,7 @@ public enum TrustCache
 
             final long finalSize = tocTrains.size();
             log.log( initialSize != finalSize ? Level.INFO : Level.FINE,
-                     () -> "Expired cache for toc " + toc + " size " + finalSize + " expired " + (initialSize - finalSize) );
+                    () -> "Expired cache for toc " + toc + " size " + finalSize + " expired " + (initialSize - finalSize) );
         } );
     }
 }

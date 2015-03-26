@@ -13,11 +13,11 @@
         </tr>
     </thead>
     <tbody>
-        <c:forEach var="toc" items="${tocs}">
+        <c:forEach var="toc" items="${tocs.keySet()}">
             <tr>
                 <td>${toc}</td>
                 <td>
-                    <a href="/trust/${toc}">${toc}</a>
+                    <a href="/trust/${toc}">${tocs.get(toc)}</a>
                 </td>
             </tr>
         </c:forEach>

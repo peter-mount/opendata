@@ -1,0 +1,96 @@
+#trust {
+    position: absolute;
+    left:0;
+    right:0;
+    top:0;
+    bottom:0;
+    border: 1px solid black;
+}
+#trustTop {
+    position: absolute;
+    left:0;
+    right:0;
+    top:0;
+    bottom:2em;
+    border: 1px solid black;
+    overflow: hidden;
+    font-size: 0.5em;
+}
+#trustTop select {
+    font-size: 1.2em;
+}
+#refreshRate {
+    position: absolute;
+    top:0;
+    right:0;
+}
+#trustBody {
+    position: absolute;
+    left:0;
+    right:0;
+    top:2em;
+    bottom:0;
+    border: 1px solid black;
+    overflow: hidden;
+}
+
+.trustTitle {
+    position: absolute;
+    top:0;
+    left:0;
+    right:0;
+    height:1.9em;
+    margin:0;
+    padding: 1px;
+    background: #ccc;
+    color: #000;
+    font-weight: bold;
+    text-align: center;
+}
+
+.trustStream {
+    position: absolute;
+    top: 0;
+    bottom:0;
+    border: 1px solid black;
+    padding: 1px;
+    margin: 1px;
+}
+.trustStream .trustStreamContent {
+    position: absolute;
+    top:2em;
+    bottom:0;
+    
+    overflow-y: scroll;
+    padding: 1px;
+    margin: 1px;
+}
+
+.train {
+    margin:0;
+    border-bottom: 1px solid #ccc;
+    padding: 0.5em 0;
+    padding-bottom: 0.5em;
+}
+.train .title {
+    margin:0;
+    padding: 1px;
+    background: #ccc;
+    color: #000;
+    font-weight: bold;
+    text-align: left;
+    font-size: 0.6em;
+}
+.train .info {
+    color: #000;
+    font-weight: normal;
+    text-align: left;
+    font-size: 0.8em;
+}
+
+.train th {
+    width: 5em;
+}
+.train td {
+    width:20em;
+}
