@@ -38,7 +38,23 @@ public class ScheduleJsonBuilder
     private JsonObjectBuilder builder;
     private JsonArrayBuilder locations;
 
+    public JsonObjectBuilder getBuilder()
+    {
+        return builder;
+    }
+
+    public JsonArrayBuilder getLocations()
+    {
+        return locations;
+    }
+
     public JsonObject visit( Schedule t )
+    {
+        return visitBuilder( t ).
+                build();
+    }
+
+    public JsonObjectBuilder visitBuilder( Schedule t )
     {
         builder = Json.createObjectBuilder();
         locations = Json.createArrayBuilder();
@@ -53,7 +69,7 @@ public class ScheduleJsonBuilder
 
         builder.add( "locations", locations );
 
-        return builder.build();
+        return builder;
     }
 
     @Override

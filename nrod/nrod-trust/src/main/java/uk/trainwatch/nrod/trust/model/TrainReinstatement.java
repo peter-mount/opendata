@@ -26,6 +26,12 @@ public class TrainReinstatement
         super( TrustMovementType.REINSTATEMENT );
     }
 
+    @Override
+    public long getTimestamp()
+    {
+        return getReinstatement_timestamp();
+    }
+
     public long getReinstatement_timestamp()
     {
         return reinstatement_timestamp;

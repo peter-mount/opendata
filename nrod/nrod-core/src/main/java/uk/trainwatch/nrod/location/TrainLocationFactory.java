@@ -41,31 +41,29 @@ public enum TrainLocationFactory
     private TrainLocationFactory()
     {
         // By default use our old data
-        try
-        {
+        try {
             PsvReader.load( getClass().
                     getResourceAsStream( "location.psv" ),
-                    s -> s.length < 12 ? null : new TrainLocation(
-                                    s[0].isEmpty() ? 0 : Long.parseLong( s[0] ),
-                                    s[1],
-                                    s[2],
-                                    s[3],
-                                    s[4],
-                                    s[5].isEmpty() ? 0 : Long.parseLong( s[5] ),
-                                    s[9]
-                            )
+                            s -> s.length < 12 ? null : new TrainLocation(
+                                            s[0].isEmpty() ? 0 : Long.parseLong( s[0] ),
+                                            s[1],
+                                            s[2],
+                                            s[3],
+                                            s[4],
+                                            s[5].isEmpty() ? 0 : Long.parseLong( s[5] ),
+                                            s[9]
+                                    )
             ).
-                    forEach( loc ->
-                            {
-                                map.put( new TrainLocationID( loc.getId() ), loc );
-                                map.put( new CRS( loc.getCrs() ), loc );
-                                map.put( new NLC( loc.getNlc() ), loc );
-                                map.put( new Stanox( loc.getStanox() ), loc );
-                                map.put( new Tiploc( loc.getTiploc() ), loc );
+                    forEach( loc -> {
+                        map.put( new TrainLocationID( loc.getId() ), loc );
+                        map.put( new CRS( loc.getCrs() ), loc );
+                        map.put( new NLC( loc.getNlc() ), loc );
+                        map.put( new Stanox( loc.getStanox() ), loc );
+                        map.put( new Tiploc( loc.getTiploc() ), loc );
                     }
                     );
-        } catch( IOException ex )
-        {
+        }
+        catch( IOException ex ) {
             throw new UncheckedIOException( ex );
         }
     }
@@ -74,26 +72,23 @@ public enum TrainLocationFactory
      * Allows us to reload from the timetable
      * <p>
      * @param dataSource
-     * <p>
+     *                   <p>
      * @throws SQLException
      */
     void reload( DataSource dataSource )
             throws SQLException
     {
         LOG.log( Level.INFO, "Reloading TrainLocations" );
-        try( Connection con = dataSource.getConnection() )
-        {
-            try( Statement s = con.createStatement() )
-            {
+        try( Connection con = dataSource.getConnection() ) {
+            try( Statement s = con.createStatement() ) {
                 Map<LocationKey, TrainLocation> newMap = new ConcurrentHashMap<>();
                 SQL.stream( s.executeQuery( "SELECT * FROM timetable.tiploc" ), TrainLocation.fromSQL ).
-                        forEach( loc ->
-                                {
-                                    newMap.put( new TrainLocationID( loc.getId() ), loc );
-                                    newMap.put( new CRS( loc.getCrs() ), loc );
-                                    newMap.put( new NLC( loc.getNlc() ), loc );
-                                    newMap.put( new Stanox( loc.getStanox() ), loc );
-                                    newMap.put( new Tiploc( loc.getTiploc() ), loc );
+                        forEach( loc -> {
+                            newMap.put( new TrainLocationID( loc.getId() ), loc );
+                            newMap.put( new CRS( loc.getCrs() ), loc );
+                            newMap.put( new NLC( loc.getNlc() ), loc );
+                            newMap.put( new Stanox( loc.getStanox() ), loc );
+                            newMap.put( new Tiploc( loc.getTiploc() ), loc );
                         } );
                 map = newMap;
 
@@ -117,33 +112,28 @@ public enum TrainLocationFactory
      * Resolve the train location by crs, tiploc, nlc then stanox in that order.
      * <p>
      * @param name
-     * <p>
+     *             <p>
      * @return
      */
     public TrainLocation resolveTrainLocation( String name )
     {
-        if( name == null || name.isEmpty() )
-        {
+        if( name == null || name.isEmpty() ) {
             return null;
         }
 
         TrainLocation loc = getTrainLocationByCrs( name );
-        if( loc == null )
-        {
+        if( loc == null ) {
             loc = getTrainLocationByTiploc( name );
         }
-        if( loc == null )
-        {
+        if( loc == null ) {
             loc = getTrainLocationByNlc( name );
         }
-        if( loc == null )
-        {
-            try
-            {
+        if( loc == null ) {
+            try {
                 loc = getTrainLocationByStanox( Long.parseLong( name ) );
-            } catch( NumberFormatException |
-                    NullPointerException ex )
-            {
+            }
+            catch( NumberFormatException |
+                   NullPointerException ex ) {
                 loc = null;
             }
         }
@@ -250,5 +240,17 @@ public enum TrainLocationFactory
     {
         TrainLocation l = INSTANCE.getTrainLocationByStanox( stanox );
         return l == null ? null : l.toJson();
+    }
+
+    public static JsonObjectBuilder getJsonByTiploc( String tiploc )
+    {
+        TrainLocation l = INSTANCE.getTrainLocationByTiploc( tiploc );
+        return l == null ? null : l.toJson();
+    }
+
+    public static String getTiplocByStanox( long stanox )
+    {
+        TrainLocation l = INSTANCE.getTrainLocationByStanox( stanox );
+        return l == null ? Long.toString( stanox ) : l.getTiploc();
     }
 }

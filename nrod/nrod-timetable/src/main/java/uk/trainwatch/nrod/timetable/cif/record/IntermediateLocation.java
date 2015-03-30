@@ -9,6 +9,7 @@ import java.time.LocalTime;
 import java.util.function.Function;
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.util.Activity;
 import uk.trainwatch.util.JsonUtils;
@@ -54,7 +55,7 @@ public class IntermediateLocation
             JsonUtils.getInt( o, "perfAllowance" )
     );
 
-    public static final Function<IntermediateLocation, JsonObject> toJson = l -> Json.createObjectBuilder().
+    public static final Function<IntermediateLocation, JsonObjectBuilder> toJsonBuilder = l -> Json.createObjectBuilder().
             add( "type", l.getRecordType().
                  toString() ).
             add( "tiploc", l.getLocation().
@@ -70,8 +71,9 @@ public class IntermediateLocation
             add( "engAllowance", l.getEngAllowance() ).
             add( "pathAllowance", l.getPathAllowance() ).
             add( "perfAllowance", l.getPerfAllowance() ).
-            add( "activity", JsonUtils.getArray( l.getActivity() ) ).
-            build();
+            add( "activity", JsonUtils.getArray( l.getActivity() ) );
+    
+    public static final Function<IntermediateLocation, JsonObject> toJson = l -> toJsonBuilder.apply( l ).build();
 
     private final LocalTime workArrival;
     private final LocalTime workDeparture;
@@ -100,13 +102,11 @@ public class IntermediateLocation
 
         // Added Oct 22 2014: If workPass is set then we ignore public times as they are always 00:00
         this.workPass = workPass;
-        if( workPass == null )
-        {
+        if( workPass == null ) {
             this.pubArrival = pubArrival;
             this.pubDeparture = pubDeparture;
         }
-        else
-        {
+        else {
             this.pubArrival = null;
             this.pubDeparture = null;
         }
@@ -193,4 +193,9 @@ public class IntermediateLocation
         return workPass != null;
     }
 
+    @Override
+    public LocalTime getTime()
+    {
+        return isPass() ? getWorkPass() : getWorkDeparture();
+    }
 }

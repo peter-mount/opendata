@@ -74,12 +74,10 @@ public class TrainActivation
          * the location at which the train starts, otherwise the STANOX of the scheduled origin location. If this field
          * is populated, it will be typically be in response to a VAR issued through VSTP or SCHEDULE.
          */
-        if( tp_origin_stanox > 0 )
-        {
+        if( tp_origin_stanox > 0 ) {
             this.tp_origin_stanox = tp_origin_stanox;
         }
-        else
-        {
+        else {
             this.tp_origin_stanox = sched_origin_stanox;
         }
 
@@ -95,10 +93,15 @@ public class TrainActivation
         this.schedule_start_date = schedule_start_date;
     }
 
+    @Override
+    public long getTimestamp()
+    {
+        return getOrigin_dep_timestamp();
+    }
+
     public synchronized TrainId getTrainId()
     {
-        if( trainId == null )
-        {
+        if( trainId == null ) {
             TrainDate td = new TrainDate( schedule_start_date.getTime() ).//
                     clearTime().
                     setHour( 6 );
@@ -226,100 +229,80 @@ public class TrainActivation
     @Override
     public boolean equals( Object obj )
     {
-        if( obj == null )
-        {
+        if( obj == null ) {
             return false;
         }
-        if( getClass() != obj.getClass() )
-        {
+        if( getClass() != obj.getClass() ) {
             return false;
         }
         final TrainActivation other = (TrainActivation) obj;
         if( (this.schedule_source == null) ? (other.schedule_source != null) : !this.schedule_source.equals(
-                other.schedule_source ) )
-        {
+                other.schedule_source ) ) {
             return false;
         }
         if( (this.train_file_address == null) ? (other.train_file_address != null) : !this.train_file_address.equals(
-                other.train_file_address ) )
-        {
+                other.train_file_address ) ) {
             return false;
         }
         if( this.schedule_end_date != other.schedule_end_date && (this.schedule_end_date == null || !this.schedule_end_date.
                                                                   equals(
-                                                                  other.schedule_end_date )) )
-        {
+                                                                  other.schedule_end_date )) ) {
             return false;
         }
         if( (this.getTrain_id() == null) ? (other.getTrain_id() != null) : !this.getTrain_id().
-                equals( other.getTrain_id() ) )
-        {
+                equals( other.getTrain_id() ) ) {
             return false;
         }
         if( this.tp_origin_timestamp != other.tp_origin_timestamp && (this.tp_origin_timestamp == null || !this.tp_origin_timestamp.
                                                                       equals(
-                                                                      other.tp_origin_timestamp )) )
-        {
+                                                                      other.tp_origin_timestamp )) ) {
             return false;
         }
-        if( this.creation_timestamp != other.creation_timestamp )
-        {
+        if( this.creation_timestamp != other.creation_timestamp ) {
             return false;
         }
-        if( this.tp_origin_stanox != other.tp_origin_stanox )
-        {
+        if( this.tp_origin_stanox != other.tp_origin_stanox ) {
             return false;
         }
-        if( this.origin_dep_timestamp != other.origin_dep_timestamp )
-        {
+        if( this.origin_dep_timestamp != other.origin_dep_timestamp ) {
             return false;
         }
         if( (this.train_service_code == null) ? (other.train_service_code != null) : !this.train_service_code.equals(
-                other.train_service_code ) )
-        {
+                other.train_service_code ) ) {
             return false;
         }
-        if( this.getToc_id() != other.getToc_id() )
-        {
+        if( this.getToc_id() != other.getToc_id() ) {
             return false;
         }
         if( (this.d1266_record_number == null) ? (other.d1266_record_number != null) : !this.d1266_record_number.equals(
-                other.d1266_record_number ) )
-        {
+                other.d1266_record_number ) ) {
             return false;
         }
         if( (this.train_call_type == null) ? (other.train_call_type != null) : !this.train_call_type.equals(
-                other.train_call_type ) )
-        {
+                other.train_call_type ) ) {
             return false;
         }
-        if( (this.train_uid == null) ? (other.train_uid != null) : !this.train_uid.equals( other.train_uid ) )
-        {
+        if( (this.train_uid == null) ? (other.train_uid != null) : !this.train_uid.equals( other.train_uid ) ) {
             return false;
         }
         if( (this.train_call_mode == null) ? (other.train_call_mode != null) : !this.train_call_mode.equals(
-                other.train_call_mode ) )
-        {
+                other.train_call_mode ) ) {
             return false;
         }
         if( (this.schedule_type == null) ? (other.schedule_type != null) : !this.schedule_type.equals(
-                other.schedule_type ) )
-        {
+                other.schedule_type ) ) {
             return false;
         }
-        if( this.sched_origin_stanox != other.sched_origin_stanox )
-        {
+        if( this.sched_origin_stanox != other.sched_origin_stanox ) {
             return false;
         }
         if( (this.schedule_wtt_id == null) ? (other.schedule_wtt_id != null) : !this.schedule_wtt_id.equals(
-                other.schedule_wtt_id ) )
-        {
+                other.schedule_wtt_id ) ) {
             return false;
         }
         if( this.schedule_start_date != other.schedule_start_date && (this.schedule_start_date == null || !this.schedule_start_date.
                                                                       equals(
-                                                                      other.schedule_start_date )) )
-        {
+                                                                      other.schedule_start_date )) ) {
             return false;
         }
         return true;
@@ -330,8 +313,7 @@ public class TrainActivation
     {
         int r = getTrain_id().
                 compareTo( o.getTrain_id() );
-        if( r == 0 )
-        {
+        if( r == 0 ) {
             r = schedule_start_date.compareTo( o.schedule_start_date );
         }
         return r;

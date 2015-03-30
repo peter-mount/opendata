@@ -9,6 +9,7 @@ import java.time.LocalTime;
 import java.util.function.Function;
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.util.Activity;
 import uk.trainwatch.util.JsonUtils;
@@ -40,7 +41,7 @@ public class TerminatingLocation
             JsonUtils.getEnumArray( Activity.class, o, "activity" )
     );
 
-    public static final Function<TerminatingLocation, JsonObject> toJson = l -> Json.createObjectBuilder().
+    public static final Function<TerminatingLocation, JsonObjectBuilder> toJsonBuilder = l -> Json.createObjectBuilder().
             add( "type", l.getRecordType().
                  toString() ).
             add( "tiploc", l.getLocation().
@@ -49,8 +50,9 @@ public class TerminatingLocation
             add( "pubArrival", TimeUtils.toJson( l.getPublicArrival() ) ).
             add( "platform", l.getPlatform() ).
             add( "path", l.getPath() ).
-            add( "activity", JsonUtils.getArray( l.getActivity() ) ).
-            build();
+            add( "activity", JsonUtils.getArray( l.getActivity() ) );
+
+    public static final Function<TerminatingLocation, JsonObject> toJson = l -> toJsonBuilder.apply( l ).build();
 
     private final LocalTime workArrival;
     private final LocalTime pubArrival;
@@ -104,4 +106,9 @@ public class TerminatingLocation
         return activity;
     }
 
+    @Override
+    public LocalTime getTime()
+    {
+        return getWorkArrival();
+    }
 }

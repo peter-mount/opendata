@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import uk.trainwatch.nrod.rtppm.sql.Operator;
 import uk.trainwatch.nrod.rtppm.sql.OperatorManager;
+import uk.trainwatch.nrod.trust.model.TrustMovement;
 
 /**
  * Handles the storage of current data
@@ -25,6 +27,7 @@ import uk.trainwatch.nrod.rtppm.sql.OperatorManager;
  * @author peter
  */
 public enum TrustCache
+        implements Consumer<TrustMovement>
 {
 
     INSTANCE;
@@ -114,4 +117,11 @@ public enum TrustCache
                      () -> "Expired cache for toc " + toc + " size " + finalSize + " expired " + (initialSize - finalSize) );
         } );
     }
+
+    @Override
+    public void accept( TrustMovement m )
+    {
+        getTrust( m.getToc_id(), m.getTrain_id() ).accept( m );
+    }
+
 }

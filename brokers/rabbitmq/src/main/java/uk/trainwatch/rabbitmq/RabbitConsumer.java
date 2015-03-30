@@ -21,7 +21,7 @@ public class RabbitConsumer
         implements Consumer<byte[]>
 {
 
-    private static final Logger LOG = Logger.getLogger(RabbitConsumer.class.getName() );
+    private static final Logger LOG = Logger.getLogger( RabbitConsumer.class.getName() );
     /**
      * Number of reconnect attempts to post
      */
@@ -31,6 +31,11 @@ public class RabbitConsumer
     private final String topic;
     private final String routingKey;
     private final int hashCode;
+
+    public RabbitConsumer( RabbitConnection connection, String routingKey )
+    {
+        this( connection, RabbitMQ.DEFAULT_TOPIC, routingKey );
+    }
 
     public RabbitConsumer( RabbitConnection connection, String topic, String routingKey )
     {
@@ -43,12 +48,9 @@ public class RabbitConsumer
     @Override
     public synchronized void accept( byte[] t )
     {
-        if( t != null )
-        {
-            for( int attempt = 0; attempt < ATTEMPTS; attempt++ )
-            {
-                try
-                {
+        if( t != null ) {
+            for( int attempt = 0; attempt < ATTEMPTS; attempt++ ) {
+                try {
                     LOG.log( Level.FINE,
                              () -> "Publishing " + t.length + " bytes to " + topic + " routing " + routingKey );
 
@@ -57,8 +59,7 @@ public class RabbitConsumer
                     return;
                 }
                 catch( IOException |
-                       UncheckedIOException ex )
-                {
+                       UncheckedIOException ex ) {
                     LOG.log( Level.SEVERE, "On topic " + topic + " routing " + routingKey, ex );
                     connection.close();
                 }
@@ -77,8 +78,7 @@ public class RabbitConsumer
     @Override
     public boolean equals( Object obj )
     {
-        if( obj == null || getClass() != obj.getClass() )
-        {
+        if( obj == null || getClass() != obj.getClass() ) {
             return false;
         }
         final RabbitConsumer other = (RabbitConsumer) obj;

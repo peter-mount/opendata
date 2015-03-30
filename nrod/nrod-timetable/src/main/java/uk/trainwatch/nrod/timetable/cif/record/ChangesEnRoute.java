@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.nrod.timetable.cif.record;
 
+import java.time.LocalTime;
 import java.util.function.Function;
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -241,6 +242,12 @@ public class ChangesEnRoute
     public int getUicCode()
     {
         return uicCode;
+    }
+
+    @Override
+    public LocalTime getTime()
+    {
+        return null;
     }
 
 }

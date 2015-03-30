@@ -12,14 +12,20 @@ import java.util.TimerTask;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.json.Json;
+import javax.json.JsonObject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.annotation.WebListener;
+import uk.trainwatch.nrod.trust.model.TrainActivation;
 import uk.trainwatch.nrod.trust.model.TrustMovement;
 import uk.trainwatch.nrod.trust.model.TrustMovementFactory;
 import uk.trainwatch.rabbitmq.RabbitConnection;
+import uk.trainwatch.rabbitmq.RabbitConsumer;
 import uk.trainwatch.rabbitmq.RabbitMQ;
+import uk.trainwatch.util.Consumers;
+import uk.trainwatch.util.Functions;
 import uk.trainwatch.util.JsonUtils;
 import uk.trainwatch.util.counter.RateMonitor;
 import uk.trainwatch.util.sql.DBContextListener;
@@ -59,25 +65,36 @@ public class TrustContextListener
         LOG.log( Level.INFO, () -> "Connecting to MQ" );
 
         // Connect to rabbitmq
-        try
-        {
+        try {
             rabbitConnection = new RabbitConnection(
                     InitialContext.doLookup( "java:/comp/env/rabbit/uktrain/user" ),
                     InitialContext.doLookup( "java:/comp/env/rabbit/uktrain/password" ),
                     InitialContext.doLookup( "java:/comp/env/rabbit/uktrain/host" )
             );
 
-            Consumer<TrustMovement> consumer = m -> TrustCache.INSTANCE.getTrust( m.getToc_id(), m.getTrain_id() ).
-                    accept( m );
+            // Activate any timetables
+            String activationRoutingKey = "trust.activaton." + RabbitMQ.getHostname();
+            Consumer<byte[]> ttResolverPublisher = new RabbitConsumer( rabbitConnection, activationRoutingKey );
+            RabbitMQ.queueDurableStream( rabbitConnection, "trust.activation", activationRoutingKey, s -> s.
+                                         map( RabbitMQ.toString ).
+                                         map( JsonUtils.parseJsonObject ).
+                                         map( Functions.castTo( JsonObject.class ) ).
+                                         filter( Objects::nonNull ).
+                                         forEach( new TimetableResolver() ) );
 
+            // Consume raw trust mvt feed
             RabbitMQ.queueDurableStream( rabbitConnection, "trust.status", "nr.trust.mvt", s -> s.
-                    map( RabbitMQ.toString ).
-                    map( JsonUtils.parseJsonObject ).
-                    map( TrustMovementFactory.INSTANCE ).
-                    filter( Objects::nonNull ).
-                    forEach( consumer.andThen( RateMonitor.log( LOG, "Receive Trust" ) ) ) );
-        } catch( NamingException ex )
-        {
+                                         map( RabbitMQ.toString ).
+                                         map( JsonUtils.parseJsonObject ).
+                                         map( TrustMovementFactory.INSTANCE ).
+                                         filter( Objects::nonNull ).
+                                         forEach( TrustCache.INSTANCE.
+                                                 andThen( new TimetableActivator( ttResolverPublisher ) ).
+                                                 andThen( RateMonitor.log( LOG, "Receive Trust" ) ) )
+            );
+
+        }
+        catch( NamingException ex ) {
             Logger.getLogger( TrustContextListener.class.getName() ).
                     log( Level.SEVERE, null, ex );
             throw new SQLException( ex );
@@ -91,17 +108,14 @@ public class TrustContextListener
     {
         LOG.log( Level.INFO, "Shutting down Trust" );
 
-        try
-        {
-            if( rabbitConnection != null )
-            {
+        try {
+            if( rabbitConnection != null ) {
                 rabbitConnection.close();
                 rabbitConnection = null;
             }
-        } finally
-        {
-            if( timer != null )
-            {
+        }
+        finally {
+            if( timer != null ) {
                 timer.cancel();
                 timer = null;
             }

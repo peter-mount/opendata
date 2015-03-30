@@ -35,6 +35,12 @@ public class ChangeOfOrigin
         super( TrustMovementType.CHANGE_OF_ORIGIN );
     }
 
+    @Override
+    public long getTimestamp()
+    {
+        return getDep_timestamp();
+    }
+
     public String getReason_code()
     {
         return reason_code;

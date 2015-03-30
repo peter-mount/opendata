@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.nrod.timetable.cif.record;
 
+import java.time.LocalTime;
 import uk.trainwatch.nrod.location.Tiploc;
 
 /**
@@ -46,4 +47,6 @@ public abstract class Location
     {
         return false;
     }
+
+    public abstract LocalTime getTime();
 }

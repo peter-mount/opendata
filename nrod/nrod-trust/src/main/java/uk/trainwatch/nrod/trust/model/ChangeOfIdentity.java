@@ -29,6 +29,13 @@ public class ChangeOfIdentity
         super( TrustMovementType.CHANGE_OF_IDENTITY );
     }
 
+    @Override
+    public long getTimestamp()
+    {
+        return getEvent_timestamp();
+    }
+
+    
     public String getCurrent_train_id()
     {
         return current_train_id;

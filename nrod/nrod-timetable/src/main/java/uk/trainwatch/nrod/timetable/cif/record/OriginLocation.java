@@ -9,6 +9,7 @@ import java.time.LocalTime;
 import java.util.function.Function;
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.timetable.util.Activity;
 import uk.trainwatch.util.JsonUtils;
@@ -49,7 +50,7 @@ public class OriginLocation
             JsonUtils.getInt( o, "perfAllowance" )
     );
 
-    public static final Function<OriginLocation, JsonObject> toJson = l -> Json.createObjectBuilder().
+    public static final Function<OriginLocation, JsonObjectBuilder> toJsonBuilder = l -> Json.createObjectBuilder().
             add( "type", l.getRecordType().
                  toString() ).
             add( "tiploc", l.getLocation().
@@ -61,8 +62,9 @@ public class OriginLocation
             add( "engAllowance", l.getEngAllowance() ).
             add( "pathAllowance", l.getPathAllowance() ).
             add( "perfAllowance", l.getPerfAllowance() ).
-            add( "activity", JsonUtils.getArray( l.getActivity() ) ).
-            build();
+            add( "activity", JsonUtils.getArray( l.getActivity() ) );
+
+    public static final Function<OriginLocation, JsonObject> toJson = l -> toJsonBuilder.apply( l ).build();
 
     private final LocalTime workDeparture;
     private final LocalTime publicDeparture;
@@ -138,6 +140,12 @@ public class OriginLocation
     public int getPerfAllowance()
     {
         return perfAllowance;
+    }
+
+    @Override
+    public LocalTime getTime()
+    {
+        return getWorkDeparture();
     }
 
 }

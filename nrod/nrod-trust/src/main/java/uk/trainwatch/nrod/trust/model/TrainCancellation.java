@@ -53,6 +53,10 @@ public class TrainCancellation
         return original_data_source;
     }
 
+    @Override
+    public long getTimestamp(){
+        return getCanx_timestamp();
+    }
     public void setOriginal_data_source( String original_data_source )
     {
         this.original_data_source = original_data_source;

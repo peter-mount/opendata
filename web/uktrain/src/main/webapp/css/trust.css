@@ -63,12 +63,24 @@
     overflow: auto;
 }
 
+#trainScheduleBody .schedule {
+    font-size: 0.8em;
+}
+#trainScheduleBody .schedule tr {
+    line-height: 1em;
+}
+#trainScheduleBody .schedule th, #trainScheduleBody .schedule td {
+    line-height: 1em;
+    padding: 0;
+    margin:0;
+}
+
 #trainDetails {
     position: absolute;
-    left:25%;
-    right:25%;
-    top:25%;
-    bottom:25%;
+    left:10%;
+    right:10%;
+    top:10%;
+    bottom:10%;
     overflow: auto;
     border: 1px solid black;
     border-top-left-radius: 1em;
@@ -85,6 +97,16 @@
     right:0;
     top:2.5em;
     bottom:0;
+}
+
+#trustBody .ui-tabs-panel {
+    position: absolute;
+    top:2em;
+    bottom:0;
+    left:0;
+    right:0;
+    border: 1px solid black;
+    background: #ddd;
     overflow: hidden;
     overflow-x: scroll;
 }
@@ -129,12 +151,12 @@
 
 .trustStream {
     position: absolute;
-    top: 2em;
+    top: 0;
     bottom:0;
-    border: 1px solid black;
     padding: 1px;
     margin: 1px;
     font-size: 0.8em;
+    background: #fff;
 }
 .trustStream .trustStreamContent {
     position: absolute;
@@ -164,6 +186,9 @@
     font-size: 0.8em;
     overflow:hidden;
 }
+
+#trainDetailBody .info table {width:100%;}
+
 #trainDetailBody .info,
 .train .info {
     color: #000;
@@ -174,7 +199,11 @@
 .train .info {font-size: 0.8em;}
 .info th {text-align: right;}
 .info td {text-align: left;}
-
+.info th.rowh {
+    border-bottom: 1px solid black;
+    padding-top: 0.5em;
+    text-align: center;
+}
 .train th {
     width: 5em;
 }
@@ -222,4 +251,112 @@
     border-width: 0;
     padding: 1em 1.4em;
     background: none;
+}
+
+.schedule {
+    border-collapse: collapse;
+}
+.schedule tr {
+    height: 1em;
+    border-collapse: collapse;
+    margin:0;
+    padding:0;
+}
+.schedule td {
+    border-collapse: collapse;
+    border: 0;
+    margin:0;
+    padding:0;
+}
+.schedule td.netstart,
+.schedule td.netpass,
+.schedule td.netstop,
+.schedule td.netend,
+.schedule td.netjoin, .schedule td.netjoin2,
+.schedule td.netdivide, .schedule td.netdivide2,
+.schedule td.netnextfirst,
+.schedule td.netnextinter, .schedule td.netnextinter2,
+.schedule td.netnextlast,
+.schedule td.netprevfirst,
+.schedule td.netprevinter, .schedule td.netprevinter2,
+.schedule td.netprevlast,
+.schedule td.netblank {
+    width: 1em;
+}
+
+.schedule td.netpass {
+    background: white url("/images/net/STR.png") no-repeat top left;
+    border-right: 1px solid white;
+}
+
+.schedule td.netstart {
+    background: white url("/images/net/KBHFa.png") no-repeat top left;
+    border-right: 1px solid white;
+}
+
+.schedule td.netstop {
+    background: white url("/images/net/BHF.png") no-repeat top left;
+    border-right: 1px solid white;
+}
+
+.schedule td.netend {
+    background: white url("/images/net/KBHFe.png") no-repeat top left;
+    border-right: 1px solid white;
+    border-bottom: 1px solid white;
+}
+
+.schedule td.netjoin {
+    background: white url("/images/net/ABZrg.png") no-repeat top left;
+}
+
+.schedule td.netjoin2 {
+    background: white url("/images/net/STRq.png") no-repeat top left;
+    border-right: 1px solid white;
+}
+
+.schedule td.netdivide {
+    background: white url("/images/net/ABZlf.png") no-repeat top left;
+}
+
+.schedule td.netdivide2 {
+    background: white url("/images/net/CONTfq.png") no-repeat top left;
+    border-right: 1px solid white;
+}
+
+.schedule td.netnextfirst {
+    background: white url("/images/net/KBHFxe.png") no-repeat top left;
+    border-right: 1px solid white;
+}
+
+.schedule td.netnextinter {
+    background: white url("/images/net/exABZlf.png") no-repeat top left;
+}
+
+.schedule td.netnextinter2 {
+    background: white url("/images/net/exCONTfq.png") no-repeat top left;
+    border-right: 1px solid white;
+}
+
+.schedule td.netnextlast {
+    background: white url("/images/net/exCONTf.png") no-repeat top left;
+    border-right: 1px solid white;
+    border-bottom: 1px solid white;
+}
+
+.schedule td.netprevfirst {
+    background: white url("/images/net/exCONTg.png") no-repeat top left;
+    border-right: 1px solid white;
+}
+
+.schedule td.netprevinter {
+    background: white url("/images/net/exABZrg.png") no-repeat top left;
+}
+.schedule td.netprevinter2 {
+    background: white url("/images/net/exSTRq.png") no-repeat top left;
+    border-right: 1px solid white;
+}
+
+.schedule td.netprevlast {
+    background: white url("/images/net/KBHFxa.png") no-repeat top left;
+    border-right: 1px solid white;
 }

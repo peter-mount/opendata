@@ -1,10 +1,27 @@
+function cell(r, v) {
+    return $('<td></td>').text(v === null ? ' ' : v).appendTo(r);
+}
+function header(r, v) {
+    return $('<th></th>').text(v === null ? ' ' : v).appendTo(r);
+}
 function row(t, l) {
-    var d = $('<td></td>');
+    var d = $('<td valign="top"></td>');
     $('<tr></tr>').
-            append('<th>' + l + '</th>').
+            append('<th valign="top">' + l + '</th>').
             append(d).
             appendTo(t);
     return d;
+}
+function isun(v) {
+    return typeof v === 'undefined';
+}
+function rowh(t, l) {
+    return $('<th></th>').text(l).attr({'colspan': 2}).addClass('rowh').appendTo($('<tr></tr>').appendTo(t));
+}
+function stime(t) {
+    if (t)
+        return t.substr(0, 5) + (t.length > 5 ? '½' : ' ');
+    return '';
 }
 function time(t) {
     if (t)
@@ -27,6 +44,7 @@ function csdiv(i, c) {
 var streamWidth = 20;
 
 var Tab = (function () {
+    Tab.all = [];
     var tabIdSeq = 0;
     function Tab(title) {
         this.tabId = tabIdSeq++;
@@ -36,6 +54,7 @@ var Tab = (function () {
 
         this.li = $('<li><a href="#tabs-' + this.tabId + '">' + title + '</li>');
         this.div = $("<div'></div>").attr({id: 'tabs-' + this.tabId});
+        Tab.all.push(this);
         Tab.tabs.find(".ui-tabs-nav").append(this.li);
         Tab.tabs.append(this.div);
         Tab.tabs.tabs("refresh");
@@ -47,7 +66,7 @@ var Tab = (function () {
     // Layout streams so they are back in sequence
     Tab.prototype.layout = function () {
         this.div.find('.trustStream').each(function (i, s) {
-            $(s).css({left: (streamWidth * i) + 'em'});
+            $(s).css({left: ((streamWidth + 0.4) * i) + 'em'});
         });
     };
 
@@ -60,10 +79,13 @@ var Tab = (function () {
         stream.refresh();
     };
 
-    Tab.prototype.refreshAll = function () {
+    Tab.refreshAll = function () {
         Workbench.queueUpdate();
-        $.each(this.streams, function (i, s) {
-            s.refresh();
+        $.each(Tab.all, function (i, t) {
+            if (t.div.attr('aria-expanded') === 'true')
+                $.each(t.streams, function (i, s) {
+                    s.refresh();
+                });
         });
     };
 
@@ -117,11 +139,30 @@ var Stream = (function () {
         var d = $('#trainDetails');
         if (d.length === 0)
             d = cdiv('trainDetails').appendTo($('#trust'));
-        d.empty();
-        Stream.newPane(d, eid, e, true);
+        //Stream.newPane(d, eid, e, true);
+        d.empty().text("Please wait...");
+        $.ajax({
+            url: '/api/rail/1/trust/dashboard/details/' + e.toc + '/' + e.id,
+            type: 'GET',
+            dataType: 'json',
+            async: true,
+            error: function () {
+                d.empty().text("Failed to retrieve details");
+                setTimeout(Stream.hideDetails, 2000);
+            },
+            statusCode: {
+                200: function (v) {
+                    if (v === '')
+                        d.empty().text('Sorry that entry does not exist');
+                    else
+                        Stream.newPane(d, eid, v[0], true);
+                }
+            }
+        });
     };
 
     Stream.newPane = function (d, eid, e, detailed) {
+        d.empty();
         var tt = sdiv('title').appendTo(d).text(e.id);
         if (detailed)
             d = cdiv('trainDetailBody').appendTo(
@@ -135,15 +176,23 @@ var Stream = (function () {
 
         var a = e.activation;
         if (a) {
+            if (detailed)
+                rowh(t, 'Activation Details');
             tt.text(a.id + ' ' + time(a.time) + ' from ' + a.location.location);
             row(t, 'Schedule').text(a.id);
-            row(t, 'Departs').text(a.location.location);
-            row(t, 'at').text(time(a.time));
+            if (detailed)
+                row(t, 'Departs').text(a.location.location + ' at ' + time(a.time));
+            else {
+                row(t, 'Departs').text(a.location.location);
+                row(t, 'at').text(time(a.time));
+            }
         }
 
         var c = e.cancellation;
         if (c) {
-            row(t, 'Canceled').text(time(c.time));
+            if (detailed)
+                rowh(t, 'Cancellation Details');
+            row(t, 'Cancelled').text(time(c.time));
 
             var cc = Ref.cancCode[c.reason];
             if (detailed && typeof cc !== 'undefined')
@@ -156,23 +205,63 @@ var Stream = (function () {
 
         var m = e.movement;
         if (m) {
+            if (detailed)
+                rowh(t, 'Latest movement');
+            row(t, detailed ? 'Last report' : 'Location').text(m.location.location);
             var delay = Math.floor(m.delay / 60);
             if (delay < 0)
                 row(t, 'Early').text(-delay);
             else if (delay > 0 && !m.offroute)
                 row(t, 'Delay').text(delay);
 
-            row(t, 'Last report').text(m.location.location);
             row(t, 'Time').text(time(m.time));
             if (m.offroute)
                 row(t, 'Warning').text('On Diversion');
             if (m.terminated)
                 row(t, 'Note').text('Train Terminated');
         }
+
+        if (e.schedule && detailed) {
+            var s = e.schedule;
+
+            // May be null if we have not resolved the schedule
+            var sd = s.schedule;
+            if (sd) {
+                rowh(t, 'Schedule');
+                row(t, 'UID').text(sd.trainUid);
+                row(t, 'ID').text(sd.trainIdentity);
+                row(t, 'Dates').text(sd.runsFrom + ' to ' + sd.runsTo);
+                // daysRun here
+                row(t, 'Type').text(sd.stpIndicator + ' ' + sd.trainStatus);
+            }
+
+            rowh(t, 'Schedule & Movements');
+            var lt = $('<table></table>').
+                    addClass('schedule').
+                    appendTo(d).
+                    append('<tr><th colspan="3">Trust</th><th rowspan="2" valign="bottom">Location</th><th colspan="2">GBTT</th><th colspan="3">Working Timetable</th></tr>').
+                    append('<tr><th></th><th>Actl</th><th>Delay</th><th>Arr</th><th>Dep</th><th>Arr</th><th>Dep</th><th>Pass</th></tr>');
+            $.each(s.locations, function (i, l) {
+                var c = 'netpass';
+                if (!l.workPass && !l.offroute)
+                    c = (i + 1) === s.locations.length ? 'netend' : (i ? 'netstop' : 'netstart');
+
+                var r = $('<tr></tr>').appendTo(lt);
+                cell(r, '').addClass(c);
+                cell(r, isun(l.time) ? '' : time(l.time));
+                cell(r, isun(l.delay) ? '' : Math.floor(l.delay / 60));
+                cell(r, isun(l.location) ? l.tiploc : l.location.location);
+                cell(r, stime(l.pubArrival));
+                cell(r, stime(l.pubDeparture));
+                cell(r, stime(l.workArrival));
+                cell(r, stime(l.workDeparture));
+                cell(r, stime(l.workPass));
+            });
+        }
     };
 
     Stream.prototype.refresh = function () {
-        //console.log('refresh', this.id, this.api);
+        console.log('refresh', this.id, this.api);
         var stream = this;
         $.ajax({
             url: '/api/rail/1/trust/dashboard/' + stream.api,
@@ -221,7 +310,7 @@ var Workbench = (function () {
 
         $('#refreshRate select').change(function (e) {
             Workbench.refreshRate = 60000 * $('#refreshRate select').val();
-            Stream.refreshAll();
+            Tab.refreshAll();
         });
 
         Tab.tabs = $('#trustBody').tabs();
@@ -236,7 +325,7 @@ var Workbench = (function () {
             tab.addStream(e[0] + '/80', 'Southeastern: ' + e[1]);
         });
 
-        tab.refreshAll();
+        Tab.refreshAll();
 
 //        var tab = new Tab('Southern');
 //        $.each([
@@ -252,7 +341,7 @@ var Workbench = (function () {
 
     Workbench.queueUpdate = function () {
         clearTimeout(Workbench.timer);
-        Workbench.timer = setTimeout(Stream.refreshAll, Workbench.refreshRate);
+        Workbench.timer = setTimeout(Tab.refreshAll, Workbench.refreshRate);
     };
 
     return Workbench;

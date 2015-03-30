@@ -53,5 +53,7 @@ public abstract class TrustMovement
         this.train_id = train_id;
     }
 
+    public abstract long getTimestamp();
+
     public abstract void accept( TrustMovementVisitor v );
 }

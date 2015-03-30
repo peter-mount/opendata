@@ -5,6 +5,11 @@
  */
 package uk.trainwatch.web.trust;
 
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.json.Json;
@@ -17,7 +22,16 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import uk.trainwatch.nrod.location.Tiploc;
 import uk.trainwatch.nrod.location.TrainLocationFactory;
+import uk.trainwatch.nrod.timetable.cif.record.ChangesEnRoute;
+import uk.trainwatch.nrod.timetable.cif.record.IntermediateLocation;
+import uk.trainwatch.nrod.timetable.cif.record.Location;
+import uk.trainwatch.nrod.timetable.cif.record.OriginLocation;
+import uk.trainwatch.nrod.timetable.cif.record.RecordType;
+import uk.trainwatch.nrod.timetable.cif.record.RecordVisitor;
+import uk.trainwatch.nrod.timetable.cif.record.TerminatingLocation;
+import uk.trainwatch.nrod.timetable.model.ScheduleJsonBuilder;
 import uk.trainwatch.nrod.trust.model.TrainActivation;
 import uk.trainwatch.nrod.trust.model.TrainCancellation;
 import uk.trainwatch.nrod.trust.model.TrainMovement;
@@ -38,7 +52,7 @@ public class TrustRest
     @Produces(MediaType.APPLICATION_JSON)
     public Response details( @PathParam("toc") int toc, @PathParam("id") String id )
     {
-        return getResponse( TrustStreams.details( toc, id ) );
+        return getResponse( TrustStreams.details( toc, id ), true );
     }
 
     @Path("/activations/{toc}")
@@ -97,41 +111,15 @@ public class TrustRest
         return getResponse( TrustStreams.issues( toc ) );
     }
 
-    /*
-     @Path( "/current/{toc}" )
-     @GET
-     @Produces( MediaType.APPLICATION_JSON )
-     public Response current( @PathParam( "toc" ) int toc )
-     {
-     return getResponse( TrustCache.INSTANCE.getTrains( toc ).stream() );
-     }
-
-     @Path( "/delay/low/{toc}" )
-     @GET
-     @Produces( MediaType.APPLICATION_JSON )
-     public Response delayLow( @PathParam( "toc" ) int toc )
-     {
-     return getResponse( TrustCache.INSTANCE.getTrains( toc ).stream().
-     filter( Trust::hasMovement ).
-     sorted( ( a, b ) -> Long.compare( a.getDelay(), b.getDelay() ) )
-     );
-     }
-
-     @Path( "/delay/high/{toc}" )
-     @GET
-     @Produces( MediaType.APPLICATION_JSON )
-     public Response delayHigh( @PathParam( "toc" ) int toc )
-     {
-     return getResponse( TrustCache.INSTANCE.getTrains( toc ).stream().
-     filter( Trust::hasMovement ).
-     sorted( ( a, b ) -> -Long.compare( a.getDelay(), b.getDelay() ) )
-     );
-     }
-     */
     private Response getResponse( Stream<Trust> trains )
     {
+        return getResponse( trains, false );
+    }
+
+    private Response getResponse( Stream<Trust> trains, boolean detailed )
+    {
         JsonArrayBuilder a = Json.createArrayBuilder();
-        trains.forEach( t -> add( a, t ) );
+        trains.forEach( t -> add( a, t, detailed ) );
         CacheControl cache = new CacheControl();
         cache.setMaxAge( 60 );
         cache.setSMaxAge( 60 );
@@ -140,7 +128,7 @@ public class TrustRest
                 build();
     }
 
-    private void add( JsonArrayBuilder a, Trust t )
+    private void add( JsonArrayBuilder a, Trust t, boolean detailed )
     {
         JsonObjectBuilder o = Json.createObjectBuilder().
                 add( "id", t.getId() ).
@@ -166,14 +154,222 @@ public class TrustRest
         }
         if( t.getMovement() != null ) {
             TrainMovement v = t.getMovement();
-            o.add( "movement", Json.createObjectBuilder().
-                   add( "delay", v.getDelay() ).
-                   add( "location", TrainLocationFactory.getJsonByStanox( v.getLoc_stanox() ) ).
-                   add( "time", TimeUtils.toJson( v.getActual_timestamp() ) ).
-                   add( "offroute", v.isOffroute_ind() ).
-                   add( "terminated", v.isTrain_terminated() )
+            o.add( "movement", addMovement( Json.createObjectBuilder(), v ) );
+        }
+
+        if( detailed ) {
+            JsonObjectBuilder s;
+
+            List<Location> locations = new ArrayList<>();
+            if( Trust.isScheduled( t ) ) {
+                s = extractSchedule( locations, t );
+            }
+            else {
+                s = Json.createObjectBuilder();
+                s.addNull( "schedule" );
+            }
+
+            //extractMovements( locations, t );
+            s.add( "locations", Visitor.visit( locations ) );
+
+            o.add( "schedule", s );
+        }
+
+        a.add( o );
+    }
+
+    private static JsonObjectBuilder addMovement( JsonObjectBuilder b, TrainMovement v )
+    {
+        return b.add( "delay", v.getDelay() ).
+                add( "location", TrainLocationFactory.getJsonByStanox( v.getLoc_stanox() ) ).
+                add( "time", TimeUtils.toJson( v.getActual_timestamp() ) ).
+                add( "offroute", v.isOffroute_ind() ).
+                add( "terminated", v.isTrain_terminated() ).
+                //
+                add( "curTrainId", Objects.toString( v.getCurrent_train_id(), "" ) ).
+                add( "platform", Objects.toString( v.getPlatform(), "" ) ).
+                add( "fileAddress", Objects.toString( v.getTrain_file_address(), "" ) ).
+                add( "serviceCode", Objects.toString( v.getTrain_service_code(), "" ) ).
+                add( "varStat", Objects.toString( v.getVariation_status(), "" ) );
+    }
+
+    private JsonArrayBuilder extractMovements( Map<LocalTime, JsonObjectBuilder> map, Trust t )
+    {
+        return t.getMovements().
+                stream().
+                map( m -> {
+                    // Create a new entry
+                    // FIXME buggy as works on actual time so no delays managed
+                    JsonObjectBuilder b = map.computeIfAbsent(
+                            TimeUtils.getLocalDateTime( m.getActual_timestamp() ).toLocalTime(),
+                            k -> Json.createObjectBuilder().
+                            add( "location", TrainLocationFactory.getJsonByStanox( m.getLoc_stanox() ) )
+                    );
+
+                    return addMovement( b, m );
+                } ).
+                reduce( Json.createArrayBuilder(), JsonArrayBuilder::add, ( a, b ) -> a );
+    }
+
+    private JsonObjectBuilder extractSchedule( List<Location> schedule, Trust t )
+    {
+        ScheduleJsonBuilder v = new ScheduleJsonBuilder()
+        {
+
+            @Override
+            public void visit( OriginLocation ol )
+            {
+                schedule.add( ol );
+            }
+
+            @Override
+            public void visit( IntermediateLocation il )
+            {
+                schedule.add( il );
+            }
+
+            @Override
+            public void visit( TerminatingLocation tl )
+            {
+                schedule.add( tl );
+            }
+
+            @Override
+            public void visit( ChangesEnRoute s )
+            {
+            }
+
+        };
+        return v.visitBuilder( t.getSchedule() );
+    }
+
+    private static class UnscheduledLocation
+            extends Location
+    {
+
+        private final TrainMovement mvt;
+        private final LocalTime time;
+
+        public UnscheduledLocation( TrainMovement mvt, Tiploc loc )
+        {
+            super( RecordType.ZZ, loc );
+            this.mvt = mvt;
+            time = TimeUtils.getLocalDateTime( mvt.getActual_timestamp() ).toLocalTime();
+        }
+
+        public TrainMovement getMvt()
+        {
+            return mvt;
+        }
+
+        @Override
+        public LocalTime getTime()
+        {
+            return time;
+        }
+
+        @Override
+        public void accept( RecordVisitor v )
+        {
+            ((Visitor) v).visit( this );
+        }
+
+    }
+
+    public static class ScheduledLocation
+            extends UnscheduledLocation
+    {
+
+        private final Location loc;
+
+        public ScheduledLocation( TrainMovement mvt, Location loc )
+        {
+            super( mvt, loc.getLocation() );
+            this.loc = loc;
+        }
+
+        public Location getLoc()
+        {
+            return loc;
+        }
+
+        @Override
+        public void accept( RecordVisitor v )
+        {
+            ((Visitor) v).visit( this );
+        }
+
+    }
+
+    private static class Visitor
+            implements RecordVisitor
+    {
+
+        private final JsonArrayBuilder locations = Json.createArrayBuilder();
+
+        public static JsonArrayBuilder visit( List<Location> locations )
+        {
+            Visitor v = new Visitor();
+            locations.forEach( l -> l.accept( v ) );
+            return v.locations;
+        }
+
+        public void visit( UnscheduledLocation ul )
+        {
+            TrainMovement m = ul.getMvt();
+            locations.add( addMovement( Json.createObjectBuilder(), m ) );
+        }
+
+        public void visit( ScheduledLocation ul )
+        {
+            TrainMovement m = ul.getMvt();
+            JsonObjectBuilder b = null;
+
+            Location loc = ul.getLoc();
+            if( loc instanceof OriginLocation ) {
+                b = OriginLocation.toJsonBuilder.apply( (OriginLocation) loc );
+            }
+            else if( loc instanceof IntermediateLocation ) {
+                b = IntermediateLocation.toJsonBuilder.apply( (IntermediateLocation) loc );
+            }
+            else if( loc instanceof TerminatingLocation ) {
+                b = TerminatingLocation.toJsonBuilder.apply( (TerminatingLocation) loc );
+            }
+
+            // Note: b is null for a Location with types we are filtering out
+            if( b != null && loc != null ) {
+                b.add( "location", TrainLocationFactory.getJsonByTiploc( loc.getLocation().getKey() ) );
+            }
+            else {
+                b = Json.createObjectBuilder();
+            }
+
+            locations.add( addMovement( b, m ) );
+        }
+
+        @Override
+        public void visit( OriginLocation ol )
+        {
+            locations.add( OriginLocation.toJsonBuilder.apply( ol ).
+                    add( "location", TrainLocationFactory.getJsonByTiploc( ol.getLocation().getKey() ) )
             );
         }
-        a.add( o );
+
+        @Override
+        public void visit( IntermediateLocation il )
+        {
+            locations.add( IntermediateLocation.toJsonBuilder.apply( il ).
+                    add( "location", TrainLocationFactory.getJsonByTiploc( il.getLocation().getKey() ) )
+            );
+        }
+
+        @Override
+        public void visit( TerminatingLocation tl )
+        {
+            locations.add( TerminatingLocation.toJsonBuilder.apply( tl ).
+                    add( "location", TrainLocationFactory.getJsonByTiploc( tl.getLocation().getKey() ) )
+            );
+        }
+
     }
 }
