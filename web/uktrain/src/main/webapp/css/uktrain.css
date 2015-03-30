@@ -13,6 +13,39 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+/* New uktra.in skin */
+#main-outer{}
+#top-menu,#banner_left,#banner_right {
+    background: rgb(145,201,236);
+}
+#banner_left {}
+#banner_right {}
+
+
+#navbar {
+    background: cadetblue;
+    color: #000;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+#navbar a, #navbar a:visited {
+    margin-left: .2em;
+    margin-right: .2em;
+    text-decoration: underline;
+    text-decoration: none;
+    color: black;
+    font-weight: bold;
+    font-size: 0.8em;
+}
+
+#navbar a:hover {
+    color: #fff;
+    text-decoration: none;
+}
+
+#main-body {background:white;}
+
 /* 
     Created on : 15-Jul-2014, 19:03:29
     Author     : peter
@@ -49,21 +82,6 @@ limitations under the License.
     color: black;
 }
 
-#navbar {
-    border-top: 1px solid black;
-    border-bottom: 1px solid black;
-}
-
-#navbar a {
-    margin-left: .2em;
-    margin-right: .2em;
-    text-decoration: underline;
-    text-decoration: none;
-}
-
-#navbar a:hover {
-    text-decoration: underline;
-}
 #maincontent {
     padding: 2px;
     line-height: 1.4em;

@@ -43,13 +43,19 @@ public enum TrustCache
      * <p>
      * @param toc
      * @param trainId
-     * <p>
+     *                <p>
      * @return
      */
     public Trust getTrust( int toc, String trainId )
     {
         return trains.computeIfAbsent( toc, k -> new ConcurrentHashMap<>() ).
                 computeIfAbsent( trainId, id -> new Trust( toc, id ) );
+    }
+
+    public Trust getTrustIfPresent( int toc, String trainId )
+    {
+        return trains.getOrDefault( toc, Collections.emptyMap() ).
+                getOrDefault( trainId, null );
     }
 
     /**
@@ -61,11 +67,11 @@ public enum TrustCache
      */
     public Map<Integer, String> getTocs()
     {
-        return trains.keySet().stream().
-                collect( Collectors.toMap( Function.identity(), id ->
-                                {
-                                    Operator o = OperatorManager.INSTANCE.getOperator( id );
-                                    return o == null ? String.valueOf( id ) : o.getDisplay();
+        return trains.keySet().
+                stream().
+                collect( Collectors.toMap( Function.identity(), id -> {
+                    Operator o = OperatorManager.INSTANCE.getOperator( id );
+                    return o == null ? String.valueOf( id ) : o.getDisplay();
                 } ) );
     }
 
@@ -84,7 +90,8 @@ public enum TrustCache
 
     public Stream<Trust> getStream( int toc )
     {
-        return getTrains( toc ).stream();
+        return getTrains( toc ).
+                stream();
     }
 
     /**
@@ -95,8 +102,7 @@ public enum TrustCache
         final LocalDateTime expiryTime = LocalDateTime.now().
                 minusHours( MAX_AGE_HOURS );
 
-        trains.forEach( ( toc, tocTrains ) ->
-        {
+        trains.forEach( ( toc, tocTrains ) -> {
             final long initialSize = tocTrains.size();
             log.log( Level.FINE, () -> "Expiring cache for toc " + toc + " size " + initialSize );
 
@@ -105,7 +111,7 @@ public enum TrustCache
 
             final long finalSize = tocTrains.size();
             log.log( initialSize != finalSize ? Level.INFO : Level.FINE,
-                    () -> "Expired cache for toc " + toc + " size " + finalSize + " expired " + (initialSize - finalSize) );
+                     () -> "Expired cache for toc " + toc + " size " + finalSize + " expired " + (initialSize - finalSize) );
         } );
     }
 }

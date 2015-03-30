@@ -28,8 +28,7 @@ public class Streams
      */
     public static <T> Stream<T> stream( Stream<T> s )
     {
-        if( s == null )
-        {
+        if( s == null ) {
             return Stream.empty();
         }
         return s;
@@ -45,11 +44,25 @@ public class Streams
      */
     public static <T> Stream<T> stream( Collection<T> col )
     {
-        if( col == null || col.isEmpty() )
-        {
+        if( col == null || col.isEmpty() ) {
             return Stream.empty();
         }
         return col.stream();
+    }
+
+    /**
+     * Returns a stream containing e or an empty stream if that value is null.
+     * <p>
+     * Note: This is equivalent to Stream.ofNullable() present in Java 9.
+     * <p>
+     * @param <T>
+     * @param e
+     * <p>
+     * @return
+     */
+    public static <T> Stream<T> ofNullable( T e )
+    {
+        return e == null ? Stream.empty() : Stream.of( e );
     }
 
     /**
@@ -82,8 +95,7 @@ public class Streams
     {
         Objects.requireNonNull( streams );
         Stream<T> s = null;
-        for( Stream<? extends T> s2 : streams )
-        {
+        for( Stream<? extends T> s2: streams ) {
             s = concat( s, s2 );
         }
         return stream( s );
@@ -104,10 +116,8 @@ public class Streams
         Objects.requireNonNull( cols );
 
         Stream<T> s = null;
-        for( Collection<? extends T> col : cols )
-        {
-            if( col != null && !col.isEmpty() )
-            {
+        for( Collection<? extends T> col: cols ) {
+            if( col != null && !col.isEmpty() ) {
                 s = concat( s, col.stream() );
             }
         }
@@ -218,20 +228,20 @@ public class Streams
      * Once you have done that, this stream then returns to get the next element and the stream you are working on is
      * that of the flattened stream so will be safe to use any method.
      * <p>
-     * @param <T>     Type of the stream
-     * @param supplier Supplier that will provide 
-     * @param factory Consumer that will configure and run the stream
+     * @param <T>      Type of the stream
+     * @param supplier Supplier that will provide
+     * @param factory  Consumer that will configure and run the stream
      * <p>
      * @return Consumer
      */
     public static <T> void supplierStream( BlockingSupplier<T> supplier, Consumer<Stream<T>> factory )
     {
-        Thread t = DaemonThreadFactory.INSTANCE.newThread( () ->
-        {
+        Thread t = DaemonThreadFactory.INSTANCE.newThread( () -> {
             Stream<T> s = Stream.generate( supplier );
             try {
                 factory.accept( s );
-            }finally {
+            }
+            finally {
                 supplier.setInvalid();
             }
         } );

@@ -1,3 +1,4 @@
+/* Stylesheet for the workbench */
 #trust {
     position: absolute;
     left:0;
@@ -16,21 +17,100 @@
     overflow: hidden;
     font-size: 0.5em;
 }
+#trustTop .trustBanner {display: inline-block;}
+#trustTop h2 {
+    display: inline;
+    margin:0;
+    padding:0;
+}
+
+#trustTop #tocs {
+    float: right;
+}
+
 #trustTop select {
     font-size: 1.2em;
 }
+
 #refreshRate {
     position: absolute;
     top:0;
     right:0;
 }
+
+#trainDetails .title {
+    position: absolute;
+    left:4px;
+    top:0.5em;
+    right: 32px;
+}
+
+#trainDetails .closeButton {
+    position: absolute;
+    right:4px;
+    top:4px;
+    width: 24px;
+    height: 24px;
+    background-image: url('/images/general/Close24.png');
+}
+#trainDetailBody {
+    position: absolute;
+    left: 4px;
+    right:4px;
+    top:2em;
+    bottom: 1em;
+    background: #fff;
+    overflow: auto;
+}
+
+#trainDetails {
+    position: absolute;
+    left:25%;
+    right:25%;
+    top:25%;
+    bottom:25%;
+    overflow: auto;
+    border: 1px solid black;
+    border-top-left-radius: 1em;
+    border-top-right-radius: 1em;
+    border-bottom-left-radius: 1em;
+    border-bottom-right-radius: 1em;
+    background: #ccc;
+    padding: 2em;
+}
+
 #trustBody {
     position: absolute;
     left:0;
     right:0;
-    top:2em;
+    top:2.5em;
     bottom:0;
     overflow: hidden;
+    overflow-x: scroll;
+}
+
+#trustBody ul {
+    font-size: 0.8em;
+    padding-top: 0;
+}
+
+#trustBody li {
+    border: 1px solid #000;
+    background: #ddd;
+    color: #000;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+#trustBody li.ui-state-active {background:rgb(145,201,236);}
+#trustBody li a { color: #000; }
+#trustBody li a:visited { color: #000; }
+#trustBody li a:hover { color: #000; }
+#trustBody li.ui-state-active a:hover { color: #000; }
+
+#trustBody li .ui-icon-close {
+    float: left;
+    margin: 0.4em 0.2em 0 0;
+    cursor: pointer;
 }
 
 .trustTitle {
@@ -41,7 +121,7 @@
     height:1.9em;
     margin:0;
     padding: 1px;
-    background: #ccc;
+    background: rgb(145,201,236);
     color: #000;
     font-weight: bold;
     text-align: center;
@@ -49,17 +129,18 @@
 
 .trustStream {
     position: absolute;
-    top: 0;
+    top: 2em;
     bottom:0;
     border: 1px solid black;
     padding: 1px;
     margin: 1px;
+    font-size: 0.8em;
 }
 .trustStream .trustStreamContent {
     position: absolute;
     top:2em;
     bottom:0;
-    
+
     overflow-y: scroll;
     padding: 1px;
     margin: 1px;
@@ -67,6 +148,7 @@
 
 .train {
     margin:0;
+    border:0;
     border-bottom: 1px solid #ccc;
     padding: 0.5em 0;
     padding-bottom: 0.5em;
@@ -74,22 +156,70 @@
 .train .title {
     margin:0;
     padding: 1px;
-    background: #ccc;
+    border:0;
+    background: rgb(145,201,236);
     color: #000;
     font-weight: bold;
     text-align: left;
-    font-size: 0.6em;
+    font-size: 0.8em;
+    overflow:hidden;
 }
+#trainDetailBody .info,
 .train .info {
     color: #000;
+    border:0;
     font-weight: normal;
     text-align: left;
-    font-size: 0.8em;
 }
+.train .info {font-size: 0.8em;}
+.info th {text-align: right;}
+.info td {text-align: left;}
 
 .train th {
     width: 5em;
 }
 .train td {
     width:20em;
+}
+
+.ui-tabs {
+    position: relative;/* position: relative prevents IE scroll bug (element with position: relative inside container with overflow: auto appear as "fixed") */
+    padding: .2em;
+}
+.ui-tabs .ui-tabs-nav {
+    margin: 0;
+    padding: .2em .2em 0;
+}
+.ui-tabs .ui-tabs-nav li {
+    list-style: none;
+    float: left;
+    position: relative;
+    top: 0;
+    margin: 1px .2em 0 0;
+    border-bottom-width: 0;
+    padding: 0;
+    white-space: nowrap;
+}
+.ui-tabs .ui-tabs-nav .ui-tabs-anchor {
+    float: left;
+    padding: .5em 1em;
+    text-decoration: none;
+}
+.ui-tabs .ui-tabs-nav li.ui-tabs-active {
+    margin-bottom: -1px;
+    padding-bottom: 1px;
+}
+.ui-tabs .ui-tabs-nav li.ui-tabs-active .ui-tabs-anchor,
+.ui-tabs .ui-tabs-nav li.ui-state-disabled .ui-tabs-anchor,
+.ui-tabs .ui-tabs-nav li.ui-tabs-loading .ui-tabs-anchor {
+    cursor: text;
+}
+.ui-tabs-collapsible .ui-tabs-nav li.ui-tabs-active .ui-tabs-anchor {
+    cursor: pointer;
+}
+.ui-tabs .ui-tabs-panel {
+    display: block;
+    border-width: 0;
+    padding: 1em 1.4em;
+    background: none;
 }

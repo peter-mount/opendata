@@ -6,6 +6,7 @@
 package uk.trainwatch.web.trust;
 
 import java.util.stream.Stream;
+import uk.trainwatch.util.Streams;
 
 /**
  * Common streams against the collected trust data
@@ -15,10 +16,16 @@ import java.util.stream.Stream;
 public class TrustStreams
 {
 
+    public static Stream<Trust> details( int toc, String id )
+    {
+        return Streams.ofNullable( TrustCache.INSTANCE.getTrust( toc, id ) );
+    }
+
     /**
      * A stream of activated trains
      *
      * @param toc Train Operator
+     * <p>
      * @return Stream
      */
     public static Stream<Trust> activations( int toc )
@@ -31,6 +38,7 @@ public class TrustStreams
      * A stream of recent movements
      *
      * @param toc Train Operator
+     * <p>
      * @return Stream
      */
     public static Stream<Trust> movements( int toc )
@@ -43,6 +51,7 @@ public class TrustStreams
      * A stream of cancellations
      *
      * @param toc Train Operator
+     * <p>
      * @return Stream
      */
     public static Stream<Trust> cancellations( int toc )
@@ -55,6 +64,7 @@ public class TrustStreams
      * A stream of delays
      *
      * @param toc Train Operator
+     * <p>
      * @return Stream
      */
     public static Stream<Trust> delays( int toc )
@@ -79,8 +89,8 @@ public class TrustStreams
     {
         return TrustCache.INSTANCE.getStream( toc ).
                 filter( t -> Trust.isCancelled( t )
-                        || Trust.isDelayed( t )
-                        || Trust.isOffRoute( t )
+                             || Trust.isDelayed( t )
+                             || Trust.isOffRoute( t )
                 );
     }
 }
