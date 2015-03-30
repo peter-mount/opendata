@@ -33,36 +33,93 @@ public class TrustRest
 
     private static final Logger LOG = Logger.getLogger( TrustRest.class.getName() );
 
-    @Path( "/current/{toc}" )
+    @Path( "/activations/{toc}" )
     @GET
     @Produces( MediaType.APPLICATION_JSON )
-    public Response current( @PathParam( "toc" ) int toc )
+    public Response activations( @PathParam( "toc" ) int toc )
     {
-        return getResponse( TrustCache.INSTANCE.getTrains( toc ).stream() );
+        return getResponse( TrustStreams.activations( toc ) );
     }
 
-    @Path( "/delay/low/{toc}" )
+    @Path( "/movements/{toc}" )
     @GET
     @Produces( MediaType.APPLICATION_JSON )
-    public Response delayLow( @PathParam( "toc" ) int toc )
+    public Response running( @PathParam( "toc" ) int toc )
     {
-        return getResponse( TrustCache.INSTANCE.getTrains( toc ).stream().
-                filter( Trust::hasMovement ).
-                sorted( ( a, b ) -> Long.compare( a.getDelay(), b.getDelay() ) )
-        );
+        return getResponse( TrustStreams.movements( toc ) );
     }
 
-    @Path( "/delay/high/{toc}" )
+    @Path( "/cancellations/{toc}" )
     @GET
     @Produces( MediaType.APPLICATION_JSON )
-    public Response delayHigh( @PathParam( "toc" ) int toc )
+    public Response cancellations( @PathParam( "toc" ) int toc )
     {
-        return getResponse( TrustCache.INSTANCE.getTrains( toc ).stream().
-                filter( Trust::hasMovement ).
-                sorted( ( a, b ) -> -Long.compare( a.getDelay(), b.getDelay() ) )
-        );
+        return getResponse( TrustStreams.cancellations( toc ) );
     }
 
+    @Path( "/delays/{toc}" )
+    @GET
+    @Produces( MediaType.APPLICATION_JSON )
+    public Response delays( @PathParam( "toc" ) int toc )
+    {
+        return getResponse( TrustStreams.delays( toc ) );
+    }
+
+    @Path( "/offroute/{toc}" )
+    @GET
+    @Produces( MediaType.APPLICATION_JSON )
+    public Response offroute( @PathParam( "toc" ) int toc )
+    {
+        return getResponse( TrustStreams.offroute( toc ) );
+    }
+
+    @Path( "/terminated/{toc}" )
+    @GET
+    @Produces( MediaType.APPLICATION_JSON )
+    public Response terminated( @PathParam( "toc" ) int toc )
+    {
+        return getResponse( TrustStreams.terminated( toc ) );
+    }
+
+    @Path( "/issues/{toc}" )
+    @GET
+    @Produces( MediaType.APPLICATION_JSON )
+    public Response issues( @PathParam( "toc" ) int toc )
+    {
+        return getResponse( TrustStreams.issues( toc ) );
+    }
+
+    /*
+     @Path( "/current/{toc}" )
+     @GET
+     @Produces( MediaType.APPLICATION_JSON )
+     public Response current( @PathParam( "toc" ) int toc )
+     {
+     return getResponse( TrustCache.INSTANCE.getTrains( toc ).stream() );
+     }
+
+     @Path( "/delay/low/{toc}" )
+     @GET
+     @Produces( MediaType.APPLICATION_JSON )
+     public Response delayLow( @PathParam( "toc" ) int toc )
+     {
+     return getResponse( TrustCache.INSTANCE.getTrains( toc ).stream().
+     filter( Trust::hasMovement ).
+     sorted( ( a, b ) -> Long.compare( a.getDelay(), b.getDelay() ) )
+     );
+     }
+
+     @Path( "/delay/high/{toc}" )
+     @GET
+     @Produces( MediaType.APPLICATION_JSON )
+     public Response delayHigh( @PathParam( "toc" ) int toc )
+     {
+     return getResponse( TrustCache.INSTANCE.getTrains( toc ).stream().
+     filter( Trust::hasMovement ).
+     sorted( ( a, b ) -> -Long.compare( a.getDelay(), b.getDelay() ) )
+     );
+     }
+     */
     private Response getResponse( Stream<Trust> trains )
     {
         JsonArrayBuilder a = Json.createArrayBuilder();

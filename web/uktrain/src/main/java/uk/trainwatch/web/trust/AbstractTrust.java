@@ -110,7 +110,7 @@ public class AbstractTrust
     public final int compareTo( AbstractTrust o )
     {
         // Use accessor here as it's synchronized
-        return -getTouched().
+        return getTouched().
                 compareTo( o.getTouched() );
     }
 //</editor-fold>

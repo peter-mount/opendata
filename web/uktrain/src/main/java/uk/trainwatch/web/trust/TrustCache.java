@@ -15,6 +15,7 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import uk.trainwatch.nrod.rtppm.sql.Operator;
 import uk.trainwatch.nrod.rtppm.sql.OperatorManager;
 
@@ -79,6 +80,11 @@ public enum TrustCache
     {
         return new TreeSet<>( trains.getOrDefault( toc, Collections.emptyMap() ).
                 values() );
+    }
+
+    public Stream<Trust> getStream( int toc )
+    {
+        return getTrains( toc ).stream();
     }
 
     /**

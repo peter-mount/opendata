@@ -13,8 +13,9 @@
         <script src="/js/jquery/jquery-ui.js"></script>
         <script src="/js/trust.js"></script>
         <script>
-            var toc =${toc};
-            $(document).ready(initTrust);
+            $(document).ready(function () {
+                Workbench.init(${toc});
+            });
         </script>
     </head>
     <body>
@@ -38,6 +39,7 @@
                     </select>
                 </div>
             </div>
+            <div id="trustBody"></div>
         </div>
     </body>
 </html>

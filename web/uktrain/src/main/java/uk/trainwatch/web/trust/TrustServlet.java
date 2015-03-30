@@ -6,11 +6,9 @@
 package uk.trainwatch.web.trust;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import uk.trainwatch.web.servlet.AbstractServlet;

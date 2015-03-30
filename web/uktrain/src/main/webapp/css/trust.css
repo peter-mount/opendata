@@ -11,7 +11,7 @@
     left:0;
     right:0;
     top:0;
-    bottom:2em;
+    height:4em;
     border: 1px solid black;
     overflow: hidden;
     font-size: 0.5em;
@@ -30,7 +30,6 @@
     right:0;
     top:2em;
     bottom:0;
-    border: 1px solid black;
     overflow: hidden;
 }
 

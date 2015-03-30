@@ -131,4 +131,75 @@ public class Trust
         }
     }
 
+    /**
+     * Has a train got an activation record?
+     *
+     * @param t
+     * @return
+     */
+    public static boolean isActivated( Trust t )
+    {
+        return t != null && t.getActivation() != null;
+    }
+
+    /**
+     * Has a train got a movement record?
+     *
+     * @param t
+     * @return
+     */
+    public static boolean isMovement( Trust t )
+    {
+        return t != null && t.getMovement() != null;
+    }
+
+    /**
+     * Has a train got a cancellation record?
+     *
+     * @param t
+     * @return
+     */
+    public static boolean isCancelled( Trust t )
+    {
+        return t != null && t.getCancellation() != null;
+    }
+
+    /**
+     * Is a train delayed?
+     *
+     * Note: Delayed here is >=5m but we put an upper limit as delay can appear to be 45 years for when they are off route
+     *
+     * @param t
+     * @return
+     */
+    public static boolean isDelayed( Trust t )
+    {
+        if( !isMovement( t ) )
+        {
+            return false;
+        }
+        long delay = t.getDelay();
+        return delay >= 300 && delay < 86400;
+    }
+
+    public static boolean isOffRoute( Trust t )
+    {
+        if( !isMovement( t ) )
+        {
+            return false;
+        }
+        TrainMovement m = t.getMovement();
+        return m.isOffroute_ind();
+    }
+
+    public static boolean isTerminated( Trust t )
+    {
+        if( !isMovement( t ) )
+        {
+            return false;
+        }
+        TrainMovement m = t.getMovement();
+        return m.isTrain_terminated();
+    }
+
 }
