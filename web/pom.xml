@@ -17,6 +17,7 @@
     <modules>
         <module>uktrain</module>
         <module>web-core</module>
+        <module>web-signal</module>
     </modules>
     
 </project>
