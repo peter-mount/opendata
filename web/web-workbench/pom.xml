@@ -19,6 +19,12 @@
     </properties>
     
     <dependencies>
+
+        <dependency>
+            <groupId>uk.trainwatch.web</groupId>
+            <artifactId>web-timetable</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
         
         <dependency>
             <groupId>uk.trainwatch.web</groupId>
@@ -26,6 +32,24 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
         
+        <dependency>
+            <groupId>uk.trainwatch.nrod</groupId>
+            <artifactId>nrod-rtppm</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>uk.trainwatch.nrod</groupId>
+            <artifactId>nrod-timetable</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.trainwatch.nrod</groupId>
+            <artifactId>nrod-trust</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
         <!-- Open data -->
         <dependency>
             <groupId>uk.trainwatch</groupId>
