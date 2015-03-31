@@ -24,3 +24,7 @@
 /web/maps/target/
 /osgb/osgb-codepoint/target/
 /web/web-signal/target/
+/web/web-performance/target/
+/web/web-timetable/target/
+/web/web-station/target/
+/web/web-workbench/target/

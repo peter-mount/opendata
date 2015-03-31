@@ -17,7 +17,11 @@
     <modules>
         <module>uktrain</module>
         <module>web-core</module>
+        <module>web-performance</module>
         <module>web-signal</module>
+        <module>web-station</module>
+        <module>web-timetable</module>
+        <module>web-workbench</module>
     </modules>
     
 </project>

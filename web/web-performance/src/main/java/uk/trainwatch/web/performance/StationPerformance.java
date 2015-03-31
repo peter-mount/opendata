@@ -19,7 +19,6 @@ import javax.sql.DataSource;
 import uk.trainwatch.nrod.location.TrainLocation;
 import uk.trainwatch.util.Streams;
 import uk.trainwatch.util.sql.SQL;
-import uk.trainwatch.web.timetable.ScheduleSQL;
 
 /**
  * Handles the generation of performance figures for a station (if known)
@@ -36,7 +35,7 @@ public class StationPerformance
     {
         if( dataSource == null )
         {
-            synchronized( ScheduleSQL.class )
+            synchronized( StationPerformance.class )
             {
                 if( dataSource == null )
                 {
