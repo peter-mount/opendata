@@ -14,12 +14,13 @@
     <name>Applications</name>
     
     <description>
-    	The various standalone applications
+        The various standalone applications
     </description>
     
     <modules>
         <module>archiver</module>
         <module>analysis</module>
+        <module>nationalrail</module> 
         <module>networkrail</module>
         <module>signalanalyser</module>
         <module>utilities</module>

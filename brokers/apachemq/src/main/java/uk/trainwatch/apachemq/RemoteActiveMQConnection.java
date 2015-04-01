@@ -35,7 +35,7 @@ public class RemoteActiveMQConnection
 {
 
     private static final Logger LOG = Logger.getLogger( RemoteActiveMQConnection.class.getName() );
-    private final Map<String, TopicClient> clients = new ConcurrentHashMap<>();
+    private final Map<String, MQClient> clients = new ConcurrentHashMap<>();
     private Watchdog watchdog;
     private final String brokerUri;
     private final String username;
@@ -46,8 +46,8 @@ public class RemoteActiveMQConnection
 
     /**
      *
-     * @param server   Server name
-     * @param port     Server port
+     * @param server Server name
+     * @param port Server port
      * @param username Username
      * @param password Password
      */
@@ -58,24 +58,24 @@ public class RemoteActiveMQConnection
 
     /**
      *
-     * @param server   Server name
-     * @param port     Server port
+     * @param server Server name
+     * @param port Server port
      * @param clientId Unique client id
      * @param username Username
      * @param password Password
      */
     public RemoteActiveMQConnection( final String server, final int port, final String clientId, final String username,
-                                     final String password )
+            final String password )
     {
         this.username = Objects.requireNonNull( username );
         this.clientId = Objects.requireNonNull( clientId );
         this.password = Objects.requireNonNull( password );
 
         brokerUri = "tcp://" + Objects.requireNonNull( server )
-                    + ":" + port
-                    + "?trace=false"
-                    + "&daemon=true"
-                    + "&soTimeout=30000";
+                + ":" + port
+                + "?trace=false"
+                + "&daemon=true"
+                + "&soTimeout=30000";
 
         connectionFactory = new ActiveMQConnectionFactory( brokerUri );
 
@@ -108,21 +108,26 @@ public class RemoteActiveMQConnection
      * A topic can only have one consumer associated with it
      * <p>
      * @param topicName Topic name
-     * @param consumer  Consumer
+     * @param consumer Consumer
      */
     public void registerTopicConsumer( String topicName, Consumer<Message> consumer )
     {
         clients.computeIfAbsent( topicName, k -> new TopicClient( this, topicName, consumer ) );
     }
 
+    public void registerQueueConsumer( String queueName, Consumer<Message> consumer )
+    {
+        clients.computeIfAbsent( queueName, k -> new QueueClient( this, queueName, consumer ) );
+    }
+
     /**
      * De-Register a topic
      * <p>
-     * @param topicName Topic name
+     * @param name Topic name
      */
-    public void deregisterClient( String topicName )
+    public void deregisterClient( String name )
     {
-        clients.computeIfPresent( topicName, (k, c) -> c.stop() );
+        clients.computeIfPresent( name, ( k, c ) -> c.stop() );
     }
 
     /**
@@ -149,8 +154,7 @@ public class RemoteActiveMQConnection
             try
             {
                 watchdog.stop();
-            }
-            finally
+            } finally
             {
                 watchdog = null;
             }
@@ -167,7 +171,7 @@ public class RemoteActiveMQConnection
      */
     public void connect()
             throws JMSException,
-                   InterruptedException
+            InterruptedException
     {
         if( disconnect() )
         {
@@ -183,7 +187,7 @@ public class RemoteActiveMQConnection
 
         LOG.info( () -> "Connected to " + brokerUri );
 
-        clients.forEach( (t, c) -> c.start() );
+        clients.values().forEach( MQClient::start );
 
         LOG.info( () -> clients.size() + " clients started" );
     }
@@ -203,20 +207,17 @@ public class RemoteActiveMQConnection
 
             try
             {
-                clients.forEach( (t, c) -> c.stop() );
-            }
-            finally
+                clients.values().forEach( MQClient::stop );
+            } finally
             {
 
                 try
                 {
                     connection.close();
-                }
-                catch( JMSException ex )
+                } catch( JMSException ex )
                 {
                     LOG.log( Level.SEVERE, null, ex );
-                }
-                finally
+                } finally
                 {
                     connection = null;
                 }

@@ -29,7 +29,7 @@ import uk.trainwatch.apachemq.RemoteActiveMQConnection;
 import uk.trainwatch.rabbitmq.RabbitConnection;
 import uk.trainwatch.rabbitmq.RabbitMQ;
 import uk.trainwatch.util.Consumers;
-import uk.trainwatch.util.JMS;
+import uk.trainwatch.apachemq.JMS;
 import uk.trainwatch.util.JsonUtils;
 import uk.trainwatch.util.app.Application;
 import uk.trainwatch.util.counter.RateMonitor;

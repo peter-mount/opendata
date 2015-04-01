@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package uk.trainwatch.util;
+package uk.trainwatch.apachemq;
 
 import java.util.function.Function;
 import java.util.logging.Level;
