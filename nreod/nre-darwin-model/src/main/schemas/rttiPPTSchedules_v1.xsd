@@ -10,7 +10,7 @@
 	11/03/2013  	Version 1:
 						Support for DCIS. Separated out to multiple schemas.
 	-->
-	<xs:import namespace="http://www.thalesgroup.com/rtti/PushPort/CommonTypes/v1" schemaLocation="rttiPPTCommonTypes_V1.xsd"/>
+	<xs:import namespace="http://www.thalesgroup.com/rtti/PushPort/CommonTypes/v1" schemaLocation="rttiPPTCommonTypes_v1.xsd"/>
 	<!-- Simple Types -->
 	<xs:simpleType name="CategoryType">
 		<xs:annotation>

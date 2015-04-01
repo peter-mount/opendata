@@ -15,27 +15,29 @@
         Contains the current schemas &amp; JAXB models for the push feeds.
     </description>
     
+    <dependencies>
+        <dependency>
+            <groupId>org.jvnet.jaxb2_commons</groupId>
+            <artifactId>jaxb2-basics-runtime</artifactId>
+            <version>0.9.0</version>
+        </dependency>
+    </dependencies>
     <build>
         
-    <pluginManagement>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>1.8</source>
+                        <target>1.8</target>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </pluginManagement>
-        <plugins>
-            <plugin>
-                <!--
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>1.6</version>
-                -->
                 <groupId>org.jvnet.jaxb2.maven2</groupId>
                 <artifactId>maven-jaxb2-plugin</artifactId>
                 <version>0.10.0</version>
@@ -50,23 +52,28 @@
                     <target>2.1</target>
                     <sourceType>xsd</sourceType>
                     <schemaDirectory>src/main/schemas</schemaDirectory>
-                    <!--packageName>uk.trainwatch.nre.darwin.model</packageName-->
+                    <enableIntrospection>true</enableIntrospection>
+                    <markGenerated>true</markGenerated>
+                    <forceRegenerate>true</forceRegenerate>
+                    <extension>true</extension>
+                    <args>
+                        <arg>-XtoString</arg>
+                        <arg>-Xequals</arg>
+                        <arg>-XhashCode</arg>
+                        <arg>-Xcopyable</arg>
+                        <arg>-Xmergeable</arg>
+                    </args>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.jvnet.jaxb2_commons</groupId>
+                            <artifactId>jaxb2-basics</artifactId>
+                            <version>0.9.0</version>
+                        </plugin>
+                    </plugins>
                 </configuration>
-                <!--
-                    <accessExternalSchema>true</accessExternalSchema>
-                <configuration>
-                    <schemaIncludes>
-                        <include>org/xmpp/schemas/activity.xsd</include>
-                    </schemaIncludes>
-                    <bindingIncludes>
-                        <include>org/xmpp/schemas/activity.xjb</include>
-                    </bindingIncludes>
-                    <episodes>
-                    </episodes>
-                </configuration>
-                -->
             </plugin>
         </plugins>
+        
     </build>
 
 </project>

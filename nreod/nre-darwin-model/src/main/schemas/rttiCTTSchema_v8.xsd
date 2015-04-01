@@ -23,7 +23,7 @@
 						Changed activity codes from fixed length to variable length.
 	23/06/2014	Version 8.0. Support for DCIS data.
 	-->
-	<xs:import namespace="http://www.thalesgroup.com/rtti/PushPort/CommonTypes/v1" schemaLocation="rttiPPTCommonTypes_V1.xsd"/>
+	<xs:import namespace="http://www.thalesgroup.com/rtti/PushPort/CommonTypes/v1" schemaLocation="rttiPPTCommonTypes_v1.xsd"/>
 	<!--Simple Types-->
 	<xs:simpleType name="CategoryType">
 		<xs:annotation>
