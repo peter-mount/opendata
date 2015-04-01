@@ -13,6 +13,7 @@
         <module>brokers</module>
         <module>core</module>
         <module>gis</module>
+        <module>nreod</module> 
         <module>nrod</module>
         <module>ogl</module>
         <module>osgb</module>

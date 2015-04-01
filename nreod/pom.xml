@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>uk.trainwatch</groupId>
+        <artifactId>opendata-parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    
+    <groupId>uk.trainwatch.nre</groupId>
+    <artifactId>nre-parent</artifactId>
+    <packaging>pom</packaging>
+    
+    <name>NRE Parent</name>
+    
+    <description>
+        Modules that handle the National Rail Enquiries Open Data feeds.
+
+	Note: This is not to be confused by Network Rail which has the
+	raw feeds, this is primarily for Darwin
+    </description>
+    
+    <modules>
+        <module>nre-darwin-model</module>
+    </modules>
+    
+</project>
