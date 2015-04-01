@@ -65,7 +65,7 @@ var Tab = (function () {
 
     // Layout streams so they are back in sequence
     Tab.prototype.layout = function () {
-        this.div.find('.trustStream').each(function (i, s) {
+        this.div.find('.workbenchStream').each(function (i, s) {
             $(s).css({left: ((streamWidth + 0.4) * i) + 'em'});
         });
     };
@@ -98,16 +98,16 @@ var Stream = (function () {
      * @param {type} toc train operator id
      * @param {type} api stream endpoint
      * @param {type} title title of stream
-     * @returns {trust_L27.Stream}
+     * @returns {workbench_L27.Stream}
      */
     function Stream(id, api, title) {
         this.id = id;
         this.api = api;
         this.title = title;
-        this.content = csdiv(this.id, 'trustStreamContent');
-        this.div = sdiv('trustStream').
+        this.content = csdiv(this.id, 'workbenchStreamContent');
+        this.div = sdiv('workbenchStream').
                 css({width: streamWidth + 'em'}).
-                append(sdiv('trustTitle').text(title)).
+                append(sdiv('workbenchTitle').text(title)).
                 append(this.content);
     }
 
@@ -138,11 +138,11 @@ var Stream = (function () {
     Stream.showDetails = function (eid, e) {
         var d = $('#trainDetails');
         if (d.length === 0)
-            d = cdiv('trainDetails').appendTo($('#trust'));
+            d = cdiv('trainDetails').appendTo($('#workbench'));
         //Stream.newPane(d, eid, e, true);
         d.empty().text("Please wait...");
         $.ajax({
-            url: '/api/rail/1/trust/dashboard/details/' + e.toc + '/' + e.id,
+            url: '/api/rail/1/workbench/trust/details/' + e.toc + '/' + e.id,
             type: 'GET',
             dataType: 'json',
             async: true,
@@ -264,7 +264,7 @@ var Stream = (function () {
         console.log('refresh', this.id, this.api);
         var stream = this;
         $.ajax({
-            url: '/api/rail/1/trust/dashboard/' + stream.api,
+            url: '/api/rail/1/workbench/' + stream.api,
             type: 'GET',
             dataType: 'json',
             async: true,
@@ -301,7 +301,7 @@ var Workbench = (function () {
         // FIXME remove when we can create streams for multiple tocs
         Workbench.toc = toc;
 
-        Workbench.body = $('#trustBody');
+        Workbench.body = $('#workbenchBody');
 
         $('#tocs select').change(function (e) {
             Workbench.toc = $('#tocs select').val();
@@ -313,30 +313,20 @@ var Workbench = (function () {
             Tab.refreshAll();
         });
 
-        Tab.tabs = $('#trustBody').tabs();
+        Tab.tabs = $('#workbenchBody').tabs();
 
+        // Demo, show Southeastern trust
         var tab = new Tab('Southeastern');
         $.each([
-            ['activations', 'Activations'],
-            ['movements', 'Running'],
-            ['delays', 'Delayed'],
-            ['cancellations', 'Cancellations']
+            ['trust/activations', 'Activations'],
+            ['trust/movements', 'Running'],
+            ['trust/delays', 'Delayed'],
+            ['trust/cancellations', 'Cancellations']
         ], function (i, e) {
             tab.addStream(e[0] + '/80', 'Southeastern: ' + e[1]);
         });
 
         Tab.refreshAll();
-
-//        var tab = new Tab('Southern');
-//        $.each([
-//            ['activations', 'Activations'],
-//            ['movements', 'Running'],
-//            ['delays', 'Delayed'],
-//            ['cancellations', 'Cancellations']
-//        ], function (i, e) {
-//            tab.addStream(e[0] + '/82', 'Southern: ' + e[1]);
-//        });
-//        tab.refreshAll();
     };
 
     Workbench.queueUpdate = function () {

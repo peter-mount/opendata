@@ -7,12 +7,12 @@
         <title>UK Train Trust Workbench</title>
         <link rel="stylesheet" href="/css/tcmain.css" />
         <link rel="stylesheet" href="/css/uktrain.css" />
-        <link rel="stylesheet" href="/css/trust.css" />
         <script src="/js/jquery/jquery.js"></script>
         <script src="/js/menu_jquery.js"></script>
         <script src="/js/jquery/jquery-ui.js"></script>
-        <script src="/js/trustCodes.js"></script>
-        <script src="/js/trust.js"></script>
+        <link rel="stylesheet" href="/workbench/workbench.css" />
+        <script src="/workbench/trustCodes.js"></script>
+        <script src="/workbench/workbench.js"></script>
         <script>
             $(document).ready(function () {
                 Workbench.init(${toc});
@@ -20,9 +20,9 @@
         </script>
     </head>
     <body>
-        <div id="trust">
-            <div id="trustTop">
-                <div class="trustBanner">
+        <div id="workbench">
+            <div id="workbenchTop">
+                <div class="workbenchBanner">
                     <img src="/images/375-logo.png" height="24"/>
                     <h2>UKTra.in Realtime Workbench</h2>
                 </div>
@@ -44,7 +44,7 @@
                     </select>
                 </div>
             </div>
-            <div id="trustBody">
+            <div id="workbenchBody">
                 <ul>
                     <li>
                         <a href="#addTab">+</a>

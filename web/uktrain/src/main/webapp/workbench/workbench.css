@@ -1,5 +1,5 @@
 /* Stylesheet for the workbench */
-#trust {
+#workbench {
     position: absolute;
     left:0;
     right:0;
@@ -7,7 +7,7 @@
     bottom:0;
     border: 1px solid black;
 }
-#trustTop {
+#workbenchTop {
     position: absolute;
     left:0;
     right:0;
@@ -17,18 +17,18 @@
     overflow: hidden;
     font-size: 0.5em;
 }
-#trustTop .trustBanner {display: inline-block;}
-#trustTop h2 {
+#workbenchTop .workbenchBanner {display: inline-block;}
+#workbenchTop h2 {
     display: inline;
     margin:0;
     padding:0;
 }
 
-#trustTop #tocs {
+#workbenchTop #tocs {
     float: right;
 }
 
-#trustTop select {
+#workbenchTop select {
     font-size: 1.2em;
 }
 
@@ -91,7 +91,7 @@
     padding: 2em;
 }
 
-#trustBody {
+#workbenchBody {
     position: absolute;
     left:0;
     right:0;
@@ -99,7 +99,7 @@
     bottom:0;
 }
 
-#trustBody .ui-tabs-panel {
+#workbenchBody .ui-tabs-panel {
     position: absolute;
     top:2em;
     bottom:0;
@@ -111,31 +111,31 @@
     overflow-x: scroll;
 }
 
-#trustBody ul {
+#workbenchBody ul {
     font-size: 0.8em;
     padding-top: 0;
 }
 
-#trustBody li {
+#workbenchBody li {
     border: 1px solid #000;
     background: #ddd;
     color: #000;
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
 }
-#trustBody li.ui-state-active {background:rgb(145,201,236);}
-#trustBody li a { color: #000; }
-#trustBody li a:visited { color: #000; }
-#trustBody li a:hover { color: #000; }
-#trustBody li.ui-state-active a:hover { color: #000; }
+#workbenchBody li.ui-state-active {background:rgb(145,201,236);}
+#workbenchBody li a { color: #000; }
+#workbenchBody li a:visited { color: #000; }
+#workbenchBody li a:hover { color: #000; }
+#workbenchBody li.ui-state-active a:hover { color: #000; }
 
-#trustBody li .ui-icon-close {
+#workbenchBody li .ui-icon-close {
     float: left;
     margin: 0.4em 0.2em 0 0;
     cursor: pointer;
 }
 
-.trustTitle {
+.workbenchTitle {
     position: absolute;
     top:0;
     left:0;
@@ -149,7 +149,7 @@
     text-align: center;
 }
 
-.trustStream {
+.workbenchStream {
     position: absolute;
     top: 0;
     bottom:0;
@@ -158,7 +158,7 @@
     font-size: 0.8em;
     background: #fff;
 }
-.trustStream .trustStreamContent {
+.workbenchStream .workbenchStreamContent {
     position: absolute;
     top:2em;
     bottom:0;

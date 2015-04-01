@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package uk.trainwatch.web.trust;
+package uk.trainwatch.web.workbench.trust;
 
+import uk.trainwatch.web.workbench.trust.Trust;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,23 +37,24 @@ import uk.trainwatch.nrod.trust.model.TrainActivation;
 import uk.trainwatch.nrod.trust.model.TrainCancellation;
 import uk.trainwatch.nrod.trust.model.TrainMovement;
 import uk.trainwatch.util.TimeUtils;
+import uk.trainwatch.web.workbench.WorkbenchStreams;
 
 /**
  *
  * @author peter
  */
-@Path("/rail/1/trust/dashboard")
+@Path("/rail/1/workbench/trust")
 public class TrustRest
 {
 
-    private static final Logger LOG = Logger.getLogger( TrustRest.class.getName() );
+    private static final Logger LOG = Logger.getLogger(TrustRest.class.getName() );
 
     @Path("/details/{toc}/{id}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response details( @PathParam("toc") int toc, @PathParam("id") String id )
     {
-        return getResponse( TrustStreams.details( toc, id ), true );
+        return getResponse( WorkbenchStreams.details( toc, id ), true );
     }
 
     @Path("/activations/{toc}")
@@ -60,7 +62,7 @@ public class TrustRest
     @Produces(MediaType.APPLICATION_JSON)
     public Response activations( @PathParam("toc") int toc )
     {
-        return getResponse( TrustStreams.activations( toc ) );
+        return getResponse( WorkbenchStreams.activations( toc ) );
     }
 
     @Path("/movements/{toc}")
@@ -68,7 +70,7 @@ public class TrustRest
     @Produces(MediaType.APPLICATION_JSON)
     public Response running( @PathParam("toc") int toc )
     {
-        return getResponse( TrustStreams.movements( toc ) );
+        return getResponse( WorkbenchStreams.movements( toc ) );
     }
 
     @Path("/cancellations/{toc}")
@@ -76,7 +78,7 @@ public class TrustRest
     @Produces(MediaType.APPLICATION_JSON)
     public Response cancellations( @PathParam("toc") int toc )
     {
-        return getResponse( TrustStreams.cancellations( toc ) );
+        return getResponse( WorkbenchStreams.cancellations( toc ) );
     }
 
     @Path("/delays/{toc}")
@@ -84,7 +86,7 @@ public class TrustRest
     @Produces(MediaType.APPLICATION_JSON)
     public Response delays( @PathParam("toc") int toc )
     {
-        return getResponse( TrustStreams.delays( toc ) );
+        return getResponse( WorkbenchStreams.delays( toc ) );
     }
 
     @Path("/offroute/{toc}")
@@ -92,7 +94,7 @@ public class TrustRest
     @Produces(MediaType.APPLICATION_JSON)
     public Response offroute( @PathParam("toc") int toc )
     {
-        return getResponse( TrustStreams.offroute( toc ) );
+        return getResponse( WorkbenchStreams.offroute( toc ) );
     }
 
     @Path("/terminated/{toc}")
@@ -100,7 +102,7 @@ public class TrustRest
     @Produces(MediaType.APPLICATION_JSON)
     public Response terminated( @PathParam("toc") int toc )
     {
-        return getResponse( TrustStreams.terminated( toc ) );
+        return getResponse( WorkbenchStreams.terminated( toc ) );
     }
 
     @Path("/issues/{toc}")
@@ -108,7 +110,7 @@ public class TrustRest
     @Produces(MediaType.APPLICATION_JSON)
     public Response issues( @PathParam("toc") int toc )
     {
-        return getResponse( TrustStreams.issues( toc ) );
+        return getResponse( WorkbenchStreams.issues( toc ) );
     }
 
     private Response getResponse( Stream<Trust> trains )

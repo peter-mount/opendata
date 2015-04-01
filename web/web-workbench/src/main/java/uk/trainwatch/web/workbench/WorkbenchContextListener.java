@@ -3,8 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package uk.trainwatch.web.trust;
+package uk.trainwatch.web.workbench;
 
+import uk.trainwatch.web.workbench.trust.TrustCache;
+import uk.trainwatch.web.workbench.trust.TimetableActivator;
+import uk.trainwatch.web.workbench.trust.TimetableResolver;
 import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Timer;
@@ -31,11 +34,11 @@ import uk.trainwatch.util.sql.DBContextListener;
  * @author peter
  */
 @WebListener
-public class TrustContextListener
+public class WorkbenchContextListener
         extends DBContextListener
 {
 
-    private static final Logger LOG = Logger.getLogger( TrustContextListener.class.getName() );
+    private static final Logger LOG = Logger.getLogger(WorkbenchContextListener.class.getName() );
     private Timer timer;
 
     private RabbitConnection rabbitConnection;
@@ -91,7 +94,7 @@ public class TrustContextListener
 
         }
         catch( NamingException ex ) {
-            Logger.getLogger( TrustContextListener.class.getName() ).
+            Logger.getLogger(WorkbenchContextListener.class.getName() ).
                     log( Level.SEVERE, null, ex );
             throw new SQLException( ex );
         }

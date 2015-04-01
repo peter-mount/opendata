@@ -3,8 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package uk.trainwatch.web.trust;
+package uk.trainwatch.web.workbench;
 
+import uk.trainwatch.web.workbench.trust.Trust;
+import uk.trainwatch.web.workbench.trust.TrustCache;
 import java.util.stream.Stream;
 import uk.trainwatch.util.Streams;
 
@@ -13,7 +15,7 @@ import uk.trainwatch.util.Streams;
  *
  * @author peter
  */
-public class TrustStreams
+public class WorkbenchStreams
 {
 
     public static Stream<Trust> details( int toc, String id )
