@@ -50,8 +50,14 @@
                 </executions>
                 <configuration>
                     <target>2.1</target>
-                    <sourceType>xsd</sourceType>
                     <schemaDirectory>src/main/schemas</schemaDirectory>
+                    <schemaIncludes>
+                        <include>*.xsd</include>
+                    </schemaIncludes>
+                    <bindingDirectory>src/main/schemas</bindingDirectory>
+                    <bindingIncludes>
+                        <include>*.xjb</include>
+                    </bindingIncludes>
                     <enableIntrospection>true</enableIntrospection>
                     <markGenerated>true</markGenerated>
                     <forceRegenerate>true</forceRegenerate>

@@ -1,0 +1,8 @@
+<jaxb:bindings xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" version="2.0" schemaLocation="rttiPPTStationMessages_v1.xsd">
+
+    <jaxb:schemaBindings>
+        <jaxb:package name="uk.trainwatch.nre.darwin.model.ppt.stationmessages" />
+    </jaxb:schemaBindings>
+
+</jaxb:bindings>
