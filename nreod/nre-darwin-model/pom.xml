@@ -59,7 +59,7 @@
                         <include>*.xjb</include>
                     </bindingIncludes>
                     <enableIntrospection>true</enableIntrospection>
-                    <markGenerated>true</markGenerated>
+                    <markGenerated>false</markGenerated>
                     <forceRegenerate>true</forceRegenerate>
                     <extension>true</extension>
                     <args>
