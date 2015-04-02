@@ -22,6 +22,7 @@
     
     <modules>
         <module>nre-darwin-model</module>
+        <module>nre-darwin-parser</module>
     </modules>
     
 </project>
