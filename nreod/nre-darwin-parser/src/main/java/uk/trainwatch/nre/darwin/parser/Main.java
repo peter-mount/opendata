@@ -8,6 +8,7 @@ package uk.trainwatch.nre.darwin.parser;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,6 +25,9 @@ public class Main
     public static void main( String... args )
             throws Exception
     {
+        DarwinDispatcher d = new DarwinDispatcherBuilder().
+                addStationMessage( ( p, m ) -> System.out.println( m ) ).
+                build();
 
         for( String arg : args )
         {
@@ -31,7 +35,8 @@ public class Main
             Path p = Paths.get( arg );
             Files.lines( p ).
                     map( DarwinJaxbContext.fromXML ).
-                    forEach( System.out::println );
+                    filter( Objects::nonNull ).
+                    forEach( d );
         }
     }
 }

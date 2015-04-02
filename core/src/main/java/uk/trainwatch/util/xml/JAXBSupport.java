@@ -34,6 +34,7 @@ import javax.xml.bind.Unmarshaller;
 public class JAXBSupport
 {
 
+    private final int capacity;
     private final JAXBContext context;
 
     private final BlockingQueue<Unmarshaller> unmarshallerQueue;
@@ -57,8 +58,26 @@ public class JAXBSupport
     public JAXBSupport( int capacity, String packages )
             throws JAXBException
     {
+        this.capacity = capacity;
         unmarshallerQueue = new LinkedBlockingDeque<>( capacity );
         this.context = JAXBContext.newInstance( packages );
+    }
+
+    public JAXBSupport populateUnmarshaller( int capacity )
+            throws JAXBException
+    {
+        final int max = Math.max( capacity, this.capacity );
+        synchronized( context )
+        {
+            while( unmarshallerQueue.size() < max )
+            {
+                if( !unmarshallerQueue.offer( context.createUnmarshaller() ) )
+                {
+                    break;
+                }
+            }
+        }
+        return this;
     }
 
     public Unmarshaller getUnmarshaller()

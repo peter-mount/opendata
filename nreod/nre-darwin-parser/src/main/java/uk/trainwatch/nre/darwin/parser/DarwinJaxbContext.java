@@ -63,7 +63,7 @@ public enum DarwinJaxbContext
         try
         {
             log.log( Level.INFO, "Initialising Darwin JAXB" );
-            jaxb = new JAXBSupport( PACKAGES );
+            jaxb = new JAXBSupport( PACKAGES ).populateUnmarshaller( 2 );
         } catch( JAXBException ex )
         {
             Logger.getLogger( DarwinJaxbContext.class.getName() ).log( Level.SEVERE, null, ex );
