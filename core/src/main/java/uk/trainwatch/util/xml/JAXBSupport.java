@@ -18,6 +18,7 @@ package uk.trainwatch.util.xml;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 /**
@@ -38,6 +40,7 @@ public class JAXBSupport
     private final JAXBContext context;
 
     private final BlockingQueue<Unmarshaller> unmarshallerQueue;
+    private final BlockingQueue<Marshaller> marshallerQueue;
 
     public JAXBSupport( String packages ) throws JAXBException
     {
@@ -60,6 +63,7 @@ public class JAXBSupport
     {
         this.capacity = capacity;
         unmarshallerQueue = new LinkedBlockingDeque<>( capacity );
+        marshallerQueue = new LinkedBlockingDeque<>( capacity );
         this.context = JAXBContext.newInstance( packages );
     }
 
@@ -72,6 +76,23 @@ public class JAXBSupport
             while( unmarshallerQueue.size() < max )
             {
                 if( !unmarshallerQueue.offer( context.createUnmarshaller() ) )
+                {
+                    break;
+                }
+            }
+        }
+        return this;
+    }
+
+    public JAXBSupport populateMarshaller( int capacity )
+            throws JAXBException
+    {
+        final int max = Math.max( capacity, this.capacity );
+        synchronized( context )
+        {
+            while( marshallerQueue.size() < max )
+            {
+                if( !marshallerQueue.offer( context.createMarshaller() ) )
                 {
                     break;
                 }
@@ -106,7 +127,33 @@ public class JAXBSupport
         unmarshallerQueue.offer( u );
     }
 
-    public <T, S> T unmarshall( JAXBUnmarshaller f )
+    public Marshaller getMarshaller()
+            throws JAXBException
+    {
+        Marshaller u;
+        try
+        {
+            u = marshallerQueue.poll( 1, TimeUnit.SECONDS );
+        } catch( InterruptedException ex )
+        {
+            u = null;
+        }
+        if( u == null )
+        {
+            synchronized( context )
+            {
+                u = context.createMarshaller();
+            }
+        }
+        return u;
+    }
+
+    public void returnMarshaller( Marshaller u )
+    {
+        marshallerQueue.offer( u );
+    }
+
+    public <T> T unmarshall( JAXBUnmarshaller f )
             throws JAXBException
     {
         try
@@ -135,4 +182,36 @@ public class JAXBSupport
             }
         } );
     }
+
+    public <T> T marshall( JAXBMarshaller f )
+            throws JAXBException
+    {
+        try
+        {
+            final Marshaller m = getMarshaller();
+            try
+            {
+                return (T) f.apply( m );
+            } finally
+            {
+                returnMarshaller( m );
+            }
+        } catch( IOException | InterruptedException ex )
+        {
+            throw new JAXBException( ex );
+        }
+    }
+
+    public <T> String marshallToString( T v ) throws JAXBException
+    {
+        return marshall( m ->
+        {
+            try( StringWriter s = new StringWriter() )
+            {
+                m.marshal( context, s );
+                return s.toString();
+            }
+        } );
+    }
+
 }

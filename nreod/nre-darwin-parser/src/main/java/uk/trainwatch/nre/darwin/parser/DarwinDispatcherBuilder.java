@@ -6,16 +6,8 @@
 package uk.trainwatch.nre.darwin.parser;
 
 import java.util.function.BiConsumer;
-import uk.trainwatch.nre.darwin.model.ppt.alarms.RTTIAlarm;
-import uk.trainwatch.nre.darwin.model.ppt.forecasts.TS;
-import uk.trainwatch.nre.darwin.model.ppt.schedules.Association;
-import uk.trainwatch.nre.darwin.model.ppt.schedules.DeactivatedSchedule;
-import uk.trainwatch.nre.darwin.model.ppt.schedules.Schedule;
+import java.util.function.Consumer;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
-import uk.trainwatch.nre.darwin.model.ppt.stationmessages.StationMessage;
-import uk.trainwatch.nre.darwin.model.ppt.tddata.TrackingID;
-import uk.trainwatch.nre.darwin.model.ppt.trainalerts.TrainAlert;
-import uk.trainwatch.nre.darwin.model.ppt.trainorder.TrainOrder;
 
 /**
  * A builder for {@link DarwinDispatcher}.
@@ -29,69 +21,69 @@ import uk.trainwatch.nre.darwin.model.ppt.trainorder.TrainOrder;
 public final class DarwinDispatcherBuilder
 {
 
-    private BiConsumer<Pport, Schedule> schedule = null;
-    private BiConsumer<Pport, DeactivatedSchedule> deactivatedSchedule = null;
-    private BiConsumer<Pport, Association> association = null;
-    private BiConsumer<Pport, TS> ts = null;
-    private BiConsumer<Pport, StationMessage> stationMessage = null;
-    private BiConsumer<Pport, TrainAlert> trainAlert = null;
-    private BiConsumer<Pport, TrainOrder> trainOrder = null;
-    private BiConsumer<Pport, TrackingID> trackingID = null;
-    private BiConsumer<Pport, RTTIAlarm> alarm = null;
+    private Consumer<Pport> schedule = null;
+    private Consumer<Pport> deactivatedSchedule = null;
+    private Consumer<Pport> association = null;
+    private Consumer<Pport> ts = null;
+    private Consumer<Pport> stationMessage = null;
+    private Consumer<Pport> trainAlert = null;
+    private Consumer<Pport> trainOrder = null;
+    private Consumer<Pport> trackingID = null;
+    private Consumer<Pport> alarm = null;
 
     public DarwinDispatcherBuilder()
     {
     }
 
-    public DarwinDispatcherBuilder addSchedule( BiConsumer<Pport, Schedule> schedule )
+    public DarwinDispatcherBuilder addSchedule( Consumer<Pport> schedule )
     {
         this.schedule = this.schedule == null ? schedule : schedule.andThen( schedule );
         return this;
     }
 
-    public DarwinDispatcherBuilder addDeactivatedSchedule( BiConsumer<Pport, DeactivatedSchedule> deactivatedSchedule )
+    public DarwinDispatcherBuilder addDeactivatedSchedule( Consumer<Pport> deactivatedSchedule )
     {
         this.deactivatedSchedule = this.deactivatedSchedule == null ? deactivatedSchedule : deactivatedSchedule.andThen( deactivatedSchedule );
         return this;
     }
 
-    public DarwinDispatcherBuilder addAssociation( BiConsumer<Pport, Association> association )
+    public DarwinDispatcherBuilder addAssociation( Consumer<Pport> association )
     {
         this.association = this.association == null ? association : association.andThen( association );
         return this;
     }
 
-    public DarwinDispatcherBuilder addTs( BiConsumer<Pport, TS> ts )
+    public DarwinDispatcherBuilder addTs( Consumer<Pport> ts )
     {
         this.ts = this.ts == null ? ts : ts.andThen( ts );
         return this;
     }
 
-    public DarwinDispatcherBuilder addStationMessage( BiConsumer<Pport, StationMessage> stationMessage )
+    public DarwinDispatcherBuilder addStationMessage( Consumer<Pport> stationMessage )
     {
         this.stationMessage = this.stationMessage == null ? stationMessage : stationMessage.andThen( stationMessage );
         return this;
     }
 
-    public DarwinDispatcherBuilder addTrainAlert( BiConsumer<Pport, TrainAlert> trainAlert )
+    public DarwinDispatcherBuilder addTrainAlert( Consumer<Pport> trainAlert )
     {
         this.trainAlert = this.trainAlert == null ? trainAlert : trainAlert.andThen( trainAlert );
         return this;
     }
 
-    public DarwinDispatcherBuilder addTrainOrder( BiConsumer<Pport, TrainOrder> trainOrder )
+    public DarwinDispatcherBuilder addTrainOrder( Consumer<Pport> trainOrder )
     {
         this.trainOrder = this.trainOrder == null ? trainOrder : trainOrder.andThen( trainOrder );
         return this;
     }
 
-    public DarwinDispatcherBuilder addTrackingID( BiConsumer<Pport, TrackingID> trackingID )
+    public DarwinDispatcherBuilder addTrackingID( Consumer<Pport> trackingID )
     {
         this.trackingID = this.trackingID == null ? trackingID : trackingID.andThen( trackingID );
         return this;
     }
 
-    public DarwinDispatcherBuilder addAlarm( BiConsumer<Pport, RTTIAlarm> alarm )
+    public DarwinDispatcherBuilder addAlarm( Consumer<Pport> alarm )
     {
         this.alarm = this.alarm == null ? alarm : alarm.andThen( alarm );
         return this;

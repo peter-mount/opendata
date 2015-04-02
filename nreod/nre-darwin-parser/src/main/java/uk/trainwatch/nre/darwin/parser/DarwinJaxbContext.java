@@ -39,6 +39,21 @@ public enum DarwinJaxbContext
         }
     };
 
+    public static final Function<Pport, String> toXML = p ->
+    {
+        if( p == null )
+        {
+            return null;
+        }
+        try
+        {
+            return INSTANCE.marshall( p );
+        } catch( ClassCastException | NullPointerException | JAXBException ex )
+        {
+            return null;
+        }
+    };
+
     private final String PACKAGES[] =
     {
         "uk.trainwatch.nre.darwin.model.ctt.referenceschema",
@@ -75,5 +90,10 @@ public enum DarwinJaxbContext
             throws JAXBException
     {
         return jaxb.unmarshall( s );
+    }
+
+    public String marshall( Pport p ) throws JAXBException
+    {
+        return jaxb.marshallToString( p );
     }
 }

@@ -19,11 +19,15 @@ import uk.trainwatch.apachemq.GUnZipBytesMessage;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 import javax.jms.BytesMessage;
 import uk.trainwatch.apachemq.RemoteActiveMQConnection;
+import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
+import uk.trainwatch.nre.darwin.parser.DarwinDispatcherBuilder;
+import uk.trainwatch.nre.darwin.parser.DarwinJaxbContext;
 import uk.trainwatch.rabbitmq.RabbitConnection;
 import uk.trainwatch.rabbitmq.RabbitMQ;
 import uk.trainwatch.util.Consumers;
@@ -85,19 +89,49 @@ public class Main
         }
     }
 
+    private Consumer<Pport> forward( RabbitConnection mq, String routingKey )
+    {
+        Consumer<String> c = RabbitMQ.stringConsumer( rabbitmq, routingKey );
+        return p -> c.accept( DarwinJaxbContext.toXML.apply( p ) );
+    }
+
     @Override
     protected void setupApplication()
             throws IOException
     {
         // There's just one queue from NRE so we'll just receive everything, uncompress & publish to rabbit
         Consumer<String> monitor = RateMonitor.log( LOG, "record nre.raw" );
-        Consumer<String> publisher = RabbitMQ.stringConsumer( rabbitmq, "nre.raw" );
-        activemq.registerQueueConsumer(nreProps.getProperty( "push.queue" ),
-                Consumers.guard(msg -> Stream.of( msg ).
+
+        // Send the raw/all feed - may not be required later
+        Consumer<String> publisher = RabbitMQ.stringConsumer( rabbitmq, "nre.push.raw" );
+
+        // Dispatcher to send to individual routing keys
+        Consumer<Pport> dispatcher = new DarwinDispatcherBuilder().
+                addAlarm( forward( rabbitmq, "nre.push.alarm" ) ).
+                addAssociation( forward( rabbitmq, "nre.push.association" ) ).
+                addDeactivatedSchedule( forward( rabbitmq, "nre.push.deactivated" ) ).
+                addSchedule( forward( rabbitmq, "nre.push.schedule" ) ).
+                addStationMessage( forward( rabbitmq, "nre.push.stationmessage" ) ).
+                addTrackingID( forward( rabbitmq, "nre.push.trackingid" ) ).
+                addTrainAlert( forward( rabbitmq, "nre.push.trainalert" ) ).
+                addTrainOrder( forward( rabbitmq, "nre.push.trainorder" ) ).
+                addTs( forward( rabbitmq, "nre.push.ts" ) ).
+                build();
+
+        // Now register our queue consumer
+        activemq.registerQueueConsumer( nreProps.getProperty( "push.queue" ),
+                Consumers.guard( msg -> Stream.of( msg ).
+                        // The xml is gzipped so decompress it first
                         map( Functions.castTo( BytesMessage.class ) ).
-                        map(new GUnZipBytesMessage() ).
+                        map( new GUnZipBytesMessage() ).
                         filter( Objects::nonNull ).
-                        forEach( monitor.andThen( publisher ) )
+                        // Log raw message count
+                        peek( monitor ).
+                        // Push raw feed - may remove
+                        peek( publisher ).
+                        // Now unmarshall the xml & dispatch to the correct routing key
+                        map( DarwinJaxbContext.fromXML ).
+                        forEach( dispatcher )
                 ) );
     }
 

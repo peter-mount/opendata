@@ -9,17 +9,8 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import uk.trainwatch.nre.darwin.model.ppt.alarms.RTTIAlarm;
-import uk.trainwatch.nre.darwin.model.ppt.forecasts.TS;
-import uk.trainwatch.nre.darwin.model.ppt.schedules.Association;
-import uk.trainwatch.nre.darwin.model.ppt.schedules.DeactivatedSchedule;
-import uk.trainwatch.nre.darwin.model.ppt.schedules.Schedule;
 import uk.trainwatch.nre.darwin.model.ppt.schema.DataResponse;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
-import uk.trainwatch.nre.darwin.model.ppt.stationmessages.StationMessage;
-import uk.trainwatch.nre.darwin.model.ppt.tddata.TrackingID;
-import uk.trainwatch.nre.darwin.model.ppt.trainalerts.TrainAlert;
-import uk.trainwatch.nre.darwin.model.ppt.trainorder.TrainOrder;
 
 /**
  * Takes a {@link Pport} and dispatches it to a relevant {@link BiConsumer} based on the messages content
@@ -30,17 +21,17 @@ public final class DarwinDispatcher
         implements Consumer<Pport>
 {
 
-    private final BiConsumer<Pport, Schedule> schedule;
-    private final BiConsumer<Pport, DeactivatedSchedule> deactivatedSchedule;
-    private final BiConsumer<Pport, Association> association;
-    private final BiConsumer<Pport, TS> ts;
-    private final BiConsumer<Pport, StationMessage> stationMessage;
-    private final BiConsumer<Pport, TrainAlert> trainAlert;
-    private final BiConsumer<Pport, TrainOrder> trainOrder;
-    private final BiConsumer<Pport, TrackingID> trackingID;
-    private final BiConsumer<Pport, RTTIAlarm> alarm;
+    private final Consumer<Pport> schedule;
+    private final Consumer<Pport> deactivatedSchedule;
+    private final Consumer<Pport> association;
+    private final Consumer<Pport> ts;
+    private final Consumer<Pport> stationMessage;
+    private final Consumer<Pport> trainAlert;
+    private final Consumer<Pport> trainOrder;
+    private final Consumer<Pport> trackingID;
+    private final Consumer<Pport> alarm;
 
-    DarwinDispatcher( BiConsumer<Pport, Schedule> schedule, BiConsumer<Pport, DeactivatedSchedule> deactivatedSchedule, BiConsumer<Pport, Association> association, BiConsumer<Pport, TS> ts, BiConsumer<Pport, StationMessage> stationMessage, BiConsumer<Pport, TrainAlert> trainAlert, BiConsumer<Pport, TrainOrder> trainOrder, BiConsumer<Pport, TrackingID> trackingID, BiConsumer<Pport, RTTIAlarm> alarm )
+    DarwinDispatcher( Consumer<Pport> schedule, Consumer<Pport> deactivatedSchedule, Consumer<Pport> association, Consumer<Pport> ts, Consumer<Pport> stationMessage, Consumer<Pport> trainAlert, Consumer<Pport> trainOrder, Consumer<Pport> trackingID, Consumer<Pport> alarm )
     {
         this.schedule = schedule;
         this.deactivatedSchedule = deactivatedSchedule;
@@ -78,14 +69,14 @@ public final class DarwinDispatcher
         dispatch( t, alarm, r::getAlarm );
     }
 
-    private <T> void dispatch( Pport p, BiConsumer<Pport, T> c, Supplier<List<T>> s )
+    private <T> void dispatch( Pport p, Consumer<Pport> c, Supplier<List<T>> s )
     {
         if( c != null )
         {
             final List<T> l = s.get();
-            if( !l.isEmpty() )
+            if( l != null && !l.isEmpty() )
             {
-                l.forEach( v -> c.accept( p, v ) );
+                c.accept( p );
             }
         }
     }
