@@ -16,6 +16,7 @@
     
     <modules>
         <module>uktrain</module>
+        <module>web-cms</module> 
         <module>web-core</module>
         <module>web-performance</module>
         <module>web-signal</module>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+<tiles-definitions>
+    
+    <definition name="cms.page" extends="layout.main">
+        <put-attribute name="title" value="Untitled page" />
+        <put-attribute name="body" value=".cms.page" />
+        <put-attribute name="javascript" value="/common/cms/javascript.jsp" />
+    </definition>
+    <definition name=".cms.page" extends="layout.2col-left">
+        <put-attribute name="left" value="/common/cms/left.jsp" />
+        <put-attribute name="center" value="/common/cms/center.jsp" />
+    </definition>
+    
+</tiles-definitions>

@@ -35,6 +35,11 @@
         <!-- fragments -->
         <dependency>
             <groupId>uk.trainwatch.web</groupId>
+            <artifactId>web-cms</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>uk.trainwatch.web</groupId>
             <artifactId>web-performance</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>

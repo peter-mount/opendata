@@ -1,0 +1,15 @@
+div.fieldrow {
+}
+
+div.fieldheader {
+  display: inline-block;
+  width: 20em;
+  text-align: right;
+  padding-right: 5px;
+}
+
+a.reportsrc {
+  padding-right: 2px;
+  color: #000;
+}
+
