@@ -55,29 +55,25 @@ public class RabbitSupplier
         this.bindRoutingKey = bindRoutingKey;
         this.durable = durable;
 
-        if( durable )
-        {
+        if( durable ) {
             this.queueProperties = queueProperties == null ? new HashMap<>() : queueProperties;
 
             // When durable, enforce a 5 minute ttl for all messages unless specified. This is a safety net so that we
             // don't cause the server to fill up with messages on a dead durable queue
             this.queueProperties.putIfAbsent( "x-message-ttl", 300000 );
         }
-        else
-        {
+        else {
             // queue properties are optiona, so null is valid. If empty then replace with null
             this.queueProperties = (queueProperties == null || queueProperties.isEmpty()) ? null : queueProperties;
         }
 
         // Enable parking
-        if( this.queueProperties != null && this.queueProperties.containsKey( "internal-park-queue" ) )
-        {
+        if( this.queueProperties != null && this.queueProperties.containsKey( "internal-park-queue" ) ) {
             parked = true;
             parkDelay = (Long) this.queueProperties.remove( "internal-park-queue" );
             parkQueueName = queueName + "$park";
         }
-        else
-        {
+        else {
             parked = false;
             parkDelay = 0L;
             parkQueueName = null;
@@ -94,8 +90,7 @@ public class RabbitSupplier
     protected final Channel getChannel()
             throws IOException
     {
-        if( channel == null || !channel.isOpen() )
-        {
+        if( channel == null || !channel.isOpen() ) {
             closeImpl();
             connect();
         }
@@ -105,50 +100,40 @@ public class RabbitSupplier
     public final synchronized QueueingConsumer getQueueingConsumer()
             throws IOException
     {
-        if( channel == null || !channel.isOpen() )
-        {
+        if( channel == null || !channel.isOpen() ) {
             closeImpl();
             connect();
         }
         return consumer;
     }
 
-    @SuppressWarnings( "UseSpecificCatch" )
+    @SuppressWarnings("UseSpecificCatch")
     public final void start()
     {
-        DaemonThreadFactory.INSTANCE.newThread( () ->
-        {
+        DaemonThreadFactory.INSTANCE.newThread( () -> {
             running = true;
-            while( running )
-            {
-                try
-                {
+            while( running ) {
+                try {
                     processNextMessage();
                 }
-                catch( InterruptedException ex )
-                {
+                catch( InterruptedException ex ) {
                     running = false;
                     LOG.log( Level.INFO, "Interrupted so terminating" );
                 }
-                catch( IOException ex )
-                {
-                    if( running )
-                    {
+                catch( IOException ex ) {
+                    if( running ) {
                         LOG.log( Level.SEVERE, "IOException, attempting to recover", ex );
                         closeImpl();
                     }
                 }
-                catch( Throwable ex )
-                {
+                catch( Throwable ex ) {
                     // Catch all others so the thread doesn't terminate but try to recover by reconnecting.
                     // Reconnecting will automatically nack the message and requeue it
-                    if( running )
-                    {
+                    if( running ) {
                         LOG.log( Level.WARNING, "Error whilst processing message, attempting to recover", ex );
                         closeImpl();
                     }
-                    else
-                    {
+                    else {
                         LOG.log( Level.SEVERE, "Error whilst processing message, appears to be fatal?", ex );
                     }
                 }
@@ -167,8 +152,7 @@ public class RabbitSupplier
 
     private void closeImpl()
     {
-        if( channel != null )
-        {
+        if( channel != null ) {
             LOG.log( Level.INFO, () -> "Closing channel " + queueName );
             connection.close( this, channel );
             channel = null;
@@ -191,11 +175,9 @@ public class RabbitSupplier
         LOG.log( Level.FINE, () -> "Creating consumer on " + queueName );
         consumer = new QueueingConsumer( channel );
 
-        if( bindTopic != null )
-        {
+        if( bindTopic != null ) {
             // Create the parking queue
-            if( parked )
-            {
+            if( parked ) {
                 Map<String, Object> props = new HashMap<>();
                 props.put( "x-message-ttl", parkDelay );
                 props.put( "x-dead-letter-exchange", "" );
@@ -205,7 +187,9 @@ public class RabbitSupplier
             }
 
             // Bind to the correct queue so if parked then it receives from the exchange
-            channel.queueBind( parked ? parkQueueName : queueName, bindTopic, bindRoutingKey );
+            for( String routingKey: bindRoutingKey.split( "," ) ) {
+                channel.queueBind( parked ? parkQueueName : queueName, bindTopic, routingKey );
+            }
         }
 
         // Now consume the main queue
@@ -221,8 +205,7 @@ public class RabbitSupplier
         final QueueingConsumer.Delivery delivery = getQueueingConsumer().
                 nextDelivery();
 
-        try
-        {
+        try {
             supplier.accept( delivery.getBody() );
 
             // ack as we have handled it safely
@@ -230,8 +213,7 @@ public class RabbitSupplier
                     getDeliveryTag(), false );
 
         }
-        catch( Exception ex )
-        {
+        catch( Exception ex ) {
             // nack and don't requeue
             getChannel().
                     basicNack( delivery.getEnvelope().
@@ -262,21 +244,17 @@ public class RabbitSupplier
     @Override
     public boolean equals( Object obj )
     {
-        if( obj == null )
-        {
+        if( obj == null ) {
             return false;
         }
-        if( getClass() != obj.getClass() )
-        {
+        if( getClass() != obj.getClass() ) {
             return false;
         }
         final RabbitSupplier other = (RabbitSupplier) obj;
-        if( !Objects.equals( this.queueName, other.queueName ) )
-        {
+        if( !Objects.equals( this.queueName, other.queueName ) ) {
             return false;
         }
         return true;
     }
 
-    
 }
