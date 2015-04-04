@@ -24,63 +24,61 @@ public enum DarwinJaxbContext
     /**
      * Mapping function to parse XML into JAXB instances
      */
-    public static final Function<String, Pport> fromXML = s ->
-    {
-        if( s == null || s.isEmpty() )
-        {
+    public static final Function<String, Pport> fromXML = s -> {
+        if( s == null || s.isEmpty() ) {
             return null;
         }
-        try
-        {
+        try {
             return INSTANCE.unmarshall( s );
-        } catch( ClassCastException | NullPointerException | JAXBException ex )
-        {
+        }
+        catch( ClassCastException |
+               NullPointerException |
+               JAXBException ex ) {
             return null;
         }
     };
 
-    public static final Function<Pport, String> toXML = p ->
-    {
-        if( p == null )
-        {
+    public static final Function<Pport, String> toXML = p -> {
+        if( p == null ) {
             return null;
         }
-        try
-        {
+        try {
             return INSTANCE.marshall( p );
-        } catch( ClassCastException | NullPointerException | JAXBException ex )
-        {
+        }
+        catch( ClassCastException |
+               NullPointerException |
+               JAXBException ex ) {
             return null;
         }
     };
 
-    private final String PACKAGES[] =
-    {
-        "uk.trainwatch.nre.darwin.model.ctt.referenceschema",
-        "uk.trainwatch.nre.darwin.model.ctt.schema",
-        "uk.trainwatch.nre.darwin.model.ppt.alarms",
-        "uk.trainwatch.nre.darwin.model.ppt.commontypes",
-        "uk.trainwatch.nre.darwin.model.ppt.forecasts",
-        "uk.trainwatch.nre.darwin.model.ppt.schedules",
-        "uk.trainwatch.nre.darwin.model.ppt.schema",
-        "uk.trainwatch.nre.darwin.model.ppt.stationmessages",
-        "uk.trainwatch.nre.darwin.model.ppt.status",
-        "uk.trainwatch.nre.darwin.model.ppt.tddata",
-        "uk.trainwatch.nre.darwin.model.ppt.trainalerts",
-        "uk.trainwatch.nre.darwin.model.ppt.trainorder"
-    };
+    private final String PACKAGES[]
+                           = {
+                "uk.trainwatch.nre.darwin.model.ctt.referenceschema",
+                "uk.trainwatch.nre.darwin.model.ctt.schema",
+                "uk.trainwatch.nre.darwin.model.ppt.alarms",
+                "uk.trainwatch.nre.darwin.model.ppt.commontypes",
+                "uk.trainwatch.nre.darwin.model.ppt.forecasts",
+                "uk.trainwatch.nre.darwin.model.ppt.schedules",
+                "uk.trainwatch.nre.darwin.model.ppt.schema",
+                "uk.trainwatch.nre.darwin.model.ppt.stationmessages",
+                "uk.trainwatch.nre.darwin.model.ppt.status",
+                "uk.trainwatch.nre.darwin.model.ppt.tddata",
+                "uk.trainwatch.nre.darwin.model.ppt.trainalerts",
+                "uk.trainwatch.nre.darwin.model.ppt.trainorder"
+            };
     private final Logger log = Logger.getLogger( DarwinJaxbContext.class.getName() );
 
     private final JAXBSupport jaxb;
 
     private DarwinJaxbContext()
     {
-        try
-        {
+        try {
             log.log( Level.INFO, "Initialising Darwin JAXB" );
-            jaxb = new JAXBSupport( PACKAGES ).populateUnmarshaller( 2 );
-        } catch( JAXBException ex )
-        {
+            //jaxb = new JAXBSupport( PACKAGES ).populateUnmarshaller( 2 );
+            jaxb = new JAXBSupport( Pport.class ).populateUnmarshaller( 2 );
+        }
+        catch( JAXBException ex ) {
             Logger.getLogger( DarwinJaxbContext.class.getName() ).log( Level.SEVERE, null, ex );
             throw new IllegalStateException( "Failed to create JAXBContect for Darwin", ex );
         }
@@ -92,7 +90,8 @@ public enum DarwinJaxbContext
         return jaxb.unmarshall( s );
     }
 
-    public String marshall( Pport p ) throws JAXBException
+    public String marshall( Pport p )
+            throws JAXBException
     {
         return jaxb.marshallToString( p );
     }

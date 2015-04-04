@@ -81,10 +81,8 @@ public final class Consumers
     {
         Objects.requireNonNull( p );
         Objects.requireNonNull( t );
-        return v ->
-        {
-            if( p.test( v ) )
-            {
+        return v -> {
+            if( p.test( v ) ) {
                 t.accept( v );
             }
         };
@@ -123,14 +121,11 @@ public final class Consumers
         Objects.requireNonNull( t );
         Objects.requireNonNull( f );
 
-        return v ->
-        {
-            if( p.test( v ) )
-            {
+        return v -> {
+            if( p.test( v ) ) {
                 t.accept( v );
             }
-            else
-            {
+            else {
                 f.accept( v );
             }
         };
@@ -149,8 +144,7 @@ public final class Consumers
      */
     public static <T> Consumer<T> sink()
     {
-        return v ->
-        {
+        return v -> {
         };
     }
 
@@ -232,18 +226,7 @@ public final class Consumers
      */
     public static <T> Consumer<T> andThen( Consumer<T> a, Consumer<T> b )
     {
-        if( a == null )
-        {
-            return Objects.requireNonNull( b );
-        }
-        else if( b == null )
-        {
-            return Objects.requireNonNull( a );
-        }
-        else
-        {
-            return a.andThen( b );
-        }
+        return a == null ? Objects.requireNonNull( b ) : b == null ? a : a.andThen( b );
     }
 
     /**
@@ -259,16 +242,13 @@ public final class Consumers
      */
     public static <T> Consumer<T> andThen( Consumer<T>... consumers )
     {
-        if( consumers == null || consumers.length == 0 )
-        {
+        if( consumers == null || consumers.length == 0 ) {
             return sink();
         }
 
         Consumer<T> c = null;
-        for( Consumer<T> consumer : consumers )
-        {
-            if( consumer != null )
-            {
+        for( Consumer<T> consumer: consumers ) {
+            if( consumer != null ) {
                 c = andThen( c, consumer );
             }
         }
@@ -317,17 +297,13 @@ public final class Consumers
     public static <T> Consumer<T> andThenGuarded( Logger log, Consumer<T>... consumers )
     {
         Objects.requireNonNull( log );
-        if( consumers == null || consumers.length == 0 )
-        {
+        if( consumers == null || consumers.length == 0 ) {
             return sink();
         }
 
         Consumer<T> c = null;
-        for( Consumer<T> consumer : consumers )
-        {
-            if( consumer != null )
-
-            {
+        for( Consumer<T> consumer: consumers ) {
+            if( consumer != null ) {
                 c = andThen( c, guard( log, consumer ) );
             }
         }
@@ -404,14 +380,11 @@ public final class Consumers
     {
         Objects.requireNonNull( log );
         Objects.requireNonNull( c );
-        return v ->
-        {
-            try
-            {
+        return v -> {
+            try {
                 c.accept( v );
             }
-            catch( Throwable t )
-            {
+            catch( Throwable t ) {
                 log.log( Level.SEVERE, "Exception thrown by consumer " + c, t );
             }
         };

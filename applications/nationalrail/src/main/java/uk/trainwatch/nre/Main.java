@@ -91,7 +91,7 @@ public class Main
 
     private Consumer<Pport> forward( RabbitConnection mq, String routingKey )
     {
-        Consumer<String> c = RabbitMQ.stringConsumer( rabbitmq, routingKey );
+        Consumer<String> c = RabbitMQ.stringConsumer( mq, routingKey );
         return p -> c.accept( DarwinJaxbContext.toXML.apply( p ) );
     }
 
