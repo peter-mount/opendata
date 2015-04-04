@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package uk.trainwatch.nre.darwin.parser;
+package uk.trainwatch.nre.darwin.stationmsg;
 
 import java.util.ArrayList;
 import java.util.List;

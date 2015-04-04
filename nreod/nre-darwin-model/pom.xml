@@ -53,7 +53,7 @@
                     </bindingIncludes>
                     <enableIntrospection>true</enableIntrospection>
                     <markGenerated>false</markGenerated>
-                    <forceRegenerate>true</forceRegenerate>
+                    <forceRegenerate>false</forceRegenerate>
                 </configuration>
             </plugin>
         </plugins>

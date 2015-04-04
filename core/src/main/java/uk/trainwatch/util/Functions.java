@@ -5,8 +5,14 @@
  */
 package uk.trainwatch.util;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  *
@@ -139,6 +145,21 @@ public class Functions
                    IllegalAccessException ex ) {
                 return null;
             }
+        }
+    }
+
+    public static Stream<String> fileLines( File f )
+    {
+        return f == null ? Stream.empty() : lines( f.toPath() );
+    }
+
+    public static Stream<String> lines( Path p )
+    {
+        try {
+            return p == null ? Stream.empty() : Files.lines( p );
+        }
+        catch( IOException ex ) {
+            throw new UncheckedIOException( ex );
         }
     }
 

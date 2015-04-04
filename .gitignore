@@ -33,3 +33,5 @@
 /applications/nationalrail/target/
 /nreod/nre-darwin-parser/target/
 /nreod/nre-darwin-model/target/
+/nreod/nre-darwin-forecast/target/
+/nreod/nre-darwin-stationmsg/target/

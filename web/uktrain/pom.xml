@@ -53,11 +53,13 @@
             <artifactId>web-timetable</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <!-- For now disabled
         <dependency>
             <groupId>uk.trainwatch.web</groupId>
             <artifactId>web-workbench</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        -->
         
         <!-- Open data -->
         <dependency>

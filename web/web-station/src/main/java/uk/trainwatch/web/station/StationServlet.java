@@ -19,11 +19,11 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
 import uk.trainwatch.gis.StationPosition;
 import uk.trainwatch.gis.StationPositionManager;
+import uk.trainwatch.nre.darwin.forecast.ForecastManager;
+import uk.trainwatch.nre.darwin.stationmsg.StationMessageManager;
 import uk.trainwatch.nrod.location.TrainLocation;
 import uk.trainwatch.nrod.location.TrainLocationFactory;
-import uk.trainwatch.util.Streams;
 import uk.trainwatch.util.TimeUtils;
-import uk.trainwatch.web.performance.StationPerformance;
 import uk.trainwatch.web.timetable.ScheduleSQL;
 
 /**
@@ -41,28 +41,23 @@ public class StationServlet
             throws ServletException,
                    IOException
     {
-        String tiploc = request.getPathInfo().
-                substring( 1 ).
-                toUpperCase();
-        TrainLocation loc = TrainLocationFactory.INSTANCE.getTrainLocationByTiploc( tiploc );
-        if( loc == null )
-        {
-            // See if they have used an alternate code
-            loc = TrainLocationFactory.INSTANCE.resolveTrainLocation( tiploc );
+        String crs = request.getPathInfo().substring( 1 ).toUpperCase();
 
-            if( loc == null )
-            {
+        TrainLocation loc = TrainLocationFactory.INSTANCE.getTrainLocationByCrs( crs );
+        if( loc == null ) {
+            // See if they have used an alternate code
+            loc = TrainLocationFactory.INSTANCE.resolveTrainLocation( crs );
+
+            if( loc == null ) {
                 request.sendError( HttpServletResponse.SC_NOT_FOUND );
             }
-            else
-            {
+            else {
                 // Redirect to the correct page
                 request.getResponse().
-                        sendRedirect( "/station/" + loc.getTiploc() );
+                        sendRedirect( "/station/" + loc.getCrs() );
             }
         }
-        else
-        {
+        else {
             show( request, loc );
         }
     }
@@ -74,19 +69,48 @@ public class StationServlet
         Map<String, Object> req = request.getRequestScope();
         req.put( "location", loc );
         req.put( "pageTitle", loc.getLocation() );
-        try
-        {
+        try {
+            getMessages( req, loc );
             showMap( req, loc );
             getDepartures( req, loc );
         }
-        catch( SQLException ex )
-        {
+        catch( SQLException ex ) {
             ex.printStackTrace();
         }
 
         request.renderTile( "station.info" );
     }
 
+    /**
+     * Station Messages
+     * <p>
+     * @param req
+     * @param loc
+     *            <p>
+     * @throws SQLException
+     */
+    private void getMessages( Map<String, Object> req, TrainLocation loc )
+            throws SQLException
+    {
+        req.put( "stationMessages",
+                 StationMessageManager.INSTANCE.
+                 getMessages( loc.getCrs() ).
+                 collect( Collectors.toList() ) );
+
+        req.put( "forecasts",
+                 ForecastManager.INSTANCE.
+                 getForecasts( loc.getTiploc() ).
+                 collect( Collectors.toList() ) );
+    }
+
+    /**
+     * Timetabled departures
+     * <p>
+     * @param req
+     * @param loc
+     *            <p>
+     * @throws SQLException
+     */
     private void getDepartures( Map<String, Object> req, TrainLocation loc )
             throws SQLException
     {
@@ -120,8 +144,7 @@ public class StationServlet
     {
 
         List<StationPosition> stationPosition = StationPositionManager.INSTANCE.find( loc.getLocation() );
-        if( !stationPosition.isEmpty() )
-        {
+        if( !stationPosition.isEmpty() ) {
             StationPosition station = stationPosition.get( 0 );
             req.put( "stationPosition", station );
             req.put( "nearBy", StationPositionManager.INSTANCE.nearby( station, 3 ) );

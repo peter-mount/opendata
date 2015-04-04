@@ -9,4 +9,5 @@
 <%@ taglib prefix="t" uri="http://uktra.in/tld/opendata" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 
+<tiles:insertAttribute name="messages"/>
 <tiles:insertAttribute name="map"/>

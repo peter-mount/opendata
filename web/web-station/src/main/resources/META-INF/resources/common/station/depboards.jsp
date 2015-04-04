@@ -9,12 +9,13 @@
 <%@ taglib prefix="t" uri="http://uktra.in/tld/opendata" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <table class="wikitable" width="100%">
-    <caption>Next Departures</caption>
+    <caption>Departure Boards</caption>
     <tr>
-        <th style="width: 2.5em;">Depart</th>
+        <th style="width: 2.5em;">Time</th>
         <th style="width: 1.25+em;">Pl</th>
         <th width="100%">Destination</th>
     </tr>
+    <%--
     <c:forEach var="schedule" items="${departures}">
         <tr>
             <c:forEach var="loc" items="${schedule.locations}">
@@ -34,5 +35,5 @@
             </c:forEach>
         </tr>
     </c:forEach>
+    --%>
 </table>
-<a href="/timetable/station/${location.tiploc}">View todays full timetable</a>

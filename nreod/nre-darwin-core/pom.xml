@@ -6,13 +6,13 @@
         <artifactId>nre-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>nre-darwin-parser</artifactId>
+    <artifactId>nre-darwin-core</artifactId>
     <packaging>jar</packaging>
     
-    <name>NRE Darwin Parser</name>
+    <name>NRE Darwin Core</name>
     
     <description>
-        Handles the parsing of the NRE Push Port XML feed
+        Core code for the NRE PushPort feed
     </description>
     
     <dependencies>

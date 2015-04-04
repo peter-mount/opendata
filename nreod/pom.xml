@@ -16,13 +16,15 @@
     <description>
         Modules that handle the National Rail Enquiries Open Data feeds.
 
-	Note: This is not to be confused by Network Rail which has the
-	raw feeds, this is primarily for Darwin
+        Note: This is not to be confused by Network Rail which has the
+        raw feeds, this is primarily for Darwin
     </description>
     
     <modules>
+        <module>nre-darwin-core</module>
+        <module>nre-darwin-forecast</module>
         <module>nre-darwin-model</module>
-        <module>nre-darwin-parser</module>
+        <module>nre-darwin-stationmsg</module>
     </modules>
     
 </project>

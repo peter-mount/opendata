@@ -27,7 +27,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.annotation.WebListener;
-import uk.trainwatch.nrod.td.model.TDMessage;
 import uk.trainwatch.nrod.td.model.TDMessageFactory;
 import uk.trainwatch.rabbitmq.RabbitConnection;
 import uk.trainwatch.rabbitmq.RabbitMQ;

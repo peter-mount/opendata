@@ -18,7 +18,7 @@ import uk.trainwatch.nrod.location.TrainLocationFactory;
  * <p>
  * @author Peter T Mount
  */
-@WebServlet(name = "StationHome", urlPatterns = "/station/")
+@WebServlet(name = "StationHome", urlPatterns = {"/station", "/station/"})
 public class HomeServlet
         extends AbstractServlet
 {

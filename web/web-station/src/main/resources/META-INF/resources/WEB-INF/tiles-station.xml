@@ -26,10 +26,12 @@
         <put-attribute name="performance" value="/common/station/performance.jsp" />
     </definition>
     <definition name=".station.info.left" template="/common/station/left.jsp">
-        <put-attribute name="departures" value="/common/station/departures.jsp" />
+        <put-attribute name="depboards" value="/common/station/depboards.jsp" />
+        <put-attribute name="timetable" value="/common/station/timetable.jsp" />
     </definition>
     <definition name=".station.info.center" template="/common/station/center.jsp">
         <put-attribute name="map" value="/common/station/map.jsp" />
+        <put-attribute name="messages" value="/common/station/messages.jsp" />
     </definition>
     <definition name=".station.info.right" template="/common/station/right.jsp">
         <put-attribute name="details" value="/common/station/details.jsp" />
