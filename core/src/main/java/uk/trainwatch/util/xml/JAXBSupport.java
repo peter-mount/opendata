@@ -42,12 +42,14 @@ public class JAXBSupport
     private final BlockingQueue<Unmarshaller> unmarshallerQueue;
     private final BlockingQueue<Marshaller> marshallerQueue;
 
-    public JAXBSupport( String packages ) throws JAXBException
+    public JAXBSupport( String packages )
+            throws JAXBException
     {
         this( 10, packages );
     }
 
-    public JAXBSupport( String... packages ) throws JAXBException
+    public JAXBSupport( String... packages )
+            throws JAXBException
     {
         this( 10, packages );
     }
@@ -61,22 +63,37 @@ public class JAXBSupport
     public JAXBSupport( int capacity, String packages )
             throws JAXBException
     {
+        this( capacity, JAXBContext.newInstance( packages ) );
+    }
+
+    public JAXBSupport( Class... classes )
+            throws JAXBException
+    {
+        this( 10, classes );
+    }
+
+    public JAXBSupport( int capacity, Class... classes )
+            throws JAXBException
+    {
+        this( capacity, JAXBContext.newInstance( classes ) );
+    }
+
+    private JAXBSupport( int capacity, JAXBContext context )
+            throws JAXBException
+    {
         this.capacity = capacity;
         unmarshallerQueue = new LinkedBlockingDeque<>( capacity );
         marshallerQueue = new LinkedBlockingDeque<>( capacity );
-        this.context = JAXBContext.newInstance( packages );
+        this.context = context;
     }
 
     public JAXBSupport populateUnmarshaller( int capacity )
             throws JAXBException
     {
         final int max = Math.max( capacity, this.capacity );
-        synchronized( context )
-        {
-            while( unmarshallerQueue.size() < max )
-            {
-                if( !unmarshallerQueue.offer( context.createUnmarshaller() ) )
-                {
+        synchronized( context ) {
+            while( unmarshallerQueue.size() < max ) {
+                if( !unmarshallerQueue.offer( context.createUnmarshaller() ) ) {
                     break;
                 }
             }
@@ -88,12 +105,9 @@ public class JAXBSupport
             throws JAXBException
     {
         final int max = Math.max( capacity, this.capacity );
-        synchronized( context )
-        {
-            while( marshallerQueue.size() < max )
-            {
-                if( !marshallerQueue.offer( context.createMarshaller() ) )
-                {
+        synchronized( context ) {
+            while( marshallerQueue.size() < max ) {
+                if( !marshallerQueue.offer( context.createMarshaller() ) ) {
                     break;
                 }
             }
@@ -105,17 +119,14 @@ public class JAXBSupport
             throws JAXBException
     {
         Unmarshaller u;
-        try
-        {
+        try {
             u = unmarshallerQueue.poll( 1, TimeUnit.SECONDS );
-        } catch( InterruptedException ex )
-        {
+        }
+        catch( InterruptedException ex ) {
             u = null;
         }
-        if( u == null )
-        {
-            synchronized( context )
-            {
+        if( u == null ) {
+            synchronized( context ) {
                 u = context.createUnmarshaller();
             }
         }
@@ -131,17 +142,14 @@ public class JAXBSupport
             throws JAXBException
     {
         Marshaller u;
-        try
-        {
+        try {
             u = marshallerQueue.poll( 1, TimeUnit.SECONDS );
-        } catch( InterruptedException ex )
-        {
+        }
+        catch( InterruptedException ex ) {
             u = null;
         }
-        if( u == null )
-        {
-            synchronized( context )
-            {
+        if( u == null ) {
+            synchronized( context ) {
                 u = context.createMarshaller();
             }
         }
@@ -156,28 +164,26 @@ public class JAXBSupport
     public <T> T unmarshall( JAXBUnmarshaller f )
             throws JAXBException
     {
-        try
-        {
+        try {
             final Unmarshaller unmarshaller = getUnmarshaller();
-            try
-            {
+            try {
                 return (T) f.apply( unmarshaller );
-            } finally
-            {
+            }
+            finally {
                 returnUnmarshaller( unmarshaller );
             }
-        } catch( IOException | InterruptedException ex )
-        {
+        }
+        catch( IOException |
+               InterruptedException ex ) {
             throw new JAXBException( ex );
         }
     }
 
-    public <T> T unmarshall( String s ) throws JAXBException
+    public <T> T unmarshall( String s )
+            throws JAXBException
     {
-        return unmarshall( m ->
-        {
-            try( Reader r = new StringReader( s ) )
-            {
+        return unmarshall( m -> {
+            try( Reader r = new StringReader( s ) ) {
                 return m.unmarshal( r );
             }
         } );
@@ -186,29 +192,27 @@ public class JAXBSupport
     public <T> T marshall( JAXBMarshaller f )
             throws JAXBException
     {
-        try
-        {
+        try {
             final Marshaller m = getMarshaller();
-            try
-            {
+            try {
                 return (T) f.apply( m );
-            } finally
-            {
+            }
+            finally {
                 returnMarshaller( m );
             }
-        } catch( IOException | InterruptedException ex )
-        {
+        }
+        catch( IOException |
+               InterruptedException ex ) {
             throw new JAXBException( ex );
         }
     }
 
-    public <T> String marshallToString( T v ) throws JAXBException
+    public <T> String marshallToString( T v )
+            throws JAXBException
     {
-        return marshall( m ->
-        {
-            try( StringWriter s = new StringWriter() )
-            {
-                m.marshal( context, s );
+        return marshall( m -> {
+            try( StringWriter s = new StringWriter() ) {
+                m.marshal( v, s );
                 return s.toString();
             }
         } );
