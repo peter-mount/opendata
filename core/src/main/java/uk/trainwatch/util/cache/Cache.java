@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDateTime;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -57,6 +58,10 @@ public class Cache<K, V>
 
     private final long maxSize;
     private final Duration maxAge;
+    /**
+     * Optional consumer to be notified of evictions
+     */
+    private BiConsumer<K, V> evicted;
 
     public Cache()
     {
@@ -80,6 +85,18 @@ public class Cache<K, V>
 
         // Expire by age in the background once every minute
         DaemonThreadFactory.INSTANCE.scheduleAtFixedRate( this::expireByAge, 1L, 1L, TimeUnit.MINUTES );
+    }
+
+    /**
+     * Adds an optional hook that will be called if an entry is evicted.
+     * <p>
+     * The hook will be called post eviction so this is just a notification.
+     * <p>
+     * @param evicted {@link BiConsumer} to call if an entry is evicted
+     */
+    public void setEvicted( BiConsumer<K, V> evicted )
+    {
+        this.evicted = evicted;
     }
 
     /**
@@ -110,8 +127,22 @@ public class Cache<K, V>
      */
     private void expire( LocalDateTime expires )
     {
-        map.values().
-                removeIf( e -> !e.isAfter( expires ) );
+        if( evicted == null ) {
+            // No notification so use the simple method of expiry
+            map.values().
+                    removeIf( e -> e.isBefore( expires ) );
+        }
+        else {
+            // As we need to notify we'll have to do it the old way
+            Iterator<Map.Entry<K, CacheEntry<K, V>>> it = map.entrySet().iterator();
+            while( it.hasNext() ) {
+                Map.Entry<K, CacheEntry<K, V>> e = it.next();
+                if( e.getValue().isBefore( expires ) ) {
+                    it.remove();
+                    evicted.accept( e.getKey(), e.getValue().getValue() );
+                }
+            }
+        }
     }
 
     /**
