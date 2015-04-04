@@ -206,7 +206,8 @@ public class JsonUtils
                 }
                 try {
                     return Integer.parseInt( s );
-                } catch( NumberFormatException ex ) {
+                }
+                catch( NumberFormatException ex ) {
                     LOG.log( Level.INFO, ex, () -> "" + s );
                     return defaultValue;
                 }
@@ -243,7 +244,8 @@ public class JsonUtils
                 }
                 try {
                     return Long.parseLong( s );
-                } catch( NumberFormatException ex ) {
+                }
+                catch( NumberFormatException ex ) {
                     return defaultValue;
                 }
             case TRUE:
@@ -274,7 +276,8 @@ public class JsonUtils
                 }
                 try {
                     return Double.parseDouble( s );
-                } catch( NumberFormatException ex ) {
+                }
+                catch( NumberFormatException ex ) {
                     return defaultValue;
                 }
             case TRUE:
@@ -417,7 +420,8 @@ public class JsonUtils
 
         try {
             return new Timestamp( Long.parseLong( dt ) );
-        } catch( NumberFormatException nfe ) {
+        }
+        catch( NumberFormatException nfe ) {
             // The database can send us time with a timezone offset so strip it out
             // FIXME later account for this or better still implement proper timestamp handling
             int i = dt.indexOf( "+" );
@@ -436,7 +440,8 @@ public class JsonUtils
 
             try {
                 return Timestamp.valueOf( dt );
-            } catch( Exception e ) {
+            }
+            catch( Exception e ) {
                 LOG.log( Level.SEVERE, "Timestamp " + dt, e );
                 return null;
             }
@@ -526,7 +531,7 @@ public class JsonUtils
     {
         Objects.requireNonNull( b );
         Objects.requireNonNull( o );
-        o.forEach( (k, v) -> b.add( k, v ) );
+        o.forEach( ( k, v ) -> b.add( k, v ) );
         return b;
     }
 
@@ -565,6 +570,12 @@ public class JsonUtils
         return s == null ? null : Enum.valueOf( c, s );
     }
 
+    public static <T extends Enum<T>> T getEnum( Function<String, T> lookup, JsonObject o, String n )
+    {
+        String s = getString( o, n );
+        return s == null ? null : lookup.apply( s );
+    }
+
     public static <T extends Enum<T>> T[] getEnumArray( Class<T> c, JsonObject o, String n )
     {
         List<T> l = o.getJsonArray( n ).
@@ -585,7 +596,7 @@ public class JsonUtils
     {
         JsonArrayBuilder b = Json.createArrayBuilder();
         if( ary != null && ary.length > 0 ) {
-            for( Enum<?> a : ary ) {
+            for( Enum<?> a: ary ) {
                 b.add( a.toString() );
             }
         }

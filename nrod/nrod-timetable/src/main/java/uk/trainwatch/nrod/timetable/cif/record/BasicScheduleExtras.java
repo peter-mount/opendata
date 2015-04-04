@@ -29,17 +29,15 @@ public class BasicScheduleExtras
 
     public static final Function<JsonObject, BasicScheduleExtras> fromJson = o -> new BasicScheduleExtras(
             null,
-            JsonUtils.getInt( o, "uicCodde" ),
-            JsonUtils.getEnum( ATOCCode.class, o, "atocCode" ),
-            JsonUtils.getEnum( ATSCode.class, o, "atsCode" )
+            JsonUtils.getInt( o, "uicCode" ),
+            JsonUtils.getEnum( ATOCCode::lookup, o, "atocCode" ),
+            JsonUtils.getEnum( ATSCode::lookup, o, "atsCode" )
     );
 
     public static final Function<BasicScheduleExtras, JsonObject> toJson = s -> Json.createObjectBuilder().
             add( "uicCode", s.getUicCode() ).
-            add( "atocCode", s.getAtocCode().
-                 getCode() ).
-            add( "atsCode", s.getApplicableTimetableCode().
-                 getCode() ).
+            add( "atocCode", s.getAtocCode().getCode() ).
+            add( "atsCode", s.getApplicableTimetableCode().getCode() ).
             build();
 
     // No longer used
