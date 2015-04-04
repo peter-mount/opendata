@@ -6,6 +6,8 @@
 package uk.trainwatch.web.cms;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -16,19 +18,19 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Filter which intercepts requests to static content.
+ * Filter which intercepts requests to static images.
  * <p>
  * Originally this was done via apache but we now do this so we can include content from within the application
  * <p>
  * @author peter
  */
-@WebFilter(filterName = "CmsPageFilter", urlPatterns = "/*")
-public class CmsPageFilter
+@WebFilter(filterName = "CmsImageFilter", urlPatterns = "/*")
+public class CmsImageFilter
         implements Filter
 {
 
     private static final String FILE = "/File:";
-    private static final int FILE_LENGTH = FILE.length();
+    private final Pattern pattern = Pattern.compile( "^/images/([0-9a-fA-F]+)/([0-9a-fA-F]+)/(.*)" );
 
     @Override
     public void init( FilterConfig fc )
@@ -48,15 +50,15 @@ public class CmsPageFilter
             requestURI = requestURI.substring( contextPath.length() );
         }
 
-        if( requestURI.startsWith( FILE ) ) {
-            request.getRequestDispatcher( "/staticImage/" + requestURI.substring( FILE_LENGTH ) ).forward( req, resp );
+        if( requestURI.startsWith( "/images/" ) ) {
+            Matcher m = pattern.matcher( requestURI );
+            if( m.matches() ) {
+                request.getRequestDispatcher( "/staticImage/" + m.group( 3 ) ).forward( req, resp );
+            }
+            return;
         }
-        else if( requestURI.length() > 2 && Character.isUpperCase( requestURI.charAt( 1 ) ) ) {
-            request.getRequestDispatcher( "/staticContent" + requestURI ).forward( req, resp );
-        }
-        else {
-            chain.doFilter( req, resp );
-        }
+
+        chain.doFilter( req, resp );
     }
 
     @Override
