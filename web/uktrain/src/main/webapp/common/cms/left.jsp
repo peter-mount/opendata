@@ -7,8 +7,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="t" uri="http://uktra.in/tld/opendata" %>
+<%@ taglib prefix="cms" uri="http://uktra.in/tld/cms" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 
-Left Content
-<%--tiles:insertAttribute name="messages"/>
-<tiles:insertAttribute name="map"/--%>
+<cms:page page="Home/PopularArticles"/>

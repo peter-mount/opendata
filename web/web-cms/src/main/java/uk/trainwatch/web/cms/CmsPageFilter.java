@@ -28,7 +28,8 @@ public class CmsPageFilter
 {
 
     private static final String FILE = "/File:";
-    private static final int FILE_LENGTH = FILE.length();
+    private static final String STATIC_CONTENT = "/staticContent";
+    private static final String STATIC_IMAGE = "/staticImage";
 
     @Override
     public void init( FilterConfig fc )
@@ -49,10 +50,10 @@ public class CmsPageFilter
         }
 
         if( requestURI.startsWith( FILE ) ) {
-            request.getRequestDispatcher( "/staticImage/" + requestURI.substring( FILE_LENGTH ) ).forward( req, resp );
+            request.getRequestDispatcher(STATIC_IMAGE + requestURI ).forward( req, resp );
         }
         else if( requestURI.length() > 2 && Character.isUpperCase( requestURI.charAt( 1 ) ) ) {
-            request.getRequestDispatcher( "/staticContent" + requestURI ).forward( req, resp );
+            request.getRequestDispatcher(STATIC_CONTENT + requestURI ).forward( req, resp );
         }
         else {
             chain.doFilter( req, resp );

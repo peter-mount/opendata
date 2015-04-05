@@ -62,8 +62,9 @@
         <put-attribute name="body" value=".homepage" />
         <put-attribute name="javascript" value="/common/jquery_flot.jsp" />
     </definition>
-    <definition name=".homepage" extends="layout.1col">
-        <put-attribute name="center" value="/common/blank.jsp" />
+    <definition name=".homepage" extends="layout.2col-left">
+        <put-attribute name="left" value="/common/cms/left.jsp" />
+        <put-attribute name="center" value="/common/cms/home.jsp" />
     </definition>
     
 </tiles-definitions>

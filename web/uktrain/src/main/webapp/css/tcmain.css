@@ -7,6 +7,7 @@ body {
     font-family: Verdana,Helvetica,Arial,sans-serif;
     margin: 0;
     padding: 0;
+    overflow: hidden;
 }
 
 .left { float: left; }
@@ -35,10 +36,77 @@ body {
     padding-bottom: 1px;
 }
 
+/* Layouts */
+#main-content {
+    position: absolute;
+    left:0;
+    top: 7em;
+    bottom: 3.2em;
+    right: 0;
+    overflow: auto;
+}
+#col-left, #col-right, #col-2coll-center, #col-2colr-center, #col-3col-center {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+}
+/* Left for 2coll and 3col */
+#col-left {
+    left:0;
+    width: 25%;
+}
+/* right for 2colr and 3col */
+#col-right {
+    right:0;
+    width: 25%;
+}
+/* Center for 2coll */
+#col-2coll-center {
+    left: 25%;
+    right: 0;
+}
+/* Center for 2colr */
+#col-2colr-center {
+    left: 0;
+    right: 25%;
+}
+/* Center for 3col */
+#col-3col-center {
+    left: 25%;
+    right: 25%;
+}
+
+/* Sidebox tables - usually for embedded content */
+.sidebox {}
+.sidebox a {
+    color: #00f;
+    text-decoration: none;
+}
+.sidebox a:visited {color: #00f;}
+.sidebox a:hover {
+    color: #00f;
+    text-decoration: underline;
+}
+.sidebox caption {
+    text-align: left;
+    font-weight: bold;
+    font-size: 1.4em;
+}
+.sidebox td {}
+.sidebox th {}
+.sidebox tr {}
+
+/* pre elements wrap to fit */
+pre {overflow-wrap: break-word;}
+
 /* Footer */
 
 #footer {
-    height: 1.5em;
+    position:absolute;
+    bottom:0;
+    left:0;
+    right:0;
+    height: 2.3em;
     background: #fff;
     color: #000;
 }

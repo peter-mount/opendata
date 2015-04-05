@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taglib version="2.1" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd">
+    <tlib-version>1.0</tlib-version>
+    <short-name>opendata</short-name>
+    <uri>http://uktra.in/tld/cms</uri>
+    <tag>
+        <name>page</name>
+        <tag-class>uk.trainwatch.web.cms.PageTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>page</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+            <type>java.lang.String</type>
+            <description>
+                The CMS Page to embed
+            </description>
+        </attribute>
+        <attribute>
+            <name>strip</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <type>boolean</type>
+            <description>
+                Enable strip mode (default).
+                
+                This will strip the embedded page's article elements as an embedded article is usually not the primary article of the page
+            </description>
+        </attribute>
+    </tag>
+</taglib>

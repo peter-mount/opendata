@@ -5,10 +5,6 @@
 --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
-<table width="100%">
-    <tr>
-        <td width="25%" valign="top"><tiles:insertAttribute name="left"/></td>
-        <td width="50%" valign="top"><tiles:insertAttribute name="center"/></td>
-        <td width="25%" valign="top"><tiles:insertAttribute name="right"/></td>
-    </tr>
-</table>
+<div id="col-3col-center"><tiles:insertAttribute name="center"/></div>
+<div id="col-left"><tiles:insertAttribute name="left"/></div>
+<div id="col-right"><tiles:insertAttribute name="right"/></div>

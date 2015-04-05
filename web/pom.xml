@@ -21,6 +21,7 @@
         <module>web-performance</module>
         <module>web-signal</module>
         <module>web-station</module>
+        <module>web-taglib</module>
         <module>web-timetable</module>
         <module>web-workbench</module>
     </modules>

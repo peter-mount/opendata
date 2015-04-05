@@ -20,16 +20,15 @@ public abstract class AbstractStaticServlet
         extends AbstractServlet
 {
 
-    // FIXME remove this hardcoding
-    protected final File baseDirectory = new File( "/var/www/uktra.in" );
-
     @Override
     protected final void doGet( ApplicationRequest request )
             throws ServletException,
                    IOException
     {
+        // Remove leading /
         String path = request.getPathInfo().substring( 1 );
 
+        // Dissalow filenames starting with . - also prevents people from navigating outside of the cms directory structure by using /..
         if( path.startsWith( "." ) || path.contains( "/." ) ) {
             request.sendError( HttpServletResponse.SC_BAD_REQUEST, path );
         }
@@ -38,6 +37,15 @@ public abstract class AbstractStaticServlet
         }
     }
 
+    /**
+     * Do the get operation
+     * <p>
+     * @param request ApplicationRequest
+     * @param path    The file path to act upon
+     * <p>
+     * @throws ServletException
+     * @throws IOException
+     */
     protected abstract void doGet( ApplicationRequest request, String path )
             throws ServletException,
                    IOException;
