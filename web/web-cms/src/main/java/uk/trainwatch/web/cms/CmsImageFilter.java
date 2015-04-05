@@ -54,8 +54,8 @@ public class CmsImageFilter
             Matcher m = pattern.matcher( requestURI );
             if( m.matches() ) {
                 request.getRequestDispatcher( "/staticImage/" + m.group( 3 ) ).forward( req, resp );
+                return;
             }
-            return;
         }
 
         chain.doFilter( req, resp );
