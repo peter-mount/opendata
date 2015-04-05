@@ -27,4 +27,14 @@ public class StaticImageServlet
         StaticContentManager.INSTANCE.getImage( path, request.getResponse() );
     }
 
+    @Override
+    protected void doHead( ApplicationRequest request, final String path )
+            throws ServletException,
+                   IOException
+    {
+        // For now doGet until we implement this
+        doGet( request, path );
+    }
+
+    
 }

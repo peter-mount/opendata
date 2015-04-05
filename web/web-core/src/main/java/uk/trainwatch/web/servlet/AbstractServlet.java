@@ -25,16 +25,13 @@ public class AbstractServlet
                    IOException
     {
         ApplicationRequest req = new ApplicationRequest( getServletContext(), request, response );
-        try
-        {
+        try {
             doGet( req );
         }
-        catch( HttpResponseException ex )
-        {
+        catch( HttpResponseException ex ) {
             ex.sendError( req );
         }
-        catch( Exception ex )
-        {
+        catch( Exception ex ) {
             log( ex.getMessage(), ex );
             req.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage() );
         }
@@ -53,16 +50,13 @@ public class AbstractServlet
                    IOException
     {
         ApplicationRequest req = new ApplicationRequest( getServletContext(), request, response );
-        try
-        {
+        try {
             doPost( req );
         }
-        catch( HttpResponseException ex )
-        {
+        catch( HttpResponseException ex ) {
             ex.sendError( req );
         }
-        catch( Exception ex )
-        {
+        catch( Exception ex ) {
             log( ex.getMessage(), ex );
             req.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage() );
         }
@@ -74,4 +68,30 @@ public class AbstractServlet
     {
         request.sendError( HttpServletResponse.SC_BAD_REQUEST );
     }
+
+    @Override
+    protected final void doHead( HttpServletRequest request, HttpServletResponse response )
+            throws ServletException,
+                   IOException
+    {
+        ApplicationRequest req = new ApplicationRequest( getServletContext(), request, response );
+        try {
+            doGet( req );
+        }
+        catch( HttpResponseException ex ) {
+            ex.sendError( req );
+        }
+        catch( Exception ex ) {
+            log( ex.getMessage(), ex );
+            req.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage() );
+        }
+    }
+
+    protected void doHead( ApplicationRequest request )
+            throws ServletException,
+                   IOException
+    {
+        doGet( request );
+    }
+
 }

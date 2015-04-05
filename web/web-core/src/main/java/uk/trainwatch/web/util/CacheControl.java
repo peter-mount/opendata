@@ -33,6 +33,10 @@ public enum CacheControl
      */
     HOUR( 3600000L ),
     /**
+     * Cache for 2 hours
+     */
+    TWO_HOURS( 7300000L ),
+    /**
      * Cache for 1 day
      */
     DAY( 86400000L ),

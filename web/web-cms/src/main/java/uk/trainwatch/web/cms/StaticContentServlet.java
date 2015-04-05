@@ -5,11 +5,15 @@
  */
 package uk.trainwatch.web.cms;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
 import uk.trainwatch.web.servlet.ApplicationRequest;
+import uk.trainwatch.web.util.CacheControl;
+import uk.trainwatch.web.util.ImageUtils;
 
 /**
  *
@@ -25,7 +29,18 @@ public class StaticContentServlet
             throws ServletException,
                    IOException
     {
-        if( StaticContentManager.INSTANCE.getPage( path, request.getRequestScope() ) ) {
+        Map<String, Object> req = request.getRequestScope();
+        if( StaticContentManager.INSTANCE.getPage( path, req ) ) {
+            HttpServletResponse response = request.getResponse();
+            // Cache page for 1 hour
+            CacheControl.HOUR.addHeaders( response );
+
+            // Include the last modified header based on when it was published
+            File file = (File) req.get( StaticContentManager.PAGE_FILE );
+            if( file != null ) {
+                ImageUtils.addLastModified( file, response );
+            }
+
             request.renderTile( "cms.page" );
         }
         else {
@@ -33,4 +48,14 @@ public class StaticContentServlet
         }
     }
 
+    @Override
+    protected void doHead( ApplicationRequest request, String path )
+            throws ServletException,
+                   IOException
+    {
+        // For now doGet until we implement this
+        doGet( request, path );
+    }
+
+    
 }

@@ -17,6 +17,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+import uk.trainwatch.web.util.CacheControl;
+import uk.trainwatch.web.util.ImageUtils;
 
 /**
  * Common code used by both the servlets and tags
@@ -42,7 +44,10 @@ public enum StaticContentManager
      * Request attribute holding the page title
      */
     public static final String PAGE_TITLE = "pageTitle";
-
+    /**
+     * Request attribute holding the File for the page.
+     */
+    public static final String PAGE_FILE = "pageFile";
     // FIXME remove this hardcoding
     protected final File baseDirectory = new File( "/var/www/uktra.in" );
 
@@ -75,6 +80,8 @@ public enum StaticContentManager
             }
             req.put( PAGE, page );
 
+            req.put( PAGE_FILE, f );
+
             return true;
         }
         else {
@@ -87,8 +94,7 @@ public enum StaticContentManager
     {
         File f = new File( baseDirectory, getRealImagePath( path ) );
         if( f.exists() && f.isFile() && f.canRead() ) {
-            response.setContentLength( (int) f.length() );
-            Files.copy( f.toPath(), response.getOutputStream() );
+            ImageUtils.sendFile( f.toPath(), CacheControl.TWO_HOURS, response );
             return true;
         }
         else {

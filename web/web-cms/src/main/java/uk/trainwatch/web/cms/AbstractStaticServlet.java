@@ -50,6 +50,27 @@ public abstract class AbstractStaticServlet
             throws ServletException,
                    IOException;
 
+    @Override
+    protected final void doHead( ApplicationRequest request )
+            throws ServletException,
+                   IOException
+    {
+        // Remove leading /
+        String path = request.getPathInfo().substring( 1 );
+
+        // Dissalow filenames starting with . - also prevents people from navigating outside of the cms directory structure by using /..
+        if( path.startsWith( "." ) || path.contains( "/." ) ) {
+            request.sendError( HttpServletResponse.SC_BAD_REQUEST, path );
+        }
+        else {
+            doHead( request, path );
+        }
+    }
+
+    protected abstract void doHead( ApplicationRequest request, String path )
+            throws ServletException,
+                   IOException;
+
     /**
      * Disallow posts to static content
      * <p>
