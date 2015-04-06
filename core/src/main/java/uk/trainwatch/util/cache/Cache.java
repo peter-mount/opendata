@@ -148,23 +148,17 @@ public class Cache<K, V>
     /**
      * Expires the oldest entries if we are too big.
      * <p>
-     * Here we find the oldest entry, then expire everything within 2 minutes of that entry
+     * Originally we expired everything within 2 minutes of the oldest entry but ISSUE 15 occurred if that was itself under 2 minutes old so now we just
+     * remove the oldest 25% of entries.
      */
     private void expire()
     {
         if( size() > maxSize ) {
-            synchronized( this ) {
-                LocalDateTimeRange range = new LocalDateTimeRange();
-                while( size() > maxSize ) {
-                    range.reset();
-                    map.values().
-                            stream().
-                            map( CacheEntry::getEntered ).
-                            forEach( range );
-
-                    range.ifPresent( r -> expire( r.getMin() ) );
-                }
-            }
+            map.entrySet().
+                    stream().
+                    sorted( ( a, b ) -> b.getValue().getEntered().compareTo( a.getValue().getEntered() ) ).
+                    limit( maxSize / 4 ).
+                    forEach( e -> map.remove( e.getKey() ) );
         }
     }
 

@@ -19,15 +19,18 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayDeque;
+import java.util.Queue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import uk.trainwatch.util.lock.Lock;
+import uk.trainwatch.util.lock.WriteLock;
 
 /**
  *
@@ -36,11 +39,12 @@ import javax.xml.bind.Unmarshaller;
 public class JAXBSupport
 {
 
+    private static final Logger LOG = Logger.getLogger( JAXBSupport.class.getName() );
     private final int capacity;
     private final JAXBContext context;
-
-    private final BlockingQueue<Unmarshaller> unmarshallerQueue;
-    private final BlockingQueue<Marshaller> marshallerQueue;
+    private final Queue<Unmarshaller> unmarshallerQueue;
+    private final Queue<Marshaller> marshallerQueue;
+    private final Lock lock = new WriteLock();
 
     public JAXBSupport( String packages )
             throws JAXBException
@@ -82,20 +86,18 @@ public class JAXBSupport
             throws JAXBException
     {
         this.capacity = capacity;
-        unmarshallerQueue = new LinkedBlockingDeque<>( capacity );
-        marshallerQueue = new LinkedBlockingDeque<>( capacity );
+        unmarshallerQueue = new ArrayDeque<>( capacity );
+        marshallerQueue = new ArrayDeque<>( capacity );
         this.context = context;
     }
 
     public JAXBSupport populateUnmarshaller( int capacity )
             throws JAXBException
     {
-        final int max = Math.max( capacity, this.capacity );
-        synchronized( context ) {
+        try( Lock l = lock.lock() ) {
+            final int max = Math.max( capacity, this.capacity );
             while( unmarshallerQueue.size() < max ) {
-                if( !unmarshallerQueue.offer( context.createUnmarshaller() ) ) {
-                    break;
-                }
+                unmarshallerQueue.offer( context.createUnmarshaller() );
             }
         }
         return this;
@@ -104,12 +106,10 @@ public class JAXBSupport
     public JAXBSupport populateMarshaller( int capacity )
             throws JAXBException
     {
-        final int max = Math.max( capacity, this.capacity );
-        synchronized( context ) {
+        try( Lock l = lock.lock() ) {
+            final int max = Math.max( capacity, this.capacity );
             while( marshallerQueue.size() < max ) {
-                if( !marshallerQueue.offer( context.createMarshaller() ) ) {
-                    break;
-                }
+                marshallerQueue.offer( context.createMarshaller() );
             }
         }
         return this;
@@ -118,47 +118,45 @@ public class JAXBSupport
     public Unmarshaller getUnmarshaller()
             throws JAXBException
     {
-        Unmarshaller u;
-        try {
-            u = unmarshallerQueue.poll( 1, TimeUnit.SECONDS );
-        }
-        catch( InterruptedException ex ) {
-            u = null;
-        }
-        if( u == null ) {
-            synchronized( context ) {
+        try( Lock l = lock.lock() ) {
+            Unmarshaller u = unmarshallerQueue.poll();
+            if( u == null ) {
+                LOG.log( Level.INFO, "Creating unmarshaller" );
                 u = context.createUnmarshaller();
             }
+            return u;
         }
-        return u;
     }
 
     public void returnUnmarshaller( Unmarshaller u )
     {
-        unmarshallerQueue.offer( u );
+        try( Lock l = lock.lock() ) {
+            if( unmarshallerQueue.size() < capacity ) {
+                unmarshallerQueue.offer( u );
+            }
+        }
     }
 
     public Marshaller getMarshaller()
             throws JAXBException
     {
-        Marshaller u;
-        try {
-            u = marshallerQueue.poll( 1, TimeUnit.SECONDS );
-        }
-        catch( InterruptedException ex ) {
-            u = null;
-        }
-        if( u == null ) {
-            synchronized( context ) {
+        try( Lock l = lock.lock() ) {
+            Marshaller u = marshallerQueue.poll();
+            if( u == null ) {
+                LOG.log( Level.INFO, "Creating marshaller" );
                 u = context.createMarshaller();
             }
+            return u;
         }
-        return u;
     }
 
     public void returnMarshaller( Marshaller u )
     {
-        marshallerQueue.offer( u );
+        try( Lock l = lock.lock() ) {
+            if( unmarshallerQueue.size() < capacity ) {
+                marshallerQueue.offer( u );
+            }
+        }
     }
 
     public <T> T unmarshall( JAXBUnmarshaller f )

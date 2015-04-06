@@ -102,9 +102,6 @@ public class Main
         // There's just one queue from NRE so we'll just receive everything, uncompress & publish to rabbit
         Consumer<String> monitor = RateMonitor.log( LOG, "record nre.raw" );
 
-        // Send the raw/all feed - may not be required later
-        Consumer<String> publisher = RabbitMQ.stringConsumer( rabbitmq, "nre.push.raw" );
-
         // Dispatcher to send to individual routing keys
         Consumer<Pport> dispatcher = new DarwinDispatcherBuilder().
                 addAlarm( forward( rabbitmq, "nre.push.alarm" ) ).
@@ -127,8 +124,6 @@ public class Main
                         filter( Objects::nonNull ).
                         // Log raw message count
                         peek( monitor ).
-                        // Push raw feed - may remove
-                        peek( publisher ).
                         // Now unmarshall the xml & dispatch to the correct routing key
                         map( DarwinJaxbContext.fromXML ).
                         forEach( dispatcher )

@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
 import uk.trainwatch.nre.darwin.model.ppt.stationmessages.StationMessage;
-import uk.trainwatch.nre.darwin.model.ppt.stationmessages.StationMessage.Station;
 import uk.trainwatch.util.cache.Cache;
 
 /**
