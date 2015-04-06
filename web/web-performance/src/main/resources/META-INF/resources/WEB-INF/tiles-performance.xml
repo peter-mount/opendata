@@ -9,7 +9,8 @@
         <put-attribute name="body" value=".performance.home" />
         <put-attribute name="javascript" value="/common/blank.jsp" />
     </definition>
-    <definition name=".performance.home" extends="layout.1col">
+    <definition name=".performance.home" extends="layout.2col-left">
+        <put-attribute name="left" value=".left" />
         <put-attribute name="center" value="/common/performance/home.jsp" />
     </definition>
 
@@ -19,15 +20,20 @@
         <put-attribute name="body" value=".performance.ppm.view" />
         <put-attribute name="javascript" value="/common/jquery.jsp" />
     </definition>
-    <definition name=".performance.ppm.view" extends="layout.1col">
+    <definition name=".performance.ppm.view" extends="layout.2col-left">
+        <put-attribute name="left" value=".performance.ppm.view.left" />
         <put-attribute name="center" value="/common/performance/ppm.jsp" />
+    </definition>
+    <definition name=".performance.ppm.view.left" template="/common/performance/left.jsp">
+        <put-attribute name="left" value=".left" />
     </definition>
 
     <definition name="performance.ppm.years" extends="layout.main">
         <put-attribute name="title" value="Public Performance Measure" />
         <put-attribute name="body" value=".performance.ppm.years" />
     </definition>
-    <definition name=".performance.ppm.years" extends="layout.1col">
+    <definition name=".performance.ppm.years" extends="layout.2col-left">
+        <put-attribute name="left" value=".left" />
         <put-attribute name="center" value="/common/performance/ppm-years.jsp" />
     </definition>
 
@@ -35,7 +41,8 @@
         <put-attribute name="title" value="Public Performance Measure" />
         <put-attribute name="body" value=".performance.ppm.months" />
     </definition>
-    <definition name=".performance.ppm.months" extends="layout.1col">
+    <definition name=".performance.ppm.months" extends="layout.2col-left">
+        <put-attribute name="left" value=".left" />
         <put-attribute name="center" value="/common/performance/ppm-months.jsp" />
     </definition>
     
@@ -44,7 +51,8 @@
         <put-attribute name="body" value=".performance.ppm.days" />
         <put-attribute name="javascript" value="/common/jquery_flot.jsp" />
     </definition>
-    <definition name=".performance.ppm.days" extends="layout.1col">
+    <definition name=".performance.ppm.days" extends="layout.2col-left">
+        <put-attribute name="left" value=".left" />
         <put-attribute name="center" value="/common/performance/ppm-days.jsp" />
     </definition>
     

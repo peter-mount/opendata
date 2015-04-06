@@ -50,7 +50,9 @@ public enum StaticContentManager
     public static final String PAGE_FILE = "pageFile";
     // FIXME remove this hardcoding
     protected final File baseDirectory = new File( "/var/www/uktra.in" );
-
+    /**
+     * Pattern to extract page title
+     */
     private final Pattern titlePattern = Pattern.compile( "<title>(.+)</title>" );
 
     /**
@@ -78,6 +80,10 @@ public enum StaticContentManager
             if( i > 0 ) {
                 page = page.substring( i, j + ARTICLE_END_LENGTH );
             }
+
+            // Fix external links in the cms that points to it so we point to the real site
+            page=page.replaceAll( "//((.+?trainwatch\\.im)|(.+?\\.uktra\\.in)|(uktra\\.in))/", "/");
+
             req.put( PAGE, page );
 
             req.put( PAGE_FILE, f );

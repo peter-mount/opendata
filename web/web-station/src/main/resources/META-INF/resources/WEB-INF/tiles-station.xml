@@ -9,7 +9,8 @@
         <put-attribute name="body" value=".station.home" />
         <put-attribute name="javascript" value="/common/blank.jsp" />
     </definition>
-    <definition name=".station.home" extends="layout.1col">
+    <definition name=".station.home" extends="layout.2col-left">
+        <put-attribute name="left" value=".left" />
         <put-attribute name="center" value="/common/station/index.jsp" />
     </definition>
     
@@ -19,15 +20,15 @@
         <put-attribute name="javascript" value="/common/jquery_map.jsp" />
         <put-attribute name="footer" value="layout.footer.map" />
     </definition>
-    <definition name=".station.info" template="/common/station/layout.jsp">
+    <definition name=".station.info" extends="layout.3col">
         <put-attribute name="center" value=".station.info.center" />
         <put-attribute name="left" value=".station.info.left" />
         <put-attribute name="right" value=".station.info.right" />
-        <put-attribute name="performance" value="/common/station/performance.jsp" />
     </definition>
     <definition name=".station.info.left" template="/common/station/left.jsp">
         <put-attribute name="depboards" value="/common/station/depboards.jsp" />
         <put-attribute name="timetable" value="/common/station/timetable.jsp" />
+        <put-attribute name="other" value=".left" />
     </definition>
     <definition name=".station.info.center" template="/common/station/center.jsp">
         <put-attribute name="map" value="/common/station/map.jsp" />

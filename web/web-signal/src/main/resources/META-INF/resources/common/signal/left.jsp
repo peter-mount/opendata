@@ -6,6 +6,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <table class="wikitable" width="100%">
     <caption>Signal Area</caption>
     <tr>
@@ -22,21 +23,6 @@
     </tr>
 </table>
 
-<table class="wikitable" width="100%">
-    <caption>Recent movements</caption>
-    <thead>
-        <tr>
-            <th>Time</th>
-            <th width="100%">Train</th>
-            <th>TP</th>
-            <th>From</th>
-            <th>To</th>
-        </tr>
-    </thead>
-    <tbody id="recentMovement">
-    </tbody>
-</table>
-
 <p>
     Data presented here is based on signalling movements and may not necessarily relate to track layout.
 </p>
@@ -46,3 +32,5 @@
 <p>
     The data on this page will update itself every 10 seconds.
 </p>
+
+<tiles:insertAttribute name="other"/>

@@ -38,9 +38,8 @@ import uk.trainwatch.util.TimeUtils;
  * <p>
  * @author Peter T Mount
  */
-@WebServlet(name = "PPMCurrentServlet", urlPatterns =
-    {
-        "/performance/ppm", "/performance/ppm/*"
+@WebServlet(name = "PPMCurrentServlet", urlPatterns = {
+    "/performance/ppm", "/performance/ppm/*"
 })
 public class PPMCurrentServlet
         extends AbstractServlet
@@ -53,19 +52,16 @@ public class PPMCurrentServlet
     {
         String path = request.getPathInfo();
 
-        if( path == null )
-        {
+        if( path == null ) {
             // Convert now to rail date - so 01:59 will show the previous day
             show( request, TimeUtils.getLocalDateTime().
                   minusHours( 2 ).
                   toLocalDate() );
         }
-        else
-        {
+        else {
             // This will always be >1 as it leads with a /
             String comp[] = path.split( "/" );
-            switch( comp.length )
-            {
+            switch( comp.length ) {
                 case 0:
                     showYears( request );
                     break;
@@ -89,15 +85,13 @@ public class PPMCurrentServlet
             throws ServletException,
                    IOException
     {
-        try
-        {
+        try {
             Map<String, Object> req = request.getRequestScope();
             req.put( "years", PerformanceManager.INSTANCE.getYears() );
             request.renderTile( "performance.ppm.years" );
         }
         catch( NoSuchElementException |
-               SQLException ex )
-        {
+               SQLException ex ) {
             Logger.getLogger( PPMCurrentServlet.class.getName() ).
                     log( Level.SEVERE, null, ex );
             request.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage() );
@@ -108,15 +102,12 @@ public class PPMCurrentServlet
             throws ServletException,
                    IOException
     {
-        try
-        {
+        try {
             IntSummaryStatistics stat = PerformanceManager.INSTANCE.getMonths( year );
-            if( stat.getMin() == 0 && stat.getMax() == 0 )
-            {
+            if( stat.getMin() == 0 && stat.getMax() == 0 ) {
                 request.sendError( HttpServletResponse.SC_NOT_FOUND );
             }
-            else
-            {
+            else {
                 Map<String, Object> req = request.getRequestScope();
                 req.put( "year", year );
                 req.put( "months", stat );
@@ -124,54 +115,57 @@ public class PPMCurrentServlet
             }
         }
         catch( NoSuchElementException |
-               SQLException ex )
-        {
+               SQLException ex ) {
             Logger.getLogger( PPMCurrentServlet.class.getName() ).
                     log( Level.SEVERE, null, ex );
             request.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage() );
         }
     }
 
+    private LocalDate addCalendar( Map<String, Object> req, LocalDate date, IntSummaryStatistics stat )
+    {
+        LocalDate startDate = date.withDayOfMonth( 1 );
+        setDate( req, startDate );
+
+        req.put( "prevMonth", startDate.minusMonths( 1 ) );
+        req.put( "nextMonth", startDate.plusMonths( 1 ) );
+
+        // Setup the calendar
+        req.put( "dow", DayOfWeek.values() );
+        // Day names
+        req.put( "down", Stream.of( DayOfWeek.values() ).
+                 map( d -> d.getDisplayName( TextStyle.SHORT, Locale.ENGLISH ) ).
+                 collect( Collectors.toList() ) );
+
+        // Calendar
+        LocalDate dateEnd = startDate.plusMonths( 1 ).minusDays( 1 );
+        int end = dateEnd.getDayOfMonth();
+
+        List<LocalDate> days = new ArrayList<>();
+        for( int i = 1; i <= end; i++ ) {
+            days.add( LocalDate.of( startDate.getYear(), startDate.getMonth(), i ) );
+        }
+        req.put( "calendar", days );
+
+        req.put( "days", stat );
+
+        return dateEnd;
+    }
+
     private void show( ApplicationRequest request, int year, int month )
             throws ServletException,
                    IOException
     {
-        try
-        {
+        try {
             // Unlike other pages we'll allow date of 0 as we'll show just the calendar
             IntSummaryStatistics stat = PerformanceManager.INSTANCE.getDays( year, month );
 
             Map<String, Object> req = request.getRequestScope();
             LocalDate startDate = LocalDate.of( year, month, 1 );
-            setDate( req, startDate );
-
-            req.put( "prevMonth", startDate.minusMonths( 1 ) );
-            req.put( "nextMonth", startDate.plusMonths( 1 ) );
-
-            // Setup the calendar
-            req.put( "dow", DayOfWeek.values() );
-            // Day names
-            req.put( "down", Stream.of( DayOfWeek.values() ).
-                     map( d -> d.getDisplayName( TextStyle.SHORT, Locale.ENGLISH ) ).
-                     collect( Collectors.toList() ) );
-
-            // Calendar
-            LocalDate dateEnd = startDate.plusMonths( 1 ).
-                    minusDays( 1 );
-            int end = dateEnd.getDayOfMonth();
-
-            List<LocalDate> days = new ArrayList<>();
-            for( int i = 1; i <= end; i++ )
-            {
-                days.add( LocalDate.of( year, month, i ) );
-            }
-            req.put( "calendar", days );
-
-            req.put( "days", stat );
+            LocalDate dateEnd = addCalendar( req, startDate, stat );
 
             // Needed for the graphs - only valid if we have data
-            if( stat.getMin() != 0 && stat.getMax() != 0 )
-            {
+            if( stat.getMin() != 0 && stat.getMax() != 0 ) {
                 req.put( "operators", OperatorManager.INSTANCE.getOperators() );
                 req.put( "monthppm", PerformanceManager.INSTANCE.getMonthsDailyPPM( year, month ) );
                 req.put( "startDate", TimeUtils.getLocalDateTime( startDate ).
@@ -185,8 +179,7 @@ public class PPMCurrentServlet
             request.renderTile( "performance.ppm.days" );
         }
         catch( NoSuchElementException |
-               SQLException ex )
-        {
+               SQLException ex ) {
             Logger.getLogger( PPMCurrentServlet.class.getName() ).
                     log( Level.SEVERE, null, ex );
             request.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage() );
@@ -204,9 +197,11 @@ public class PPMCurrentServlet
             throws ServletException,
                    IOException
     {
-        try
-        {
+        try {
             Map<String, Object> req = request.getRequestScope();
+
+            addCalendar( req, date, PerformanceManager.INSTANCE.getDays( date.getYear(), date.getMonthValue() ) );
+
             setDate( req, date );
 
             req.put( "operators", OperatorManager.INSTANCE.getOperatorMap() );
@@ -218,8 +213,7 @@ public class PPMCurrentServlet
             request.renderTile( "performance.ppm.view" );
         }
         catch( NoSuchElementException |
-               SQLException ex )
-        {
+               SQLException ex ) {
             Logger.getLogger( PPMCurrentServlet.class.getName() ).
                     log( Level.SEVERE, null, ex );
             request.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage() );

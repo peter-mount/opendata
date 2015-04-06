@@ -63,8 +63,17 @@
         <put-attribute name="javascript" value="/common/jquery_flot.jsp" />
     </definition>
     <definition name=".homepage" extends="layout.2col-left">
-        <put-attribute name="left" value="/common/cms/left.jsp" />
+        <put-attribute name="left" value=".home.left" />
         <put-attribute name="center" value="/common/cms/home.jsp" />
+    </definition>
+    
+    <!-- The common left side bar -->
+    <definition name=".left" template="/common/cms/left.jsp">
+        <put-attribute name="ads" value="/common/cms/ads.jsp" />
+    </definition>
+    <!-- The left side bar for the home page -->
+    <definition name=".home.left" template="/common/cms/homeleft.jsp">
+        <put-attribute name="ads" value="/common/cms/ads.jsp" />
     </definition>
     
 </tiles-definitions>

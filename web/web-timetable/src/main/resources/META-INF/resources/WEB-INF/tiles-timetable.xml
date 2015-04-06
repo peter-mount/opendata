@@ -9,7 +9,8 @@
         <put-attribute name="body" value=".timetable.home" />
         <put-attribute name="javascript" value="/common/jquery.jsp" />
     </definition>
-    <definition name=".timetable.home" extends="layout.1col">
+    <definition name=".timetable.home" extends="layout.2col-left">
+        <put-attribute name="left" value=".left" />
         <put-attribute name="center" value="/common/timetable/home.jsp" />
     </definition>
     
@@ -18,7 +19,8 @@
         <put-attribute name="body" value=".timetable.search" />
         <put-attribute name="javascript" value="/common/jquery.jsp" />
     </definition>
-    <definition name=".timetable.search" extends="layout.1col">
+    <definition name=".timetable.search" extends="layout.2col-left">
+        <put-attribute name="left" value=".left" />
         <put-attribute name="center" value="/common/timetable/search_center.jsp" />
     </definition>
     
@@ -27,7 +29,8 @@
         <put-attribute name="body" value=".timetable.schedule" />
         <put-attribute name="javascript" value="/common/jquery.jsp" />
     </definition>
-    <definition name=".timetable.schedule" extends="layout.1col">
+    <definition name=".timetable.schedule" extends="layout.2col-left">
+        <put-attribute name="left" value=".left" />
         <put-attribute name="center" value="/common/timetable/schedule.jsp" />
     </definition>
     

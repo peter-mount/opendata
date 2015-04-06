@@ -9,7 +9,8 @@
         <put-attribute name="body" value=".signal.home" />
         <put-attribute name="javascript" value="/common/blank.jsp" />
     </definition>
-    <definition name=".signal.home" extends="layout.1col">
+    <definition name=".signal.home" extends="layout.2col-left">
+        <put-attribute name="left" value=".left" />
         <put-attribute name="center" value="/common/signal/index.jsp" />
     </definition>
     
@@ -19,8 +20,11 @@
         <put-attribute name="javascript" value="/common/signal/javascript.jsp" />
     </definition>
     <definition name=".signal.map" extends="layout.2col-left">
-        <put-attribute name="left" value="/common/signal/left.jsp" />
+        <put-attribute name="left" value=".signal.map.left" />
         <put-attribute name="center" value="/common/signal/map.jsp" />
+    </definition>
+    <definition name=".signal.map.left" template="/common/signal/left.jsp">
+        <put-attribute name="other" value=".left" />
     </definition>
     
 </tiles-definitions>

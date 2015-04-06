@@ -10,7 +10,7 @@
         <put-attribute name="javascript" value="/common/cms/javascript.jsp" />
     </definition>
     <definition name=".cms.page" extends="layout.2col-left">
-        <put-attribute name="left" value="/common/cms/left.jsp" />
+        <put-attribute name="left" value=".left" />
         <put-attribute name="center" value="/common/cms/center.jsp" />
     </definition>
     
