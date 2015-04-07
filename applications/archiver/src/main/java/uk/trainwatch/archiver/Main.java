@@ -67,6 +67,7 @@ public class Main
         RTPPMArchiver.setup( rabbitmq );
         ReportArchiver.setup( rabbitmq );
         DarwinTSArchiver.setup( rabbitmq );
+        NRTDArchiver.setup( rabbitmq );
     }
 
 }

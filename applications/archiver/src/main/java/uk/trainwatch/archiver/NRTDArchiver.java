@@ -26,25 +26,19 @@ import uk.trainwatch.rabbitmq.RabbitMQ;
 import uk.trainwatch.util.Consumers;
 import uk.trainwatch.util.counter.RateMonitor;
 
-/**
- * Archives the raw Trust MVT feed to disk
- * <p>
- * @author Peter T Mount
- */
-public class TrustMvtAllArchiver
+public class NRTDArchiver
 {
 
-    protected static final Logger LOG = Logger.getLogger( TrustMvtAllArchiver.class.getName() );
+    protected static final Logger LOG = Logger.getLogger( NRTDArchiver.class.getName() );
 
     public static void setup( RabbitConnection rabbitmq )
     {
-        Consumer<String> mvtAllMonitor = RateMonitor.log( LOG, "record nr.trust.mvtall" );
-        Function<String, Path> trustmapper = new DatePathMapper( "/usr/local/networkrail", "trust/raw", true );
-        RabbitMQ.queueDurableStream( rabbitmq, "archiver.nrod.trust", "nr.trust.mvtall",
+        Consumer<String> monitor = RateMonitor.log( LOG, "record nr.td.all" );
+        Function<String, Path> pathMapper = new DatePathMapper( "/usr/local/networkrail", "td", true );
+        RabbitMQ.queueDurableStream( rabbitmq, "archiver.nrod.td", "nr.td.all",
                 s -> s.map( RabbitMQ.toString ).
-                peek( mvtAllMonitor ).
-                map( l -> l + "\n" ).
-                forEach( Consumers.guard( LOG, FileRecorder.recordTo( trustmapper ) ) )
+                peek( monitor ).
+                forEach( Consumers.guard( LOG, FileRecorder.recordTo( pathMapper ) ) )
         );
     }
 

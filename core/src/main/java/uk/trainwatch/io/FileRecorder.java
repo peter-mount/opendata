@@ -35,8 +35,8 @@ public class FileRecorder<T>
     /**
      * Create a consumer that will append to the file at the specified path, creating it as necessary
      * <p>
-     * @param <T>     Type
-     * @param path    Path to record to
+     * @param <T> Type
+     * @param path Path to record to
      * @param encoder mapping function to encode the type to a String
      * <p>
      * @return consumer
@@ -49,9 +49,9 @@ public class FileRecorder<T>
     /**
      * Create a consumer that will append to the file at the path provided by the pathMapper, creating it as necessary
      * <p>
-     * @param <T>        Type
+     * @param <T> Type
      * @param pathMapper mapping function to determine the path based on the type
-     * @param encoder    mapping function to encode the type to a String
+     * @param encoder mapping function to encode the type to a String
      * <p>
      * @return consumer
      */
@@ -88,7 +88,7 @@ public class FileRecorder<T>
      * Construct a FileRecorder that will create the file if it does not exist, otherwise it will append to it.
      * <p>
      * @param pathMapper mapping function that can generate a Path based on the value being passed
-     * @param encoder    mapping function that encodes the value to a String
+     * @param encoder mapping function that encodes the value to a String
      */
     public FileRecorder( final Function<T, Path> pathMapper, final Function<T, String> encoder )
     {
@@ -100,8 +100,8 @@ public class FileRecorder<T>
      * Constructor allowing alternate {@link OpenOption}'s to be provided.
      * <p>
      * @param pathMapper mapping function that can generate a Path based on the value being passed
-     * @param encoder    mapping function that encodes the value to a String
-     * @param options    {@link OpenOption}'s to apply to the file
+     * @param encoder mapping function that encodes the value to a String
+     * @param options {@link OpenOption}'s to apply to the file
      */
     public FileRecorder( final Function<T, Path> pathMapper, final Function<T, String> encoder, OpenOption... options )
     {
@@ -118,15 +118,14 @@ public class FileRecorder<T>
             try
             {
                 final Path path = fileNameMapper.apply( t );
-                final String record = encoder.apply( t );
-
+                final String rec = encoder.apply( t );
+                final String record = rec.endsWith( "\n" ) ? rec : (rec + "\n");
                 if( path != null && encoder != null )
                 {
                     LOG.log( Level.FINE, () -> "Writing to " + path );
                     Files.write( path, record.getBytes( Charset.defaultCharset() ), options );
                 }
-            }
-            catch( IOException ex )
+            } catch( IOException ex )
             {
                 LOG.log( Level.SEVERE, null, ex );
             }
