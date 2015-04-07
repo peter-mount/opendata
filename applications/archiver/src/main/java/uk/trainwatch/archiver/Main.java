@@ -16,19 +16,11 @@
 package uk.trainwatch.archiver;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Properties;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.logging.Level;
-import uk.trainwatch.io.DatePathMapper;
-import uk.trainwatch.io.FileRecorder;
 import uk.trainwatch.rabbitmq.RabbitConnection;
-import uk.trainwatch.rabbitmq.RabbitMQ;
-import uk.trainwatch.util.Consumers;
 import uk.trainwatch.util.app.Application;
 import static uk.trainwatch.util.app.Application.loadProperties;
-import uk.trainwatch.util.counter.RateMonitor;
 
 /**
  *
@@ -42,7 +34,7 @@ public class Main
 
     public static void main( String... args )
             throws IOException,
-                   InterruptedException
+            InterruptedException
     {
         LOG.log( Level.INFO, "Initialising Rail Analyser" );
 
@@ -55,8 +47,8 @@ public class Main
     {
         Properties p = loadProperties( "rabbit.properties" );
         rabbitmq = new RabbitConnection( p.getProperty( "username" ),
-                                         p.getProperty( "password" ),
-                                         p.getProperty( "host" )
+                p.getProperty( "password" ),
+                p.getProperty( "host" )
         );
     }
 
@@ -74,6 +66,7 @@ public class Main
         TrustMvtAllArchiver.setup( rabbitmq );
         RTPPMArchiver.setup( rabbitmq );
         ReportArchiver.setup( rabbitmq );
+        DarwinTSArchiver.setup( rabbitmq );
     }
 
 }
