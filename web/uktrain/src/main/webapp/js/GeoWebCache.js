@@ -39,7 +39,7 @@ function newMapLuLayer(layer, name, base, background) {
             );
 }
 OpenLayers.Layer.GeoWebCache = OpenLayers.Class(OpenLayers.Layer.Grid, {
-    url: "//dev.map.lu/tiles/geos/",
+    url: "//map.lu/tiles/geos/",
     type: 'png',
     // OSGB Standard stylesheets are limited to 17 although 19 would be nice
     numZoomLevels: 17,
