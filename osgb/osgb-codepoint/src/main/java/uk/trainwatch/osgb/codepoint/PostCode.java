@@ -91,4 +91,11 @@ public class PostCode {
         return Objects.equals(this.postCode, other.postCode);
     }
 
+    @Override
+    public String toString()
+    {
+        return "Postcode["+postCode+","+eastings+","+northings+']';
+    }
+
+    
 }

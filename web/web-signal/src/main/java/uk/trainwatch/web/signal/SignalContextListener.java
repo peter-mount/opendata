@@ -15,15 +15,12 @@
  */
 package uk.trainwatch.web.signal;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.annotation.WebListener;
@@ -31,6 +28,7 @@ import uk.trainwatch.nrod.td.model.TDMessageFactory;
 import uk.trainwatch.rabbitmq.RabbitConnection;
 import uk.trainwatch.rabbitmq.RabbitMQ;
 import uk.trainwatch.util.JsonUtils;
+import uk.trainwatch.util.config.JNDIConfig;
 import uk.trainwatch.util.counter.RateMonitor;
 import uk.trainwatch.util.sql.DBContextListener;
 
@@ -56,14 +54,12 @@ public class SignalContextListener
 
         try
         {
-            String localHost = InetAddress.getLocalHost().
-                    getHostName();
+            String localHost = RabbitMQ.getHostname();
 
             boolean dev = "europa".equals( localHost ) || "phoebe".equals( localHost );
             // Dev, connect to prod for data but only request a single area to keep volumne down.
             configure( dev ? "nr.td.area.A3" : "nr.td.area.#", "signal.map", true );
-        } catch( NamingException |
-                UnknownHostException ex )
+        } catch( NamingException ex )
         {
             LOG.log( Level.SEVERE, null, ex );
         }
@@ -82,13 +78,14 @@ public class SignalContextListener
     private void configure( String routingKey, String queueName, boolean durable )
             throws NamingException
     {
+        if( JNDIConfig.INSTANCE.getBoolean( "signal.disabled" ) )
+        {
+            return;
+        }
+
         LOG.log( Level.INFO, () -> "Requesting " + routingKey + " on " + queueName );
 
-        rabbitConnection = new RabbitConnection(
-                InitialContext.doLookup( "java:/comp/env/rabbit/uktrain/user" ),
-                InitialContext.doLookup( "java:/comp/env/rabbit/uktrain/password" ),
-                InitialContext.doLookup( "java:/comp/env/rabbit/uktrain/host" )
-        );
+        rabbitConnection = RabbitMQ.createJNDIConnection( "rabbit/uktrain" );
 
         Consumer<Stream<byte[]>> consumer = s
                 -> s.map( RabbitMQ.toString.

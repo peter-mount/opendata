@@ -1,0 +1,20 @@
+#!/bin/bash
+#======================================================================
+# Compresses the previous day's archives from Darwin to reduce the
+# size of the archives
+#
+# 2015/4/8	Version 1 pmount
+#======================================================================
+
+DOW=$(date -d yesterday +"%Y/%-m/%-d"|tr A-Z a-z)
+echo "Compressing darwin logs for $DOW"
+
+(
+    cd /usr/local/networkrail/darwin
+    for dir in */
+    do
+	echo $dir
+	tar cvjpf ${dir}/${DOW}.tar.bz2 $dir/${DOW} && rm -r ${dir}/${DOW}
+    done
+)
+
