@@ -7,6 +7,6 @@
     Author     : Peter T Mount
 --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<script src="/js/jquery/jquery.js"></script>
-<script src="/js/menu_jquery.js"></script>
-<script src="/js/jquery/jquery-ui.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+<script src="/js/combo.js"></script>

@@ -8,13 +8,17 @@
 <p>
     From this page you can query the current timetable for any UK Rail station.
 </p>
-
+<script>
+    $(document).ready(function(){
+        $('#station').combobox();
+    });
+</script>
 <form method="GET" action="/timetable/search">
     <table>
         <tr>
             <td>Station</td>
             <td>
-                <select name ="station">
+                <select id="station" name ="station">
                     <option value="">Select a station...</option>
                     <c:forEach items="${stations}" var="station" varStatus="status">
                         <option value="${station.crs}">${station.location}</option>

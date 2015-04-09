@@ -345,3 +345,58 @@ table.wikitable td.netprevlast {
     color: #000;
     text-align: right;
 }
+
+.custom-combobox {
+    position: relative;
+    display: inline-block;
+}
+.custom-combobox-input {
+    margin: 0;
+    padding: 5px 10px;
+}
+
+
+.custom-combobox input {
+    width: 10em;
+}
+
+.custom-combobox-toggle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    margin-left: -1px;
+    padding: 0;
+    color: white;
+    border: thin;
+    border-color: blue;
+}
+
+.ui-autocomplete {
+    background: #fff;
+    border: 1px solid black;
+    padding: 0.2em;
+    max-height: 200px;
+    overflow-y: auto;
+    /* prevent horizontal scrollbar */
+    overflow-x: hidden;
+    /* add padding to account for vertical scrollbar */
+    position: absolute;
+    font-style: normal;
+    z-index: 2000;
+}
+
+.ui-autocomplete, .ui-autocomplete:hover
+{
+    background-color: white;
+    text-wrap: none;
+    font-weight: normal;
+    color: black;
+}
+.ui-autocomplete li.ui-menu-item:hover {
+    background-color: blue;
+    color: white;
+}
+
+.ui-helper-hidden-accessible {
+    display:none;
+}
