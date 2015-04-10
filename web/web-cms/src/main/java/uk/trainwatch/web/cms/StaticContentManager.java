@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.servlet.http.HttpServletResponse;
 import uk.trainwatch.web.util.CacheControl;
 import uk.trainwatch.web.util.ImageUtils;
@@ -55,11 +56,19 @@ public enum StaticContentManager
      */
     private final Pattern titlePattern = Pattern.compile( "<title>(.+)</title>" );
 
+    private String getPage( File f ) throws IOException
+    {
+        try( Stream<String> lines = Files.lines( f.toPath() ) )
+        {
+            return lines.collect( Collectors.joining( "\n" ) );
+        }
+    }
+
     /**
      * Retrieve a static page from the cms
      * <p>
      * @param path Page name
-     * @param req  Map to store the page
+     * @param req Map to store the page
      * <p>
      * @return true if the page was found & rendered, false if not found
      * <p>
@@ -69,28 +78,30 @@ public enum StaticContentManager
             throws IOException
     {
         File f = new File( baseDirectory, path.substring( 0, 1 ) + "/" + path + "/index.shtml" );
-        if( f.exists() && f.isFile() && f.canRead() ) {
-            String page = Files.lines( f.toPath() ).collect( Collectors.joining( "\n" ) );
+        if( f.exists() && f.isFile() && f.canRead() )
+        {
+            String page = getPage( f );
 
             Matcher m = titlePattern.matcher( page );
             req.put( PAGE_TITLE, m.matches() ? m.group( 1 ) : f.getParentFile().getName() );
 
             int i = page.indexOf( ARTICLE_START );
             int j = page.indexOf( ARTICLE_END );
-            if( i > 0 ) {
+            if( i > 0 )
+            {
                 page = page.substring( i, j + ARTICLE_END_LENGTH );
             }
 
             // Fix external links in the cms that points to it so we point to the real site
-            page=page.replaceAll( "//((.+?trainwatch\\.im)|(.+?\\.uktra\\.in)|(uktra\\.in))/", "/");
+            page = page.replaceAll( "//((.+?trainwatch\\.im)|(.+?\\.uktra\\.in)|(uktra\\.in))/", "/" );
 
             req.put( PAGE, page );
 
             req.put( PAGE_FILE, f );
 
             return true;
-        }
-        else {
+        } else
+        {
             return false;
         }
     }
@@ -99,11 +110,12 @@ public enum StaticContentManager
             throws IOException
     {
         File f = new File( baseDirectory, getRealImagePath( path ) );
-        if( f.exists() && f.isFile() && f.canRead() ) {
+        if( f.exists() && f.isFile() && f.canRead() )
+        {
             ImageUtils.sendFile( f.toPath(), CacheControl.TWO_HOURS, response );
             return true;
-        }
-        else {
+        } else
+        {
             response.sendError( HttpServletResponse.SC_NOT_FOUND, path );
             return false;
         }
@@ -112,14 +124,13 @@ public enum StaticContentManager
     /**
      * Get the real image path of an image.
      * <p>
-     * This is based on MediaWiki's algorithm, given an image name it gets the MD5 of that name, takes the first 2 hex digits, and uses them
-     * to form the path.
+     * This is based on MediaWiki's algorithm, given an image name it gets the MD5 of that name, takes the first 2 hex digits,
+     * and uses them to form the path.
      * <p>
      * So "Apple.jpg" has the first 2 digits 2b so the path is "/images/2/2b/Apple.jpg"
      * <p>
-     * The reasoning behind this is to prevent directories becoming large as that does have a performance hit. Using the MD5 just spreads images across
-     * directories
-     * more evenly than say using the first characters of the filename.
+     * The reasoning behind this is to prevent directories becoming large as that does have a performance hit. Using the MD5
+     * just spreads images across directories more evenly than say using the first characters of the filename.
      * <p>
      * @param s File name.
      * <p>
@@ -128,12 +139,14 @@ public enum StaticContentManager
     public String getRealImagePath( String s )
     {
         String name = s == null ? "" : s;
-        if( name.startsWith( FILE ) ) {
+        if( name.startsWith( FILE ) )
+        {
             name = name.substring( FILE_LENGTH );
         }
         byte b[] = md5( name );
         String p = Integer.toHexString( Byte.toUnsignedInt( b[0] ) );
-        if( p.length() == 1 ) {
+        if( p.length() == 1 )
+        {
             p = '0' + p;
         }
         return String.join( "/", "/images", p.substring( 0, 1 ), p, name );
@@ -143,15 +156,16 @@ public enum StaticContentManager
      * Get the MD5 of a string
      * <p>
      * @param s
-     *          <p>
+     * <p>
      * @return
      */
     public byte[] md5( String s )
     {
-        try {
+        try
+        {
             return MessageDigest.getInstance( "MD5" ).digest( s.getBytes() );
-        }
-        catch( NoSuchAlgorithmException ex ) {
+        } catch( NoSuchAlgorithmException ex )
+        {
             Logger.getLogger( StaticContentManager.class.getName() ).log( Level.SEVERE, null, ex );
             throw new IllegalStateException( ex );
         }

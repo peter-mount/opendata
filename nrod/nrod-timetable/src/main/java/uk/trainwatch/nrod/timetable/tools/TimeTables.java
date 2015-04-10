@@ -37,6 +37,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import org.apache.commons.cli.CommandLine;
 import org.kohsuke.MetaInfServices;
 import uk.trainwatch.nrod.timetable.cif.record.Association;
@@ -80,7 +81,7 @@ import uk.trainwatch.util.sql.SQLConsumer;
  *
  * @author peter
  */
-@MetaInfServices(Utility.class)
+@MetaInfServices( Utility.class )
 public class TimeTables
         extends DBUtility
 {
@@ -106,7 +107,7 @@ public class TimeTables
     }
 
     @Override
-    @SuppressWarnings("ThrowableInstanceNeverThrown")
+    @SuppressWarnings( "ThrowableInstanceNeverThrown" )
     public boolean parseArgs( CommandLine cmd )
     {
         super.parseArgs( cmd );
@@ -189,7 +190,8 @@ public class TimeTables
     /**
      * Prepares the daysrun table which maps days of week to a single id
      * <p>
-     * @param con <p>
+     * @param con
+     * <p>
      * @throws SQLException
      */
     private void prepareDaysRun( Connection con )
@@ -236,8 +238,8 @@ public class TimeTables
             final CIFParser parser = new CIFParser( true );
 
             final Supplier<String> exceptionLogger = () -> "Failed on line " + parser.lineCount()
-                                                           + " position " + parser.position()
-                                                           + "\n" + parser.currentLine( null );
+                    + " position " + parser.position()
+                    + "\n" + parser.currentLine( null );
             try
             {
                 // Do the import in one massive transaction
@@ -257,8 +259,8 @@ public class TimeTables
                             LocalDateTime imported = rs.getTimestamp( 2 ).
                                     toLocalDateTime();
                             LOG.log( Level.INFO, "Last file extracted {0}, imported {1}", new Object[]
-                             {
-                                 lastUpdate, imported
+                            {
+                                lastUpdate, imported
                             } );
                         }
                     }
@@ -274,8 +276,7 @@ public class TimeTables
                         ps.setTimestamp( 2, Timestamp.valueOf( TimeUtils.getLocalDateTime() ) );
                         ps.setString( 3, h.getCurrentFileRef() );
                         ps.executeUpdate();
-                    }
-                    catch( SQLException ex )
+                    } catch( SQLException ex )
                     {
                         throw new UncheckedSQLException( ex );
                     }
@@ -294,7 +295,7 @@ public class TimeTables
                 Consumer<Schedule> scheduleConsumer = Consumers.createIf(
                         includeSchedules,
                         () -> Consumers.andThen( schedules,
-                                                 scheduleLocations ) );
+                                scheduleLocations ) );
 
                 Consumer<Association> associations = Consumers.createIf(
                         includeAssociations,
@@ -306,27 +307,27 @@ public class TimeTables
 
                 // Now what to do at the end of the import
                 Consumer<TrailerRecord> trailer = t -> LOG.log( Level.INFO,
-                                                                () -> "Processed " + parser.lineCount() + " records." );
+                        () -> "Processed " + parser.lineCount() + " records." );
 
                 if( includeTiploc )
                 {
                     trailer = trailer.andThen( t -> LOG.log( Level.INFO,
-                                                             () -> "Tiplocs " + tiplocs ) );
+                            () -> "Tiplocs " + tiplocs ) );
                 }
 
                 if( includeAssociations )
                 {
                     trailer = trailer.andThen( t -> LOG.log( Level.INFO,
-                                                             () -> "Associations " + associations ) );
+                            () -> "Associations " + associations ) );
                 }
 
                 if( includeSchedules )
                 {
                     trailer = trailer.andThen( t -> LOG.log( Level.INFO,
-                                                             () -> "Schedules " + schedules + ", locations " + scheduleLocations ) );
+                            () -> "Schedules " + schedules + ", locations " + scheduleLocations ) );
                 }
 
-            // Pick the type of builder - if not forming schedules or associations then there's no need to use
+                // Pick the type of builder - if not forming schedules or associations then there's no need to use
                 // the more expensive visitor
                 BasicRecordVisitor builder;
                 if( includeSchedules )
@@ -338,8 +339,7 @@ public class TimeTables
                             scheduleConsumer,
                             trailer,
                             lastUpdate );
-                }
-                else
+                } else
                 {
                     // No schedules so no point in building Schedule objects
                     builder = new BasicRecordVisitor(
@@ -356,24 +356,22 @@ public class TimeTables
                         l -> LOG.log( Level.INFO, () -> "read " + parser.lineCount() + " records." )
                 );
 
-                Files.lines( cifFile ).
-                        map( parser::parse ).
-                        filter( Objects::nonNull ).
-                        peek( recCount ).
-                        forEach( r -> r.accept( builder ) );
-
-            }
-            catch( IOException ex )
+                try( Stream<String> lines = Files.lines( cifFile ) )
+                {
+                    lines.map( parser::parse ).
+                            filter( Objects::nonNull ).
+                            peek( recCount ).
+                            forEach( r -> r.accept( builder ) );
+                }
+            } catch( IOException ex )
             {
                 LOG.log( Level.SEVERE, exceptionLogger );
                 throw new UncheckedIOException( ex );
-            }
-            catch( SQLException ex )
+            } catch( SQLException ex )
             {
                 LOG.log( Level.SEVERE, exceptionLogger );
                 throw new UncheckedSQLException( ex );
-            }
-            catch( Exception ex )
+            } catch( Exception ex )
             {
                 LOG.log( Level.SEVERE, exceptionLogger );
                 throw new RuntimeException( ex );

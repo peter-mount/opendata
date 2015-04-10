@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -35,20 +36,23 @@ public class ImageUtils
 
     private static final Map<String, String> MIME_TYPES = new ConcurrentHashMap<>();
 
-    static {
+    static
+    {
         Path path = FileSystems.getDefault().
                 getPath( "/etc/mime.types" );
-        try {
-            Files.lines( path ).
-                    map( l -> l.replaceAll( "\\p{Space}", " " ) ).
+        try( Stream<String> stream = Files.lines( path ) )
+        {
+            stream.map( l -> l.replaceAll( "\\p{Space}", " " ) ).
                     map( l -> l.split( " " ) ).
-                    forEach( s -> {
-                        for( int i = 1; i < s.length; i++ ) {
-                            MIME_TYPES.putIfAbsent( s[i], s[0] );
-                        }
+                    forEach( s ->
+                            {
+                                for( int i = 1; i < s.length; i++ )
+                                {
+                                    MIME_TYPES.putIfAbsent( s[i], s[0] );
+                                }
                     } );
-        }
-        catch( IOException ex ) {
+        } catch( IOException ex )
+        {
             Logger.getLogger( ImageUtils.class.getName() ).
                     log( Level.SEVERE, null, ex );
         }
@@ -70,7 +74,8 @@ public class ImageUtils
         String p = path.toString();
 
         int i = p.lastIndexOf( '.' );
-        if( i < 0 && (i + 1) < p.length() ) {
+        if( i < 0 && (i + 1) < p.length() )
+        {
             return null;
         }
 
@@ -80,7 +85,7 @@ public class ImageUtils
     /**
      * Add contentType to the request based on the Path
      * <p>
-     * @param path     Path
+     * @param path Path
      * @param response Response to add to
      * <p>
      * @throws IllegalArgumentException if path is of an unsupported mime type
@@ -88,7 +93,8 @@ public class ImageUtils
     public static void addContentType( Path path, HttpServletResponse response )
     {
         String mime = getContentType( path );
-        if( mime != null ) {
+        if( mime != null )
+        {
             response.setContentType( mime );
         }
     }
@@ -96,7 +102,7 @@ public class ImageUtils
     /**
      * Adds the content length & last modified fields for a path
      * <p>
-     * @param path     Path
+     * @param path Path
      * @param response Response to add to
      */
     public static void addContentLenth( Path path, HttpServletResponse response )
@@ -107,7 +113,7 @@ public class ImageUtils
     /**
      * Adds the content length & last modified fields for a File
      * <p>
-     * @param file     File
+     * @param file File
      * @param response Response to add to
      */
     public static void addContentLenth( File file, HttpServletResponse response )
@@ -139,7 +145,7 @@ public class ImageUtils
     /**
      * Adds access control origin for a specific domain
      * <p>
-     * @param domain   The domain to allow access to
+     * @param domain The domain to allow access to
      * @param response Response to add to
      */
     public static void addAccessControlAllowOrigin( String domain, HttpServletResponse response )
@@ -150,11 +156,11 @@ public class ImageUtils
     /**
      * Sends an image file to the response
      * <p>
-     * @param path     Path to the file in the file system
-     * @param cache    CacheControl
+     * @param path Path to the file in the file system
+     * @param cache CacheControl
      * @param response Response to send to
      * <p>
-     * @throws IOException              on failure
+     * @throws IOException on failure
      * @throws IllegalArgumentException if the image is not a supported image type
      */
     public static void sendFile( Path path, CacheControl cache, HttpServletResponse response )
