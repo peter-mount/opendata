@@ -6,12 +6,27 @@
 package uk.trainwatch.osgb.codepoint;
 
 import java.util.Objects;
+import uk.trainwatch.util.sql.SQLResultSetHandler;
 
 /**
  *
  * @author peter
  */
-public class PostCode {
+public class PostCode
+{
+
+    public static final SQLResultSetHandler<PostCode> fromSQL = rs -> new PostCode(
+            rs.getString( "postcode" ),
+            rs.getInt( "pqi" ),
+            rs.getInt( "eastings" ),
+            rs.getInt( "northings" ),
+            rs.getString( "country" ),
+            rs.getString( "county" ),
+            rs.getString( "district" ),
+            rs.getString( "ward" ),
+            rs.getString( "nhsRegion" ),
+            rs.getString( "nhs" )
+    );
 
     private final String postCode;
     private final int pqi;
@@ -24,7 +39,8 @@ public class PostCode {
     private final String nhsRegion;
     private final String nhs;
 
-    public PostCode(String postCode, int pqi, int eastings, int northings, String country, String county, String district, String ward, String nhsRegion, String nhs) {
+    public PostCode( String postCode, int pqi, int eastings, int northings, String country, String county, String district, String ward, String nhsRegion, String nhs )
+    {
         this.postCode = postCode;
         this.pqi = pqi;
         this.eastings = eastings;
@@ -37,65 +53,77 @@ public class PostCode {
         this.nhs = nhs;
     }
 
-    public String getPostCode() {
+    public String getPostCode()
+    {
         return postCode;
     }
 
-    public int getPqi() {
+    public int getPqi()
+    {
         return pqi;
     }
 
-    public int getEastings() {
+    public int getEastings()
+    {
         return eastings;
     }
 
-    public int getNorthings() {
+    public int getNorthings()
+    {
         return northings;
     }
 
-    public String getCountry() {
+    public String getCountry()
+    {
         return country;
     }
 
-    public String getCounty() {
+    public String getCounty()
+    {
         return county;
     }
 
-    public String getDistrict() {
+    public String getDistrict()
+    {
         return district;
     }
 
-    public String getWard() {
+    public String getWard()
+    {
         return ward;
     }
 
-    public String getNhsRegion() {
+    public String getNhsRegion()
+    {
         return nhsRegion;
     }
 
-    public String getNhs() {
+    public String getNhs()
+    {
         return nhs;
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hashCode(this.postCode);
+    public int hashCode()
+    {
+        return Objects.hashCode( this.postCode );
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null || getClass() != obj.getClass()) {
+    public boolean equals( Object obj )
+    {
+        if( obj == null || getClass() != obj.getClass() )
+        {
             return false;
         }
         final PostCode other = (PostCode) obj;
-        return Objects.equals(this.postCode, other.postCode);
+        return Objects.equals( this.postCode, other.postCode );
     }
 
     @Override
     public String toString()
     {
-        return "Postcode["+postCode+","+eastings+","+northings+']';
+        return "Postcode[" + postCode + "," + eastings + "," + northings + ']';
     }
 
-    
 }

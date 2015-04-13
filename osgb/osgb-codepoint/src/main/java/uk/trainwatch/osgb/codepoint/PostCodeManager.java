@@ -5,9 +5,13 @@
  */
 package uk.trainwatch.osgb.codepoint;
 
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.sql.DataSource;
+import uk.trainwatch.util.sql.SQL;
 
 /**
  *
@@ -60,23 +64,29 @@ public enum PostCodeManager
         return String.format( "%-4.4s%3.3s", prefix, suffix );
     }
 
+    /**
+     * Lookup a single postcode
+     *
+     * @param postcode
+     * @return
+     */
     public PostCode lookup( String postcode )
     {
         String pc = normalise( postcode );
-        return pc == null ? null : new PostCode( pc, 0, 0, 0, "", "", "", "", "", "" );
+        if( pc != null && !pc.isEmpty() )
+        {
+            try( Connection con = dataSource.getConnection() )
+            {
+                try( PreparedStatement ps = SQL.prepare( con, "SELECT * FROM gis.codepoint WHERE postcode=?", pc ) )
+                {
+                    return SQL.stream( ps, PostCode.fromSQL ).findAny().orElse( null );
+                }
+            } catch( SQLException ex )
+            {
+                Logger.getLogger( PostCodeManager.class.getName() ).log( Level.SEVERE, null, ex );
+            }
+        }
+        return null;
     }
 
-    public static void main( String... args ) throws Exception
-    {
-        Stream.of( "ME15 0AS",
-                "ME150AS",
-                "W1C 3bb",
-                // Invalid
-                "W1 1AB",
-                // Valid
-                "W2 1AB",
-                "ME15 000"
-        ).forEach( p -> System.out.printf( "%10s %s\n", p, INSTANCE.lookup( p ) ) );
-        throw new Exception();
-    }
 }
