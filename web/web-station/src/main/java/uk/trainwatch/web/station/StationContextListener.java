@@ -40,8 +40,6 @@ public class StationContextListener
         extends DBContextListener
 {
 
-    private static final Logger LOG = Logger.getLogger( StationContextListener.class.getName() );
-
     private RabbitConnection rabbitConnection;
 
     @Override

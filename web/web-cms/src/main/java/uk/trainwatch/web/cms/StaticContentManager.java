@@ -18,6 +18,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.servlet.http.HttpServletResponse;
+import uk.trainwatch.util.config.Configuration;
+import uk.trainwatch.util.config.JNDIConfig;
 import uk.trainwatch.web.util.CacheControl;
 import uk.trainwatch.web.util.ImageUtils;
 
@@ -50,16 +52,22 @@ public enum StaticContentManager
      */
     public static final String PAGE_FILE = "pageFile";
     // FIXME remove this hardcoding
-    protected final File baseDirectory = new File( "/var/www/uktra.in" );
+    protected final File baseDirectory;
     /**
      * Pattern to extract page title
      */
     private final Pattern titlePattern = Pattern.compile( "<title>(.+)</title>" );
 
-    private String getPage( File f ) throws IOException
+    private StaticContentManager()
     {
-        try( Stream<String> lines = Files.lines( f.toPath() ) )
-        {
+        Configuration config = JNDIConfig.INSTANCE;
+        baseDirectory = new File( config.get( "mediawiki.basedir" ) );
+    }
+
+    private String getPage( File f )
+            throws IOException
+    {
+        try( Stream<String> lines = Files.lines( f.toPath() ) ) {
             return lines.collect( Collectors.joining( "\n" ) );
         }
     }
@@ -68,7 +76,7 @@ public enum StaticContentManager
      * Retrieve a static page from the cms
      * <p>
      * @param path Page name
-     * @param req Map to store the page
+     * @param req  Map to store the page
      * <p>
      * @return true if the page was found & rendered, false if not found
      * <p>
@@ -78,8 +86,7 @@ public enum StaticContentManager
             throws IOException
     {
         File f = new File( baseDirectory, path.substring( 0, 1 ) + "/" + path + "/index.shtml" );
-        if( f.exists() && f.isFile() && f.canRead() )
-        {
+        if( f.exists() && f.isFile() && f.canRead() ) {
             String page = getPage( f );
 
             Matcher m = titlePattern.matcher( page );
@@ -87,8 +94,7 @@ public enum StaticContentManager
 
             int i = page.indexOf( ARTICLE_START );
             int j = page.indexOf( ARTICLE_END );
-            if( i > 0 )
-            {
+            if( i > 0 ) {
                 page = page.substring( i, j + ARTICLE_END_LENGTH );
             }
 
@@ -100,8 +106,8 @@ public enum StaticContentManager
             req.put( PAGE_FILE, f );
 
             return true;
-        } else
-        {
+        }
+        else {
             return false;
         }
     }
@@ -110,12 +116,11 @@ public enum StaticContentManager
             throws IOException
     {
         File f = new File( baseDirectory, getRealImagePath( path ) );
-        if( f.exists() && f.isFile() && f.canRead() )
-        {
+        if( f.exists() && f.isFile() && f.canRead() ) {
             ImageUtils.sendFile( f.toPath(), CacheControl.TWO_HOURS, response );
             return true;
-        } else
-        {
+        }
+        else {
             response.sendError( HttpServletResponse.SC_NOT_FOUND, path );
             return false;
         }
@@ -139,14 +144,12 @@ public enum StaticContentManager
     public String getRealImagePath( String s )
     {
         String name = s == null ? "" : s;
-        if( name.startsWith( FILE ) )
-        {
+        if( name.startsWith( FILE ) ) {
             name = name.substring( FILE_LENGTH );
         }
         byte b[] = md5( name );
         String p = Integer.toHexString( Byte.toUnsignedInt( b[0] ) );
-        if( p.length() == 1 )
-        {
+        if( p.length() == 1 ) {
             p = '0' + p;
         }
         return String.join( "/", "/images", p.substring( 0, 1 ), p, name );
@@ -156,16 +159,15 @@ public enum StaticContentManager
      * Get the MD5 of a string
      * <p>
      * @param s
-     * <p>
+     *          <p>
      * @return
      */
     public byte[] md5( String s )
     {
-        try
-        {
+        try {
             return MessageDigest.getInstance( "MD5" ).digest( s.getBytes() );
-        } catch( NoSuchAlgorithmException ex )
-        {
+        }
+        catch( NoSuchAlgorithmException ex ) {
             Logger.getLogger( StaticContentManager.class.getName() ).log( Level.SEVERE, null, ex );
             throw new IllegalStateException( ex );
         }

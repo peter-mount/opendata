@@ -68,7 +68,7 @@ public class RabbitMQ
      * content will be sent.
      * <p>
      * @param connection Connection manager
-     * @param topic topic to publish to
+     * @param topic      topic to publish to
      * @param routingKey routing key
      * <p>
      * @return consumer
@@ -76,10 +76,8 @@ public class RabbitMQ
     public static Consumer<String> stringConsumer( RabbitConnection connection, String topic, String routingKey )
     {
         Consumer<byte[]> c = rabbitConsumer( connection, topic, routingKey );
-        return s ->
-        {
-            if( s != null && !s.isEmpty() )
-            {
+        return s -> {
+            if( s != null && !s.isEmpty() ) {
                 c.accept( s.getBytes( UTF8 ) );
             }
         };
@@ -102,7 +100,7 @@ public class RabbitMQ
      * Convenience method that returns a {@link Consumer} of {@link JsonStructure} that will publish JSON to a remote topic.
      * <p>
      * @param connection Connection manager
-     * @param topic topic to publish to
+     * @param topic      topic to publish to
      * @param routingKey routing key
      * <p>
      * @return consumer
@@ -136,7 +134,7 @@ public class RabbitMQ
      * {@link RabbitConsumer#RabbitConsumer(uk.trainwatch.rabbitmq.RabbitConnection, java.lang.String, java.lang.String)}
      * <p>
      * @param connection Connection manager
-     * @param topic topic to publish to
+     * @param topic      topic to publish to
      * @param routingKey routing key
      * <p>
      * @return consumer
@@ -150,8 +148,8 @@ public class RabbitMQ
      * Create an infinite Stream fed by the broker. This stream will run on a background thread.
      * <p>
      * @param connection Broker connection
-     * @param queueName Queue name
-     * @param factory Consumer that will take the final stream and consume it
+     * @param queueName  Queue name
+     * @param factory    Consumer that will take the final stream and consume it
      */
     public static void queueStream( RabbitConnection connection, String queueName, Consumer<Stream<byte[]>> factory )
     {
@@ -162,12 +160,12 @@ public class RabbitMQ
      * Create an infinite Stream fed by the broker. This stream will run on a background thread.
      * <p>
      * @param connection Broker connection
-     * @param queueName Queue name
+     * @param queueName  Queue name
      * @param routingKey Routing Key to bind to
-     * @param factory Consumer that will take the final stream and consume it
+     * @param factory    Consumer that will take the final stream and consume it
      */
     public static void queueStream( RabbitConnection connection, String queueName, String routingKey,
-            Consumer<Stream<byte[]>> factory )
+                                    Consumer<Stream<byte[]>> factory )
     {
         queueStream( connection, queueName, DEFAULT_TOPIC, routingKey, false, null, factory );
     }
@@ -176,13 +174,13 @@ public class RabbitMQ
      * Create an infinite Stream fed by the broker. This stream will run on a background thread.
      * <p>
      * @param connection Broker connection
-     * @param queueName Queue name
-     * @param topic Topic to bind to
+     * @param queueName  Queue name
+     * @param topic      Topic to bind to
      * @param routingKey Routing Key to bind to
-     * @param factory Consumer that will take the final stream and consume it
+     * @param factory    Consumer that will take the final stream and consume it
      */
     public static void queueStream( RabbitConnection connection, String queueName, String topic, String routingKey,
-            Consumer<Stream<byte[]>> factory )
+                                    Consumer<Stream<byte[]>> factory )
     {
         queueStream( connection, queueName, topic, routingKey, false, null, factory );
     }
@@ -191,11 +189,11 @@ public class RabbitMQ
      * Create an infinite Stream fed by the broker. This stream will run on a background thread.
      * <p>
      * @param connection Broker connection
-     * @param queueName Queue name
-     * @param factory Consumer that will take the final stream and consume it
+     * @param queueName  Queue name
+     * @param factory    Consumer that will take the final stream and consume it
      */
     public static void queueDurableStream( RabbitConnection connection, String queueName,
-            Consumer<Stream<byte[]>> factory )
+                                           Consumer<Stream<byte[]>> factory )
     {
         queueStream( connection, queueName, null, null, true, null, factory );
     }
@@ -204,12 +202,12 @@ public class RabbitMQ
      * Create an infinite Stream fed by the broker. This stream will run on a background thread.
      * <p>
      * @param connection Broker connection
-     * @param queueName Queue name
+     * @param queueName  Queue name
      * @param routingKey Routing Key to bind to
-     * @param factory Consumer that will take the final stream and consume it
+     * @param factory    Consumer that will take the final stream and consume it
      */
     public static void queueDurableStream( RabbitConnection connection, String queueName, String routingKey,
-            Consumer<Stream<byte[]>> factory )
+                                           Consumer<Stream<byte[]>> factory )
     {
         queueStream( connection, queueName, DEFAULT_TOPIC, routingKey, true, null, factory );
     }
@@ -218,14 +216,14 @@ public class RabbitMQ
      * Create an infinite Stream fed by the broker. This stream will run on a background thread.
      * <p>
      * @param connection Broker connection
-     * @param queueName Queue name
-     * @param topic Topic to bind to
+     * @param queueName  Queue name
+     * @param topic      Topic to bind to
      * @param routingKey Routing Key to bind to
-     * @param factory Consumer that will take the final stream and consume it
+     * @param factory    Consumer that will take the final stream and consume it
      */
     public static void queueDurableStream( RabbitConnection connection, String queueName, String topic,
-            String routingKey,
-            Consumer<Stream<byte[]>> factory )
+                                           String routingKey,
+                                           Consumer<Stream<byte[]>> factory )
     {
         queueStream( connection, queueName, topic, routingKey, true, null, factory );
     }
@@ -234,13 +232,13 @@ public class RabbitMQ
      * Create an infinite Stream fed by the broker. This stream will run on a background thread.
      * <p>
      * @param connection Broker connection
-     * @param queueName Queue name
+     * @param queueName  Queue name
      * @param properties Queue properties
-     * @param factory Consumer that will take the final stream and consume it
+     * @param factory    Consumer that will take the final stream and consume it
      */
     public static void queueStream( RabbitConnection connection, String queueName,
-            Map<String, Object> properties,
-            Consumer<Stream<byte[]>> factory )
+                                    Map<String, Object> properties,
+                                    Consumer<Stream<byte[]>> factory )
     {
         queueStream( connection, queueName, null, null, false, properties, factory );
     }
@@ -249,14 +247,14 @@ public class RabbitMQ
      * Create an infinite Stream fed by the broker. This stream will run on a background thread.
      * <p>
      * @param connection Broker connection
-     * @param queueName Queue name
+     * @param queueName  Queue name
      * @param routingKey Routing Key to bind to
      * @param properties Queue properties
-     * @param factory Consumer that will take the final stream and consume it
+     * @param factory    Consumer that will take the final stream and consume it
      */
     public static void queueStream( RabbitConnection connection, String queueName, String routingKey,
-            Map<String, Object> properties,
-            Consumer<Stream<byte[]>> factory )
+                                    Map<String, Object> properties,
+                                    Consumer<Stream<byte[]>> factory )
     {
         queueStream( connection, queueName, DEFAULT_TOPIC, routingKey, false, properties, factory );
     }
@@ -265,15 +263,15 @@ public class RabbitMQ
      * Create an infinite Stream fed by the broker. This stream will run on a background thread.
      * <p>
      * @param connection Broker connection
-     * @param queueName Queue name
-     * @param topic Topic to bind to
+     * @param queueName  Queue name
+     * @param topic      Topic to bind to
      * @param routingKey Routing Key to bind to
      * @param properties Queue properties
-     * @param factory Consumer that will take the final stream and consume it
+     * @param factory    Consumer that will take the final stream and consume it
      */
     public static void queueStream( RabbitConnection connection, String queueName, String topic, String routingKey,
-            Map<String, Object> properties,
-            Consumer<Stream<byte[]>> factory )
+                                    Map<String, Object> properties,
+                                    Consumer<Stream<byte[]>> factory )
     {
         queueStream( connection, queueName, topic, routingKey, false, properties, factory );
     }
@@ -282,13 +280,13 @@ public class RabbitMQ
      * Create an infinite Stream fed by the broker. This stream will run on a background thread.
      * <p>
      * @param connection Broker connection
-     * @param queueName Queue name
+     * @param queueName  Queue name
      * @param properties Queue properties
-     * @param factory Consumer that will take the final stream and consume it
+     * @param factory    Consumer that will take the final stream and consume it
      */
     public static void queueDurableStream( RabbitConnection connection, String queueName,
-            Map<String, Object> properties,
-            Consumer<Stream<byte[]>> factory )
+                                           Map<String, Object> properties,
+                                           Consumer<Stream<byte[]>> factory )
     {
         queueStream( connection, queueName, null, null, true, properties, factory );
     }
@@ -297,14 +295,14 @@ public class RabbitMQ
      * Create an infinite Stream fed by the broker. This stream will run on a background thread.
      * <p>
      * @param connection Broker connection
-     * @param queueName Queue name
+     * @param queueName  Queue name
      * @param routingKey Routing Key to bind to
      * @param properties Queue properties
-     * @param factory Consumer that will take the final stream and consume it
+     * @param factory    Consumer that will take the final stream and consume it
      */
     public static void queueDurableStream( RabbitConnection connection, String queueName, String routingKey,
-            Map<String, Object> properties,
-            Consumer<Stream<byte[]>> factory )
+                                           Map<String, Object> properties,
+                                           Consumer<Stream<byte[]>> factory )
     {
         queueStream( connection, queueName, DEFAULT_TOPIC, routingKey, true, properties, factory );
     }
@@ -313,26 +311,26 @@ public class RabbitMQ
      * Create an infinite Stream fed by the broker. This stream will run on a background thread.
      * <p>
      * @param connection Broker connection
-     * @param queueName Queue name
-     * @param topic Topic to bind to
+     * @param queueName  Queue name
+     * @param topic      Topic to bind to
      * @param routingKey Routing Key to bind to
      * @param properties Queue properties
-     * @param factory Consumer that will take the final stream and consume it
+     * @param factory    Consumer that will take the final stream and consume it
      */
     public static void queueDurableStream( RabbitConnection connection, String queueName, String topic,
-            String routingKey,
-            Map<String, Object> properties,
-            Consumer<Stream<byte[]>> factory )
+                                           String routingKey,
+                                           Map<String, Object> properties,
+                                           Consumer<Stream<byte[]>> factory )
     {
         queueStream( connection, queueName, topic, routingKey, true, properties, factory );
     }
 
     private static void queueStream( RabbitConnection connection,
-            String queueName,
-            String topic, String routingKey,
-            boolean durable,
-            Map<String, Object> properties,
-            Consumer<Stream<byte[]>> factory )
+                                     String queueName,
+                                     String topic, String routingKey,
+                                     boolean durable,
+                                     Map<String, Object> properties,
+                                     Consumer<Stream<byte[]>> factory )
     {
         String realQueue = queueName + "." + getHostname();
         RabbitSupplier supplier = new RabbitSupplier( connection, realQueue, topic, routingKey, durable, properties );
@@ -342,11 +340,10 @@ public class RabbitMQ
 
     public static String getHostname()
     {
-        try
-        {
+        try {
             return InetAddress.getLocalHost().getHostName();
-        } catch( UnknownHostException ex )
-        {
+        }
+        catch( UnknownHostException ex ) {
             return "localHost";
         }
     }
@@ -367,7 +364,7 @@ public class RabbitMQ
      * Create properties to mark this queue as being parked
      * <p>
      * @param properties Existing properties map
-     * @param delay Delay in milliseconds to hold a message before delivery
+     * @param delay      Delay in milliseconds to hold a message before delivery
      * <p>
      * @return Map
      */
@@ -375,6 +372,37 @@ public class RabbitMQ
     {
         Objects.requireNonNull( properties );
         properties.put( "internal-park-queue", delay );
+        return properties;
+    }
+
+    /**
+     * Set the queue Time To Live value.
+     * <p>
+     * By default if this is not set the queue will default to 5 minutes (set in our code, RabbitMQ's default is no timeout).
+     * <p>
+     * @param delay time to live in milliseconds
+     * <p>
+     * @return
+     */
+    public static Map<String, Object> queueTTL( long delay )
+    {
+        return queueTTL( new HashMap<>(), delay );
+    }
+
+    /**
+     * Set the queue Time To Live value.
+     * <p>
+     * By default if this is not set the queue will default to 5 minutes (set in our code, RabbitMQ's default is no timeout).
+     * <p>
+     * @param properties Properties
+     * @param delay      time to live in milliseconds
+     * <p>
+     * @return
+     */
+    public static Map<String, Object> queueTTL( Map<String, Object> properties, long delay )
+    {
+        Objects.requireNonNull( properties );
+        properties.put( "x-message-ttl", delay );
         return properties;
     }
 
