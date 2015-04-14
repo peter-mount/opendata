@@ -75,6 +75,8 @@ public enum ForecastManager
                     return SQL.stream( ps, SQL.STRING_LOOKUP ).
                             map( DarwinJaxbContext.fromXML ).
                             flatMap( p -> p.getUR().getTS().stream() ).
+                            // Sort data into correct order
+                            peek( ts -> ts.getLocation().sort( TSLocationComparator.INSTANCE ) ).
                             collect( Collectors.toList() ).
                             stream();
                 }
@@ -97,14 +99,12 @@ public enum ForecastManager
     {
         if( rid != null && !rid.isEmpty() ) {
             try( Connection con = dataSource.getConnection() ) {
-                try( PreparedStatement ps = SQL.prepare( con, "SELECT f.xml FROM darwin.forecast f"
-                                                              + " INNER JOIN darwin.forecast_entry fe ON f.id=fe.fid"
-                                                              + " INNER JOIN darwin.tiploc t ON fe.tpl=t.id"
-                                                              + " WHERE t.tpl=?",
-                                                         rid ) ) {
+                try( PreparedStatement ps = SQL.prepare( con, "SELECT xml FROM darwin.forecast WHERE rid=?", rid ) ) {
                     return SQL.stream( ps, SQL.STRING_LOOKUP ).
                             map( DarwinJaxbContext.fromXML ).
                             flatMap( p -> p.getUR().getTS().stream() ).
+                            // Sort data into correct order
+                            peek( ts -> ts.getLocation().sort( TSLocationComparator.INSTANCE ) ).
                             findAny().
                             orElse( null );
                 }

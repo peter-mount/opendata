@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+<tiles-definitions>
+    
+    <definition name="train.info" extends="layout.main">
+        <put-attribute name="title" value="Current Train Status" />
+        <put-attribute name="body" value=".train.info" />
+        <put-attribute name="javascript" value="/common/blank.jsp" />
+    </definition>
+    <definition name=".train.info" extends="layout.2col-left">
+        <put-attribute name="left" value=".left" />
+        <put-attribute name="center" value="/common/train/info.jsp" />
+    </definition>
+    
+</tiles-definitions>

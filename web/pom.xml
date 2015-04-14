@@ -24,6 +24,7 @@
         <module>web-station</module>
         <module>web-taglib</module>
         <module>web-timetable</module>
+        <module>web-train</module>
         <module>web-workbench</module>
     </modules>
     

@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.trainwatch.web.station;
+package uk.trainwatch.web.train;
 
 import java.sql.SQLException;
 import java.util.logging.Level;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.annotation.WebListener;
 import javax.sql.DataSource;
+import uk.trainwatch.nre.darwin.forecast.ForecastManager;
+import uk.trainwatch.nre.darwin.forecast.ForecastRecorder;
 import uk.trainwatch.nre.darwin.parser.DarwinJaxbContext;
-import uk.trainwatch.nre.darwin.stationmsg.StationMessageManager;
-import uk.trainwatch.nre.darwin.stationmsg.StationMessageRecorder;
 import uk.trainwatch.rabbitmq.RabbitConnection;
 import uk.trainwatch.rabbitmq.RabbitMQ;
 import uk.trainwatch.util.config.JNDIConfig;
@@ -33,7 +33,7 @@ import uk.trainwatch.util.sql.DBContextListener;
  * @author peter
  */
 @WebListener
-public class StationContextListener
+public class TrainContextListener
         extends DBContextListener
 {
 
@@ -46,21 +46,21 @@ public class StationContextListener
         // Always initialise the manager
         DataSource dataSource = getRailDataSource();
 
-        StationMessageManager.INSTANCE.setDataSource( dataSource );
+        ForecastManager.INSTANCE.setDataSource( dataSource );
 
-        if( !JNDIConfig.INSTANCE.getBoolean( "stationInfo.disabled" ) ) {
-            log.log( Level.INFO, "Initialising Station Information" );
+        if( !JNDIConfig.INSTANCE.getBoolean( "trainInfo.disabled" ) ) {
+            log.log( Level.INFO, "Initialising Train Information" );
 
             rabbitConnection = RabbitMQ.createJNDIConnection( "rabbit/uktrain" );
 
-            // Station messages
+            // Pass deactivated & TS messages to forecast
             RabbitMQ.queueDurableStream( rabbitConnection,
-                                         "station.nre.msg",
-                                         "nre.push.stationmessage",
+                                         "station.nre.forecast",
+                                         "nre.push.deactivated,nre.push.ts",
                                          s -> s.map( RabbitMQ.toString ).
                                          map( DarwinJaxbContext.fromXML ).
                                          flatMap( DarwinJaxbContext.messageSplitter ).
-                                         forEach( new StationMessageRecorder( dataSource ) )
+                                         forEach( new ForecastRecorder( dataSource ) )
             );
         }
     }
