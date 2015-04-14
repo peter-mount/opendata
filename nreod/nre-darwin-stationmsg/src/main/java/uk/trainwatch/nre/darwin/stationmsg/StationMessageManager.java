@@ -5,52 +5,35 @@
  */
 package uk.trainwatch.nre.darwin.stationmsg;
 
-import java.time.Duration;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
+import javax.sql.DataSource;
 import uk.trainwatch.nre.darwin.model.ppt.stationmessages.StationMessage;
-import uk.trainwatch.util.cache.Cache;
+import uk.trainwatch.nre.darwin.parser.DarwinJaxbContext;
+import uk.trainwatch.util.sql.SQL;
 
 /**
  *
  * @author peter
  */
 public enum StationMessageManager
-        implements Consumer<Pport>
 {
 
     INSTANCE;
 
     private final Logger log = Logger.getLogger( StationMessageManager.class.getName() );
 
-    /**
-     * Cache of messages
-     */
-    private final Cache<Integer, StationMessage> cache;
-    /**
-     * Map of locations to messages
-     */
-    private final Map<String, Collection<Integer>> locations = new ConcurrentHashMap<>();
+    private DataSource dataSource;
 
-    private StationMessageManager()
+    public void setDataSource( DataSource dataSource )
     {
-        cache = new Cache<>( 10000, Duration.ofHours( 12 ) );
-        cache.setEvicted( this::remove );
-    }
-
-    private Collection<Integer> getLocation( String tpl )
-    {
-        return locations.computeIfAbsent( tpl, k -> new CopyOnWriteArraySet<>() );
+        this.dataSource = dataSource;
     }
 
     /**
@@ -62,70 +45,51 @@ public enum StationMessageManager
      */
     public Stream<StationMessage> getMessages( String crs )
     {
-        return locations.getOrDefault( crs, Collections.emptyList() ).
-                stream().
-                sorted().
-                map( cache::get ).
-                filter( Objects::nonNull );
+        if( crs == null || crs.isEmpty() ) {
+            return Stream.empty();
+        }
+        
+        String talpha = crs.toUpperCase();
+
+        try( Connection con = dataSource.getConnection() ) {
+            try( PreparedStatement ps = SQL.prepare( con,
+                                                     "SELECT m.xml FROM darwin.message m"
+                                                     + " INNER JOIN darwin.message_station ms ON m.id=ms.msgid"
+                                                     + " INNER JOIN darwin.station s ON ms.stationid=s.id"
+                                                     + " WHERE s.crs=?"
+                                                     + " ORDER BY m.id DESC",
+                                                     talpha ) ) {
+                return SQL.stream( ps, SQL.STRING_LOOKUP ).
+                        map( DarwinJaxbContext.fromXML ).
+                        filter( Objects::nonNull ).
+                        flatMap( p -> p.getUR().getOW().stream() ).
+                        filter( ow -> ow.getStation().stream().filter( s -> s.getCrs().equals( talpha ) ).findAny().isPresent() ).
+                        collect( Collectors.toList() ).
+                        stream();
+            }
+        }
+        catch( SQLException ex ) {
+            log.log( Level.SEVERE, ex, () -> "Retrieving messages for " + talpha );
+        }
+        return null;
     }
 
     public StationMessage getMessage( int id )
     {
-        return cache.get( id );
-    }
-
-    @Override
-    public void accept( Pport t )
-    {
-        t.getUR().getOW().forEach( this::accept );
-    }
-
-    private void accept( StationMessage m )
-    {
-        int id = m.getId();
-
-        log.log( Level.INFO, () -> "Received station message " + id );
-
-        StationMessage oldM = cache.put( id, m );
-
-        // TODO make this more efficient, we could have a brief moment when a rid is not visible
-        if( oldM == null ) {
-            log.log( Level.INFO, () -> "Creating " + id );
+        try( Connection con = dataSource.getConnection() ) {
+            try( PreparedStatement ps = SQL.prepare( con, "SELECT xml FROM darwin.message WHERE id=?", id ) ) {
+                return SQL.stream( ps, SQL.STRING_LOOKUP ).
+                        map( DarwinJaxbContext.fromXML ).
+                        filter( Objects::nonNull ).
+                        flatMap( p -> p.getUR().getOW().stream() ).
+                        filter( s -> s.getId() == id ).
+                        findAny().
+                        orElse( null );
+            }
         }
-        else {
-            log.log( Level.INFO, () -> "Updating " + id );
-            // Remove any xrefs in tpl if we have an update
-            oldM.getStation().forEach( tl -> getLocation( tl.getCrs() ).remove( id ) );
+        catch( SQLException ex ) {
+            log.log( Level.SEVERE, ex, () -> "Retrieving message id " + id );
         }
-
-        // Add locations from t
-        m.getStation().forEach( tl -> getLocation( tl.getCrs() ).add( id ) );
-        log.log( Level.INFO, () -> "Complete " + cache.size() );
-
-        // FIXME remove
-        log.log( Level.INFO,
-                 () -> "Affects: " + m.getStation().stream().map( StationMessage.Station::getCrs ).collect( Collectors.joining( ", " ) )
-        );
-    }
-
-    /**
-     * Remove a rid from the cache
-     * <p>
-     * @param id
-     */
-    public void remove( Integer id )
-    {
-        cache.computeIfPresent( id, this::remove );
-    }
-
-    private StationMessage remove( Integer id, StationMessage ts )
-    {
-        log.log( Level.INFO, () -> "Removing " + id );
-
-        // Remove all xrefs
-        ts.getStation().forEach( tl -> getLocation( tl.getCrs() ).remove( id ) );
-
-        // Now remove from forecasts
         return null;
     }
 

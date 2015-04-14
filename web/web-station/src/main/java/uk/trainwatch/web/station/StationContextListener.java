@@ -26,6 +26,7 @@ import javax.servlet.annotation.WebListener;
 import uk.trainwatch.nre.darwin.forecast.ForecastManager;
 import uk.trainwatch.nre.darwin.parser.DarwinJaxbContext;
 import uk.trainwatch.nre.darwin.stationmsg.StationMessageManager;
+import uk.trainwatch.nre.darwin.stationmsg.StationMessageRecorder;
 import uk.trainwatch.rabbitmq.RabbitConnection;
 import uk.trainwatch.rabbitmq.RabbitMQ;
 import uk.trainwatch.util.config.JNDIConfig;
@@ -46,33 +47,38 @@ public class StationContextListener
     protected void init( ServletContextEvent sce )
             throws SQLException
     {
-        if( JNDIConfig.INSTANCE.getBoolean( "stationInfo.disabled" ) )
-        {
-            return;
+        // Always initialise the manager
+        StationMessageManager.INSTANCE.setDataSource( getRailDataSource() );
+
+        if( !JNDIConfig.INSTANCE.getBoolean( "stationInfo.disabled" ) ) {
+            log.log( Level.INFO, "Initialising Station Information" );
+
+            rabbitConnection = RabbitMQ.createJNDIConnection( "rabbit/uktrain" );
+
+            // Pass deactivated & TS messages to forecast
+            RabbitMQ.queueDurableStream( rabbitConnection,
+                                         "station.nre.forecast",
+                                         "nre.push.deactivated,nre.push.ts",
+                                         s -> s.map( RabbitMQ.toString ).
+                                         map( DarwinJaxbContext.fromXML ).
+                                         forEach( ForecastManager.INSTANCE::accept )
+            );
+
+            // Station messages
+            RabbitMQ.queueDurableStream( rabbitConnection,
+                                         "station.nre.msg",
+                                         "nre.push.stationmessage",
+                                         s -> s.map( RabbitMQ.toString ).
+                                         map( DarwinJaxbContext.fromXML ).
+                                         forEach( new StationMessageRecorder( getRailDataSource() ) )
+            );
         }
-
-        log.log( Level.INFO, "Initialising Station Information" );
-
-        rabbitConnection = RabbitMQ.createJNDIConnection( "rabbit/uktrain" );
-
-        // Pass deactivated & TS messages to forecast
-        Consumer<Stream<byte[]>> forecast = s -> s.map( RabbitMQ.toString ).
-                map( DarwinJaxbContext.fromXML ).
-                forEach( ForecastManager.INSTANCE::accept );
-        RabbitMQ.queueDurableStream( rabbitConnection, "station.nre.forecast", "nre.push.deactivated,nre.push.ts", forecast );
-
-        // Station messages
-        Consumer<Stream<byte[]>> stationMessages = s -> s.map( RabbitMQ.toString ).
-                map( DarwinJaxbContext.fromXML ).
-                forEach( StationMessageManager.INSTANCE::accept );
-        RabbitMQ.queueDurableStream( rabbitConnection, "station.nre.msg", "nre.push.stationmessage", stationMessages );
     }
 
     @Override
     protected void shutdown( ServletContextEvent sce )
     {
-        if( rabbitConnection != null )
-        {
+        if( rabbitConnection != null ) {
             rabbitConnection.close();
             rabbitConnection = null;
         }
