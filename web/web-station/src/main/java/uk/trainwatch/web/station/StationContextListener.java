@@ -16,14 +16,12 @@
 package uk.trainwatch.web.station;
 
 import java.sql.SQLException;
-import java.util.function.Consumer;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Stream;
-import javax.naming.NamingException;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.annotation.WebListener;
+import javax.sql.DataSource;
 import uk.trainwatch.nre.darwin.forecast.ForecastManager;
+import uk.trainwatch.nre.darwin.forecast.ForecastRecorder;
 import uk.trainwatch.nre.darwin.parser.DarwinJaxbContext;
 import uk.trainwatch.nre.darwin.stationmsg.StationMessageManager;
 import uk.trainwatch.nre.darwin.stationmsg.StationMessageRecorder;
@@ -48,7 +46,10 @@ public class StationContextListener
             throws SQLException
     {
         // Always initialise the manager
-        StationMessageManager.INSTANCE.setDataSource( getRailDataSource() );
+        DataSource dataSource = getRailDataSource();
+
+        StationMessageManager.INSTANCE.setDataSource( dataSource );
+        ForecastManager.INSTANCE.setDataSource( dataSource );
 
         if( !JNDIConfig.INSTANCE.getBoolean( "stationInfo.disabled" ) ) {
             log.log( Level.INFO, "Initialising Station Information" );
@@ -61,7 +62,8 @@ public class StationContextListener
                                          "nre.push.deactivated,nre.push.ts",
                                          s -> s.map( RabbitMQ.toString ).
                                          map( DarwinJaxbContext.fromXML ).
-                                         forEach( ForecastManager.INSTANCE::accept )
+                                         flatMap( DarwinJaxbContext.messageSplitter ).
+                                         forEach( new ForecastRecorder( dataSource ) )
             );
 
             // Station messages
@@ -70,7 +72,8 @@ public class StationContextListener
                                          "nre.push.stationmessage",
                                          s -> s.map( RabbitMQ.toString ).
                                          map( DarwinJaxbContext.fromXML ).
-                                         forEach( new StationMessageRecorder( getRailDataSource() ) )
+                                         flatMap( DarwinJaxbContext.messageSplitter ).
+                                         forEach( new StationMessageRecorder( dataSource ) )
             );
         }
     }

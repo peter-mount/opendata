@@ -8,6 +8,7 @@ package uk.trainwatch.nre.darwin.parser;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import javax.xml.bind.JAXBException;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
 import uk.trainwatch.util.xml.JAXBSupport;
@@ -52,21 +53,11 @@ public enum DarwinJaxbContext
         }
     };
 
-    private final String PACKAGES[]
-                           = {
-                "uk.trainwatch.nre.darwin.model.ctt.referenceschema",
-                "uk.trainwatch.nre.darwin.model.ctt.schema",
-                "uk.trainwatch.nre.darwin.model.ppt.alarms",
-                "uk.trainwatch.nre.darwin.model.ppt.commontypes",
-                "uk.trainwatch.nre.darwin.model.ppt.forecasts",
-                "uk.trainwatch.nre.darwin.model.ppt.schedules",
-                "uk.trainwatch.nre.darwin.model.ppt.schema",
-                "uk.trainwatch.nre.darwin.model.ppt.stationmessages",
-                "uk.trainwatch.nre.darwin.model.ppt.status",
-                "uk.trainwatch.nre.darwin.model.ppt.tddata",
-                "uk.trainwatch.nre.darwin.model.ppt.trainalerts",
-                "uk.trainwatch.nre.darwin.model.ppt.trainorder"
-            };
+    /**
+     * A common instance of {@link DarwinUrSplitter}
+     */
+    public static final Function<Pport, Stream<Pport>> messageSplitter = new DarwinUrSplitter();
+
     private final Logger log = Logger.getLogger( DarwinJaxbContext.class.getName() );
 
     private final JAXBSupport jaxb;
@@ -75,8 +66,7 @@ public enum DarwinJaxbContext
     {
         try {
             log.log( Level.INFO, "Initialising Darwin JAXB" );
-            //jaxb = new JAXBSupport( PACKAGES ).populateUnmarshaller( 2 );
-            jaxb = new JAXBSupport( Pport.class ).populateUnmarshaller( 2 );
+            jaxb = new JAXBSupport( 50, Pport.class );
         }
         catch( JAXBException ex ) {
             Logger.getLogger( DarwinJaxbContext.class.getName() ).log( Level.SEVERE, null, ex );
@@ -94,5 +84,23 @@ public enum DarwinJaxbContext
             throws JAXBException
     {
         return jaxb.marshallToString( p );
+    }
+
+    public static Pport duplicate( Pport orig )
+    {
+        Pport p = new Pport();
+        p.setTs( orig.getTs() );
+        p.setVersion( orig.getVersion() );
+
+        Pport.UR ur0 = orig.getUR();
+        if( ur0 != null ) {
+            Pport.UR ur1 = new Pport.UR();
+            ur1.setRequestID( ur0.getRequestID() );
+            ur1.setRequestSource( ur0.getRequestSource() );
+            ur1.setUpdateOrigin( ur0.getUpdateOrigin() );
+            p.setUR( ur1 );
+        }
+
+        return p;
     }
 }

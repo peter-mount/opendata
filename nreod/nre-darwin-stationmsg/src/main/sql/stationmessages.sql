@@ -34,6 +34,7 @@ CREATE TABLE message (
     dt          TIMESTAMP WITHOUT TIME ZONE,
     PRIMARY KEY (id)
 );
+CREATE INDEX message_d ON message(dt);
 
 -- ----------------------------------------------------------------------
 -- Links message to station
@@ -43,6 +44,9 @@ CREATE TABLE message_station (
     msgid       BIGINT NOT NULL REFERENCES message(id),
     stationid   BIGINT NOT NULL REFERENCES station(id)
 );
+CREATE UNIQUE INDEX message_station_ms ON message_station(msgid,stationid);
+CREATE INDEX message_station_m ON message_station(msgid);
+CREATE INDEX message_station_s ON message_station(stationid);
 
 -- ----------------------------------------------------------------------
 -- Handles the insertion & updates of station messages from Darwin

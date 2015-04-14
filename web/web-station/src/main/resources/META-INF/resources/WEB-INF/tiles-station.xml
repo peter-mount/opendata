@@ -39,4 +39,14 @@
         <put-attribute name="nearby" value="/common/station/nearby.jsp" />
     </definition>
     
+    <definition name="station.messages" extends="layout.main">
+        <put-attribute name="title" value="Current Rail Messages" />
+        <put-attribute name="body" value=".station.messages" />
+        <put-attribute name="javascript" value="/common/blank.jsp" />
+    </definition>
+    <definition name=".station.messages" extends="layout.2col-left">
+        <put-attribute name="left" value=".left" />
+        <put-attribute name="center" value="/common/station/messages.jsp" />
+    </definition>
+    
 </tiles-definitions>

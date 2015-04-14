@@ -8,6 +8,7 @@ package uk.trainwatch.nre.darwin.stationmsg;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,6 +37,26 @@ public enum StationMessageManager
         this.dataSource = dataSource;
     }
 
+    public Collection<StationMessage> getMessages()
+    {
+        try( Connection con = dataSource.getConnection() ) {
+            try( PreparedStatement ps = SQL.prepare( con,
+                                                     "SELECT xml FROM darwin.message"
+                                                     + " WHERE dt between now()-'6 hours'::interval AND now()"
+                                                     + " ORDER BY dt DESC" ) ) {
+                return SQL.stream( ps, SQL.STRING_LOOKUP ).
+                        map( DarwinJaxbContext.fromXML ).
+                        filter( Objects::nonNull ).
+                        flatMap( p -> p.getUR().getOW().stream() ).
+                        collect( Collectors.toList() );
+            }
+        }
+        catch( SQLException ex ) {
+            log.log( Level.SEVERE, ex, () -> "Retrieving messages" );
+        }
+        return null;
+    }
+
     /**
      * Get all messages for a crs sorted by id
      * <p>
@@ -45,33 +66,31 @@ public enum StationMessageManager
      */
     public Stream<StationMessage> getMessages( String crs )
     {
-        if( crs == null || crs.isEmpty() ) {
-            return Stream.empty();
-        }
-        
-        String talpha = crs.toUpperCase();
+        if( crs != null && !crs.isEmpty() ) {
+            String talpha = crs.toUpperCase();
 
-        try( Connection con = dataSource.getConnection() ) {
-            try( PreparedStatement ps = SQL.prepare( con,
-                                                     "SELECT m.xml FROM darwin.message m"
-                                                     + " INNER JOIN darwin.message_station ms ON m.id=ms.msgid"
-                                                     + " INNER JOIN darwin.station s ON ms.stationid=s.id"
-                                                     + " WHERE s.crs=?"
-                                                     + " ORDER BY m.id DESC",
-                                                     talpha ) ) {
-                return SQL.stream( ps, SQL.STRING_LOOKUP ).
-                        map( DarwinJaxbContext.fromXML ).
-                        filter( Objects::nonNull ).
-                        flatMap( p -> p.getUR().getOW().stream() ).
-                        filter( ow -> ow.getStation().stream().filter( s -> s.getCrs().equals( talpha ) ).findAny().isPresent() ).
-                        collect( Collectors.toList() ).
-                        stream();
+            try( Connection con = dataSource.getConnection() ) {
+                try( PreparedStatement ps = SQL.prepare( con,
+                                                         "SELECT m.xml FROM darwin.message m"
+                                                         + " INNER JOIN darwin.message_station ms ON m.id=ms.msgid"
+                                                         + " INNER JOIN darwin.station s ON ms.stationid=s.id"
+                                                         + " WHERE s.crs=?"
+                                                         + " ORDER BY m.id DESC",
+                                                         talpha ) ) {
+                    return SQL.stream( ps, SQL.STRING_LOOKUP ).
+                            map( DarwinJaxbContext.fromXML ).
+                            filter( Objects::nonNull ).
+                            flatMap( p -> p.getUR().getOW().stream() ).
+                            filter( ow -> ow.getStation().stream().filter( s -> s.getCrs().equals( talpha ) ).findAny().isPresent() ).
+                            collect( Collectors.toList() ).
+                            stream();
+                }
+            }
+            catch( SQLException ex ) {
+                log.log( Level.SEVERE, ex, () -> "Retrieving messages for " + talpha );
             }
         }
-        catch( SQLException ex ) {
-            log.log( Level.SEVERE, ex, () -> "Retrieving messages for " + talpha );
-        }
-        return null;
+        return Stream.empty();
     }
 
     public StationMessage getMessage( int id )
