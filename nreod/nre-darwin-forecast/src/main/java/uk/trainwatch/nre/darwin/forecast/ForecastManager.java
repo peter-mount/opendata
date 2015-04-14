@@ -6,6 +6,9 @@
 package uk.trainwatch.nre.darwin.forecast;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -175,10 +178,16 @@ public enum ForecastManager
         Stream.of( dir.listFiles( n -> n.getName().startsWith( "pPortData.log." ) ) ).
                 sorted( ( a, b ) -> a.getName().compareTo( b.getName() ) ).
                 limit( 20 ).
-                flatMap( Functions::fileLines ).
-                map( DarwinJaxbContext.fromXML ).
-                filter( Objects::nonNull ).
-                forEach( consumer );
+                forEach( file -> {
+                    try( Stream<String> lines = Files.lines( file.toPath() ) ) {
+                        lines.map( DarwinJaxbContext.fromXML ).
+                        filter( Objects::nonNull ).
+                        forEach( consumer );
+                    }
+                    catch( IOException ex ) {
+                        throw new UncheckedIOException( ex );
+                    }
+                } );
 
         INSTANCE.log.log( Level.WARNING, () -> "Completed " + INSTANCE.forecasts.size() );
 
