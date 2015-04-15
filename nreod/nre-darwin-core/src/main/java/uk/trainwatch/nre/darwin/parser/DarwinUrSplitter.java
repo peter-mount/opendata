@@ -8,6 +8,7 @@ package uk.trainwatch.nre.darwin.parser;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
@@ -40,13 +41,15 @@ public class DarwinUrSplitter
     public Stream<Pport> apply( Pport t )
     {
         Pport.UR ur = t.getUR();
-        if( ur != null ) {
+        if( ur != null )
+        {
             return GETTERS.stream().
                     map( get -> this.<Object>duplicate( t, get ) ).
+                    filter( Objects::nonNull ).
                     findAny().
                     orElse( Stream.empty() );
-        }
-        else {
+        } else
+        {
             return Stream.empty();
         }
     }
@@ -54,15 +57,17 @@ public class DarwinUrSplitter
     private Stream<Pport> duplicate( Pport t, Function<Pport, List> get )
     {
         List l = get.apply( t );
-        if( l.isEmpty() ) {
-            return Stream.empty();
+        if( l.isEmpty() )
+        {
+            return null;
         }
 
         return l.stream().
-                map( ts -> {
-                    Pport p = DarwinJaxbContext.duplicate( t );
-                    get.apply( p ).add( ts );
-                    return p;
+                map( ts ->
+                        {
+                            Pport p = DarwinJaxbContext.duplicate( t );
+                            get.apply( p ).add( ts );
+                            return p;
                 } );
     }
 
