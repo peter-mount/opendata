@@ -33,14 +33,14 @@ public class AssociationDBUpdate
     public AssociationDBUpdate( Connection con )
     {
         super( con,
-               "INSERT INTO timetable.association"
-               + " (mainuid,assocuid,startdt,enddt,assocdays,assoccat,assocdateind,tiploc,assoctype,baselocsuff,assoclocsuff,stpind)"
-               + " VALUES (timetable.trainuid(?),timetable.trainuid(?),?,?,?,?,?,timetable.tiploc(?),?,?,?,?)",
-               null,
-               "DELETE FROM timetable.association"
-               + " WHERE mainuid=timetable.trainuid(?) AND assocuid=timetable.trainuid(?)"
-               + " AND startdt=? AND enddt=? AND assocdays=?"
-               + " AND assoccat=? AND assocdateind=? AND tiploc=timetable.tiploc(?) AND assoctype=?"
+                "INSERT INTO timetable.association"
+                + " (mainuid,assocuid,startdt,enddt,assocdays,assoccat,assocdateind,tiploc,assoctype,baselocsuff,assoclocsuff,stpind)"
+                + " VALUES (timetable.trainuid(?),timetable.trainuid(?),?,?,?,?,?,timetable.tiploc(?),?,?,?,?)",
+                null,
+                "DELETE FROM timetable.association"
+                + " WHERE mainuid=timetable.trainuid(?) AND assocuid=timetable.trainuid(?)"
+                + " AND startdt=? AND enddt=? AND assocdays=?"
+                + " AND assoccat=? AND assocdateind=? AND tiploc=timetable.tiploc(?) AND assoctype=?"
         );
     }
 
@@ -82,16 +82,11 @@ public class AssociationDBUpdate
         s.setString( i++, t.getAssocTrainUID() );
         TimeUtils.setDate( s, i++, t.getStartDate() );
         TimeUtils.setDate( s, i++, t.getEndDate() );
-        s.setInt( i++, t.getAssocDays().
-                  getDaysRunning() );
-        s.setInt( i++, t.getAssociationCategory().
-                  ordinal() );
-        s.setInt( i++, t.getAssocDateInd().
-                  ordinal() );
-        s.setString( i++, t.getAssocLocation().
-                     getKey() );
-        s.setInt( i++, t.getAssocType().
-                  ordinal() );
+        s.setInt( i++, t.getAssocDays().getDaysRunning() );
+        s.setInt( i++, t.getAssociationCategory().ordinal() );
+        s.setInt( i++, t.getAssocDateInd().ordinal() );
+        s.setString( i++, t.getAssocLocation().getKey() );
+        s.setInt( i++, t.getAssocType().ordinal() );
         return i;
     }
 
@@ -100,8 +95,7 @@ public class AssociationDBUpdate
     {
         s.setString( i++, t.getBaseLocSuffix() );
         s.setString( i++, t.getAssocLocSuffix() );
-        s.setInt( i++, t.getStpIndicator().
-                  ordinal() );
+        s.setInt( i++, t.getStpIndicator().ordinal() );
         return i;
     }
 }

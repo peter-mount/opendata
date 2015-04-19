@@ -59,9 +59,9 @@ public class ScheduleLocUpdate
     public ScheduleLocUpdate( Connection con )
     {
         super( con,
-               "INSERT INTO timetable.schedule_loc (scheduleid,tiploc) values (?,timetable.tiploc(?))",
-               null,
-               "DELETE FROM timetable.schedule_loc WHERE scheduleid=? AND tiploc=timetable.tiploc(?)"
+                "INSERT INTO timetable.schedule_loc (scheduleid,tiploc) values (?,timetable.tiploc(?))",
+                null,
+                "DELETE FROM timetable.schedule_loc WHERE scheduleid=? AND tiploc=timetable.tiploc(?)"
         );
 
         // used to retrieve the scheduleId(s) for a Schedule
@@ -77,14 +77,13 @@ public class ScheduleLocUpdate
                     "SELECT id FROM timetable.schedule WHERE trainuid=timetable.trainuid(?) AND runsfrom=?"
             );
 
-        }
-        catch( SQLException ex )
+        } catch( SQLException ex )
         {
             throw new UncheckedSQLException( ex );
         }
 
         // Delete a schedule
-        delete = (scheduleId, tiploc) ->
+        delete = ( scheduleId, tiploc ) ->
         {
             PreparedStatement s = getDelete();
             s.setLong( 1, scheduleId );
@@ -92,7 +91,7 @@ public class ScheduleLocUpdate
             s.executeUpdate();
         };
 
-        insert = (scheduleId, tiploc) ->
+        insert = ( scheduleId, tiploc ) ->
         {
             PreparedStatement s = getInsert();
             s.setLong( 1, scheduleId );
@@ -100,14 +99,15 @@ public class ScheduleLocUpdate
             s.executeUpdate();
         };
 
-        newSchedules = SQLBiConsumer.guard( insert.andThen( (i, l) -> inserted() ) );
+        newSchedules = SQLBiConsumer.guard( insert.andThen( ( i, l ) -> inserted() ) );
 
-        updateSchedules = SQLBiConsumer.guard( delete.andThen( insert ).
-                andThen( (i, l) -> updated() )
+        updateSchedules = SQLBiConsumer.guard( delete.
+                andThen( insert ).
+                andThen( ( i, l ) -> updated() )
         );
 
         deleteSchedules = SQLBiConsumer.guard( delete.
-                andThen( (i, l) -> deleted() )
+                andThen( ( i, l ) -> deleted() )
         );
 
     }
@@ -127,8 +127,7 @@ public class ScheduleLocUpdate
                 // to get at the id, it'll be in the sequence.
                 long scheduleId = SQL.currval( getConnection(), "timetable.schedule_id_seq" );
                 func = tiploc -> newSchedules.accept( scheduleId, tiploc );
-            }
-            else if( tx == TransactionType.REVISE )
+            } else if( tx == TransactionType.REVISE )
             {
                 // For revising just delete then insert
                 long scheduleId = getScheduleIdUpdate( schedule );
@@ -137,8 +136,7 @@ public class ScheduleLocUpdate
 
             tiplocs( schedule ).
                     forEach( func );
-        }
-        else if( tx == TransactionType.DELETE )
+        } else if( tx == TransactionType.DELETE )
         {
             if( schedule.getRunsTo() == null )
             {
@@ -149,8 +147,7 @@ public class ScheduleLocUpdate
                                         sid -> tiplocs( schedule ).
                                         forEach( tiploc -> deleteSchedules.accept( sid, tiploc ) )
                                 ) );
-            }
-            else
+            } else
             {
                 // We have a schedule so just delete it
                 long scheduleId = getScheduleIdUpdate( schedule );
@@ -170,18 +167,17 @@ public class ScheduleLocUpdate
      * <p>
      * This is valid for updates only as we have to search the table for it and it's specific to the schedule's range
      * <p>
-     * @param t <p>
+     * @param t
+     * <p>
      * @return
      */
     private long getScheduleIdUpdate( Schedule t )
             throws SQLException
     {
-        getScheduleId.setString( 1, t.getTrainUid().
-                                 toString() );
+        getScheduleId.setString( 1, t.getTrainUid().toString() );
         getScheduleId.setDate( 2, Date.valueOf( t.getRunsFrom() ) );
         getScheduleId.setDate( 3, Date.valueOf( t.getRunsTo() ) );
-        getScheduleId.setInt( 4, t.getDaysRun().
-                              getDaysRunning() );
+        getScheduleId.setInt( 4, t.getDaysRun().getDaysRunning() );
 
         try( ResultSet rs = getScheduleId.executeQuery() )
         {
@@ -198,7 +194,8 @@ public class ScheduleLocUpdate
      * <p>
      * This is valid for update and deletes only as we have to search the table for it.
      * <p>
-     * @param t <p>
+     * @param t
+     * <p>
      * @return
      */
     private Stream<Long> getScheduleIdDelete( Schedule t )
@@ -209,17 +206,14 @@ public class ScheduleLocUpdate
         if( t.getRunsTo() == null )
         {
             s = getScheduleIdShort;
-        }
-        else
+        } else
         {
             s = getScheduleId;
             s.setDate( 3, Date.valueOf( t.getRunsTo() ) );
-            s.setInt( 4, t.getDaysRun().
-                      getDaysRunning() );
+            s.setInt( 4, t.getDaysRun().getDaysRunning() );
         }
 
-        s.setString( 1, t.getTrainUid().
-                     toString() );
+        s.setString( 1, t.getTrainUid().toString() );
         s.setDate( 2, Date.valueOf( t.getRunsFrom() ) );
 
         return SQL.stream( s, SQL.LONG_LOOKUP );

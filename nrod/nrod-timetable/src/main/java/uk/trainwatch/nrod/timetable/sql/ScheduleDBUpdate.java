@@ -41,23 +41,22 @@ public class ScheduleDBUpdate
     public ScheduleDBUpdate( Connection con )
     {
         super( con,
-               "INSERT INTO timetable.schedule"
-               + " (trainuid,runsfrom,runsto,dayrun, stpindicator,bankholrun,trainstatus,traincategory,trainidentity,headcode,servicecode,atoccode,schedule)"
-               + " VALUES (timetable.trainuid(?),?,?,?,?,?,?,?,?,?,?,?,?)",
-               "UPDATE timetable.schedule"
-               + " SET stpindicator=?, bankholrun=?, trainstatus=?, traincategory=?, trainidentity=?, headcode=?,"
-               + " servicecode=?, atoccode=?, schedule=?"
-               + " WHERE trainuid=timetable.trainuid(?) AND runsfrom=? AND runsto=? AND dayrun=?",
-               "DELETE FROM timetable.schedule"
-               + " WHERE trainuid=timetable.trainuid(?) AND runsfrom=? AND runsto=? AND dayrun=?"
+                "INSERT INTO timetable.schedule"
+                + " (trainuid,runsfrom,runsto,dayrun, stpindicator,bankholrun,trainstatus,traincategory,trainidentity,headcode,servicecode,atoccode,schedule)"
+                + " VALUES (timetable.trainuid(?),?,?,?,?,?,?,?,?,?,?,?,?)",
+                "UPDATE timetable.schedule"
+                + " SET stpindicator=?, bankholrun=?, trainstatus=?, traincategory=?, trainidentity=?, headcode=?,"
+                + " servicecode=?, atoccode=?, schedule=?"
+                + " WHERE trainuid=timetable.trainuid(?) AND runsfrom=? AND runsto=? AND dayrun=?",
+                "DELETE FROM timetable.schedule"
+                + " WHERE trainuid=timetable.trainuid(?) AND runsfrom=? AND runsto=? AND dayrun=?"
         );
 
         try
         {
             deleteShort = con.prepareStatement( "DELETE FROM timetable.schedule"
-                                                + " WHERE trainuid=timetable.trainuid(?) AND runsfrom=?" );
-        }
-        catch( SQLException ex )
+                    + " WHERE trainuid=timetable.trainuid(?) AND runsfrom=?" );
+        } catch( SQLException ex )
         {
             throw new UncheckedSQLException( ex );
         }
@@ -68,19 +67,19 @@ public class ScheduleDBUpdate
      * <p>
      * @param t
      * @param s
-     * @param i <p>
-     * @return <p>
+     * @param i
+     * <p>
+     * @return
+     * <p>
      * @throws SQLException
      */
     private int setKey( Schedule t, PreparedStatement s, int i )
             throws SQLException
     {
-        s.setString( i++, t.getTrainUid().
-                     toString() );
+        s.setString( i++, t.getTrainUid().toString() );
         s.setDate( i++, Date.valueOf( t.getRunsFrom() ) );
         s.setDate( i++, Date.valueOf( t.getRunsTo() ) );
-        s.setInt( i++, t.getDaysRun().
-                  getDaysRunning() );
+        s.setInt( i++, t.getDaysRun().getDaysRunning() );
         return i;
     }
 
@@ -89,26 +88,23 @@ public class ScheduleDBUpdate
      * <p>
      * @param t
      * @param s
-     * @param i <p>
-     * @return <p>
+     * @param i
+     * <p>
+     * @return
+     * <p>
      * @throws SQLException
      */
     private int setVal( Schedule t, PreparedStatement s, int i )
             throws SQLException
     {
-        s.setInt( i++, t.getStpInd().
-                  ordinal() );
-        s.setInt( i++, t.getBankHolidayRunning().
-                  ordinal() );
-        s.setInt( i++, t.getTrainStatus().
-                  ordinal() );
-        s.setInt( i++, t.getTrainCategory().
-                  ordinal() );
+        s.setInt( i++, t.getStpInd().ordinal() );
+        s.setInt( i++, t.getBankHolidayRunning().ordinal() );
+        s.setInt( i++, t.getTrainStatus().ordinal() );
+        s.setInt( i++, t.getTrainCategory().ordinal() );
         s.setString( i++, t.getTrainIdentity() );
         s.setString( i++, t.getHeadCode() );
         s.setString( i++, t.getServiceCode() );
-        s.setInt( i++, t.getAtocCode().
-                  ordinal() );
+        s.setInt( i++, t.getAtocCode().ordinal() );
 
         // Generate json for the actual schedule
         s.setString( i++, JsonUtils.encode( jsonBuilder.visit( t ) ) );
@@ -144,14 +140,12 @@ public class ScheduleDBUpdate
             case DELETE:
                 if( t.getRunsTo() == null )
                 {
-                        // Handle case where a STPCancellation doesn't have all fields
+                    // Handle case where a STPCancellation doesn't have all fields
                     // In this instance it deletes all schedules for a train from a specified date
                     s = deleteShort;
-                    s.setString( 1, t.getTrainUid().
-                                 toString() );
+                    s.setString( 1, t.getTrainUid().toString() );
                     s.setDate( 2, Date.valueOf( t.getRunsFrom() ) );
-                }
-                else
+                } else
                 {
                     s = getDelete();
                     setKey( t, s, 1 );
