@@ -20,6 +20,7 @@
     <modules>
         <module>archiver</module>
         <module>analysis</module>
+        <module>darwin</module>
         <module>nationalrail</module> 
         <module>networkrail</module>
         <module>signalanalyser</module>
