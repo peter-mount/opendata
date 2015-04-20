@@ -184,6 +184,15 @@ public class TimeTables
             prepareDaysRun( con );
 
             LOG.log( Level.INFO, "Schedule database is now clean" );
+        } else
+        {
+            // For an update delete any schedules in the past
+            LOG.log( Level.INFO, "Deleting expires schedules" );
+            try( Statement s = con.createStatement() )
+            {
+                int count = s.executeUpdate( "DELETE FROM " + SCHEMA + ".schedule WHERE runsto < now()::date" );
+                LOG.log( Level.INFO, () -> "Expired " + count + " schedules" );
+            }
         }
     }
 
