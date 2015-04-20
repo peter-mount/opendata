@@ -17,13 +17,14 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
 import uk.trainwatch.nrod.location.TrainLocationFactory;
+import uk.trainwatch.util.TimeUtils;
 
 /**
  * Shows a schedule for a station either for todays date or a specified date
  * <p>
  * @author Peter T Mount
  */
-@WebServlet(name = "TTStation", urlPatterns = "/timetable/station/*")
+@WebServlet( name = "TTStation", urlPatterns = "/timetable/station/*" )
 public class StationScheduleServlet
         extends AbstractSearchServlet
 {
@@ -37,15 +38,15 @@ public class StationScheduleServlet
      * We only do this on what appears to be a valid url so if someone puts gibberish in there then they'll get a 404 as usual.
      * <p>
      * @param request
-     *                <p>
+     * <p>
      * @return
-     *         <p>
+     * <p>
      * @throws ServletException
      * @throws IOException
      */
     private boolean isValid( ApplicationRequest request )
             throws ServletException,
-                   IOException
+            IOException
     {
         String path = request.getPathInfo();
         String uPath = path.toUpperCase();
@@ -60,7 +61,7 @@ public class StationScheduleServlet
     @Override
     protected void doSearch( ApplicationRequest request )
             throws ServletException,
-                   IOException
+            IOException
     {
         try
         {
@@ -71,7 +72,8 @@ public class StationScheduleServlet
             {
                 if( isValid( request ) )
                 {
-                    doSearch( request, m.group( 1 ), LocalDate.now() );
+                    // Force london time zone so front end accounts for daylight saving time
+                    doSearch( request, m.group( 1 ), TimeUtils.getLondonDate() );
                 }
                 return;
             }
@@ -82,16 +84,15 @@ public class StationScheduleServlet
                 if( isValid( request ) )
                 {
                     LocalDate date = LocalDate.of( Integer.parseInt( m.group( 2 ) ),
-                                                   Month.of( Integer.parseInt( m.group( 3 ) ) ),
-                                                   Integer.parseInt( m.group( 4 ) ) );
+                            Month.of( Integer.parseInt( m.group( 3 ) ) ),
+                            Integer.parseInt( m.group( 4 ) ) );
                     doSearch( request, m.group( 1 ), date );
                 }
                 return;
             }
 
-        }
-        catch( NumberFormatException |
-               DateTimeParseException ex )
+        } catch( NumberFormatException |
+                DateTimeParseException ex )
         {
             // Ignore
         }
