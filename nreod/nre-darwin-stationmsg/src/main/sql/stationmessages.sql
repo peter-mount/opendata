@@ -20,6 +20,8 @@ CREATE TABLE station (
     PRIMARY KEY (id)
 );
 CREATE UNIQUE INDEX station_c ON station(crs);
+ALTER TABLE station OWNER TO rail;
+ALTER TABLE station_id_seq OWNER TO rail;
 
 -- ----------------------------------------------------------------------
 -- Station message
@@ -35,6 +37,7 @@ CREATE TABLE message (
     PRIMARY KEY (id)
 );
 CREATE INDEX message_d ON message(dt);
+ALTER TABLE message OWNER TO rail;
 
 -- ----------------------------------------------------------------------
 -- Links message to station
@@ -47,6 +50,7 @@ CREATE TABLE message_station (
 CREATE UNIQUE INDEX message_station_ms ON message_station(msgid,stationid);
 CREATE INDEX message_station_m ON message_station(msgid);
 CREATE INDEX message_station_s ON message_station(stationid);
+ALTER TABLE message_station OWNER TO rail;
 
 -- ----------------------------------------------------------------------
 -- Handles the insertion & updates of station messages from Darwin

@@ -20,6 +20,8 @@ CREATE TABLE tiploc (
     PRIMARY KEY (id)
 );
 CREATE UNIQUE INDEX tiploc_c ON tiploc(tpl);
+ALTER TABLE tiploc OWNER TO rail;
+ALTER TABLE tiploc_id_seq OWNER TO rail;
 
 -- ----------------------------------------------------------------------
 -- Train forecast
@@ -39,6 +41,8 @@ CREATE UNIQUE INDEX forecast_r ON forecast(rid);
 CREATE INDEX forecast_u ON forecast(uid);
 CREATE INDEX forecast_s ON forecast(ssd);
 CREATE INDEX forecast_d ON forecast(dt);
+ALTER TABLE forecast OWNER TO rail;
+ALTER TABLE forecast_id_seq OWNER TO rail;
 
 -- ----------------------------------------------------------------------
 -- Maps a forecast to the tiploc
@@ -50,8 +54,8 @@ CREATE TABLE forecast_entry (
 CREATE UNIQUE INDEX forecast_entry_ft ON forecast_entry(fid,tpl);
 CREATE INDEX forecast_entry_f ON forecast_entry(fid);
 CREATE INDEX forecast_entry_t ON forecast_entry(tpl);
+ALTER TABLE forecast_entry OWNER TO rail;
 
--- ----------------------------------------------------------------------
 -- ----------------------------------------------------------------------
 -- Handles the insertion & updates of a forecast
 -- ----------------------------------------------------------------------
