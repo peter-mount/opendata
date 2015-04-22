@@ -54,8 +54,8 @@ public class Main
     {
         Properties p = loadProperties( "rabbit.properties" );
         rabbitmq = new RabbitConnection( p.getProperty( "username" ),
-                p.getProperty( "password" ),
-                p.getProperty( "host" )
+                                         p.getProperty( "password" ),
+                                         p.getProperty( "host" )
         );
 
         nreProps = loadProperties( "nationalrail.properties" );
@@ -79,18 +79,17 @@ public class Main
     protected void stop()
     {
         super.stop();
-        try
-        {
+        try {
             activemq.stop();
-        } finally
-        {
+        }
+        finally {
             rabbitmq.close();
         }
     }
 
-    private Consumer<Pport> forward( RabbitConnection mq, String routingKey )
+    private Consumer<Pport> forward( String routingKey )
     {
-        Consumer<String> c = RabbitMQ.stringConsumer( mq, routingKey );
+        Consumer<String> c = RabbitMQ.stringConsumer( rabbitmq, routingKey );
         return p -> c.accept( DarwinJaxbContext.toXML.apply( p ) );
     }
 
@@ -101,37 +100,42 @@ public class Main
         // There's just one queue from NRE so we'll just receive everything, uncompress & publish to rabbit
         Consumer<String> monitor = RateMonitor.log( LOG, "record nre.raw" );
 
+        // Consumer to accept the raw feed
+        Consumer<String> c = RabbitMQ.stringConsumer( rabbitmq, "nre.push" );
+
         // Dispatcher to send to individual routing keys
         Consumer<Pport> dispatcher = new DarwinDispatcherBuilder().
-                addAlarm( forward( rabbitmq, "nre.push.alarm" ) ).
-                addAssociation( forward( rabbitmq, "nre.push.association" ) ).
-                addDeactivatedSchedule( forward( rabbitmq, "nre.push.deactivated" ) ).
-                addSchedule( forward( rabbitmq, "nre.push.schedule" ) ).
-                addStationMessage( forward( rabbitmq, "nre.push.stationmessage" ) ).
-                addTrackingID( forward( rabbitmq, "nre.push.trackingid" ) ).
-                addTrainAlert( forward( rabbitmq, "nre.push.trainalert" ) ).
-                addTrainOrder( forward( rabbitmq, "nre.push.trainorder" ) ).
-                addTs( forward( rabbitmq, "nre.push.ts" ) ).
+                addAlarm( forward( "nre.push.alarm" ) ).
+                addAssociation( forward( "nre.push.association" ) ).
+                addDeactivatedSchedule( forward( "nre.push.deactivated" ) ).
+                addSchedule( forward( "nre.push.schedule" ) ).
+                addStationMessage( forward( "nre.push.stationmessage" ) ).
+                addTrackingID( forward( "nre.push.trackingid" ) ).
+                addTrainAlert( forward( "nre.push.trainalert" ) ).
+                addTrainOrder( forward( "nre.push.trainorder" ) ).
+                addTs( forward( "nre.push.ts" ) ).
                 build();
 
         // Now register our queue consumer
         activemq.registerQueueConsumer( nreProps.getProperty( "push.queue" ),
-                Consumers.guard( msg -> Stream.of( msg ).
-                        // The xml is gzipped so decompress it first
-                        map( Functions.castTo( BytesMessage.class ) ).
-                        map( new GUnZipBytesMessage() ).
-                        filter( Objects::nonNull ).
-                        // Log raw message count
-                        peek( monitor ).
-                        // Now unmarshall the xml & dispatch to the correct routing key
-                        map( DarwinJaxbContext.fromXML ).
-                        forEach( dispatcher )
-                ) );
+                                        Consumers.guard( msg -> Stream.of( msg ).
+                                                // The xml is gzipped so decompress it first
+                                                map( Functions.castTo( BytesMessage.class ) ).
+                                                map( new GUnZipBytesMessage() ).
+                                                filter( Objects::nonNull ).
+                                                // Log raw message count
+                                                peek( monitor ).
+                                                // Submit everything to the main queue
+                                                peek( c ).
+                                                // Now unmarshall the xml & dispatch to the correct routing key
+                                                map( DarwinJaxbContext.fromXML ).
+                                                forEach( dispatcher )
+                                        ) );
     }
 
     public static void main( String... args )
             throws IOException,
-            InterruptedException
+                   InterruptedException
     {
         LOG.log( Level.INFO, "Initialising National Rail Enquiries Bridge" );
 

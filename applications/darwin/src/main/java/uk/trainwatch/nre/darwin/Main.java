@@ -20,8 +20,11 @@ import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import org.postgresql.ds.PGPoolingDataSource;
+import uk.trainwatch.nre.darwin.forecast.rec.DeactivationRecorder;
+import uk.trainwatch.nre.darwin.forecast.rec.ScheduleRecorder;
 import uk.trainwatch.nre.darwin.forecast.rec.TSRecorder;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
+import uk.trainwatch.nre.darwin.parser.DarwinDispatcherBuilder;
 import uk.trainwatch.nre.darwin.parser.DarwinJaxbContext;
 import uk.trainwatch.nre.darwin.stationmsg.StationMessageRecorder;
 import uk.trainwatch.rabbitmq.RabbitConnection;
@@ -30,7 +33,9 @@ import uk.trainwatch.util.app.Application;
 import uk.trainwatch.util.counter.RateMonitor;
 
 /**
- * Simple standalone application that acts as a bridge between Network Rail and RabbitMQ
+ * Simple standalone application that reads the full messages from Darwin and processes them into the database.
+ * 
+ * This function was part of tomcat but it's been pulled out to make it more efficient.
  * <p>
  * @author Peter T Mount
  */
@@ -49,8 +54,8 @@ public class Main
     {
         Properties p = loadProperties( "rabbit.properties" );
         rabbitmq = new RabbitConnection( p.getProperty( "username" ),
-                p.getProperty( "password" ),
-                p.getProperty( "host" )
+                                         p.getProperty( "password" ),
+                                         p.getProperty( "host" )
         );
     }
 
@@ -67,12 +72,6 @@ public class Main
         rabbitmq.close();
     }
 
-    private Consumer<Pport> forward( RabbitConnection mq, String routingKey )
-    {
-        Consumer<String> c = RabbitMQ.stringConsumer( mq, routingKey );
-        return p -> c.accept( DarwinJaxbContext.toXML.apply( p ) );
-    }
-
     @Override
     protected void setupApplication()
             throws IOException
@@ -86,57 +85,40 @@ public class Main
         dataSource.setPassword( p.getProperty( "password" ) );
         dataSource.setMaxConnections( 10 );
 
-        setupTrainStatus();
-        setupStationMessages();
-    }
+        // The dispatcher
+        Consumer<Pport> dispatcher = new DarwinDispatcherBuilder().
+                // Forecasts
+                addSchedule( new ScheduleRecorder( dataSource ) ).
+                addDeactivatedSchedule( new DeactivationRecorder( dataSource ) ).
+                addTs( new TSRecorder( dataSource ) ).
+                // Station Messages
+                addStationMessage( new StationMessageRecorder( dataSource ) ).
+                //
+                build();
 
-    private void setupTrainStatus()
-    {
-        String queue = "darwin.forecast";
+        String queue = "darwin.db";
 
         LOG.log( Level.INFO, () -> "Initialising " + queue );
 
-        Consumer<Pport> consumer = RateMonitor.<Pport>log( LOG, queue ).
-                andThen(new TSRecorder( dataSource ) );
+        Consumer<Pport> monitor = RateMonitor.<Pport>log( LOG, queue );
 
         // Pass deactivated & TS messages to forecast
         RabbitMQ.queueDurableStream( rabbitmq,
-                queue,
-                "nre.push.activated,nre.push.deactivated,nre.push.ts",
-                s -> s.map( RabbitMQ.toString ).
-                map( DarwinJaxbContext.fromXML ).
-                flatMap( DarwinJaxbContext.messageSplitter ).
-                forEach( consumer )
-        );
-
-    }
-
-    private void setupStationMessages()
-    {
-        String queue = "darwin.station.message";
-
-        LOG.log( Level.INFO, () -> "Initialising " + queue );
-
-        Consumer<Pport> consumer = RateMonitor.<Pport>log( LOG, queue ).
-                andThen( new StationMessageRecorder( dataSource ) );
-
-        // Station messages
-        RabbitMQ.queueDurableStream( rabbitmq,
-                queue,
-                "nre.push.stationmessage",
-                s -> s.map( RabbitMQ.toString ).
-                map( DarwinJaxbContext.fromXML ).
-                flatMap( DarwinJaxbContext.messageSplitter ).
-                forEach( consumer )
+                                     queue,
+                                     "nre.push",
+                                     s -> s.map( RabbitMQ.toString ).
+                                     map( DarwinJaxbContext.fromXML ).
+                                     peek( monitor ).
+                                     forEach( dispatcher )
         );
 
     }
 
     public static void main( String... args )
             throws IOException,
-            InterruptedException
+                   InterruptedException
     {
-        LOG.log( Level.INFO, "Initialising National Rail Enquiries Bridge" );
+        LOG.log( Level.INFO, "Initialising Darwin Database" );
 
         new Main().run();
     }
