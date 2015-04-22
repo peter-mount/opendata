@@ -1,8 +1,45 @@
 <jaxb:bindings xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
-    xmlns:xs="http://www.w3.org/2001/XMLSchema" version="2.0" schemaLocation="rttiPPTSchedules_v1.xsd">
+               xmlns:inheritance="http://jaxb2-commons.dev.java.net/basic/inheritance"
+               xmlns:xs="http://www.w3.org/2001/XMLSchema" version="2.0" schemaLocation="rttiPPTSchedules_v1.xsd">
 
     <jaxb:schemaBindings>
         <jaxb:package name="uk.trainwatch.nre.darwin.model.ppt.schedules" />
     </jaxb:schemaBindings>
+
+    <jaxb:bindings node="//xs:complexType[@name='OR']">
+            <inheritance:implements>uk.trainwatch.nre.darwin.model.util.TplLocation</inheritance:implements>
+    </jaxb:bindings>
+
+    <jaxb:bindings node="//xs:complexType[@name='OPOR']">
+            <inheritance:implements>uk.trainwatch.nre.darwin.model.util.TplLocation</inheritance:implements>
+    </jaxb:bindings>
+
+    <jaxb:bindings node="//xs:complexType[@name='IP']">
+            <inheritance:implements>uk.trainwatch.nre.darwin.model.util.TplLocation</inheritance:implements>
+    </jaxb:bindings>
+
+    <jaxb:bindings node="//xs:complexType[@name='OPIP']">
+            <inheritance:implements>uk.trainwatch.nre.darwin.model.util.TplLocation</inheritance:implements>
+    </jaxb:bindings>
+    
+    <jaxb:bindings node="//xs:complexType[@name='PP']">
+            <inheritance:implements>uk.trainwatch.nre.darwin.model.util.TplLocation</inheritance:implements>
+    </jaxb:bindings>
+
+    <jaxb:bindings node="//xs:complexType[@name='DT']">
+            <inheritance:implements>uk.trainwatch.nre.darwin.model.util.TplLocation</inheritance:implements>
+    </jaxb:bindings>
+
+    <jaxb:bindings node="//xs:complexType[@name='OPDT']">
+            <inheritance:implements>uk.trainwatch.nre.darwin.model.util.TplLocation</inheritance:implements>
+    </jaxb:bindings>
+
+    <jaxb:bindings node="//xs:complexType[@name='Schedule']">
+            <inheritance:implements>uk.trainwatch.nre.darwin.model.util.ScheduleID</inheritance:implements>
+    </jaxb:bindings>
+
+    <jaxb:bindings node="//xs:complexType[@name='DeactivatedSchedule']">
+            <inheritance:implements>uk.trainwatch.nre.darwin.model.util.RailID</inheritance:implements>
+    </jaxb:bindings>
 
 </jaxb:bindings>

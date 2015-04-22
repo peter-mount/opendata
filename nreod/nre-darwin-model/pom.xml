@@ -15,6 +15,17 @@
         Contains the current schemas &amp; JAXB models for the push feeds.
     </description>
     
+    <!--
+    <dependencies>
+        <dependency>
+            <groupId>org.jvnet.jaxb2_commons</groupId>
+            <artifactId>jaxb2-basics-runtime</artifactId>
+            <version>0.9.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+    -->
+
     <build>
         
         <pluginManagement>
@@ -54,6 +65,17 @@
                     <enableIntrospection>true</enableIntrospection>
                     <markGenerated>false</markGenerated>
                     <forceRegenerate>false</forceRegenerate>
+                    <extension>true</extension>
+                    <args>
+                        <arg>-Xinheritance</arg>
+                    </args>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.jvnet.jaxb2_commons</groupId>
+                            <artifactId>jaxb2-basics</artifactId>
+                            <version>0.9.0</version>
+                        </plugin>
+                    </plugins>    
                 </configuration>
             </plugin>
         </plugins>

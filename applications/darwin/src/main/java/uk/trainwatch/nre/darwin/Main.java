@@ -20,7 +20,7 @@ import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import org.postgresql.ds.PGPoolingDataSource;
-import uk.trainwatch.nre.darwin.forecast.ForecastRecorder;
+import uk.trainwatch.nre.darwin.forecast.rec.TSRecorder;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
 import uk.trainwatch.nre.darwin.parser.DarwinJaxbContext;
 import uk.trainwatch.nre.darwin.stationmsg.StationMessageRecorder;
@@ -97,7 +97,7 @@ public class Main
         LOG.log( Level.INFO, () -> "Initialising " + queue );
 
         Consumer<Pport> consumer = RateMonitor.<Pport>log( LOG, queue ).
-                andThen( new ForecastRecorder( dataSource ) );
+                andThen(new TSRecorder( dataSource ) );
 
         // Pass deactivated & TS messages to forecast
         RabbitMQ.queueDurableStream( rabbitmq,

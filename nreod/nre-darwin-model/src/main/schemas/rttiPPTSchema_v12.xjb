@@ -1,8 +1,13 @@
 <jaxb:bindings xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
-    xmlns:xs="http://www.w3.org/2001/XMLSchema" version="2.0" schemaLocation="rttiPPTSchema_v12.xsd">
+               xmlns:inheritance="http://jaxb2-commons.dev.java.net/basic/inheritance"
+               xmlns:xs="http://www.w3.org/2001/XMLSchema" version="2.0" schemaLocation="rttiPPTSchema_v12.xsd">
 
     <jaxb:schemaBindings>
         <jaxb:package name="uk.trainwatch.nre.darwin.model.ppt.schema" />
     </jaxb:schemaBindings>
+
+    <jaxb:bindings node="//xs:element[@name='Pport']/xs:complexType">
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.PportUtil</inheritance:implements>
+    </jaxb:bindings>
 
 </jaxb:bindings>

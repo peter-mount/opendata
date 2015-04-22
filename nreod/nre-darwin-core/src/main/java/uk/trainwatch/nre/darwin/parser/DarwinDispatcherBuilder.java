@@ -5,10 +5,9 @@
  */
 package uk.trainwatch.nre.darwin.parser;
 
-import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import uk.trainwatch.nre.darwin.model.ppt.schema.DataResponse;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
 import uk.trainwatch.util.BiConsumers;
@@ -95,24 +94,27 @@ public final class DarwinDispatcherBuilder
     }
 
     /**
-     * Used by build(), if the consumer has been defined then return a BiConsumer that will test a Pport message and invoke the consumer
+     * Used by build(), if the consumer has been defined then return a BiConsumer that will test a Pport message and invoke the
+     * consumer
      * <p>
      * @param c
      * @param s
      * <p>
      * @return
      */
-    private BiConsumer<Pport, DataResponse> build( Consumer<Pport> c, Function<DataResponse, List<?>> s )
+    private BiConsumer<Pport, DataResponse> build( Consumer<Pport> c, Predicate<DataResponse> t )
     {
         // No consumer defined then do nothing
-        if( c == null ) {
+        if( c == null )
+        {
             return null;
         }
 
         // BiConsumer which will test for the required elements & only if they exist forward to the underlying consumer
-        return ( p, r ) -> {
-            final List<?> l = s.apply( r );
-            if( l != null && !l.isEmpty() ) {
+        return ( p, r ) ->
+        {
+            if( t.test( r ) )
+            {
                 c.accept( p );
             }
         };
@@ -123,22 +125,25 @@ public final class DarwinDispatcherBuilder
         // Build a BiConsumer which will generate just those required to be tested
         // based on the fields being checked
         BiConsumer<Pport, DataResponse> c = BiConsumers.andThen(
-                build( schedule, DataResponse::getSchedule ),
-                build( deactivatedSchedule, DataResponse::getDeactivated ),
-                build( association, DataResponse::getAssociation ),
-                build( ts, DataResponse::getTS ),
-                build( stationMessage, DataResponse::getOW ),
-                build( trainAlert, DataResponse::getTrainAlert ),
-                build( trainOrder, DataResponse::getTrainOrder ),
-                build( trackingID, DataResponse::getTrackingID ),
-                build( alarm, DataResponse::getAlarm )
+                build( schedule, DataResponse::isSetSchedule ),
+                build( deactivatedSchedule, DataResponse::isSetDeactivated ),
+                build( association, DataResponse::isSetAssociation ),
+                build( ts, DataResponse::isSetTS ),
+                build( stationMessage, DataResponse::isSetOW ),
+                build( trainAlert, DataResponse::isSetTrainAlert ),
+                build( trainOrder, DataResponse::isSetTrainOrder ),
+                build( trackingID, DataResponse::isSetTrackingID ),
+                build( alarm, DataResponse::isSetAlarm )
         );
 
         // Return the actual consumer. This will test to ensure Pport & Pport.UR and not null before passing to our test above
-        return t -> {
-            if( t != null ) {
+        return t ->
+        {
+            if( t != null )
+            {
                 DataResponse r = t.getUR();
-                if( r != null ) {
+                if( r != null )
+                {
                     c.accept( t, r );
                 }
             }
