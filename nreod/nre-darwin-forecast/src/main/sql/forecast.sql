@@ -56,6 +56,26 @@ CREATE INDEX forecast_entry_f ON forecast_entry(fid);
 CREATE INDEX forecast_entry_t ON forecast_entry(tpl);
 ALTER TABLE forecast_entry OWNER TO rail;
 
+CREATE OR REPLACE FUNCTION darwin.tiploc (ptpl TEXT)
+RETURNS INTEGER AS $$
+DECLARE
+    rec     RECORD;
+BEGIN
+    LOOP
+        SELECT * INTO rec FROM darwin.tiploc WHERE tpl=ptpl;
+        IF FOUND THEN
+            RETURN rec.id;
+        END IF;
+        BEGIN
+            INSERT INTO darwin.tiploc (tpl) VALUES (ptpl);
+            RETURN currval('darwin.tiploc_id_seq');
+        EXCEPTION WHEN unique_violation THEN
+            -- Do nothing, loop & try again
+        END;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
 -- ----------------------------------------------------------------------
 -- Handles the insertion & updates of a forecast
 -- ----------------------------------------------------------------------
@@ -76,29 +96,31 @@ DECLARE
     feid    BIGINT;
     aid     INTEGER;
 BEGIN
-    SELECT * INTO rec FROM darwin.forecast WHERE rid=pid;
-    IF FOUND THEN
-        UPDATE darwin.forecast SET uid=puid, ssd=pssd, active=pactive, deactive=pdeactive, xml=pxml, dt=now() WHERE rid=pid;
-        feid=rec.id;
-    ELSE
-        INSERT INTO darwin.forecast (rid,uid,ssd,active,deactive,xml,dt) VALUES (pid,puid,pssd,pactive,pdeactive,pxml,now());
-        feid=currval('darwin.forecast_id_seq');
-    END IF;
+    LOOP
+        SELECT * INTO rec FROM darwin.forecast WHERE rid=pid;
+        IF FOUND THEN
+            UPDATE darwin.forecast SET uid=puid, ssd=pssd, active=pactive, deactive=pdeactive, xml=pxml, dt=now() WHERE rid=pid;
+            feid=rec.id;
+            EXIT;
+        ELSE
+            BEGIN
+                INSERT INTO darwin.forecast (rid,uid,ssd,active,deactive,xml,dt) VALUES (pid,puid,pssd,pactive,pdeactive,pxml,now());
+                feid=currval('darwin.forecast_id_seq');
+            EXCEPTION WHEN unique_violation THEN
+                -- Do nothing, loop & try again.
+                -- This should not happen on live as its sequential but load testing does cause this
+                -- however if this does happen then we may have inconsistent xml
+            END;
+        END IF;
+    END LOOP;
 
+    -- Create a link to each tiploc
     FOREACH atpl IN ARRAY string_to_array(ptpl,',')
     LOOP
-        SELECT * INTO rec FROM darwin.tiploc WHERE tpl=atpl;
-        IF FOUND THEN
-            aid = rec.id;
-        ELSE
-            INSERT INTO darwin.tiploc (tpl) VALUES (atpl);
-            aid = currval('darwin.tiploc_id_seq');
-        END IF;
+        aid = darwin.tiploc(atpl);
 
-        SELECT * INTO rec FROM darwin.forecast_entry WHERE fid=feid AND tpl=aid;
-        IF NOT FOUND THEN
-            INSERT INTO darwin.forecast_entry (fid,tpl) VALUES (feid,aid);
-        END IF;
+        INSERT INTO darwin.forecast_entry (fid,tpl)
+            SELECT feid,aid WHERE NOT EXISTS ( SELECT 1 FROM darwin.forecast_entry  WHERE fid=feid AND tpl=aid );
 
     END LOOP;
 

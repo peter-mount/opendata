@@ -134,8 +134,7 @@ public class Main
     }
 
     public static void main( String... args )
-            throws IOException,
-                   InterruptedException
+            throws Exception
     {
         LOG.log( Level.INFO, "Initialising National Rail Enquiries Bridge" );
 

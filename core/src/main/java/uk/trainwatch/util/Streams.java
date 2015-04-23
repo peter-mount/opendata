@@ -7,6 +7,10 @@ package uk.trainwatch.util;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -57,7 +61,7 @@ public class Streams
      * <p>
      * @param <T>
      * @param e
-     * <p>
+     *            <p>
      * @return
      */
     public static <T> Stream<T> ofNullable( T e )
@@ -236,15 +240,139 @@ public class Streams
      */
     public static <T> void supplierStream( BlockingSupplier<T> supplier, Consumer<Stream<T>> factory )
     {
-        Thread t = DaemonThreadFactory.INSTANCE.newThread( () -> {
-            Stream<T> s = Stream.generate( supplier );
+        DaemonThreadFactory.INSTANCE.newThread(
+                () -> {
+                    try( Stream<T> s = Stream.generate( supplier ) ) {
+                        factory.accept( s );
+                    }
+                    finally {
+                        supplier.setInvalid();
+                    }
+                } ).
+                start();
+    }
+
+    /**
+     * Creates a consumer which will hand off work to another consumer on a background thread
+     * <p>
+     * @param <T> Type
+     * @param c   Consumer
+     * <p>
+     * @return new consumer
+     */
+    public static <T> Consumer<T> fork( Consumer<T> c )
+    {
+        return fork( 1, c );
+    }
+
+    /**
+     * Creates a consumer which will hand off work to another consumer on a background thread
+     * <p>
+     * @param <T>     Type
+     * @param timeout Time out
+     * @param unit    TimeUnit of timeout
+     * @param c       Consumer
+     * <p>
+     * @return new consumer
+     */
+    public static <T> Consumer<T> fork( long timeout, TimeUnit unit, Consumer<T> c )
+    {
+        return fork( 1, false, timeout, unit, c );
+    }
+
+    /**
+     * Creates a consumer which will hand off work to another consumer on a background thread
+     * <p>
+     * @param <T>  Type
+     * @param size Queue size
+     * @param c    Consumer
+     * <p>
+     * @return new consumer
+     */
+    public static <T> Consumer<T> fork( int size, Consumer<T> c )
+    {
+        return fork( size, false, 10, TimeUnit.SECONDS, c );
+    }
+
+    /**
+     * Creates a consumer which will hand off work to another consumer on a background thread
+     * <p>
+     * @param <T>     Type
+     * @param size    Queue size
+     * @param timeout Time out
+     * @param unit    TimeUnit of timeout
+     * @param c       Consumer
+     * <p>
+     * @return new consumer
+     */
+    public static <T> Consumer<T> fork( int size, long timeout, TimeUnit unit, Consumer<T> c )
+    {
+        return fork( size, false, timeout, unit, c );
+    }
+
+    /**
+     * Creates a consumer which will hand off work to another consumer on a background thread
+     * <p>
+     * @param <T>      Type
+     * @param size     Queue size
+     * @param parallel true to process in parallel, false for sequential
+     * @param c        Consumer
+     * <p>
+     * @return new consumer
+     */
+    public static <T> Consumer<T> fork( int size, boolean parallel, Consumer<T> c )
+    {
+        return fork( size, parallel, 10, TimeUnit.SECONDS, c );
+    }
+
+    /**
+     * Creates a consumer which will hand off work to another consumer on a background thread
+     * <p>
+     * @param <T>      Type
+     * @param parallel true to process in parallel, false for sequential
+     * @param c        Consumer
+     * <p>
+     * @return new consumer
+     */
+    public static <T> Consumer<T> fork( boolean parallel, Consumer<T> c )
+    {
+        return fork( 1, parallel, 10, TimeUnit.SECONDS, c );
+    }
+
+    /**
+     * Creates a consumer which will hand off work to another consumer on a background thread.
+     * <p>
+     * The resulting consumer will block for timeout/unit amount of time if the underlying queue is full - i.e. when the wrapped consumer is busy.
+     * <p>
+     * If a timeout occurs then an {@link IllegalStateException} is thrown to the caller.
+     * <p>
+     * @param <T>      Type
+     * @param size     Queue size. When this queue is full then the feeding consumer will block
+     * @param parallel true to process in parallel, false for sequential
+     * @param timeout  Time out
+     * @param unit     TimeUnit of timeout
+     * @param c        Consumer
+     * <p>
+     * @return new consumer
+     */
+    public static <T> Consumer<T> fork( int size, boolean parallel, long timeout, TimeUnit unit, Consumer<T> c )
+    {
+        // Guard otherwise the stream fails and the origin will block until queue fills & times out
+        Consumer<T> consumer = Consumers.guard( c );
+        
+        BlockingQueue<T> queue = size > 1 ? new ArrayBlockingQueue<>( size ) : new SynchronousQueue<>();
+        
+        supplierStream( queue::poll, parallel ? s -> s.parallel().forEach( consumer ) : s -> s.forEach( consumer ) );
+        
+        return t -> {
             try {
-                factory.accept( s );
+                if( !queue.offer( t, timeout, unit ) ) {
+                    throw new IllegalStateException( "Unable to offer entry after " + timeout + " " + unit );
+                }
             }
-            finally {
-                supplier.setInvalid();
+            catch( InterruptedException ex ) {
+                throw new IllegalStateException( "Offer interrupted", ex );
             }
-        } );
-        t.start();
+        };
     }
 }

@@ -8,6 +8,11 @@
 
     <jaxb:bindings node="//xs:complexType[@name='TSLocation']">
             <inheritance:implements>uk.trainwatch.nre.darwin.model.util.TplLocation</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.PublicArrival</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.PublicDeparture</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.WorkArrival</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.WorkDeparture</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.WorkPass</inheritance:implements>
     </jaxb:bindings>
 
     <jaxb:bindings node="//xs:complexType[@name='TS']">

@@ -20,15 +20,17 @@ public abstract class Application
     private static final Semaphore SEMAPHORE = new Semaphore( 0 );
 
     protected void run()
-            throws IOException,
-                   InterruptedException
+            throws Exception
     {
         setupBrokers();
         setupApplication();
         start();
-
-        waitOnSignal();
-        stop();
+        try {
+            mainLoop();
+        }
+        finally {
+            stop();
+        }
         LOG.log( Level.FINE, "Main thread completed" );
     }
 
@@ -40,6 +42,12 @@ public abstract class Application
     protected void start()
     {
         LOG.log( Level.INFO, "Starting" );
+    }
+
+    protected void mainLoop()
+            throws Exception
+    {
+        waitOnSignal();
     }
 
     protected void stop()

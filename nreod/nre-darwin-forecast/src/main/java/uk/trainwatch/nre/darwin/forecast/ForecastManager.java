@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
 import uk.trainwatch.nre.darwin.model.ppt.forecasts.TS;
+import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
 import uk.trainwatch.nre.darwin.parser.DarwinJaxbContext;
 import uk.trainwatch.util.sql.SQL;
 
@@ -95,16 +96,13 @@ public enum ForecastManager
      * <p>
      * @return latest TS or null if not present
      */
-    public TS get( String rid )
+    public Pport get( String rid )
     {
         if( rid != null && !rid.isEmpty() ) {
             try( Connection con = dataSource.getConnection() ) {
                 try( PreparedStatement ps = SQL.prepare( con, "SELECT xml FROM darwin.forecast WHERE rid=?", rid ) ) {
                     return SQL.stream( ps, SQL.STRING_LOOKUP ).
                             map( DarwinJaxbContext.fromXML ).
-                            flatMap( p -> p.getUR().getTS().stream() ).
-                            // Sort data into correct order
-                            peek( ts -> ts.getLocation().sort( TSLocationComparator.INSTANCE ) ).
                             findAny().
                             orElse( null );
                 }

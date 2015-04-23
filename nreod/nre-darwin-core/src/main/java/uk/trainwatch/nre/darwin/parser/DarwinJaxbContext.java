@@ -86,6 +86,15 @@ public enum DarwinJaxbContext
         return jaxb.marshallToString( p );
     }
 
+    /**
+     * @see Pport#cloneMeta()
+     * @param orig
+     *             <p>
+     * @return
+     *         <p>
+     * @deprecated now done inside the model
+     */
+    @Deprecated
     public static Pport duplicate( Pport orig )
     {
         Pport p = new Pport();

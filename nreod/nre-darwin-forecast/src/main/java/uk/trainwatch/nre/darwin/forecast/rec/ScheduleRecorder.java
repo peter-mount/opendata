@@ -7,10 +7,10 @@ package uk.trainwatch.nre.darwin.forecast.rec;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import javax.sql.DataSource;
 import uk.trainwatch.nre.darwin.model.ppt.schedules.Schedule;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
-import uk.trainwatch.nre.darwin.parser.DarwinJaxbContext;
 
 /**
  *
@@ -38,8 +38,7 @@ public class ScheduleRecorder
         String rid = schedule.getRid();
 
         Pport dbPport = t.cloneMetaIfNull( getForecast( con, rid ) );
-
-        dbPport.getUR().getSchedule().add( schedule );
+        replace( dbPport.getUR().getSchedule(), schedule );
 
         recordForecast( con, dbPport, schedule );
     }

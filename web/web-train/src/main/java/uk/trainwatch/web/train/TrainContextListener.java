@@ -16,6 +16,9 @@
 package uk.trainwatch.web.train;
 
 import java.sql.SQLException;
+import java.util.logging.Level;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.annotation.WebListener;
 import javax.sql.DataSource;
@@ -35,7 +38,17 @@ public class TrainContextListener
     protected void init( ServletContextEvent sce )
             throws SQLException
     {
-        DataSource dataSource = getRailDataSource();
+        //DataSource dataSource = getRailDataSource();
+
+        DataSource dataSource;
+        try {
+            dataSource = InitialContext.doLookup( "java:/comp/env/jdbc/railDev" );
+            log.log( Level.SEVERE, "Forecasts Running against DEV DB");
+        }
+        catch( NamingException ex ) {
+            dataSource = getRailDataSource();
+            log.log( Level.SEVERE, "Forecasts Running against LIVE DB");
+        }
 
         ForecastManager.INSTANCE.setDataSource( dataSource );
     }

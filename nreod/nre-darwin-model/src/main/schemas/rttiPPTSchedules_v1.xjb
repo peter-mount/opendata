@@ -7,39 +7,58 @@
     </jaxb:schemaBindings>
 
     <jaxb:bindings node="//xs:complexType[@name='OR']">
-            <inheritance:implements>uk.trainwatch.nre.darwin.model.util.TplLocation</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.TplLocation</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.PublicArrival</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.PublicDeparture</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.WorkArrival</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.WorkDeparture</inheritance:implements>
     </jaxb:bindings>
 
     <jaxb:bindings node="//xs:complexType[@name='OPOR']">
-            <inheritance:implements>uk.trainwatch.nre.darwin.model.util.TplLocation</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.TplLocation</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.WorkArrival</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.WorkDeparture</inheritance:implements>
     </jaxb:bindings>
 
     <jaxb:bindings node="//xs:complexType[@name='IP']">
-            <inheritance:implements>uk.trainwatch.nre.darwin.model.util.TplLocation</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.PublicArrival</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.PublicDeparture</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.WorkArrival</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.WorkDeparture</inheritance:implements>
     </jaxb:bindings>
 
     <jaxb:bindings node="//xs:complexType[@name='OPIP']">
-            <inheritance:implements>uk.trainwatch.nre.darwin.model.util.TplLocation</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.TplLocation</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.WorkArrival</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.WorkDeparture</inheritance:implements>
     </jaxb:bindings>
     
     <jaxb:bindings node="//xs:complexType[@name='PP']">
-            <inheritance:implements>uk.trainwatch.nre.darwin.model.util.TplLocation</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.TplLocation</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.WorkPass</inheritance:implements>
     </jaxb:bindings>
 
     <jaxb:bindings node="//xs:complexType[@name='DT']">
-            <inheritance:implements>uk.trainwatch.nre.darwin.model.util.TplLocation</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.TplLocation</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.PublicArrival</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.PublicDeparture</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.WorkArrival</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.WorkDeparture</inheritance:implements>
     </jaxb:bindings>
 
     <jaxb:bindings node="//xs:complexType[@name='OPDT']">
-            <inheritance:implements>uk.trainwatch.nre.darwin.model.util.TplLocation</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.TplLocation</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.WorkArrival</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.WorkDeparture</inheritance:implements>
     </jaxb:bindings>
 
     <jaxb:bindings node="//xs:complexType[@name='Schedule']">
-            <inheritance:implements>uk.trainwatch.nre.darwin.model.util.ScheduleID</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.ScheduleID</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.ScheduleMeta</inheritance:implements>
     </jaxb:bindings>
 
     <jaxb:bindings node="//xs:complexType[@name='DeactivatedSchedule']">
-            <inheritance:implements>uk.trainwatch.nre.darwin.model.util.RailID</inheritance:implements>
+        <inheritance:implements>uk.trainwatch.nre.darwin.model.util.RailID</inheritance:implements>
     </jaxb:bindings>
 
 </jaxb:bindings>

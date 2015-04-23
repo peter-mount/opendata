@@ -11,7 +11,7 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
 import uk.trainwatch.nre.darwin.forecast.ForecastManager;
-import uk.trainwatch.nre.darwin.model.ppt.forecasts.TS;
+import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
 import uk.trainwatch.web.servlet.AbstractServlet;
 import uk.trainwatch.web.servlet.ApplicationRequest;
 
@@ -31,15 +31,15 @@ public class TrainStatusServlet
                    IOException
     {
         String rid = request.getPathInfo().substring( 1 );
-        TS ts = ForecastManager.INSTANCE.get( rid );
-        if( ts == null ) {
+        Pport pport = ForecastManager.INSTANCE.get( rid );
+        if( pport == null ) {
             request.sendError( HttpServletResponse.SC_NOT_FOUND, rid );
         }
         else {
             Map<String, Object> req = request.getRequestScope();
             req.put( "pageTitle", "Train: " + rid );
             req.put( "rid", rid );
-            req.put( "ts", ts );
+            req.put( "train", new Train( pport ) );
             //req.put( "stationMessages", StationMessageManager.INSTANCE.getMessages() );
             request.renderTile( "train.info" );
 

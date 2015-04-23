@@ -37,8 +37,7 @@ public interface PportUtil
         p.setTs( getTs() );
         p.setVersion( getVersion() );
 
-        if( isSetUR() )
-        {
+        if( isSetUR() ) {
             Pport.UR ur0 = getUR();
             Pport.UR ur1 = new Pport.UR();
             ur1.setRequestID( ur0.getRequestID() );
@@ -54,6 +53,7 @@ public interface PportUtil
      * Optionally clone the meta-data of this instance if the supplied instance is null
      *
      * @param p Pport
+     * <p>
      * @return p if not null otherwise a clone of this instance
      */
     default Pport cloneMetaIfNull( Pport p )

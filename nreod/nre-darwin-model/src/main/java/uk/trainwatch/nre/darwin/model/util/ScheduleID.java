@@ -7,6 +7,8 @@ package uk.trainwatch.nre.darwin.model.util;
 
 import java.util.Optional;
 import javax.xml.datatype.XMLGregorianCalendar;
+import uk.trainwatch.nre.darwin.model.ppt.forecasts.TS;
+import uk.trainwatch.nre.darwin.model.ppt.schedules.Schedule;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
 
 /**
@@ -29,6 +31,7 @@ public interface ScheduleID
      * Mapping function to cast a JAXB object to a RailID
      *
      * @param o JAXB Object
+     * <p>
      * @return o cast as RailID or null if o does not implement RailID
      */
     static ScheduleID castScheduleId( Object o )
@@ -43,23 +46,22 @@ public interface ScheduleID
      * {@link TS} element. If it has more than one then the first Schedule or TS element in that order is used.
      *
      * @param p
+     *          <p>
      * @return
      */
     static ScheduleID getScheduleID( Pport p )
     {
-        if( p == null )
-        {
+        if( p == null ) {
             return null;
         }
         Pport.UR ur = p.getUR();
-        if( ur == null )
-        {
+        if( ur == null ) {
             return null;
         }
         Optional<ScheduleID> schedule
-                = ur.isSetSchedule() ? Optional.of( ur.getSchedule().get( 0 ) )
-                        : ur.isSetTS() ? Optional.of( ur.getTS().get( 0 ) )
-                                : Optional.empty();
+                             = ur.isSetSchedule() ? Optional.of( ur.getSchedule().get( 0 ) )
+                               : ur.isSetTS() ? Optional.of( ur.getTS().get( 0 ) )
+                                 : Optional.empty();
         return schedule.orElse( null );
     }
 }

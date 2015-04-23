@@ -37,7 +37,7 @@ public class DeactivationRecorder
         String rid = ts.getRid();
 
         Pport dbPport = t.cloneMetaIfNull( getForecast( con, rid ) );
-        dbPport.getUR().getDeactivated().add( ts );
+        replace( dbPport.getUR().getDeactivated(), ts );
 
         recordForecast( con, dbPport );
     }

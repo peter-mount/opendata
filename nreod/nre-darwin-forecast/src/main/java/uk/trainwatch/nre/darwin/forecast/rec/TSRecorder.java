@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
+import uk.trainwatch.nre.darwin.forecast.TSLocationComparator;
 import uk.trainwatch.nre.darwin.model.ppt.forecasts.TS;
 import uk.trainwatch.nre.darwin.model.ppt.forecasts.TSLocation;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
@@ -44,12 +45,8 @@ public class TSRecorder
         Pport dbPport = t.cloneMetaIfNull( getForecast( con, rid ) );
 
         List<TS> existing = dbPport.getUR().getTS();
-        if( existing.isEmpty() )
-        {
-            // Just add the new TS as we don't have one
-            existing.add( ts );
-        } else
-        {
+
+        if( !existing.isEmpty() ) {
             // Merge any existing TSLocation's not in the new one into it
             List<TSLocation> existingTpl = existing.get( 0 ).getLocation();
             List<TSLocation> list = ts.getLocation();
@@ -64,11 +61,14 @@ public class TSRecorder
                     filter( tl -> !set.contains( tl.getTpl() ) ).
                     forEach( list::add );
 
-            // Replace the existing TS element with the new one. This means the new meta-data is now in use
-            existing.clear();
-            existing.add( ts );
+            // Not necessary but useful to sort it now, saves doing it multiple times later when processing
+            list.sort( TSLocationComparator.INSTANCE );
+
         }
 
+        // Replace the existing TS element with the new one. This means the new meta-data is now in use
+        replace( existing, ts );
+        
         recordForecast( con, dbPport, ts );
     }
 

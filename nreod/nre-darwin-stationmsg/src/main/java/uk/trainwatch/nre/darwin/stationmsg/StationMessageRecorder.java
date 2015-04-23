@@ -40,7 +40,9 @@ public class StationMessageRecorder
     @Override
     public void accept( Pport t )
     {
-        t.getUR().getOW().forEach( m -> accept( t, m ) );
+        if( t != null ) {
+            t.getUR().getOW().forEach( m -> accept( t, m ) );
+        }
     }
 
     private void accept( Pport t, StationMessage m )

@@ -9,15 +9,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
-import javax.xml.datatype.XMLGregorianCalendar;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
 import uk.trainwatch.nre.darwin.model.util.ScheduleID;
 import uk.trainwatch.nre.darwin.model.util.TplLocation;
@@ -46,26 +45,25 @@ public abstract class AbstractRecorder<S>
 
     protected final void accept( Pport t, Collection<S> s )
     {
-        s.forEach( ts ->
-        {
-            try( Connection con = dataSource.getConnection() )
-            {
-                try
-                {
-                    con.setAutoCommit( false );
-                    apply( t, ts, con );
-                    con.commit();
-                } catch( SQLException ex )
-                {
-                    LOG.log( Level.SEVERE, null, ex );
-                    con.rollback();
+        if( t != null ) {
+            s.forEach( ts -> {
+                try( Connection con = dataSource.getConnection() ) {
+                    try {
+                        con.setAutoCommit( false );
+                        apply( t, ts, con );
+                        con.commit();
+                    }
+                    catch( SQLException ex ) {
+                        LOG.log( Level.SEVERE, null, ex );
+                        con.rollback();
+                    }
                 }
-            } catch( SQLException ex )
-            {
-                LOG.log( Level.SEVERE, null, ex );
+                catch( SQLException ex ) {
+                    LOG.log( Level.SEVERE, null, ex );
+                }
             }
+            );
         }
-        );
     }
 
     protected abstract void apply( Pport t, S ts, Connection con )
@@ -74,8 +72,7 @@ public abstract class AbstractRecorder<S>
     protected final Pport getForecast( Connection con, String rid )
             throws SQLException
     {
-        try( PreparedStatement ps = SQL.prepare( con, "SELECT xml FROM darwin.forecast WHERE rid=?", rid ) )
-        {
+        try( PreparedStatement ps = SQL.prepare( con, "SELECT xml FROM darwin.forecast WHERE rid=?", rid ) ) {
             return SQL.stream( ps, SQL.STRING_LOOKUP ).
                     map( DarwinJaxbContext.fromXML ).
                     filter( Objects::nonNull ).
@@ -93,31 +90,28 @@ public abstract class AbstractRecorder<S>
     protected final void recordForecast( Connection con, Pport p, ScheduleID schedule )
             throws SQLException
     {
-        if( p == null || schedule == null )
-        {
+        if( p == null || schedule == null ) {
             return;
         }
-        
+
         Pport.UR ur = p.getUR();
 
         // Generate CSV of all tiplocs in schedule & forecast from the TplLocation's
         Stream<TplLocation> stream = null;
-        if( ur.isSetSchedule() )
-        {
+        if( ur.isSetSchedule() ) {
             stream = Streams.concat( stream,
-                    ur.getSchedule().stream().
-                    flatMap( s -> s.getOROrOPOROrIP().stream() ).
-                    map( TplLocation::castTplLocation )
+                                     ur.getSchedule().stream().
+                                     flatMap( s -> s.getOROrOPOROrIP().stream() ).
+                                     map( TplLocation::castTplLocation )
             );
         }
 
-        if( ur.isSetTS() )
-        {
+        if( ur.isSetTS() ) {
             stream = Streams.concat( stream,
-                    p.getUR().
-                    getTS().
-                    stream().
-                    flatMap( t -> t.getLocation().stream() )
+                                     p.getUR().
+                                     getTS().
+                                     stream().
+                                     flatMap( t -> t.getLocation().stream() )
             );
         }
 
@@ -127,22 +121,27 @@ public abstract class AbstractRecorder<S>
                 //sorted().
                 collect( Collectors.joining( "," ) );
 
-        try( PreparedStatement ps = SQL.prepare( con, "SELECT darwin.forecast(?,?,?,?,?,?,?)" ) )
-        {
+        try( PreparedStatement ps = SQL.prepare( con, "SELECT darwin.forecast(?,?,?,?,?,?,?)" ) ) {
             SQL.executeQuery( ps,
-                    schedule.getRid(),
-                    schedule.getUid(),
-                    Objects.toString( schedule.getSsd(), null ),
-                    // Activated?
-                    ur.isSetSchedule(),
-                    // Deactivated?
-                    ur.isSetDeactivated(),
-                    // Copy of the final XML
-                    DarwinJaxbContext.toXML.apply( p ),
-                    // Tiploc list for crossreferencing
-                    tpl
+                              schedule.getRid(),
+                              schedule.getUid(),
+                              Objects.toString( schedule.getSsd(), null ),
+                              // Activated?
+                              ur.isSetSchedule(),
+                              // Deactivated?
+                              ur.isSetDeactivated(),
+                              // Copy of the final XML
+                              DarwinJaxbContext.toXML.apply( p ),
+                              // Tiploc list for crossreferencing
+                              tpl
             );
         }
     }
 
+    protected final <T> List<T> replace( List<T> l, T v )
+    {
+        l.clear();
+        l.add( v );
+        return l;
+    }
 }

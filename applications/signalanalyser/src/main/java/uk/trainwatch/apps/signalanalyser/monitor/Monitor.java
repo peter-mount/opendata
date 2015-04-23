@@ -103,8 +103,7 @@ public class Monitor
     }
 
     public static void main( String... args )
-            throws IOException,
-                   InterruptedException
+            throws Exception
     {
         if( args.length != 1 )
         {

@@ -19,34 +19,24 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.logging.Level;
-import org.postgresql.ds.PGPoolingDataSource;
-import uk.trainwatch.nre.darwin.forecast.rec.DeactivationRecorder;
-import uk.trainwatch.nre.darwin.forecast.rec.ScheduleRecorder;
-import uk.trainwatch.nre.darwin.forecast.rec.TSRecorder;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
-import uk.trainwatch.nre.darwin.parser.DarwinDispatcherBuilder;
 import uk.trainwatch.nre.darwin.parser.DarwinJaxbContext;
-import uk.trainwatch.nre.darwin.stationmsg.StationMessageRecorder;
 import uk.trainwatch.rabbitmq.RabbitConnection;
 import uk.trainwatch.rabbitmq.RabbitMQ;
-import uk.trainwatch.util.app.Application;
 import uk.trainwatch.util.counter.RateMonitor;
 
 /**
  * Simple standalone application that reads the full messages from Darwin and processes them into the database.
- * 
+ * <p>
  * This function was part of tomcat but it's been pulled out to make it more efficient.
  * <p>
  * @author Peter T Mount
  */
 public class Main
-        extends Application
+        extends AbtractMain
 {
 
-    private PGPoolingDataSource dataSource;
     private RabbitConnection rabbitmq;
-
-    private Properties nreProps;
 
     @Override
     protected void setupBrokers()
@@ -76,25 +66,7 @@ public class Main
     protected void setupApplication()
             throws IOException
     {
-        Properties p = Application.loadProperties( "darwin.properties" );
-        dataSource = new PGPoolingDataSource();
-        dataSource.setDataSourceName( "Darwin" );
-        dataSource.setServerName( p.getProperty( "url" ) );
-        dataSource.setDatabaseName( "rail" );
-        dataSource.setUser( p.getProperty( "username" ) );
-        dataSource.setPassword( p.getProperty( "password" ) );
-        dataSource.setMaxConnections( 10 );
-
-        // The dispatcher
-        Consumer<Pport> dispatcher = new DarwinDispatcherBuilder().
-                // Forecasts
-                addSchedule( new ScheduleRecorder( dataSource ) ).
-                addDeactivatedSchedule( new DeactivationRecorder( dataSource ) ).
-                addTs( new TSRecorder( dataSource ) ).
-                // Station Messages
-                addStationMessage( new StationMessageRecorder( dataSource ) ).
-                //
-                build();
+        super.setupApplication();
 
         String queue = "darwin.db";
 
@@ -115,8 +87,7 @@ public class Main
     }
 
     public static void main( String... args )
-            throws IOException,
-                   InterruptedException
+            throws Exception
     {
         LOG.log( Level.INFO, "Initialising Darwin Database" );
 
