@@ -23,6 +23,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.annotation.WebListener;
 import javax.sql.DataSource;
 import uk.trainwatch.nre.darwin.forecast.ForecastManager;
+import uk.trainwatch.nre.darwin.reference.DarwinReferenceManager;
 import uk.trainwatch.util.sql.DBContextListener;
 
 /**
@@ -43,14 +44,15 @@ public class TrainContextListener
         DataSource dataSource;
         try {
             dataSource = InitialContext.doLookup( "java:/comp/env/jdbc/railDev" );
-            log.log( Level.SEVERE, "Forecasts Running against DEV DB");
+            log.log( Level.SEVERE, "Forecasts Running against DEV DB" );
         }
         catch( NamingException ex ) {
             dataSource = getRailDataSource();
-            log.log( Level.SEVERE, "Forecasts Running against LIVE DB");
+            log.log( Level.SEVERE, "Forecasts Running against LIVE DB" );
         }
 
         ForecastManager.INSTANCE.setDataSource( dataSource );
+        DarwinReferenceManager.INSTANCE.setDataSource( dataSource );
     }
 
 }

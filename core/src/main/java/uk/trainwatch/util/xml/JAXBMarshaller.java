@@ -24,10 +24,12 @@ import javax.xml.bind.Marshaller;
  * @author peter
  */
 @FunctionalInterface
-public interface JAXBMarshaller<T>
+public interface JAXBMarshaller
 {
 
-    T apply( Marshaller m )
-            throws IOException, InterruptedException, JAXBException;
+    void accept( Marshaller m )
+            throws IOException,
+                   InterruptedException,
+                   JAXBException;
 
 }

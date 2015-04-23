@@ -5,11 +5,17 @@
  */
 package uk.trainwatch.nre.darwin.parser;
 
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.xml.bind.JAXBException;
+import uk.trainwatch.nre.darwin.model.ctt.referenceschema.PportTimetableRef;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
 import uk.trainwatch.util.xml.JAXBSupport;
 
@@ -66,7 +72,7 @@ public enum DarwinJaxbContext
     {
         try {
             log.log( Level.INFO, "Initialising Darwin JAXB" );
-            jaxb = new JAXBSupport( 50, Pport.class );
+            jaxb = new JAXBSupport( 50, Pport.class, PportTimetableRef.class );
         }
         catch( JAXBException ex ) {
             Logger.getLogger( DarwinJaxbContext.class.getName() ).log( Level.SEVERE, null, ex );
@@ -84,6 +90,42 @@ public enum DarwinJaxbContext
             throws JAXBException
     {
         return jaxb.marshallToString( p );
+    }
+
+    public <T> T unmarshall( File f )
+            throws JAXBException
+    {
+        return jaxb.unmarshall( f );
+    }
+
+    public <T> T unmarshall( Reader r )
+            throws JAXBException
+    {
+        return jaxb.unmarshall( r );
+    }
+
+    public <T> T unmarshall( InputStream is )
+            throws JAXBException
+    {
+        return jaxb.unmarshall( is );
+    }
+
+    public void marshall( Object v, File f )
+            throws JAXBException
+    {
+        jaxb.marshall( v, f );
+    }
+
+    public void marshall( Object v, Writer w )
+            throws JAXBException
+    {
+        jaxb.marshall( v, w );
+    }
+
+    public void marshall( Object v, OutputStream os )
+            throws JAXBException
+    {
+        jaxb.marshall( v, os );
     }
 
     /**

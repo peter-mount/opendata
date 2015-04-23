@@ -24,6 +24,7 @@
         <module>nre-darwin-core</module>
         <module>nre-darwin-forecast</module>
         <module>nre-darwin-model</module>
+        <module>nre-darwin-reference</module>
         <module>nre-darwin-stationmsg</module>
     </modules>
     

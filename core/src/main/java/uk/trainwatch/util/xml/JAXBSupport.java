@@ -15,10 +15,14 @@
  */
 package uk.trainwatch.util.xml;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
@@ -212,13 +216,31 @@ public class JAXBSupport
         } );
     }
 
-    public <T> T marshall( JAXBMarshaller f )
+    public <T> T unmarshall( File f )
+            throws JAXBException
+    {
+        return unmarshall( m -> m.unmarshal( f ) );
+    }
+
+    public <T> T unmarshall( Reader r )
+            throws JAXBException
+    {
+        return unmarshall( m -> m.unmarshal( r ) );
+    }
+
+    public <T> T unmarshall( InputStream is )
+            throws JAXBException
+    {
+        return unmarshall( m -> m.unmarshal( is ) );
+    }
+
+    public void marshall( JAXBMarshaller f )
             throws JAXBException
     {
         try {
             final Marshaller m = getMarshaller();
             try {
-                return (T) f.apply( m );
+                f.accept( m );
             }
             finally {
                 returnMarshaller( m );
@@ -233,12 +255,31 @@ public class JAXBSupport
     public <T> String marshallToString( T v )
             throws JAXBException
     {
-        return marshall( m -> {
-            try( StringWriter s = new StringWriter() ) {
-                m.marshal( v, s );
-                return s.toString();
-            }
-        } );
+        try( StringWriter s = new StringWriter() ) {
+            marshall( v, s );
+            return s.toString();
+        }
+        catch( IOException ex ) {
+            throw new JAXBException( ex );
+        }
+    }
+
+    public void marshall( Object v, File f )
+            throws JAXBException
+    {
+        marshall( m -> m.marshal( v, f ) );
+    }
+
+    public void marshall( Object v, Writer w )
+            throws JAXBException
+    {
+        marshall( m -> m.marshal( v, w ) );
+    }
+
+    public void marshall( Object v, OutputStream os )
+            throws JAXBException
+    {
+        marshall( m -> m.marshal( v, os ) );
     }
 
 }

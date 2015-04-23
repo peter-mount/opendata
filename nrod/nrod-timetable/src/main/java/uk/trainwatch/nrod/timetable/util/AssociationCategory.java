@@ -30,15 +30,19 @@ public enum AssociationCategory
     /**
      * Unknown
      */
-    UNKNOWN( "  ", "Unknown", "" );
+    UNKNOWN( "  ", "Unknown", "" ),
+    /**
+     * Train is linked.
+     * <p>
+     * Not defined in CIF but it is in Darwin.
+     */
+    LK( "LK", "Linked", "Linked" );
 
     private static final Map<String, AssociationCategory> CODES = new HashMap<>();
     private static final Map<Integer, AssociationCategory> IDS = new HashMap<>();
 
-    static
-    {
-        for( AssociationCategory bhx : values() )
-        {
+    static {
+        for( AssociationCategory bhx: values() ) {
             CODES.put( bhx.code, bhx );
             IDS.put( bhx.ordinal(), bhx );
         }

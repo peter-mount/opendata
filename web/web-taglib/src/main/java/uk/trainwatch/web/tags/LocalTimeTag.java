@@ -6,11 +6,13 @@
 package uk.trainwatch.web.tags;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.BodyTagSupport;
+import uk.trainwatch.util.TimeUtils;
 
 /**
  *
@@ -20,30 +22,37 @@ public class LocalTimeTag
         extends BodyTagSupport
 {
 
-    private LocalTime value;
+    private Object value;
     private boolean working;
 
     @Override
     public int doStartTag()
             throws JspException
     {
-        if( value != null )
-        {
-            try
-            {
+        LocalTime time = null;
+        if( value instanceof LocalTime ) {
+            time = (LocalTime) value;
+        }
+        else if( value instanceof LocalDateTime ) {
+            time = ((LocalDateTime) value).toLocalTime();
+        }
+        else if( value instanceof String ) {
+            time = TimeUtils.getLocalTime( (String) value );
+        }
+
+        if( time != null ) {
+            try {
                 JspWriter w = pageContext.getOut();
 
-                boolean half = value.getSecond() != 0;
-                w.print( value.truncatedTo( ChronoUnit.MINUTES ).
+                boolean half = time.getSecond() != 0;
+                w.print( time.truncatedTo( ChronoUnit.MINUTES ).
                         toString() );
 
-                if( working )
-                {
+                if( working ) {
                     w.print( half ? "&frac12;" : "&emsp;" );
                 }
             }
-            catch( IOException ex )
-            {
+            catch( IOException ex ) {
                 throw new JspException( ex );
             }
 
@@ -52,7 +61,7 @@ public class LocalTimeTag
         return SKIP_BODY;
     }
 
-    public void setValue( LocalTime value )
+    public void setValue( String value )
     {
         this.value = value;
     }

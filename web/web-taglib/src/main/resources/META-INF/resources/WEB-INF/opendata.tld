@@ -28,7 +28,7 @@
       <name>value</name>
       <required>true</required>
       <rtexprvalue>true</rtexprvalue>
-      <type>java.time.LocalTime</type>
+      <type>java.lang.Object</type>
     </attribute>
     <attribute>
       <name>working</name>

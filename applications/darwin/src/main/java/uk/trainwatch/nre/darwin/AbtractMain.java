@@ -20,6 +20,7 @@ import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import org.postgresql.ds.PGPoolingDataSource;
+import uk.trainwatch.nre.darwin.forecast.rec.AssociationRecorder;
 import uk.trainwatch.nre.darwin.forecast.rec.DeactivationRecorder;
 import uk.trainwatch.nre.darwin.forecast.rec.ScheduleRecorder;
 import uk.trainwatch.nre.darwin.forecast.rec.TSRecorder;
@@ -72,6 +73,7 @@ public abstract class AbtractMain
         Consumer<Pport> forecast = Streams.fork(
                 new DarwinDispatcherBuilder().
                 addSchedule( new ScheduleRecorder( dataSource ) ).
+                addAssociation( new AssociationRecorder( dataSource ) ).
                 addDeactivatedSchedule( new DeactivationRecorder( dataSource ) ).
                 addTs( new TSRecorder( dataSource ) ).
                 build()

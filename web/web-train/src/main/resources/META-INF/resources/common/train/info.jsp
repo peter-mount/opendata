@@ -1,5 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="t" uri="http://uktra.in/tld/opendata" %>
+<%@ taglib prefix="d" uri="http://uktra.in/tld/darwin" %>
 
 <c:if test="${train.schedulePresent}">
     <h2>
@@ -7,70 +9,87 @@
             <c:when test="${train.origin.getClass().getSimpleName() == 'OR' }">${train.origin.ptd}</c:when>
             <c:otherwise>${train.origin.wtd}</c:otherwise>
         </c:choose>
-        ${train.origin.tpl} to ${train.destination.tpl}
+        <d:tiploc value="${train.origin.tpl}" link="false"/> to <d:tiploc value="${train.destination.tpl}" link="false"/>
     </h2>
+</c:if>
+
+<c:if test="${train.tsPresent}">
+    <c:set var="ts" value="${train.ts}"/>
+    <c:if test="${not empty ts.lateReason}">
+        <p>
+            <c:choose>
+                <c:when test="${not empty lateReason}">${lateReason.reasontext}</c:when>
+                <c:otherwise>Delayed by unknown reason code ${ts.lateReason.value}</c:otherwise>
+            </c:choose>
+            <c:if test="${ts.lateReason.near}">
+                near <d:tiploc value="${ts.lateReason.tiploc}"/>
+            </c:if>
+        </p>
+    </c:if>
+    <c:if test="${ts.isReverseFormation}"><p>Running in reverse formation.</p></c:if>
+</c:if>
+
+<c:if test="${train.schedulePresent}">
+    <c:if test="${schedule.active}">
+        <p>This train is currently active.</p>
+    </c:if>
+</c:if>
+
+<c:if test="${train.deactivated}">
+    <c:if test="${schedule.active}">
+        <p>This train has been deactivated.</p>
+    </c:if>
+</c:if>
+
+<c:if test="${train.schedulePresent}">
     <h3>Schedule</h3>
     <table class="wikitable">
         <tr>
-            <th>Rail ID</th>
+            <th style="text-align: right">Rail ID</th>
             <td>${train.schedule.rid}</td>
         </tr>
         <tr>
-            <th>Schedule ID</th>
+            <th style="text-align: right">Schedule ID</th>
             <td>${train.schedule.uid}</td>
         </tr>
         <tr>
-            <th>SSD</th>
+            <th style="text-align: right">Head Code</th>
+            <td>${train.schedule.trainId}</td>
+        </tr>
+        <tr>
+            <th style="text-align: right">Scheduled Start Date</th>
             <td>${train.schedule.ssd}</td>
         </tr>
         <tr>
-            <th>Operator</th>
-            <td>${train.schedule.toc}</td>
+            <th style="text-align: right">Operator</th>
+            <td><d:operator value="${train.schedule.toc}"/></td>
         </tr>
         <tr>
-            <th>Service type</th>
+            <th style="text-align: right">Service type</th>
             <td>
-                <c:if test="${schedule.charter}">Charter</c:if>
-                <c:if test="${schedule.passengerSvc}">Passenger&nbsp;Service</c:if>
-                </td>
-            </tr>
-            <tr>
-                <th>Status</th>
-                <td>
-                <c:if test="${schedule.active}">Active</c:if>
-                <c:if test="${schedule.deleted}">Deleted</c:if>
-                ${schedule.status}
+                <c:if test="${schedule.charter}">
+                    Charter
+                </c:if>
+                <c:if test="${schedule.passengerSvc}">
+                    Passenger&nbsp;Service
+                </c:if>
             </td>
         </tr>
         <tr>
-            <th>Category</th>
-            <td>${train.schedule.trainCat}</td>
+            <th style="text-align: right">Status</th>
+            <td>
+                ${trainStatus}
+            </td>
+        </tr>
+        <tr>
+            <th style="text-align: right">Category</th>
+            <td>${trainCategory.description}</td>
         </tr>
 
     </table>
 </c:if>
 
 <h3>Running times &amp; forecasts</h3>
-
-<c:if test="${train.tsPresent}">
-    <c:set var="ts" value="${train.ts}"/>
-    <table class="wikitable">
-        <tr>
-            <th>Disruption Reason</th>
-            <td>
-                <c:if test="${not empty ts.lateReason}">
-                    ${ts.lateReason.value}
-                    <c:if test="${ts.lateReason.near}">near ${ts.lateReason.tiploc}</c:if>
-
-                </c:if>
-            </td>
-        </tr>
-        <tr>
-            <th>Reversed Form</th>
-            <td>${ts.isReverseFormation}</td>
-        </tr>
-    </table>
-</c:if>
 
 <table class="wikitable">
 
@@ -80,11 +99,11 @@
         <th colspan="5">Timetable</th>
     </tr>
     <tr>
-        <th rowspan="2" valign="bottom">Location</th>
-        <th rowspan="2" valign="bottom">Plat</th>
-        <th rowspan="2" valign="bottom">Arrival</th>
-        <th rowspan="2" valign="bottom">Departs</th>
-        <th rowspan="2" valign="bottom">Pass</th>
+        <th rowspan="2" vstyle="text-align: bottom">Location</th>
+        <th rowspan="2" vstyle="text-align: bottom">Plat</th>
+        <th rowspan="2" vstyle="text-align: bottom">Arrival</th>
+        <th rowspan="2" vstyle="text-align: bottom">Departs</th>
+        <th rowspan="2" vstyle="text-align: bottom">Pass</th>
         <th colspan="2">GBTT</th>
         <th colspan="3">WTT</th>
     </tr>
@@ -97,7 +116,7 @@
     </tr>
     <c:forEach var="loc" items="${train.movement}">
         <tr>
-            <td>${loc.tpl}</td>
+            <td><d:tiploc value="${loc.tpl}"/></td>
 
             <td>
                 <c:if test="${loc.tsPresent and not empty loc.ts.plat}">
@@ -159,9 +178,9 @@
             <td>${loc.ptd}</td>
 
             <%-- WTT --%>
-            <td>${loc.wta}</td>
-            <td>${loc.wtd}</td>
-            <td>${loc.wtp}</td>
+            <td><t:time value="${loc.wta}" working="true"/></td>
+            <td><t:time value="${loc.wtd}" working="true"/></td>
+            <td><t:time value="${loc.wtp}" working="true"/></td>
         </tr>
     </c:forEach>
 </table>

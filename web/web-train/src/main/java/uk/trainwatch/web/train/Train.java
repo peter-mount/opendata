@@ -61,6 +61,11 @@ public final class Train
         return schedule != null;
     }
 
+    public boolean isDeactivated()
+    {
+        return pport.getUR().isSetDeactivated();
+    }
+
     public boolean isTsPresent()
     {
         return ts != null;
