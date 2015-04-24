@@ -6,6 +6,7 @@
 package uk.trainwatch.web.tags;
 
 import java.io.IOException;
+import java.time.Duration;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.BodyTagSupport;
@@ -19,38 +20,79 @@ public class DelayTag
         extends BodyTagSupport
 {
 
-    private int value;
+    private Object value;
+    private boolean ontime;
+    private boolean absolute;
+
+    @Override
+    public void release()
+    {
+        value = null;
+        ontime = false;
+        absolute = false;
+    }
 
     @Override
     public int doStartTag()
             throws JspException
     {
-        try
-        {
-            JspWriter w = pageContext.getOut();
+        if( value != null ) {
 
-            boolean half = (value % 60) != 0;
-            int mins = (value / 60) % 60;
-            int hours = value / 3600;
+            Integer delayValue = null;
 
-            w.print( String.format(
-                    hours > 0 ? "%1$dh%2$02d%3$s" : mins > 0 ? "%2$d%3$s" : "%3$s",
-                    hours,
-                    mins,
-                    half ? "&frac12;" : "&emsp;"
-            ) );
-        }
-        catch( IOException ex )
-        {
-            throw new JspException( ex );
+            if( value instanceof Number ) {
+                delayValue = ((Number) value).intValue();
+            }
+            else if( value instanceof Duration ) {
+                delayValue = (int) ((Duration) value).getSeconds();
+            }
+
+            if( delayValue != null ) {
+                try {
+                    JspWriter w = pageContext.getOut();
+
+                    boolean early = absolute ? false : delayValue < 0;
+                    int delay = Math.abs( delayValue );
+                    boolean half = (delay % 60) >= 30;
+                    int mins = (delay / 60) % 60;
+                    int hours = delay / 3600;
+
+                    if( ontime && delay == 0 ) {
+                        w.print( "OT" );
+                    }
+                    else {
+                        w.print( String.format(
+                                hours > 0 ? "%1$s%2$dh%3$02d%4$s" : mins > 0 ? "%1$s%3$d%4$s" : "%1$s%4$s",
+                                early ? "-" : "",
+                                hours,
+                                mins,
+                                // Show 1/2 or a space if not unless absolute mode is enabled
+                                half ? "&frac12;" : absolute ? "" : "&emsp;"
+                        ) );
+                    }
+                }
+                catch( IOException ex ) {
+                    throw new JspException( ex );
+                }
+            }
         }
 
         return SKIP_BODY;
     }
 
-    public void setValue( int value )
+    public void setValue( Object value )
     {
         this.value = value;
+    }
+
+    public void setOntime( boolean ontime )
+    {
+        this.ontime = ontime;
+    }
+
+    public void setAbsolute( boolean absolute )
+    {
+        this.absolute = absolute;
     }
 
 }

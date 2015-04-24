@@ -337,13 +337,13 @@ public class TrainMovement
     {
         LocalTime t = null;
         if( isTsPresent() ) {
-            if( ts.isSetArr() && ts.getArr().isSetAt() ) {
+            if( ts.isSetArr() ) {
                 t = getTime( t, ts.getArr() );
             }
-            if( ts.isSetDep() && ts.getDep().isSetAt() ) {
+            if( ts.isSetDep() ) {
                 t = getTime( t, ts.getDep() );
             }
-            if( ts.isSetPass() && ts.getPass().isSetAt() ) {
+            if( ts.isSetPass() ) {
                 t = getTime( t, ts.getPass() );
             }
         }
@@ -359,20 +359,20 @@ public class TrainMovement
      */
     public Duration getDelay()
     {
-        if( isTsPresent() ) {
-            LocalTime at = getTime();
+        LocalTime at = getTime();
+        if( at != null ) {
             String t = ts.getPtd();
             if( t == null ) {
-                ts.getPta();
+                t = ts.getPta();
             }
             if( t == null ) {
-                ts.getWtd();
+                t = ts.getWtd();
             }
             if( t == null ) {
-                ts.getWta();
+                t = ts.getWta();
             }
             if( t == null ) {
-                ts.getWtp();
+                t = ts.getWtp();
             }
             LocalTime pt = TimeUtils.getLocalTime( t );
             if( pt != null ) {

@@ -86,7 +86,7 @@ public abstract class AbstractTrainServlet
         // The time until the next report
         Duration untilNextReport = train.getUntilNextReport();
         req.put( "untilNextReport", untilNextReport );
-        
+
         // Set the cache headers accordingly
         if( untilNextReport == null ) {
             // No max time then cache to 2 hours
@@ -140,10 +140,14 @@ public abstract class AbstractTrainServlet
         // Get the origin location as seen by darwin
         TplLocation originLoc = train.getOrigin();
         LocationRef origin = originLoc == null ? null : DarwinReferenceManager.INSTANCE.getLocationRefFromTiploc( originLoc.getTpl() );
+        TrainMovement originMvt = originLoc == null ? null : train.getMovement( originLoc.getTpl() );
+        String originName=Objects.toString( origin.getLocname(), originLoc.getTpl() );
 
         // Get the destination location as seen by darwin
-        TplLocation destLoc = train.getOrigin();
-        LocationRef dest = destLoc == null ? null : DarwinReferenceManager.INSTANCE.getLocationRefFromTiploc( train.getDestination().getTpl() );
+        TplLocation destLoc = train.getDestination();
+        LocationRef dest = destLoc == null ? null : DarwinReferenceManager.INSTANCE.getLocationRefFromTiploc( destLoc.getTpl() );
+        TrainMovement destMvt = destLoc == null ? null : train.getMovement( destLoc.getTpl() );
+        String destName=Objects.toString( dest.getLocname(), destLoc.getTpl() );
 
         // Any via text
         Via via = null;
@@ -162,8 +166,7 @@ public abstract class AbstractTrainServlet
             else {
                 title = ((WorkDeparture) originLoc).getWtd();
             }
-            title = title + " " + Objects.toString( origin.getLocname(), originLoc.getTpl() )
-                    + " to " + Objects.toString( dest.getLocname(), destLoc.getTpl() );
+            title = title + " " + originName + " to " + destName;
             if( via != null ) {
                 title = title + " " + via.getViatext();
             }
@@ -177,7 +180,11 @@ public abstract class AbstractTrainServlet
         req.put( "rid", rid );
         req.put( "train", train );
         req.put( "origin", origin );
+        req.put( "originMvt", originMvt );
+        req.put( "originName", originName );
         req.put( "dest", dest );
+        req.put( "destMvt", destMvt );
+        req.put( "destName", destName );
         req.put( "via", via );
     }
 
