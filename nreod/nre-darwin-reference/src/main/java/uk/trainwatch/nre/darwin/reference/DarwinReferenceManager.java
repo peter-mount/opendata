@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,7 +27,6 @@ import uk.trainwatch.nre.darwin.model.ctt.referenceschema.Reason;
 import uk.trainwatch.nre.darwin.model.ctt.referenceschema.TocRef;
 import uk.trainwatch.nre.darwin.model.ctt.referenceschema.Via;
 import uk.trainwatch.util.sql.SQL;
-import uk.trainwatch.util.sql.SQLFunction;
 
 /**
  * Front end to the Darwin reference data
@@ -44,7 +44,7 @@ public enum DarwinReferenceManager
      * Cache LocationRef as used often
      */
     private final Map<String, LocationRef> tiplocCache = new ConcurrentHashMap<>();
-    private final Map<String, LocationRef> crsCache = new ConcurrentHashMap<>();
+    private final Map<String, List<LocationRef>> crsCache = new ConcurrentHashMap<>();
     private final Map<String, TocRef> tocCache = new ConcurrentHashMap<>();
     private final Map<String, CISSource> cisCache = new ConcurrentHashMap<>();
     private final Map<Integer, Reason> cancCache = new ConcurrentHashMap<>();
@@ -83,11 +83,16 @@ public enum DarwinReferenceManager
                 if( refreshRequired() ) {
                     try( Connection con = dataSource.getConnection();
                          Statement s = con.createStatement() ) {
-                        
+
                         List<LocationRef> locs = SQL.stream( s.executeQuery( "SELECT * FROM darwin.location" ), DarwinReferenceManager::readLocationRef ).
                                 collect( Collectors.toList() );
+
                         updateMap( tiplocCache, locs.stream(), LocationRef::getTpl );
-                        updateMap( crsCache, locs.stream().filter( l -> l.isSetCrs() ), LocationRef::getCrs );
+
+                        // CRS can map to multiple locations
+                        updateMap( crsCache, locs.stream().
+                                   filter( l -> l.isSetCrs() ).
+                                   collect( Collectors.groupingBy( LocationRef::getCrs ) ) );
 
                         updateMap( cisCache,
                                    SQL.stream( s.executeQuery( "SELECT * FROM darwin.cissource" ), DarwinReferenceManager::readCISSource ),
@@ -98,7 +103,7 @@ public enum DarwinReferenceManager
                         updateMap( cancCache,
                                    SQL.stream( s.executeQuery( "SELECT * FROM darwin.cancreason" ), DarwinReferenceManager::readReason ),
                                    Reason::getCode );
-                        
+
                         updateMap( lateCache,
                                    SQL.stream( s.executeQuery( "SELECT * FROM darwin.latereason" ), DarwinReferenceManager::readReason ),
                                    Reason::getCode );
@@ -119,7 +124,7 @@ public enum DarwinReferenceManager
         return tiplocCache.get( tpl );
     }
 
-    public LocationRef getLocationRefFromCrs( String crs )
+    public Collection<LocationRef> getLocationRefFromCrs( String crs )
     {
         if( refreshRequired() ) {
             refresh();
@@ -210,7 +215,7 @@ public enum DarwinReferenceManager
     public Reason getCancelReason( int code )
     {
         refresh();
-        return cancCache.get( code);
+        return cancCache.get( code );
     }
 
     /**
@@ -223,7 +228,7 @@ public enum DarwinReferenceManager
     public Reason getLateReason( int code )
     {
         refresh();
-        return lateCache.get( code);
+        return lateCache.get( code );
     }
 
     private static CISSource readCISSource( ResultSet rs )

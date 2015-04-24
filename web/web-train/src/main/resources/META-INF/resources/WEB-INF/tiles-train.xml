@@ -4,6 +4,28 @@
        "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
 <tiles-definitions>
     
+    <definition name="train.home" extends="layout.main">
+        <put-attribute name="title" value="Current Train Status" />
+        <put-attribute name="body" value=".train.home" />
+        <put-attribute name="javascript" value="/common/jquery.jsp" />
+    </definition>
+    
+    <definition name=".train.home" extends="layout.2col-left">
+        <put-attribute name="left" value=".left" />
+        <put-attribute name="center" value="/common/train/home.jsp" />
+    </definition>
+    
+    <definition name="train.results" extends="layout.main">
+        <put-attribute name="title" value="Current Train Status" />
+        <put-attribute name="body" value=".train.results" />
+        <put-attribute name="javascript" value="/common/blank.jsp" />
+    </definition>
+    
+    <definition name=".train.results" extends="layout.2col-left">
+        <put-attribute name="left" value=".left" />
+        <put-attribute name="center" value="/common/train/results.jsp" />
+    </definition>
+    
     <definition name="train.basic" extends="layout.main">
         <put-attribute name="title" value="Current Train Status" />
         <put-attribute name="body" value=".train.basic" />

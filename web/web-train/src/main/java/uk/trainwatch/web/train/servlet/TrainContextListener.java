@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.trainwatch.web.train;
+package uk.trainwatch.web.train.servlet;
 
 import java.sql.SQLException;
 import java.util.logging.Level;
@@ -35,13 +35,19 @@ public class TrainContextListener
         extends DBContextListener
 {
 
+    private static DataSource dataSource;
+
+    static DataSource getDataSource()
+    {
+        return dataSource;
+    }
+
     @Override
     protected void init( ServletContextEvent sce )
             throws SQLException
     {
         //DataSource dataSource = getRailDataSource();
 
-        DataSource dataSource;
         try {
             dataSource = InitialContext.doLookup( "java:/comp/env/jdbc/railDev" );
             log.log( Level.SEVERE, "Forecasts Running against DEV DB" );

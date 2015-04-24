@@ -273,6 +273,9 @@ public class TrainMovement
 
     private static LocalTime getScheduledTime( TrainMovement m )
     {
+        if( m == null ) {
+            return null;
+        }
         String t = m.getWta();
         if( t == null ) {
             t = m.getWtp();
