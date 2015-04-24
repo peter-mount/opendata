@@ -18,6 +18,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -55,7 +56,7 @@ public class TimeUtils
      * Gets the {@link LocalDateTime} for a timestamp in UTC
      * <p>
      * @param timestamp
-     * <p>
+     *                  <p>
      * @return
      */
     public static final LocalDateTime getLocalDateTime( final long timestamp )
@@ -82,7 +83,7 @@ public class TimeUtils
      * Get's the {@link LocalDateTime} for an {@link Instant} in UTC
      * <p>
      * @param instant
-     * <p>
+     *                <p>
      * @return
      */
     public static final LocalDateTime getLocalDateTime( final Instant instant )
@@ -122,59 +123,56 @@ public class TimeUtils
      * <p>
      * TODO order these so the most used one is first
      */
-    private static final DateTimeFormatter DATETIMES[] =
-    {
-        DateTimeFormatter.ISO_DATE_TIME,
-        DateTimeFormatter.ISO_LOCAL_DATE_TIME,
-        DateTimeFormatter.ISO_INSTANT,
-        DateTimeFormatter.ISO_OFFSET_DATE_TIME,
-        DateTimeFormatter.ISO_ZONED_DATE_TIME,
-        DateTimeFormatter.RFC_1123_DATE_TIME
-    };
+    private static final DateTimeFormatter DATETIMES[]
+                                             = {
+                DateTimeFormatter.ISO_DATE_TIME,
+                DateTimeFormatter.ISO_LOCAL_DATE_TIME,
+                DateTimeFormatter.ISO_INSTANT,
+                DateTimeFormatter.ISO_OFFSET_DATE_TIME,
+                DateTimeFormatter.ISO_ZONED_DATE_TIME,
+                DateTimeFormatter.RFC_1123_DATE_TIME
+            };
 
     /**
      * The formatters we'll use to get a LocalDate.
      * <p>
      * TODO order these so the most used one is first
      */
-    private static final DateTimeFormatter DATES[] =
-    {
-        DateTimeFormatter.ISO_DATE,
-        DateTimeFormatter.ISO_LOCAL_DATE,
-        DateTimeFormatter.ISO_OFFSET_DATE,
-        DateTimeFormatter.BASIC_ISO_DATE
-    };
+    private static final DateTimeFormatter DATES[]
+                                             = {
+                DateTimeFormatter.ISO_DATE,
+                DateTimeFormatter.ISO_LOCAL_DATE,
+                DateTimeFormatter.ISO_OFFSET_DATE,
+                DateTimeFormatter.BASIC_ISO_DATE
+            };
 
     /**
      * The formatters we'll use to get a LocalDateTime.
      * <p>
      * TODO order these so the most used one is first
      */
-    private static final DateTimeFormatter TIMES[] =
-    {
-        DateTimeFormatter.ISO_TIME,
-        DateTimeFormatter.ISO_LOCAL_TIME,
-        DateTimeFormatter.ISO_OFFSET_TIME
-    };
+    private static final DateTimeFormatter TIMES[]
+                                             = {
+                DateTimeFormatter.ISO_TIME,
+                DateTimeFormatter.ISO_LOCAL_TIME,
+                DateTimeFormatter.ISO_OFFSET_TIME
+            };
 
     /**
      * Attempt to parse a string
      * <p>
      * @param s
-     * <p>
+     *          <p>
      * @return
      */
     public static final LocalDateTime getLocalDateTime( final String s )
     {
-        if( s != null && !s.isEmpty() )
-        {
-            for( DateTimeFormatter dtf : DATETIMES )
-            {
-                try
-                {
+        if( s != null && !s.isEmpty() ) {
+            for( DateTimeFormatter dtf: DATETIMES ) {
+                try {
                     return LocalDateTime.parse( s, dtf );
-                } catch( DateTimeParseException ex )
-                {
+                }
+                catch( DateTimeParseException ex ) {
                     // Ignore
                 }
             }
@@ -186,20 +184,17 @@ public class TimeUtils
      * Attempt to parse a string
      * <p>
      * @param s
-     * <p>
+     *          <p>
      * @return
      */
     public static final LocalDate getLocalDate( final String s )
     {
-        if( s != null && !s.isEmpty() )
-        {
-            for( DateTimeFormatter dtf : DATES )
-            {
-                try
-                {
+        if( s != null && !s.isEmpty() ) {
+            for( DateTimeFormatter dtf: DATES ) {
+                try {
                     return LocalDate.parse( s, dtf );
-                } catch( DateTimeParseException ex )
-                {
+                }
+                catch( DateTimeParseException ex ) {
                     // Ignore
                 }
             }
@@ -211,7 +206,7 @@ public class TimeUtils
      * Returns the LocalTime based on the second of the day
      * <p>
      * @param secondOfDay
-     * <p>
+     *                    <p>
      * @return
      */
     public static final LocalTime getLocalTime( final long secondOfDay )
@@ -223,49 +218,43 @@ public class TimeUtils
      * Attempt to parse a string
      * <p>
      * @param s
-     * <p>
+     *          <p>
      * @return
      */
     public static final LocalTime getLocalTime( final String s )
     {
-        if( s != null && !s.isEmpty() )
-        {
+        if( s != null && !s.isEmpty() ) {
             // Custom formats
-            if( s.length() == 6 )
-            {
+            if( s.length() == 6 ) {
                 // hhmmss
-                try
-                {
+                try {
                     return LocalTime.of(
                             Integer.parseInt( s.substring( 0, 2 ) ),
                             Integer.parseInt( s.substring( 2, 4 ) ),
                             Integer.parseInt( s.substring( 4, 6 ) ) );
-                } catch( Exception ex )
-                {
+                }
+                catch( Exception ex ) {
                     LOG.log( Level.SEVERE, "Parse fail for: " + s, ex );
                 }
-            } else if( s.length() == 4 )
-            {
+            }
+            else if( s.length() == 4 ) {
                 // hhmm
-                try
-                {
+                try {
                     return LocalTime.of(
                             Integer.parseInt( s.substring( 0, 2 ) ),
                             Integer.parseInt( s.substring( 2, 4 ) ) );
-                } catch( Exception ex )
-                {
+                }
+                catch( Exception ex ) {
                     LOG.log( Level.SEVERE, "Parse fail for: " + s, ex );
                 }
             }
 
             // Check default formats
-            for( DateTimeFormatter dtf : TIMES )
-            {
-                try
-                {
+            for( DateTimeFormatter dtf: TIMES ) {
+                try {
                     return LocalTime.parse( s, dtf );
-                } catch( DateTimeParseException ex )
-                {
+                }
+                catch( DateTimeParseException ex ) {
                     // Ignore
                 }
             }
@@ -275,8 +264,7 @@ public class TimeUtils
 
     public static Date toDate( LocalDate ld )
     {
-        if( ld == null )
-        {
+        if( ld == null ) {
             return null;
         }
         return Date.from( ld.atStartOfDay( UTC ).toInstant() );
@@ -290,11 +278,10 @@ public class TimeUtils
     public static void setDate( PreparedStatement s, int col, LocalDate ld )
             throws SQLException
     {
-        if( ld == null )
-        {
+        if( ld == null ) {
             s.setNull( col, Types.DATE );
-        } else
-        {
+        }
+        else {
             s.setDate( col, java.sql.Date.valueOf( ld ) );
         }
     }
@@ -302,11 +289,10 @@ public class TimeUtils
     public static void setDateTime( PreparedStatement s, int col, LocalDateTime ld )
             throws SQLException
     {
-        if( ld == null )
-        {
+        if( ld == null ) {
             s.setNull( col, Types.TIMESTAMP );
-        } else
-        {
+        }
+        else {
             s.setTimestamp( col, Timestamp.valueOf( ld ) );
         }
     }
@@ -315,8 +301,7 @@ public class TimeUtils
             throws SQLException
     {
         Date d = rs.getDate( n );
-        if( rs.wasNull() )
-        {
+        if( rs.wasNull() ) {
             return null;
         }
         return getLocalDate( d.getTime() );
@@ -326,8 +311,7 @@ public class TimeUtils
             throws SQLException
     {
         Date d = rs.getDate( i );
-        if( rs.wasNull() )
-        {
+        if( rs.wasNull() ) {
             return null;
         }
         return getLocalDate( d.getTime() );
@@ -427,10 +411,26 @@ public class TimeUtils
     public static final Function<LocalDateTime, LocalDate> toRailDate = t -> t.minusHours( 2 ).toLocalDate();
 
     /**
+     * Comparator to compare two {@link LocalTime}'s into ascending order accounting for times crossing midnight as per Darwin rules.
+     * <p>
+     * Darwin uses the following rules to handle these cases:
+     * <table>
+     * <tr><td>Time difference</td><td>Interpret as</td></tr>
+     * <tr><td>Less than -6 hours</td><td>Crossed midnight</td></tr>
+     * <tr><td>Between -6 and 0 hours</td><td>Back in time</td></tr>
+     * <tr><td>Between 0 and +18 hours</td><td>Normal increasing time</td></tr>
+     * <tr><td>Greater than +18 hours</td><td>Back in time and crossed midnight</td></tr>
+     * </table>
+     * However we only look for |Δhour| &gt; 18 hours as that handles both crossed midnight cases here.
+     */
+    public static final Comparator<LocalTime> compareLocalTimeDarwin = ( a, b ) -> Math.abs( a.getHour() - b.getHour() ) < 18 ? a.compareTo( b ) : -a.
+            compareTo( b );
+
+    /**
      * Returns a {@link Predicate} that returns true if a {@link LocalDateTime} is between two others.
      * <p>
      * @param start Start time
-     * @param end End time
+     * @param end   End time
      * <p>
      * @return predicate
      * <p>
@@ -438,8 +438,7 @@ public class TimeUtils
      */
     public static Predicate<LocalDateTime> isWithin( LocalDateTime start, LocalDateTime end )
     {
-        if( !start.isBefore( end ) )
-        {
+        if( !start.isBefore( end ) ) {
             throw new IllegalArgumentException( "Start " + start + " must be before end " + end );
         }
 

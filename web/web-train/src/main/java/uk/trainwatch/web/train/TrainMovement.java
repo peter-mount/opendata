@@ -5,8 +5,11 @@
  */
 package uk.trainwatch.web.train;
 
+import java.time.Duration;
 import java.time.LocalTime;
 import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 import uk.trainwatch.nre.darwin.model.ppt.forecasts.TSLocation;
 import uk.trainwatch.nre.darwin.model.ppt.forecasts.TSTimeData;
 import uk.trainwatch.nre.darwin.model.util.PublicArrival;
@@ -29,9 +32,19 @@ public class TrainMovement
                    WorkPass
 {
 
+    /**
+     * Predicate to indicate if this movement has been suppressed &amp; should not be shown to the public
+     */
+    public static final Predicate<TrainMovement> isSuppressed = m -> m.isTsPresent() && m.getTs().isSetSuppr() && m.getTs().getSuppr();
+    public static final Predicate<TrainMovement> isNotSuppressed = isSuppressed.negate();
+
+    public static final Predicate<TrainMovement> isNotOriginOrDestination = m -> !m.isOriginOrDestination();
+
     private final String tpl;
     private TSLocation ts;
     private TplLocation scheduled;
+    private boolean origin;
+    private boolean destination;
 
     public TrainMovement( String tpl )
     {
@@ -79,6 +92,11 @@ public class TrainMovement
     public boolean isTsPresent()
     {
         return ts != null;
+    }
+
+    public boolean isTsNotPresent()
+    {
+        return !isTsPresent();
     }
 
     public TSLocation getTs()
@@ -154,16 +172,46 @@ public class TrainMovement
         return l instanceof WorkPass ? ((WorkPass) l).getWtp() : null;
     }
 
+    public boolean isPass()
+    {
+        return getWtp() != null;
+    }
+
+    /**
+     * The time of arrival, GBTT value takes precedence to WTT
+     * <p>
+     * @return time or null if no arrival
+     */
     public String getArrival()
     {
         String t = getPta();
         return t == null ? getWta() : t;
     }
 
+    /**
+     * Is there an arrival time set (GBTT or WTT)
+     * <p>
+     * @return
+     */
+    public boolean isSetArrival()
+    {
+        return getPta() != null || getWta() != null;
+    }
+
+    /**
+     * The time of departure, GBTT takes precedence to WTT.
+     * <p>
+     * @return time or null if no departure
+     */
     public String getDeparture()
     {
         String t = getPtd();
         return t == null ? getWtd() : t;
+    }
+
+    public boolean isSetDeparture()
+    {
+        return getPtd() != null || getWtd() != null;
     }
 
     /**
@@ -193,8 +241,8 @@ public class TrainMovement
      */
     public static int compare( TrainMovement a, TrainMovement b )
     {
-        LocalTime ta = getTime( a );
-        LocalTime tb = getTime( b );
+        LocalTime ta = getScheduledTime( a );
+        LocalTime tb = getScheduledTime( b );
         if( ta == tb ) {
             return 0;
         }
@@ -205,16 +253,25 @@ public class TrainMovement
             return 1;
         }
 
-        // Handle crossing midnight
-        if( Math.abs( ta.getHour() - tb.getHour() ) > 18 ) {
-            return tb.compareTo( ta );
-        }
-        else {
-            return ta.compareTo( tb );
-        }
+        return TimeUtils.compareLocalTimeDarwin.compare( ta, tb );
     }
 
-    private static LocalTime getTime( TrainMovement m )
+    /**
+     * Reverse the order defined by {@link TrainMovement#compare(uk.trainwatch.web.train.TrainMovement, uk.trainwatch.web.train.TrainMovement)}.
+     * <p>
+     * @param a
+     * @param b
+     *          <p>
+     * @return
+     *         <p>
+     * @see TrainMovement#compare(uk.trainwatch.web.train.TrainMovement, uk.trainwatch.web.train.TrainMovement)
+     */
+    public static int compareReverse( TrainMovement a, TrainMovement b )
+    {
+        return -compare( a, b );
+    }
+
+    private static LocalTime getScheduledTime( TrainMovement m )
     {
         String t = m.getWta();
         if( t == null ) {
@@ -226,14 +283,48 @@ public class TrainMovement
         return t == null ? null : TimeUtils.getLocalTime( t );
     }
 
+    public LocalTime getScheduledTime()
+    {
+        return getScheduledTime( this );
+    }
+
     public LocalTime getExpectedTime()
     {
-        return getTime( this );
+        LocalTime et = null;
+
+        if( isTsPresent() ) {
+            et = getExpectedTime( et, ts.getPass() );
+            et = getExpectedTime( et, ts.getArr() );
+            et = getExpectedTime( et, ts.getDep() );
+        }
+
+        if( et == null ) {
+            et = getScheduledTime();
+        }
+
+        return et;
+    }
+
+    private LocalTime getExpectedTime( LocalTime t, TSTimeData td )
+    {
+        LocalTime t1 = null;
+        if( td != null ) {
+            if( td.isSetAt() ) {
+                t1 = TimeUtils.getLocalTime( td.getAt() );
+            }
+            else if( td.isSetEt() ) {
+                t1 = TimeUtils.getLocalTime( td.getEt() );
+            }
+            else if( td.isSetWet() ) {
+                t1 = TimeUtils.getLocalTime( td.getWet() );
+            }
+        }
+        return t == null || (t1 != null && t1.isAfter( t )) ? t1 : t;
     }
 
     private LocalTime getTime( LocalTime t, TSTimeData td )
     {
-        if( td.isSetAt() ) {
+        if( td != null && td.isSetAt() ) {
             LocalTime t1 = TimeUtils.getLocalTime( td.getAt() );
             if( t == null || (t1 != null && t1.isAfter( t )) ) {
                 return t1;
@@ -259,10 +350,111 @@ public class TrainMovement
         return t;
     }
 
+    /**
+     * Get the delay between the timetabled (GBTT then WTT) and at time for this movement.
+     * <p>
+     * The search order here for the timetabled time is: ptd, pta, wtd, wta, wtp.
+     * <p>
+     * @return Duration or null if none
+     */
+    public Duration getDelay()
+    {
+        if( isTsPresent() ) {
+            LocalTime at = getTime();
+            String t = ts.getPtd();
+            if( t == null ) {
+                ts.getPta();
+            }
+            if( t == null ) {
+                ts.getWtd();
+            }
+            if( t == null ) {
+                ts.getWta();
+            }
+            if( t == null ) {
+                ts.getWtp();
+            }
+            LocalTime pt = TimeUtils.getLocalTime( t );
+            if( pt != null ) {
+                return Duration.between( pt, at );
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Is a delay available?
+     * <p>
+     * @return
+     */
+    public boolean isDelaySet()
+    {
+        // This should just be isSetAt() but for safety check we have a timetable time
+        return isSetAt() && (ts.isSetPta() || ts.isSetPtd() || ts.isSetWta() || ts.isSetWtd() || ts.isSetWtp());
+    }
+
     @Override
     public int compareTo( TrainMovement o )
     {
         return compare( this, o );
     }
 
+    /**
+     * Returns the latest TSTimeData for this movement.
+     * <p>
+     * This is calculated as the most recent value of arr, dep and pass values, allowing for crossing midnight.
+     * <p>
+     * @return LocalTime or null if none
+     */
+    public LocalTime getAt()
+    {
+        if( isSetAt() ) {
+            return Stream.<TSTimeData>of( ts.getArr(), ts.getDep(), ts.getPass() ).
+                    filter( Objects::nonNull ).
+                    map( TSTimeData::getAt ).
+                    map( TimeUtils::getLocalTime ).
+                    filter( Objects::nonNull ).
+                    sorted( TimeUtils.compareLocalTimeDarwin ).
+                    findAny().
+                    orElse( null );
+        }
+        else {
+            return null;
+        }
+    }
+
+    /**
+     * Does this movement have an AT value set in one of arr, dep or pass
+     * <p>
+     * @return
+     */
+    public boolean isSetAt()
+    {
+        return isTsPresent() && (ts.isSetArr() || ts.isSetDep() || ts.isSetPass());
+    }
+
+    public boolean isOrigin()
+    {
+        return origin;
+    }
+
+    void setOrigin( boolean origin )
+    {
+        this.origin = origin;
+    }
+
+    public boolean isDestination()
+    {
+        return destination;
+    }
+
+    void setDestination( boolean destination )
+    {
+        this.destination = destination;
+    }
+
+    public boolean isOriginOrDestination()
+    {
+        return origin || destination;
+    }
 }

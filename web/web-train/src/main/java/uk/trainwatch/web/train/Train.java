@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.web.train;
 
+import java.time.Duration;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,15 +13,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Stream;
 import uk.trainwatch.nre.darwin.model.ppt.forecasts.TS;
-import uk.trainwatch.nre.darwin.model.ppt.forecasts.TSLocation;
-import uk.trainwatch.nre.darwin.model.ppt.forecasts.TSTimeData;
 import uk.trainwatch.nre.darwin.model.ppt.schedules.Schedule;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
 import uk.trainwatch.nre.darwin.model.util.TplLocation;
-import uk.trainwatch.util.TimeUtils;
 
 /**
  * A normalised version of a train
@@ -30,19 +26,37 @@ import uk.trainwatch.util.TimeUtils;
 public final class Train
 {
 
+    private final String rid;
     private final Pport pport;
     private final List<TrainMovement> movement;
     private final Schedule schedule;
     private final TS ts;
     private final LocalTime lastReport;
+    private final TrainMovement nextReport;
+    private final Duration untilNextReport;
 
-    Train( Pport pport )
+    public static Train create( Pport pport )
     {
-        this.pport = pport;
+        if( pport == null || !pport.isSetUR() ) {
+            return null;
+        }
 
         Pport.UR ur = pport.getUR();
-        schedule = ur.getSchedule().stream().findAny().orElse( null );
-        ts = ur.getTS().stream().findAny().orElse( null );
+        Schedule schedule = ur.getSchedule().stream().findAny().orElse( null );
+        TS ts = ur.getTS().stream().findAny().orElse( null );
+        if( schedule == null && ts == null ) {
+            return null;
+        }
+
+        return new Train( pport, schedule, ts );
+    }
+
+    private Train( Pport pport, Schedule schedule, TS ts )
+    {
+        this.pport = pport;
+        this.schedule = schedule;
+        this.ts = ts;
+        rid = isSchedulePresent() ? schedule.getRid() : ts.getRid();
 
         Map<String, TrainMovement> map = new HashMap<>();
 
@@ -64,22 +78,52 @@ public final class Train
         movement = new ArrayList<>( map.values() );
         movement.sort( TrainMovement::compare );
 
+        // Flag origin & destination entries
+        if( !movement.isEmpty() ) {
+            movement.get( 0 ).setOrigin( true );
+            movement.get( movement.size() - 1 ).setDestination( true );
+        }
+
         // Get last report time
         lastReport = movement.stream().
-                sorted( ( a, b ) -> -TrainMovement.compare( a, b ) ).
+                sorted( TrainMovement::compareReverse ).
                 filter( TrainMovement::isTsPresent ).
-                map( TrainMovement::getTs ).
-                filter( m -> (m.isSetArr() && m.getArr().isSetAt())
-                             || (m.isSetDep() && m.getDep().isSetAt())
-                             || (m.isSetPass() && m.getPass().isSetAt()) ).
-                flatMap( m -> Stream.<TSTimeData>of( m.getArr(), m.getDep(), m.getPass() ) ).
+                map( TrainMovement::getAt ).
                 filter( Objects::nonNull ).
-                map( TSTimeData::getAt ).
-                map( TimeUtils::getLocalTime ).
-                filter( Objects::nonNull ).
-                sorted( ( a, b ) -> Math.abs( a.getHour() - b.getHour() ) > 18 ? a.compareTo( b ) : -a.compareTo( b ) ).
                 findAny().
-                orElse( LocalTime.MIN );
+                orElse( null );
+
+        // Where we are expected next
+        if( isRunning() ) {
+            // Running so find the next movement
+            nextReport = movement.stream().
+                    // Filter out all who's expected time is before the last report
+                    filter( m -> {
+                        LocalTime t = m.getScheduledTime();
+                        return t == null ? false : t.isAfter( lastReport );
+                    } ).
+                    // Filter out suppressed and entries with no arrival time or a recorded time
+                    filter( TrainMovement.isNotSuppressed.and( TrainMovement::isSetArrival ).and( m -> !m.isSetAt() ) ).
+                    // Get the first one
+                    findAny().
+                    orElse( null );
+
+            untilNextReport = nextReport == null ? null : Duration.between( lastReport, nextReport.getExpectedTime() );
+        }
+        else {
+            // Not running so find the first departure
+            nextReport = movement.stream().
+                    filter( TrainMovement.isNotSuppressed.and( TrainMovement::isSetDeparture ).and( m -> !m.isSetAt() ) ).
+                    findAny().
+                    orElse( null );
+
+            untilNextReport = nextReport == null ? null : Duration.between( LocalTime.now(), nextReport.getExpectedTime() );
+        }
+    }
+
+    public String getRid()
+    {
+        return rid;
     }
 
     public boolean isSchedulePresent()
@@ -100,6 +144,35 @@ public final class Train
     public Collection<TrainMovement> getMovement()
     {
         return movement;
+    }
+
+    /**
+     * The last reported TSLocation
+     * <p>
+     * @return TrainMovement or null
+     */
+    public TrainMovement getLastReportedMovement()
+    {
+        return movement.stream().
+                sorted( TrainMovement::compareReverse ).
+                filter( m -> m.isTsPresent() && m.isSetAt() ).
+                findAny().
+                orElse( null );
+    }
+
+    /**
+     * Returns the TrainMovement for a specified tiploc
+     * <p>
+     * @param tpl tiploc
+     * <p>
+     * @return TrainMovement or null if not found
+     */
+    public TrainMovement getMovement( String tpl )
+    {
+        return movement.stream().
+                filter( m -> m.getTpl().equals( tpl ) ).
+                findAny().
+                orElse( null );
     }
 
     public Pport getPport()
@@ -127,9 +200,48 @@ public final class Train
         return schedule == null ? null : schedule.getDestination();
     }
 
+    /**
+     * The time of the last report.
+     * <p>
+     * @return LocalTime or midnight/{@link LocalTime#MIN} if none
+     */
     public LocalTime getLastReport()
     {
-        return lastReport;
+        return lastReport == null ? LocalTime.MIN : lastReport;
+    }
+
+    /**
+     * Returns the next expected report location.
+     * <p>
+     * Note: this will be limited to a movement with a GBTT or WTT arrival time
+     * <p>
+     * @return next TrainMovement or null.
+     */
+    public TrainMovement getNextReport()
+    {
+        return nextReport;
+    }
+
+    /**
+     * The duration until the next report
+     * <p>
+     * @return Duration or null
+     */
+    public Duration getUntilNextReport()
+    {
+        return untilNextReport;
+    }
+
+    /**
+     * Is this train running or has run?
+     * <p>
+     * This is defined by having a lastReport time
+     * <p>
+     * @return true if we have had a report, false if none
+     */
+    public boolean isRunning()
+    {
+        return lastReport != null;
     }
 
 }

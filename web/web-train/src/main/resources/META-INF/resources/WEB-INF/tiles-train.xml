@@ -4,14 +4,56 @@
        "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
 <tiles-definitions>
     
-    <definition name="train.info" extends="layout.main">
+    <definition name="train.basic" extends="layout.main">
         <put-attribute name="title" value="Current Train Status" />
-        <put-attribute name="body" value=".train.info" />
+        <put-attribute name="body" value=".train.basic" />
         <put-attribute name="javascript" value="/common/blank.jsp" />
     </definition>
-    <definition name=".train.info" extends="layout.2col-left">
+    
+    <definition name=".train.basic" extends="layout.2col-left">
         <put-attribute name="left" value=".left" />
-        <put-attribute name="center" value="/common/train/info.jsp" />
+        <put-attribute name="center" value=".train.basic.info" />
     </definition>
     
+    <definition name=".train.basic.info" template="/common/train/info.jsp">
+        <put-attribute name="details" value="/common/train/details.jsp" />
+        <put-attribute name="schedule" value="/common/train/schedule.jsp" />
+        <put-attribute name="forecast" value="/common/train/forecast-basic.jsp" />
+    </definition>
+    
+    <definition name="train.detailed" extends="layout.main">
+        <put-attribute name="title" value="Current Train Status" />
+        <put-attribute name="body" value=".train.detailed" />
+        <put-attribute name="javascript" value="/common/blank.jsp" />
+    </definition>
+    
+    <definition name=".train.detailed" extends="layout.2col-left">
+        <put-attribute name="left" value=".left" />
+        <put-attribute name="center" value=".train.detailed.info" />
+    </definition>
+    
+    <definition name=".train.detailed.info" template="/common/train/info.jsp">
+        <put-attribute name="details" value="/common/train/details.jsp" />
+        <put-attribute name="schedule" value="/common/train/schedule.jsp" />
+        <put-attribute name="forecast" value="/common/train/forecast-detailed.jsp" />
+    </definition>
+    
+    <definition name="train.expert" extends="layout.main">
+        <put-attribute name="title" value="Current Train Status" />
+        <put-attribute name="body" value=".train.expert" />
+        <put-attribute name="javascript" value="/common/blank.jsp" />
+    </definition>
+    
+    <definition name=".train.expert" extends="layout.2col-left">
+        <put-attribute name="left" value=".left" />
+        <put-attribute name="center" value=".train.expert.info" />
+    </definition>
+    
+    <definition name=".train.expert.info" template="/common/train/info.jsp">
+        <put-attribute name="details" value="/common/train/details.jsp" />
+        <put-attribute name="schedule" value="/common/train/schedule.jsp" />
+        <put-attribute name="forecast" value="/common/train/forecast-expert.jsp" />
+    </definition>
+
+        
 </tiles-definitions>
