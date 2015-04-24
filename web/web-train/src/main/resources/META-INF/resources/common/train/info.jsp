@@ -78,7 +78,7 @@
         <tr>
             <th style="text-align: right">Status</th>
             <td>
-                ${trainStatus}
+                ${trainStatus.description}
             </td>
         </tr>
         <tr>
@@ -90,17 +90,18 @@
 </c:if>
 
 <h3>Running times &amp; forecasts</h3>
-
+<t:time value="${train.lastReport}"/>
 <table class="wikitable">
 
     <tr>
-        <th colspan="2">Station</th>
+        <th colspan="3">Station</th>
         <th colspan="3">Forecast</th>
         <th colspan="5">Timetable</th>
     </tr>
     <tr>
         <th rowspan="2" vstyle="text-align: bottom">Location</th>
         <th rowspan="2" vstyle="text-align: bottom">Plat</th>
+        <th rowspan="2" vstyle="text-align: bottom">Final Time</th>
         <th rowspan="2" vstyle="text-align: bottom">Arrival</th>
         <th rowspan="2" vstyle="text-align: bottom">Departs</th>
         <th rowspan="2" vstyle="text-align: bottom">Pass</th>
@@ -129,6 +130,17 @@
                         <c:otherwise>${loc.ts.plat.value}</c:otherwise>
                     </c:choose>
                 </c:if>
+            </td>
+
+            <td style="text-align: center;">
+                <c:choose>
+                    <c:when test="${not empty loc.time}">
+                        <strong><t:time value="${loc.time}"/></strong>
+                    </c:when>
+                    <c:when test="${loc.expectedTime.isBefore(train.lastReport)}">
+                        <em>No&nbsp;report</em>
+                    </c:when>
+                </c:choose>
             </td>
 
             <td>

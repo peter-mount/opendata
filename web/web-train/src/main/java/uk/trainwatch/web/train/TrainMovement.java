@@ -8,6 +8,7 @@ package uk.trainwatch.web.train;
 import java.time.LocalTime;
 import java.util.Objects;
 import uk.trainwatch.nre.darwin.model.ppt.forecasts.TSLocation;
+import uk.trainwatch.nre.darwin.model.ppt.forecasts.TSTimeData;
 import uk.trainwatch.nre.darwin.model.util.PublicArrival;
 import uk.trainwatch.nre.darwin.model.util.PublicDeparture;
 import uk.trainwatch.nre.darwin.model.util.TplLocation;
@@ -223,6 +224,39 @@ public class TrainMovement
             t = m.getWtd();
         }
         return t == null ? null : TimeUtils.getLocalTime( t );
+    }
+
+    public LocalTime getExpectedTime()
+    {
+        return getTime( this );
+    }
+
+    private LocalTime getTime( LocalTime t, TSTimeData td )
+    {
+        if( td.isSetAt() ) {
+            LocalTime t1 = TimeUtils.getLocalTime( td.getAt() );
+            if( t == null || (t1 != null && t1.isAfter( t )) ) {
+                return t1;
+            }
+        }
+        return t;
+    }
+
+    public LocalTime getTime()
+    {
+        LocalTime t = null;
+        if( isTsPresent() ) {
+            if( ts.isSetArr() && ts.getArr().isSetAt() ) {
+                t = getTime( t, ts.getArr() );
+            }
+            if( ts.isSetDep() && ts.getDep().isSetAt() ) {
+                t = getTime( t, ts.getDep() );
+            }
+            if( ts.isSetPass() && ts.getPass().isSetAt() ) {
+                t = getTime( t, ts.getPass() );
+            }
+        }
+        return t;
     }
 
     @Override
