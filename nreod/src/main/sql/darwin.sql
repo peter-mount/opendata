@@ -8,12 +8,17 @@
 --CREATE SCHEMA darwin;
 SET search_path = darwin;
 
+DROP TABLE trainorder;
+
+DROP TABLE alarms;
+
 DROP TABLE message_station;
 DROP TABLE message;
 
 DROP TABLE forecast_entry;
 DROP TABLE forecast;
 
+DROP TABLE schedule_assoc;
 DROP TABLE schedule_entry;
 DROP TABLE schedule;
 
@@ -126,6 +131,24 @@ CREATE INDEX schedule_entry_s ON schedule_entry(schedule);
 ALTER TABLE schedule_entry OWNER TO rail;
 ALTER TABLE schedule_entry_id_seq OWNER TO rail;
 
+CREATE TABLE schedule_assoc (
+    mainid      BIGINT NOT NULL REFERENCES schedule(id),
+    associd     BIGINT NOT NULL REFERENCES schedule(id),
+    tpl         INTEGER NOT NULL REFERENCES tiploc(id),
+    cat         CHAR(2),
+    cancelled   BOOLEAN DEFAULT false,
+    deleted     BOOLEAN DEFAULT false,
+    -- main arrival
+    pta         TIME,
+    wta         TIME,
+    -- assoc depart
+    ptd         TIME,
+    wtd         TIME,
+    PRIMARY KEY (mainid,associd)
+);
+CREATE INDEX schedule_assoc_t ON schedule_assoc(tpl);
+ALTER TABLE schedule_assoc OWNER TO rail;
+
 -- ----------------------------------------------------------------------
 -- Train forecast
 -- ----------------------------------------------------------------------
@@ -200,6 +223,68 @@ CREATE UNIQUE INDEX message_station_mc ON message_station(msgid,crsid);
 CREATE INDEX message_station_m ON message_station(msgid);
 CREATE INDEX message_station_c ON message_station(crsid);
 ALTER TABLE message_station OWNER TO rail;
+
+-- ----------------------------------------------------------------------
+-- Alarms
+-- ----------------------------------------------------------------------
+
+CREATE TABLE alarms (
+    id          SERIAL NOT NULL,
+    aid         NAME,
+    -- When the alarm was set
+    setts       TIMESTAMP WITH TIME ZONE,
+    -- has it been cleared and when
+    cleared     BOOLEAN DEFAULT false,
+    clearedts   TIMESTAMP WITH TIME ZONE,
+    -- type of alarm
+    type        NAME,
+    -- XML of the alarm
+    xml         TEXT,
+    PRIMARY KEY (id)
+);
+ALTER TABLE alarms OWNER TO rail;
+
+-- ----------------------------------------------------------------------
+-- Train Order
+-- ----------------------------------------------------------------------
+CREATE TABLE trainorder (
+    id          SERIAL NOT NULL,
+    tpl         INTEGER REFERENCES tiploc(id),
+    crs         INTEGER REFERENCES crs(id),
+    plat        NAME,
+    ts          TIMESTAMP WITH TIME ZONE,
+    -- first
+    rid1        VARCHAR(16),
+    tid1        CHAR(4),
+    pta1        TIME,
+    wta1        TIME,
+    ptd1        TIME,
+    wtd1        TIME,
+    -- second
+    rid2        VARCHAR(16),
+    tid2        CHAR(4),
+    pta2        TIME,
+    wta2        TIME,
+    ptd2        TIME,
+    wtd2        TIME,
+    -- third
+    rid3        VARCHAR(16),
+    tid3        CHAR(4),
+    pta3        TIME,
+    wta3        TIME,
+    ptd3        TIME,
+    wtd3        TIME,
+    PRIMARY KEY(id)
+);
+CREATE INDEX trainorder_t ON trainorder(tpl);
+CREATE INDEX trainorder_c ON trainorder(crs);
+CREATE INDEX trainorder_r1 ON trainorder(rid1);
+CREATE INDEX trainorder_t1 ON trainorder(tid1);
+CREATE INDEX trainorder_r2 ON trainorder(rid2);
+CREATE INDEX trainorder_t2 ON trainorder(tid2);
+CREATE INDEX trainorder_r3 ON trainorder(rid3);
+CREATE INDEX trainorder_t3 ON trainorder(tid3);
+ALTER TABLE trainorder OWNER TO rail;
 
 -- ----------------------------------------------------------------------
 -- Parses a push port message importing its contents into the database
@@ -403,6 +488,53 @@ BEGIN
     END LOOP;
 
     -- ---------------------------------------------------------------------------
+    -- Associations
+    FOREACH axml IN ARRAY xpath('//pport:association',pxml,ns)
+    LOOP
+        SELECT  (xpath('//sched:main/@rid',axml,ns))[1]::TEXT AS mainid,
+                (xpath('//sched:main/@pta',axml,ns))[1]::TEXT::TIME AS pta,
+                (xpath('//sched:main/@wta',axml,ns))[1]::TEXT::TIME AS wta,
+                (xpath('//sched:assoc/@rid',axml,ns))[1]::TEXT AS associd,
+                (xpath('//sched:assoc/@ptd',axml,ns))[1]::TEXT::TIME AS ptd,
+                (xpath('//sched:assoc/@wtd',axml,ns))[1]::TEXT::TIME AS wtd,
+                (xpath('//pport:association/@tiploc',axml,ns))[1]::TEXT AS tpl,
+                (xpath('//pport:association/@category',axml,ns))[1]::TEXT AS cat,
+                (xpath('//pport:association/@isCancelled',axml,ns))[1]::TEXT::BOOLEAN AS cancelled,
+                (xpath('//pport:association/@isDeleted',axml,ns))[1]::TEXT::BOOLEAN AS deleted
+            INTO arec LIMIT 1;
+
+        SELECT id INTO id1 FROM darwin.schedule WHERE rid=arec.mainid;
+        SELECT id INTO id2 FROM darwin.schedule WHERE rid=arec.associd;
+        id3=darwin.tiploc(arec.tpl);
+        IF id1 IS NOT NULL AND id2 IS NOT NULL THEN
+            LOOP
+                SELECT * INTO rec FROM darwin.schedule_assoc WHERE mainid=id1 AND associd=id2;
+                IF FOUND THEN
+                    UPDATE darwin.schedule_assoc
+                        SET tpl=id3,
+                            cat=arec.cat,
+                            cancelled=arec.cancelled,
+                            deleted=arec.deleted,
+                            pta=arec.pta,
+                            wta=arec.wta,
+                            ptd=arec.ptd,
+                            wtd=arec.wtd
+                        WHERE mainid=id1 AND associd=id2;
+                    EXIT;
+                ELSE
+                    BEGIN
+                        INSERT INTO darwin.schedule_assoc
+                            (mainid,associd,tpl,cat,cancelled,deleted,pta,wta,ptd,wtd)
+                            VALUES (id1,id2,id3,arec.cat,arec.cancelled,arec.deleted,arec.pta,arec.wta,arec.ptd,arec.wtd);
+                    EXCEPTION WHEN unique_violation THEN
+                        -- Do nothing, loop & try again.
+                    END;
+                END IF;
+            END LOOP;
+        END IF;
+    END LOOP;
+
+    -- ---------------------------------------------------------------------------
     -- Station messages
     FOREACH axml IN ARRAY xpath('//pport:OW',pxml,ns)
     LOOP
@@ -427,6 +559,73 @@ BEGIN
         
     END LOOP;
     
+    -- ---------------------------------------------------------------------------
+    -- Alarms
+    FOREACH axml IN ARRAY xpath('//pport:alarm/alarm:set',pxml,ns)
+    LOOP
+        SELECT  (xpath('/alarm:set/@id',axml,ns))[1]::TEXT AS id,
+                (xpath('name(/alarm:set/*)',axml,ns))[1]::TEXT AS type
+            INTO arec LIMIT 1;
+
+        INSERT INTO darwin.alarm (aid,settd,type,xml) VALUES (arec.id,arec.type,ats,array_to_string(axml,''));
+    END LOOP;
+
+    FOREACH axml IN ARRAY xpath('//pport:alarm/alarm:clear/text()',pxml,ns)
+    LOOP
+        UPDATE darwin.alarm SET cleared=true, clearedts=ats WHERE aid=axml::TEXT;
+    END LOOP;
+
+    -- ---------------------------------------------------------------------------
+    -- Train order
+    FOREACH axml IN ARRAY xpath('//pport:trainOrder',pxml,ns)
+    LOOP
+        SELECT  (xpath('//tord:first/tord:rid/text()',axml,ns))[1]::TEXT AS rid1,
+                (xpath('//tord:first/tord:rid/@pta',axml,ns))[1]::TEXT::TIME AS pta1,
+                (xpath('//tord:first/tord:rid/@ptd',axml,ns))[1]::TEXT::TIME AS ptd1,
+                (xpath('//tord:first/tord:rid/@wta',axml,ns))[1]::TEXT::TIME AS wta1,
+                (xpath('//tord:first/tord:rid/@wtd',axml,ns))[1]::TEXT::TIME AS wtd1,
+                (xpath('//tord:first/tord:trainID/text()',axml,ns))[1]::TEXT AS tid1,
+
+                (xpath('//tord:second/tord:rid/text()',axml,ns))[1]::TEXT AS rid2,
+                (xpath('//tord:second/tord:rid/@pta',axml,ns))[1]::TEXT::TIME AS pta2,
+                (xpath('//tord:second/tord:rid/@ptd',axml,ns))[1]::TEXT::TIME AS ptd2,
+                (xpath('//tord:second/tord:rid/@wta',axml,ns))[1]::TEXT::TIME AS wta2,
+                (xpath('//tord:second/tord:rid/@wtd',axml,ns))[1]::TEXT::TIME AS wtd2,
+                (xpath('//tord:second/tord:trainID/text()',axml,ns))[1]::TEXT AS tid2,
+
+                (xpath('//tord:third/tord:rid/text()',axml,ns))[1]::TEXT AS rid3,
+                (xpath('//tord:third/tord:rid/@pta',axml,ns))[1]::TEXT::TIME AS pta3,
+                (xpath('//tord:third/tord:rid/@ptd',axml,ns))[1]::TEXT::TIME AS ptd3,
+                (xpath('//tord:third/tord:rid/@wta',axml,ns))[1]::TEXT::TIME AS wta3,
+                (xpath('//tord:third/tord:rid/@wtd',axml,ns))[1]::TEXT::TIME AS wtd3,
+                (xpath('//tord:third/tord:trainID/text()',axml,ns))[1]::TEXT AS tid3,
+
+                (xpath('/pport:trainOrder/@tiploc',axml,ns))[1]::TEXT AS tpl,
+                (xpath('/pport:trainOrder/@crs',axml,ns))[1]::TEXT AS crs,
+                (xpath('/pport:trainOrder/@platform',axml,ns))[1]::TEXT AS plat
+            INTO arec LIMIT 1;
+
+        INSERT INTO darwin.trainorder (
+                tpl,crs,plat,ts,
+                rid1,tid1,pta1,ptd1,wta1,wtd1,
+                rid2,tid2,pta2,ptd2,wta2,wtd2,
+                rid3,tid3,pta3,ptd3,wta3,wtd3
+            ) VALUES (
+                darwin.tiploc(arec.tpl),
+                darwin.crs(arec.crs),
+                arec.plat,
+                ats,
+                arec.rid1,arec.tid1,arec.pta1,arec.ptd1,arec.wta1,arec.wtd1,
+                arec.rid2,arec.tid2,arec.pta2,arec.ptd2,arec.wta2,arec.wtd2,
+                arec.rid3,arec.tid3,arec.pta3,arec.ptd3,arec.wta3,arec.wtd3
+            );
+    END LOOP;
+
+    FOREACH axml IN ARRAY xpath('//pport:alarm/alarm:clear/text()',pxml,ns)
+    LOOP
+        UPDATE darwin.alarm SET cleared=true, clearedts=ats WHERE aid=axml::TEXT;
+    END LOOP;
+
 
 END;
 $$ LANGUAGE plpgsql;
