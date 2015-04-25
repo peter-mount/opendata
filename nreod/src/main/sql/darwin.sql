@@ -8,12 +8,16 @@
 --CREATE SCHEMA darwin;
 SET search_path = darwin;
 
+DROP TABLE message_station;
+DROP TABLE message;
+
 DROP TABLE forecast_entry;
 DROP TABLE forecast;
 
 DROP TABLE schedule_entry;
 DROP TABLE schedule;
 
+DROP TABLE crs;
 DROP TABLE tiploc;
 
 -- ----------------------------------------------------------------------
@@ -41,6 +45,38 @@ BEGIN
         BEGIN
             INSERT INTO darwin.tiploc (tpl) VALUES (ptpl);
             RETURN currval('darwin.tiploc_id_seq');
+        EXCEPTION WHEN unique_violation THEN
+            -- Do nothing, loop & try again
+        END;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ----------------------------------------------------------------------
+-- Normalisation table of crs
+-- ----------------------------------------------------------------------
+CREATE TABLE crs (
+    id          SERIAL,
+    crs         CHAR(3),
+    PRIMARY KEY (id)
+);
+CREATE UNIQUE INDEX crs_c ON crs(crs);
+ALTER TABLE crs OWNER TO rail;
+ALTER TABLE crs_id_seq OWNER TO rail;
+
+CREATE OR REPLACE FUNCTION darwin.crs (pcrs TEXT)
+RETURNS INTEGER AS $$
+DECLARE
+    rec     RECORD;
+BEGIN
+    LOOP
+        SELECT * INTO rec FROM darwin.crs WHERE crs=pcrs;
+        IF FOUND THEN
+            RETURN rec.id;
+        END IF;
+        BEGIN
+            INSERT INTO darwin.crs (crs) VALUES (pcrs);
+            RETURN currval('darwin.crs_id_seq');
         EXCEPTION WHEN unique_violation THEN
             -- Do nothing, loop & try again
         END;
@@ -138,6 +174,35 @@ DROP TABLE log;
 CREATE TABLE log (t TEXT);
 ALTER TABLE log OWNER TO rail;
 
+-- ----------------------------------------------------------------------
+-- Station messages
+-- ----------------------------------------------------------------------
+
+CREATE TABLE message (
+    id          BIGINT NOT NULL,
+    cat         VARCHAR(16) NOT NULL,
+    sev         VARCHAR(16) NOT NULL,
+    suppress    BOOLEAN,
+    xml         TEXT,
+    ts          TIMESTAMP WITH TIME ZONE,
+    PRIMARY KEY (id)
+);
+CREATE INDEX message_t ON message(ts);
+ALTER TABLE message OWNER TO rail;
+
+-- Link message to stations
+
+CREATE TABLE message_station (
+    msgid   BIGINT NOT NULL REFERENCES message(id),
+    crsid   BIGINT NOT NULL REFERENCES crs(id)
+);
+CREATE UNIQUE INDEX message_station_mc ON message_station(msgid,crsid);
+CREATE INDEX message_station_m ON message_station(msgid);
+CREATE INDEX message_station_c ON message_station(crsid);
+ALTER TABLE message_station OWNER TO rail;
+
+-- ----------------------------------------------------------------------
+-- Parses a push port message importing its contents into the database
 -- ----------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION darwin.darwinimport(pxml XML)
 RETURNS VOID AS $$
@@ -336,6 +401,32 @@ BEGIN
     LOOP
         UPDATE darwin.forecast SET deactivated=true, ts=ats WHERE rid=axml::text;
     END LOOP;
+
+    -- ---------------------------------------------------------------------------
+    -- Station messages
+    FOREACH axml IN ARRAY xpath('//pport:OW',pxml,ns)
+    LOOP
+        SELECT  (xpath('//pport:OW/@id',axml,ns))[1]::TEXT::BIGINT AS id,
+                (xpath('//pport:OW/@cat',axml,ns))[1]::TEXT AS cat,
+                (xpath('//pport:OW/@sev',axml,ns))[1]::TEXT AS sev,
+                (xpath('//pport:OW/@suppress',axml,ns))[1]::TEXT::BOOLEAN AS suppress,
+                array_to_string(xpath('//pport:OW/msg:Msg',axml,ns),'')::TEXT AS xml
+            INTO arec LIMIT 1;
+
+        id1 = arec.id;
+        DELETE FROM darwin.message_station WHERE msgid=id1;
+        DELETE FROM darwin.message WHERE id=id1;
+
+        INSERT INTO darwin.message (id,cat,sev,suppress,xml,ts)
+            VALUES (id1,arec.cat,arec.sev,arec.suppress,arec.xml,ats);
+
+        FOREACH axml2 IN ARRAY xpath('//msg:Station/@crs',axml,ns)
+        LOOP
+            INSERT INTO darwin.message_station (msgid,crsid) VALUES (id1,darwin.crs(axml2::text));
+        END LOOP;
+        
+    END LOOP;
+    
 
 END;
 $$ LANGUAGE plpgsql;
