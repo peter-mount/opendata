@@ -18,9 +18,16 @@ DROP TABLE message;
 DROP TABLE forecast_entry;
 DROP TABLE forecast;
 
+DROP TABLE forecast_entryarc;
+DROP TABLE forecastarc;
+
 DROP TABLE schedule_assoc;
 DROP TABLE schedule_entry;
 DROP TABLE schedule;
+
+DROP TABLE schedule_assocarc;
+DROP TABLE schedule_entryarc;
+DROP TABLE schedulearc;
 
 DROP TABLE crs;
 DROP TABLE tiploc;
@@ -91,6 +98,13 @@ $$ LANGUAGE plpgsql;
 
 -- ----------------------------------------------------------------------
 -- Schedule
+--
+-- This comprises two sets of tables, the active one forecast and
+-- an archive table forecastarc. The second set of tables are used when
+-- a train is deactivated.
+--
+-- This is so that the live updates operate on a smaller table, keeping
+-- performance up.
 -- ----------------------------------------------------------------------
 
 CREATE TABLE schedule (
@@ -114,6 +128,26 @@ CREATE INDEX schedule_o ON schedule(toc);
 ALTER TABLE schedule OWNER TO rail;
 ALTER TABLE schedule_id_seq OWNER TO rail;
 
+CREATE TABLE schedulearc (
+    id          BIGINT NOT NULL,
+    rid         VARCHAR(16) NOT NULL,
+    uid         VARCHAR(16) NOT NULL,
+    ssd         DATE,
+    ts          TIMESTAMP WITH TIME ZONE,
+    trainId     CHAR(4),
+    toc         CHAR(2),
+    origin      INTEGER NOT NULL REFERENCES tiploc(id),
+    dest        INTEGER NOT NULL REFERENCES tiploc(id),
+    PRIMARY KEY(id)
+);
+CREATE UNIQUE INDEX schedulearc_r ON schedulearc(rid);
+CREATE INDEX schedulearc_t ON schedulearc(ts);
+CREATE INDEX schedulearc_h ON schedulearc(trainId);
+CREATE INDEX schedulearc_sh ON schedulearc(ssd,trainId);
+CREATE INDEX schedulearc_so ON schedulearc(ssd,toc);
+CREATE INDEX schedulearc_o ON schedulearc(toc);
+ALTER TABLE schedulearc OWNER TO rail;
+
 CREATE TABLE schedule_entry (
     id          SERIAL,
     schedule    BIGINT NOT NULL REFERENCES schedule(id),
@@ -131,6 +165,22 @@ CREATE INDEX schedule_entry_s ON schedule_entry(schedule);
 ALTER TABLE schedule_entry OWNER TO rail;
 ALTER TABLE schedule_entry_id_seq OWNER TO rail;
 
+CREATE TABLE schedule_entryarc (
+    id          BIGINT NOT NULL,
+    schedule    BIGINT NOT NULL REFERENCES schedulearc(id),
+    type        NAME,
+    tpl         INTEGER NOT NULL REFERENCES tiploc(id),
+    pta         TIME,
+    ptd         TIME,
+    wta         TIME,
+    wtd         TIME,
+    wtp         TIME,
+    act         NAME,
+    PRIMARY KEY(id)
+);
+CREATE INDEX schedule_entryarc_s ON schedule_entryarc(schedule);
+ALTER TABLE schedule_entryarc OWNER TO rail;
+
 CREATE TABLE schedule_assoc (
     mainid      BIGINT NOT NULL REFERENCES schedule(id),
     associd     BIGINT NOT NULL REFERENCES schedule(id),
@@ -147,10 +197,39 @@ CREATE TABLE schedule_assoc (
     PRIMARY KEY (mainid,associd)
 );
 CREATE INDEX schedule_assoc_t ON schedule_assoc(tpl);
+CREATE INDEX schedule_assoc_m ON schedule_assoc(mainid);
+CREATE INDEX schedule_assoc_a ON schedule_assoc(associd);
 ALTER TABLE schedule_assoc OWNER TO rail;
+
+CREATE TABLE schedule_assocarc (
+    mainid      BIGINT NOT NULL REFERENCES schedulearc(id),
+    associd     BIGINT NOT NULL REFERENCES schedulearc(id),
+    tpl         INTEGER NOT NULL REFERENCES tiploc(id),
+    cat         CHAR(2),
+    cancelled   BOOLEAN DEFAULT false,
+    deleted     BOOLEAN DEFAULT false,
+    -- main arrival
+    pta         TIME,
+    wta         TIME,
+    -- assoc depart
+    ptd         TIME,
+    wtd         TIME,
+    PRIMARY KEY (mainid,associd)
+);
+CREATE INDEX schedule_assocarc_t ON schedule_assocarc(tpl);
+CREATE INDEX schedule_assocarc_m ON schedule_assocarc(mainid);
+CREATE INDEX schedule_assocarc_a ON schedule_assocarc(associd);
+ALTER TABLE schedule_assocarc OWNER TO rail;
 
 -- ----------------------------------------------------------------------
 -- Train forecast
+--
+-- This comprises two sets of tables, the active one forecast and
+-- an archive table forecastarc. The second set of tables are used when
+-- a train is deactivated.
+--
+-- This is so that the live updates operate on a smaller table, keeping
+-- performance up.
 -- ----------------------------------------------------------------------
 
 CREATE TABLE forecast (
@@ -168,6 +247,21 @@ CREATE UNIQUE INDEX forecast_r ON forecast(rid);
 CREATE INDEX forecast_t ON forecast(ts);
 ALTER TABLE forecast OWNER TO rail;
 ALTER TABLE forecast_id_seq OWNER TO rail;
+
+CREATE TABLE forecastarc (
+    id          BIGINT NOT NULL,
+    rid         VARCHAR(16) NOT NULL,
+    uid         VARCHAR(16) NOT NULL,
+    ssd         DATE,
+    ts          TIMESTAMP WITH TIME ZONE,
+    activated   BOOLEAN DEFAULT false,
+    deactivated BOOLEAN DEFAULT false,
+    schedulearc    BIGINT REFERENCES schedulearc(id),
+    PRIMARY KEY(id)
+);
+CREATE UNIQUE INDEX forecastarc_r ON forecastarc(rid);
+CREATE INDEX forecastarc_t ON forecastarc(ts);
+ALTER TABLE forecastarc OWNER TO rail;
 
 -- ----------------------------------------------------------------------
 -- Maps a forecast to the tiploc & contains the forecast details
@@ -192,6 +286,26 @@ CREATE UNIQUE INDEX forecast_entry_ft ON forecast_entry(fid,tpl);
 CREATE INDEX forecast_entry_f ON forecast_entry(fid);
 CREATE INDEX forecast_entry_t ON forecast_entry(tpl);
 ALTER TABLE forecast_entry OWNER TO rail;
+
+CREATE TABLE forecast_entryarc (
+    fid         BIGINT NOT NULL REFERENCES forecastarc(id),
+    tpl         INTEGER NOT NULL REFERENCES tiploc(id),
+    -- Suppress this entry?
+    supp        BOOLEAN DEFAULT false,
+    -- From one of the figures
+    arr         TIME,
+    dep         TIME,
+    pass        TIME,
+    -- Platform
+    plat        VARCHAR(4),
+    platsup     BOOLEAN DEFAULT false,
+    --
+    PRIMARY KEY (fid,tpl)
+);
+CREATE UNIQUE INDEX forecast_entryarc_ft ON forecast_entryarc(fid,tpl);
+CREATE INDEX forecast_entryarc_f ON forecast_entryarc(fid);
+CREATE INDEX forecast_entryarc_t ON forecast_entryarc(tpl);
+ALTER TABLE forecast_entryarc OWNER TO rail;
 
 DROP TABLE log;
 CREATE TABLE log (t TEXT);
@@ -484,7 +598,34 @@ BEGIN
     -- Deactivations - here we don't worry if we dont have an entry
     FOREACH axml IN ARRAY xpath('//pport:deactivated/@rid',pxml,ns)
     LOOP
-        UPDATE darwin.forecast SET deactivated=true, ts=ats WHERE rid=axml::text;
+        tid=axml::text;
+
+        -- Mark the forecast as deactivated
+        UPDATE darwin.forecast SET deactivated=true, ts=ats WHERE rid=tid;
+        SELECT id INTO id2 FROM darwin.schedule WHERE rid=tid;
+        SELECT id INTO id3 FROM darwin.forecast WHERE rid=tid;
+
+        -- Now archive the schedule
+        INSERT INTO darwin.schedulearc
+            SELECT * FROM darwin.schedule WHERE id=id2;
+        INSERT INTO darwin.schedule_entryarc
+            SELECT * FROM darwin.schedule_entry WHERE schedule=id2;
+        INSERT INTO darwin.schedule_assocarc
+            SELECT * FROM darwin.schedule_assoc WHERE mainid=id2 OR associd=id2;
+
+        -- archive the forecasts
+        INSERT INTO darwin.forecastarc
+            SELECT * FROM darwin.forecast WHERE id=id3;
+        INSERT INTO darwin.forecast_entryarc
+            SELECT * FROM darwin.forecast_entry WHERE fid=id3;
+
+        -- Now remove data from from the live tables
+        DELETE FROM darwin.forecast_entry WHERE fid=id3;
+        DELETE FROM darwin.forecast WHERE id=id3;
+        DELETE FROM darwin.schedule_entry WHERE schedule=id2;
+        DELETE FROM darwin.schedule_assoc WHERE mainid=id2 OR associd=id2;
+        DELETE FROM darwin.schedule WHERE id=id2;
+
     END LOOP;
 
     -- ---------------------------------------------------------------------------
