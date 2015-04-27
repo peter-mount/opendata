@@ -273,6 +273,12 @@ CREATE TABLE forecast_entry (
     tpl         INTEGER NOT NULL REFERENCES tiploc(id),
     -- Suppress this entry?
     supp        BOOLEAN DEFAULT false,
+    -- timetable entry
+    pta         TIME,
+    ptd         TIME,
+    wta         TIME,
+    wtd         TIME,
+    wtp         TIME,
     -- From one of the figures
     arr         TIME,
     dep         TIME,
@@ -280,6 +286,8 @@ CREATE TABLE forecast_entry (
     -- Platform
     plat        VARCHAR(4),
     platsup     BOOLEAN DEFAULT false,
+    cisplatsup  BOOLEAN DEFAULT false,
+    platsrc     NAME,
     --
     PRIMARY KEY (fid,tpl)
 );
@@ -293,6 +301,12 @@ CREATE TABLE forecast_entryarc (
     tpl         INTEGER NOT NULL REFERENCES tiploc(id),
     -- Suppress this entry?
     supp        BOOLEAN DEFAULT false,
+    -- timetable entry
+    pta         TIME,
+    ptd         TIME,
+    wta         TIME,
+    wtd         TIME,
+    wtp         TIME,
     -- From one of the figures
     arr         TIME,
     dep         TIME,
@@ -300,6 +314,8 @@ CREATE TABLE forecast_entryarc (
     -- Platform
     plat        VARCHAR(4),
     platsup     BOOLEAN DEFAULT false,
+    cisplatsup  BOOLEAN DEFAULT false,
+    platsrc     NAME,
     --
     PRIMARY KEY (fid,tpl)
 );

@@ -164,11 +164,24 @@ BEGIN
         FOREACH axml2 IN ARRAY xpath('//fcst:Location',axml,ns)
         LOOP
             -- extract data from each location element
-            SELECT  (xpath('//fcst:Location/@tpl',axml,ns))[1]::text AS tpl,
-                    (xpath('//fcst:plat/text()',axml,ns))[1]::text AS plat,
-                    (xpath('//fcst:plat/@platsup',axml,ns))[1]::text::boolean AS platsup
+            SELECT  (xpath('//fcst:Location/@tpl',axml,ns))[1]::TEXT AS tpl,
+                    (xpath('//fcst:Location/@pta',axml,ns))[1]::TEXT::TIME AS pta,
+                    (xpath('//fcst:Location/@ptd',axml,ns))[1]::TEXT::TIME AS ptd,
+                    (xpath('//fcst:Location/@wta',axml,ns))[1]::TEXT::TIME AS wta,
+                    (xpath('//fcst:Location/@wtd',axml,ns))[1]::TEXT::TIME AS wtd,
+                    (xpath('//fcst:Location/@wtp',axml,ns))[1]::TEXT::TIME AS wtp,
+                    (xpath('//fcst:plat/text()',axml,ns))[1]::TEXT AS plat,
+                    (xpath('//fcst:plat/@platsrc',axml,ns))[1]::TEXT AS platsrc,
+                    (xpath('//fcst:plat/@platsup',axml,ns))[1]::TEXT::BOOLEAN AS platsup,
+                    (xpath('//fcst:plat/@cisPlatsup',axml,ns))[1]::TEXT::BOOLEAN AS cisplatsup,
+                    (xpath('//fcst:arr/@at',axml,ns))[1]::TEXT::TIME AS arrat,
+                    (xpath('//fcst:arr/@et',axml,ns))[1]::TEXT::TIME AS arret,
+                    (xpath('//fcst:dep/@at',axml,ns))[1]::TEXT::TIME AS depat,
+                    (xpath('//fcst:dep/@et',axml,ns))[1]::TEXT::TIME AS depet,
+                    (xpath('//fcst:pass/@at',axml,ns))[1]::TEXT::TIME AS passat,
+                    (xpath('//fcst:pass/@et',axml,ns))[1]::TEXT::TIME AS passet
                 INTO arec LIMIT 1;
-
+            
             id2 = darwin.tiploc(arec.tpl);
 
             -- resolve/create the tiploc
@@ -176,8 +189,17 @@ BEGIN
                 SELECT * INTO rec FROM darwin.forecast_entry WHERE fid=id1 AND tpl=id2;
                 IF FOUND THEN
                     UPDATE darwin.forecast_entry
-                        SET plat=arec.plat,
-                            platsup=arec.platsup
+                        SET pta=arec.pta,
+                            ptd=arec.ptd,
+                            wta=arec.wta,
+                            wtd=arec.wtd,
+                            wtp=arec.wtp,
+                            arr=arec.arrat,
+                            dep=arec.depat,
+                            pass=arec.passat,
+                            plat=arec.plat,
+                            platsup=arec.platsup,
+                            cisplatsup=arec.cisplatsup
                         WHERE fid=id1 AND tpl=id2;
                     EXIT;
                 ELSE
