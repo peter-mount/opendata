@@ -30,6 +30,10 @@ DECLARE
     ats         TIMESTAMP WITH TIME ZONE;
     -- record used in xml parsing
     arec        RECORD;
+    aat         TIME;
+    apt         TIME;
+    awt         TIME;
+    adelay      INTERVAL;
     -- record used in db updates
     rec         RECORD;
     -- XML from xpath & used in loops
@@ -137,7 +141,8 @@ BEGIN
         -- The outer TS element
         SELECT  (xpath('//pport:TS/@rid',axml,ns))[1]::TEXT AS rid,
                 (xpath('//pport:TS/@uid',axml,ns))[1]::TEXT AS uid,
-                (xpath('//pport:TS/@ssd',axml,ns))[1]::TEXT::DATE AS ssd
+                (xpath('//pport:TS/@ssd',axml,ns))[1]::TEXT::DATE AS ssd,
+                (xpath('//fcst:LateReason/text()',axml,ns))[1]::TEXT::INTEGER AS latereason
             INTO arec LIMIT 1;
 
         -- Create/update the forecast table
@@ -157,6 +162,10 @@ BEGIN
             END IF;
         END LOOP;
 
+        IF arec.latereason IS NOT NULL THEN
+            UPDATE darwin.forecast SET latereason = arec.latereason WHERE rid=arec.rid;
+        END IF;
+
         -- Now the forecast table entries
         -- FIXME this won't handle instances of a tiploc being visited twice right now
 
@@ -164,25 +173,53 @@ BEGIN
         FOREACH axml2 IN ARRAY xpath('//fcst:Location',axml,ns)
         LOOP
             -- extract data from each location element
-            SELECT  (xpath('//fcst:Location/@tpl',axml,ns))[1]::TEXT AS tpl,
-                    (xpath('//fcst:Location/@pta',axml,ns))[1]::TEXT::TIME AS pta,
-                    (xpath('//fcst:Location/@ptd',axml,ns))[1]::TEXT::TIME AS ptd,
-                    (xpath('//fcst:Location/@wta',axml,ns))[1]::TEXT::TIME AS wta,
-                    (xpath('//fcst:Location/@wtd',axml,ns))[1]::TEXT::TIME AS wtd,
-                    (xpath('//fcst:Location/@wtp',axml,ns))[1]::TEXT::TIME AS wtp,
-                    (xpath('//fcst:plat/text()',axml,ns))[1]::TEXT AS plat,
-                    (xpath('//fcst:plat/@platsrc',axml,ns))[1]::TEXT AS platsrc,
-                    (xpath('//fcst:plat/@platsup',axml,ns))[1]::TEXT::BOOLEAN AS platsup,
-                    (xpath('//fcst:plat/@cisPlatsup',axml,ns))[1]::TEXT::BOOLEAN AS cisplatsup,
-                    (xpath('//fcst:arr/@at',axml,ns))[1]::TEXT::TIME AS arrat,
-                    (xpath('//fcst:arr/@et',axml,ns))[1]::TEXT::TIME AS arret,
-                    (xpath('//fcst:dep/@at',axml,ns))[1]::TEXT::TIME AS depat,
-                    (xpath('//fcst:dep/@et',axml,ns))[1]::TEXT::TIME AS depet,
-                    (xpath('//fcst:pass/@at',axml,ns))[1]::TEXT::TIME AS passat,
-                    (xpath('//fcst:pass/@et',axml,ns))[1]::TEXT::TIME AS passet
+            SELECT  (xpath('//fcst:Location/@tpl',axml2,ns))[1]::TEXT AS tpl,
+                    (xpath('//fcst:Location/@pta',axml2,ns))[1]::TEXT::TIME AS pta,
+                    (xpath('//fcst:Location/@ptd',axml2,ns))[1]::TEXT::TIME AS ptd,
+                    (xpath('//fcst:Location/@wta',axml2,ns))[1]::TEXT::TIME AS wta,
+                    (xpath('//fcst:Location/@wtd',axml2,ns))[1]::TEXT::TIME AS wtd,
+                    (xpath('//fcst:Location/@wtp',axml2,ns))[1]::TEXT::TIME AS wtp,
+                    (xpath('//fcst:plat/text()',axml2,ns))[1]::TEXT AS plat,
+                    (xpath('//fcst:plat/@platsrc',axml2,ns))[1]::TEXT AS platsrc,
+                    (xpath('//fcst:plat/@platsup',axml2,ns))[1]::TEXT::BOOLEAN AS platsup,
+                    (xpath('//fcst:plat/@cisPlatsup',axml2,ns))[1]::TEXT::BOOLEAN AS cisplatsup,
+                    (xpath('//fcst:arr/@at',axml2,ns))[1]::TEXT::TIME AS arrat,
+                    (xpath('//fcst:arr/@et',axml2,ns))[1]::TEXT::TIME AS arret,
+                    (xpath('//fcst:dep/@at',axml2,ns))[1]::TEXT::TIME AS depat,
+                    (xpath('//fcst:dep/@et',axml2,ns))[1]::TEXT::TIME AS depet,
+                    (xpath('//fcst:pass/@at',axml2,ns))[1]::TEXT::TIME AS passat,
+                    (xpath('//fcst:pass/@et',axml2,ns))[1]::TEXT::TIME AS passet
                 INTO arec LIMIT 1;
             
             id2 = darwin.tiploc(arec.tpl);
+
+            -- Calculate delay (if any)
+            IF arec.depat IS NOT NULL THEN
+                aat = arec.depat;
+                apt = arec.ptd;
+                awt = arec.wtd;
+            ELSIF arec.arrat IS NOT NULL THEN
+                aat = arec.arrat;
+                apt = arec.pta;
+                awt = arec.wta;
+            ELSIF arec.passat IS NOT NULL THEN
+                aat = arec.passat;
+                apt = NULL;
+                awt = arec.wtp;
+            ELSE
+                aat = NULL;
+                apt = NULL;
+                awt = NULL;
+            END IF;
+            
+            adelay = NULL;
+            IF aat IS NOT NULL THEN
+                IF apt IS NOT NULL THEN
+                    adelay = aat - apt;
+                ELSE
+                    adelay = aat - awt;
+                END IF;
+            END IF;
 
             -- resolve/create the tiploc
             LOOP
@@ -197,6 +234,7 @@ BEGIN
                             arr=arec.arrat,
                             dep=arec.depat,
                             pass=arec.passat,
+                            delay=adelay,
                             plat=arec.plat,
                             platsup=arec.platsup,
                             cisplatsup=arec.cisplatsup
@@ -205,8 +243,16 @@ BEGIN
                 ELSE
                     BEGIN
                         INSERT INTO darwin.forecast_entry
-                            (fid,tpl,plat,platsup)
-                            VALUES (id1,id2,
+                            (
+                                fid,tpl,
+                                pta,ptd,wta,wtd,wtp,
+                                arr,dep,pass,delay,
+                                plat,platsup
+                            ) VALUES (
+                                id1,id2,
+                                arec.pta,arec.ptd,arec.wta,arec.wtd,arec.wtp,
+                                arec.arrat,arec.depat,arec.passat,
+                                adelay,
                                 arec.plat,
                                 arec.platsup
                             );

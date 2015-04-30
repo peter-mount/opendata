@@ -239,6 +239,7 @@ CREATE TABLE forecast (
     uid         VARCHAR(16) NOT NULL,
     ssd         DATE,
     ts          TIMESTAMP WITH TIME ZONE,
+    latereason  INTEGER,
     activated   BOOLEAN DEFAULT false,
     deactivated BOOLEAN DEFAULT false,
     schedule    BIGINT REFERENCES schedule(id),
@@ -255,6 +256,7 @@ CREATE TABLE forecastarc (
     uid         VARCHAR(16) NOT NULL,
     ssd         DATE,
     ts          TIMESTAMP WITH TIME ZONE,
+    latereason  INTEGER,
     activated   BOOLEAN DEFAULT false,
     deactivated BOOLEAN DEFAULT false,
     schedulearc    BIGINT REFERENCES schedulearc(id),
@@ -283,6 +285,7 @@ CREATE TABLE forecast_entry (
     arr         TIME,
     dep         TIME,
     pass        TIME,
+    delay       INTERVAL,
     -- Platform
     plat        VARCHAR(4),
     platsup     BOOLEAN DEFAULT false,
@@ -311,6 +314,7 @@ CREATE TABLE forecast_entryarc (
     arr         TIME,
     dep         TIME,
     pass        TIME,
+    delay       INTERVAL,
     -- Platform
     plat        VARCHAR(4),
     platsup     BOOLEAN DEFAULT false,
