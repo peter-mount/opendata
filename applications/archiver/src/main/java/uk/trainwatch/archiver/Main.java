@@ -65,8 +65,10 @@ public class Main
         TrustMvtAllArchiver.setup( rabbitmq );
         RTPPMArchiver.setup( rabbitmq );
         ReportArchiver.setup( rabbitmq );
-        DarwinTSArchiver.setup( rabbitmq );
+        DarwinArchiver.setup( rabbitmq );
         NRTDArchiver.setup( rabbitmq );
+        // Obsolete
+        //DarwinTSArchiver.setup( rabbitmq );
     }
 
 }
