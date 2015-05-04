@@ -281,11 +281,16 @@ CREATE TABLE forecast_entry (
     wta         TIME,
     wtd         TIME,
     wtp         TIME,
-    -- From one of the figures
+    -- calculated delat
+    delay       INTERVAL,
+    -- Actual times
     arr         TIME,
     dep         TIME,
     pass        TIME,
-    delay       INTERVAL,
+    -- Estimated times
+    etarr       TIME,
+    etdep       TIME,
+    etpass      TIME,
     -- Platform
     plat        VARCHAR(4),
     platsup     BOOLEAN DEFAULT false,
@@ -310,11 +315,16 @@ CREATE TABLE forecast_entryarc (
     wta         TIME,
     wtd         TIME,
     wtp         TIME,
-    -- From one of the figures
+    -- calculated delat
+    delay       INTERVAL,
+    -- Actual times
     arr         TIME,
     dep         TIME,
     pass        TIME,
-    delay       INTERVAL,
+    -- Estimated times
+    etarr       TIME,
+    etdep       TIME,
+    etpass      TIME,
     -- Platform
     plat        VARCHAR(4),
     platsup     BOOLEAN DEFAULT false,

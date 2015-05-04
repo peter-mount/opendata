@@ -194,23 +194,36 @@ BEGIN
             id2 = darwin.tiploc(arec.tpl);
 
             -- Calculate delay (if any)
-            IF arec.depat IS NOT NULL THEN
-                aat = arec.depat;
-                apt = arec.ptd;
-                awt = arec.wtd;
-            ELSIF arec.arrat IS NOT NULL THEN
-                aat = arec.arrat;
-                apt = arec.pta;
-                awt = arec.wta;
-            ELSIF arec.passat IS NOT NULL THEN
-                aat = arec.passat;
-                apt = NULL;
-                awt = arec.wtp;
-            ELSE
-                aat = NULL;
-                apt = NULL;
-                awt = NULL;
-            END IF;
+            CASE
+                WHEN arec.depat IS NOT NULL THEN
+                    aat = arec.depat;
+                    apt = arec.ptd;
+                    awt = arec.wtd;
+                WHEN arec.arrat IS NOT NULL THEN
+                    aat = arec.arrat;
+                    apt = arec.pta;
+                    awt = arec.wta;
+                WHEN arec.passat IS NOT NULL THEN
+                    aat = arec.passat;
+                    apt = NULL;
+                    awt = arec.wtp;
+                WHEN arec.depet IS NOT NULL THEN
+                    aat = arec.depet;
+                    apt = arec.ptd;
+                    awt = arec.wtd;
+                WHEN arec.arret IS NOT NULL THEN
+                    aat = arec.arret;
+                    apt = arec.pta;
+                    awt = arec.wta;
+                WHEN arec.passet IS NOT NULL THEN
+                    aat = arec.passet;
+                    apt = NULL;
+                    awt = arec.wtp;
+                ELSE
+                    aat = NULL;
+                    apt = NULL;
+                    awt = NULL;
+            END CASE;
             
             adelay = NULL;
             IF aat IS NOT NULL THEN
@@ -219,6 +232,14 @@ BEGIN
                 ELSE
                     adelay = aat - awt;
                 END IF;
+
+                -- Handle delays across midnight
+                -- Note: use 24 hours not 1 day as "-23:00:00" + "1 day" becomes "1 day -23:00:00" and not "01:00:00"
+                CASE
+                    WHEN adelay <= '-18:00:00'::INTERVAL THEN adelay=adelay+'24 hours'::INTERVAL;
+                    WHEN adelay >= '18:00:00'::INTERVAL THEN adelay=adelay-'24 hours'::INTERVAL;
+                    ELSE adelay=adelay;
+                END CASE;
             END IF;
 
             -- resolve/create the tiploc
@@ -234,6 +255,9 @@ BEGIN
                             arr=arec.arrat,
                             dep=arec.depat,
                             pass=arec.passat,
+                            etarr=arec.arret,
+                            etdep=arec.depet,
+                            etpass=arec.passet,
                             delay=adelay,
                             plat=arec.plat,
                             platsup=arec.platsup,
@@ -246,13 +270,16 @@ BEGIN
                             (
                                 fid,tpl,
                                 pta,ptd,wta,wtd,wtp,
-                                arr,dep,pass,delay,
+                                delay,
+                                arr,dep,pass,
+                                etarr,etdep,etpass,
                                 plat,platsup
                             ) VALUES (
                                 id1,id2,
                                 arec.pta,arec.ptd,arec.wta,arec.wtd,arec.wtp,
-                                arec.arrat,arec.depat,arec.passat,
                                 adelay,
+                                arec.arrat,arec.depat,arec.passat,
+                                arec.arret,arec.depet,arec.passet,
                                 arec.plat,
                                 arec.platsup
                             );
