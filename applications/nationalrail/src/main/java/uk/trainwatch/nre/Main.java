@@ -20,13 +20,13 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.function.Consumer;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import java.util.stream.Stream;
 import javax.jms.BytesMessage;
 import uk.trainwatch.apachemq.RemoteActiveMQConnection;
-import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
-import uk.trainwatch.nre.darwin.parser.DarwinDispatcherBuilder;
-import uk.trainwatch.nre.darwin.parser.DarwinJaxbContext;
 import uk.trainwatch.rabbitmq.RabbitConnection;
 import uk.trainwatch.rabbitmq.RabbitMQ;
 import uk.trainwatch.util.Consumers;
@@ -87,34 +87,18 @@ public class Main
         }
     }
 
-    private Consumer<Pport> forward( String routingKey )
-    {
-        Consumer<String> c = RabbitMQ.stringConsumer( rabbitmq, routingKey );
-        return p -> c.accept( DarwinJaxbContext.toXML.apply( p ) );
-    }
-
     @Override
     protected void setupApplication()
             throws IOException
     {
         // There's just one queue from NRE so we'll just receive everything, uncompress & publish to rabbit
-        Consumer<String> monitor = RateMonitor.log( LOG, "record nre.raw" );
+        Consumer<String> monitor = RateMonitor.log( LOG, "record nre.push" );
+
+        // ISSUE 16: we occasionally stop receiving data
+        Consumer<String> issue16 = new Issue16();
 
         // Consumer to accept the raw feed
-        Consumer<String> c = RabbitMQ.stringConsumer( rabbitmq, "nre.push" );
-
-        // Dispatcher to send to individual routing keys
-        Consumer<Pport> dispatcher = new DarwinDispatcherBuilder().
-                addAlarm( forward( "nre.push.alarm" ) ).
-                addAssociation( forward( "nre.push.association" ) ).
-                addDeactivatedSchedule( forward( "nre.push.deactivated" ) ).
-                addSchedule( forward( "nre.push.schedule" ) ).
-                addStationMessage( forward( "nre.push.stationmessage" ) ).
-                addTrackingID( forward( "nre.push.trackingid" ) ).
-                addTrainAlert( forward( "nre.push.trainalert" ) ).
-                addTrainOrder( forward( "nre.push.trainorder" ) ).
-                addTs( forward( "nre.push.ts" ) ).
-                build();
+        Consumer<String> consumer = RabbitMQ.stringConsumer( rabbitmq, "nre.push" );
 
         // Now register our queue consumer
         activemq.registerQueueConsumer( nreProps.getProperty( "push.queue" ),
@@ -125,17 +109,28 @@ public class Main
                                                 filter( Objects::nonNull ).
                                                 // Log raw message count
                                                 peek( monitor ).
+                                                // ISSUE 16: temp fix if no messages after 3 minutes then restart
+                                                peek( issue16 ).
                                                 // Submit everything to the main queue
-                                                peek( c ).
-                                                // Now unmarshall the xml & dispatch to the correct routing key
-                                                map( DarwinJaxbContext.fromXML ).
-                                                forEach( dispatcher )
+                                                forEach( consumer )
                                         ) );
     }
 
     public static void main( String... args )
             throws Exception
     {
+        if( args.length > 0 ) {
+            FileHandler fh = new FileHandler( args[0] );
+            fh.setFormatter( new SimpleFormatter() );
+
+            // Add to the root logger
+            Logger log = LOG;
+            while( log.getParent() != null ) {
+                log = log.getParent();
+            }
+            log.addHandler( fh );
+        }
+        
         LOG.log( Level.INFO, "Initialising National Rail Enquiries Bridge" );
 
         new Main().run();
