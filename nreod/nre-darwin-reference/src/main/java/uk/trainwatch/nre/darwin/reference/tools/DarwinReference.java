@@ -128,7 +128,7 @@ public class DarwinReference
         SQL.deleteIdTable( con, SCHEMA, "location" );
 
         LOG.log( Level.INFO, () -> "Importing location" );
-        try( PreparedStatement ps = SQL.prepare( con, "INSERT INTO " + SCHEMA + ".location (tpl,crs,toc,name) VALUES (?,?,?,?)" ) ) {
+        try( PreparedStatement ps = SQL.prepare( con, "INSERT INTO " + SCHEMA + ".location (tpl,crs,toc,name) VALUES (darwin.tiploc(?),darwin.crs(?),?,?)" ) ) {
             locs.forEach( SQLConsumer.guard( l -> SQL.executeUpdate( ps,
                                                                      l.getTpl(),
                                                                      l.getCrs(),

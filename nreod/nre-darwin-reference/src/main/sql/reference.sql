@@ -13,8 +13,8 @@ DROP TABLE location;
 
 CREATE TABLE location (
     id      SERIAL NOT NULL,
-    tpl     VARCHAR(16) NOT NULL,
-    crs     CHAR(3),
+    tpl     INTEGER NOT NULL REFERENCES tiploc(id),
+    crs     INTEGER NOT NULL REFERENCES crs(id),
     toc     TEXT,
     name    NAME NOT NULL,
     PRIMARY KEY (tpl)
