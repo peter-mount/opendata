@@ -73,7 +73,7 @@ public enum StationMessageManager
                 try( PreparedStatement ps = SQL.prepare( con,
                                                          "SELECT m.xml FROM darwin.message m"
                                                          + " INNER JOIN darwin.message_station ms ON m.id=ms.msgid"
-                                                         + " INNER JOIN darwin.station s ON ms.stationid=s.id"
+                                                         + " INNER JOIN darwin.station s ON ms.crsid=s.id"
                                                          + " WHERE s.crs=?"
                                                          + " ORDER BY m.id DESC",
                                                          talpha ) ) {

@@ -142,7 +142,7 @@ BEGIN
                 (dt,operator,run,ontime,late,canc,ppm,rolling)
                 VALUES ( d_dt, d_operator, p_run, p_ontime, p_late, p_canc, p_ppm, p_rolling);
             d_id = CURRVAL('rtppm.realtime_id_seq');
-        ELSE IF p_run > rec.run OR p_ontime > rec.ontime OR p_late > rec.late OR p_canc > rec.canc THEN
+        ELSIF p_run > rec.run OR p_ontime > rec.ontime OR p_late > rec.late OR p_canc > rec.canc THEN
             UPDATE rtppm.daily
                 SET run = p_run, ontime = p_ontime, late=p_late, canc=p_canc, ppm=p_ppm, rolling=p_rolling
                 WHERE id = rec.id;

@@ -18,6 +18,7 @@
         <module>uktrain</module>
         <module>web-cms</module> 
         <module>web-core</module>
+        <module>web-ldb</module>
         <module>web-mediawiki</module>
         <module>web-performance</module>
         <module>web-signal</module>

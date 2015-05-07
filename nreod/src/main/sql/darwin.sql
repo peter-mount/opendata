@@ -296,6 +296,10 @@ CREATE TABLE forecast_entry (
     platsup     BOOLEAN DEFAULT false,
     cisplatsup  BOOLEAN DEFAULT false,
     platsrc     NAME,
+    -- Appear on LDB and terminated status
+    ldb         BOOLEAN,
+    tm          TIME,
+    term        BOOLEAN,
     --
     PRIMARY KEY (fid,tpl)
 );
@@ -330,6 +334,10 @@ CREATE TABLE forecast_entryarc (
     platsup     BOOLEAN DEFAULT false,
     cisplatsup  BOOLEAN DEFAULT false,
     platsrc     NAME,
+    -- Ignored in the archive
+    ldb         BOOLEAN,
+    tm          TIME,
+    term        BOOLEAN,
     --
     PRIMARY KEY (fid,tpl)
 );

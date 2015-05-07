@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+<tiles-definitions>
+    
+    <definition name="ldb.home" extends="layout.main">
+        <put-attribute name="title" value="Live Departure Boards" />
+        <put-attribute name="body" value=".ldb.home" />
+        <put-attribute name="javascript" value="/common/blank.jsp" />
+    </definition>
+    <definition name=".ldb.home" extends="layout.2col-left">
+        <put-attribute name="left" value=".left" />
+        <put-attribute name="center" value="/common/ldb/index.jsp" />
+    </definition>
+    
+    <definition name="ldb.info" extends="layout.main">
+        <put-attribute name="title" value="Live Departure Boards" />
+        <put-attribute name="body" value=".ldb.info" />
+        <!--put-attribute name="javascript" value="/common/jquery_map.jsp" />
+        <put-attribute name="footer" value="layout.footer.map" /-->
+    </definition>
+    <definition name=".ldb.info" extends="layout.2col-left">
+        <put-attribute name="center" value=".ldb.info.center" />
+        <put-attribute name="left" value=".left" />
+    </definition>
+    <definition name=".ldb.info.center" template="/common/ldb/departures.jsp" />
+    
+</tiles-definitions>

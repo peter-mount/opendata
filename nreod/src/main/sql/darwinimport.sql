@@ -42,6 +42,8 @@ DECLARE
     axml2       XML;
     --
     tid         TEXT;
+    aldb        BOOLEAN;
+    aterm       BOOLEAN;
     -- ID's
     id1         BIGINT;
     id2         BIGINT;
@@ -193,38 +195,58 @@ BEGIN
             
             id2 = darwin.tiploc(arec.tpl);
 
-            -- Calculate delay (if any)
+            -- Calculate delay (if any) & the LDB status as based on same tests
             CASE
+                -- train departed
                 WHEN arec.depat IS NOT NULL THEN
                     aat = arec.depat;
                     apt = arec.ptd;
                     awt = arec.wtd;
+                    aldb = FALSE;
+                    aterm = FALSE;
+                -- train arrived but not departed, may be terminated though
                 WHEN arec.arrat IS NOT NULL THEN
                     aat = arec.arrat;
                     apt = arec.pta;
                     awt = arec.wta;
+                    aldb = TRUE;
+                    aterm = arec.wtd IS NULL;
+                -- train has passed
                 WHEN arec.passat IS NOT NULL THEN
                     aat = arec.passat;
                     apt = NULL;
                     awt = arec.wtp;
+                    aldb = FALSE;
+                    aterm = FALSE;
+                -- departs eta
                 WHEN arec.depet IS NOT NULL THEN
                     aat = arec.depet;
                     apt = arec.ptd;
                     awt = arec.wtd;
+                    aldb = TRUE;
+                    aterm = FALSE;
+                -- arrived eta - in this case terminating
                 WHEN arec.arret IS NOT NULL THEN
                     aat = arec.arret;
                     apt = arec.pta;
                     awt = arec.wta;
+                    aldb = TRUE;
+                    aterm = arec.wtd IS NULL;
                 WHEN arec.passet IS NOT NULL THEN
                     aat = arec.passet;
                     apt = NULL;
                     awt = arec.wtp;
+                    aldb = FALSE;
+                    aterm = FALSE;
                 ELSE
                     aat = NULL;
                     apt = NULL;
                     awt = NULL;
+                    aldb = FALSE;
+                    aterm = FALSE;
             END CASE;
             
+            -- Delay calculation
             adelay = NULL;
             IF aat IS NOT NULL THEN
                 IF apt IS NOT NULL THEN
@@ -261,7 +283,10 @@ BEGIN
                             delay=adelay,
                             plat=arec.plat,
                             platsup=arec.platsup,
-                            cisplatsup=arec.cisplatsup
+                            cisplatsup=arec.cisplatsup,
+                            ldb=aldb,
+                            tm=aat,
+                            term=aterm
                         WHERE fid=id1 AND tpl=id2;
                     EXIT;
                 ELSE
@@ -273,7 +298,8 @@ BEGIN
                                 delay,
                                 arr,dep,pass,
                                 etarr,etdep,etpass,
-                                plat,platsup
+                                plat,platsup,
+                                ldb,tm,term
                             ) VALUES (
                                 id1,id2,
                                 arec.pta,arec.ptd,arec.wta,arec.wtd,arec.wtp,
@@ -281,7 +307,8 @@ BEGIN
                                 arec.arrat,arec.depat,arec.passat,
                                 arec.arret,arec.depet,arec.passet,
                                 arec.plat,
-                                arec.platsup
+                                arec.platsup,
+                                aldb,aat,aterm
                             );
                     EXCEPTION WHEN unique_violation THEN
                         -- Do nothing, loop & try again.
