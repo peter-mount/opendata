@@ -12,6 +12,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,6 +20,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.function.Function;
@@ -281,6 +283,31 @@ public class TimeUtils
             return null;
         }
         return getLocalTime( t.getTime() / 1000L );
+    }
+
+    /**
+     * Parses a PostgreSQL Interval type into a {@link Duration}. This is valid only for up to 24 hours"
+     *
+     * @param s Interval in "hh:mm:ss" format. A negative duration will have '-' first.
+     * @return
+     * @throws SQLException
+     */
+    public static Duration getDuration( String s )
+            throws SQLException
+    {
+        if( s == null || s.isEmpty() )
+        {
+            return null;
+        }
+        boolean negative = s.startsWith( "-" );
+        LocalTime t = LocalTime.parse( negative ? s.substring( 1 ) : s );
+        return Duration.of( negative ? -t.toSecondOfDay() : t.toSecondOfDay(), ChronoUnit.SECONDS );
+    }
+
+    public static Duration getDuration( ResultSet rs, String col )
+            throws SQLException
+    {
+        return getDuration( rs.getString( col ) );
     }
 
     public static Date toDate( LocalDate ld )

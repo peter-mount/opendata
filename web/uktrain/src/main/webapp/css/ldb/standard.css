@@ -1,0 +1,63 @@
+/* LDB Standard Theme */
+
+table.ldbTable {
+    width: 100%;
+    font-family: Arial;
+    font-size: 24pt;
+    border-collapse: collapse;
+    table-layout: fixed;
+    background: #000;
+    color: #fff;
+}
+
+table.ldbTable tr {
+    height: 36px;
+}
+
+.altrow {
+    background: #121d34;
+}
+
+table.ldbTable th {
+    border-collapse: collapse;
+    color: #ffff00;
+    margin: 0px;
+    padding: 6px 10px;
+    font-size: 24pt;
+    text-align: left;
+}
+
+table.ldbTable th, table.ldbTable td {
+    border-bottom: 2px solid #ffffff;
+}
+
+tr.ldbHead {
+
+}
+
+td.ldbCol {
+    text-align: center;
+    padding: 6px 10px;
+}
+
+th.ldbPlat {
+    width: 60px;
+    border-left: 4px solid #ffffff;
+}
+th.ldbSched {
+    width: 115px;
+    border-left: 4px solid #ffffff;
+}
+th.ldbForecast {
+    width: 170px;
+    border-left: 4px solid #ffffff;
+}
+td.ldbForecast {
+    text-align: left;
+}
+td.ldbOntime {
+    color: white;
+}
+td.ldbDelayed {
+    color: red;
+}

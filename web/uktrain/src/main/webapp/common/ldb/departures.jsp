@@ -8,17 +8,32 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="t" uri="http://uktra.in/tld/opendata" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
-<table class="wikitable" width="100%">
-    <caption>Departure Boards</caption>
-    <tr>
-        <th style="width: 2.5em;">Time</th>
-        <th style="width: 1.25+em;">Pl</th>
-        <th width="100%">Destination</th>
-        <th style="width: 2.5em;">Due</th>
+<h1>${location.location} - Departures</h1>
+
+<table class="ldbTable">
+
+    <tr class="ldbHead">
+        <th>Destination</th>
+        <th class="ldbCol ldbPlat">Plat.</th>
+        <th class="ldbCol ldbSched">Departs</th>
+        <th class="ldbCol ldbForecast">Expected</th>
     </tr>
-    <c:forEach var="dep" items="${departures}">
-        <tr>
-            <td align="center">
+
+    <c:forEach var="dep" varStatus="stat" items="${departures}">
+        <tr class="ldb-enttop<c:if test="${stat.count%2==1}"> altrow</c:if>">
+            <td>
+                <c:choose>
+                    <c:when test="${dep.terminated}">Terminates Here</c:when>
+                    <c:otherwise>${dep.dest}</c:otherwise>
+                </c:choose>
+                    <br>${dep.rid}
+            </td>
+            <td class="ldbCol ldbPlat">
+                <c:if test="${not (dep.platSup or dep.cisPlatSup)}">
+                    ${dep.plat}
+                </c:if>
+            </td>
+            <td class="ldbCol ldbSched">
                 <c:choose>
                     <c:when test="${not empty dep.pta}">
                         <t:time value="${dep.pta}"/>
@@ -28,20 +43,18 @@
                     </c:otherwise>
                 </c:choose>
             </td>
-            <td align="center">
-                <c:if test="${not (dep.platSup or dep.cisPlatSup)}">
-                    ${dep.plat}
-                </c:if>
-            </td>
-            <td align="left">
-                <c:choose>
-                    <c:when test="${dep.terminated}">Terminates Here</c:when>
-                    <c:otherwise>${dep.dest}</c:otherwise>
-                </c:choose>
-            </td>
-            <td align="center">
-                <t:time value="${dep.time}"/><br/>
-            </td>
+            <c:choose>
+                <c:when test="${dep.ontime}">
+                    <td class="ldbCol ldbForecast ldbOntime">On Time</td>
+                </c:when>
+                <c:otherwise>
+                    <td class="ldbCol ldbForecast">
+                        <t:time value="${dep.time}"/><br/>
+                        ${dep.ontime} ${dep.delay}
+                    </td>
+                </c:otherwise>
+            </c:choose>
         </tr>
+
     </c:forEach>
 </table>

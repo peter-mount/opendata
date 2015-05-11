@@ -41,7 +41,7 @@ public class LDB
             rs.getBoolean( "platsup" ),
             rs.getBoolean( "cisplatsup" ),
             // Delay tbi
-            null,
+            TimeUtils.getDuration( rs, "delay" ),
             // Terminated/terminates here
             rs.getBoolean( "term" )
     );
@@ -121,6 +121,11 @@ public class LDB
     public boolean isArrived()
     {
         return arr != null;
+    }
+
+    public boolean isOntime()
+    {
+        return delay.isZero() || Math.abs( delay.getSeconds() ) < 60;
     }
 
     public LocalTime getTime()

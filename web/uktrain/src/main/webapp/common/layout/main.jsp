@@ -16,8 +16,7 @@
                 </c:otherwise>
             </c:choose>
         </title>
-        <link rel="stylesheet" href="/css/tcmain.css" />
-        <link rel="stylesheet" href="/css/uktrain.css" />
+        <tiles:insertAttribute name="css"/>
         <tiles:insertAttribute name="javascript"/>
     </head>
     <body>
