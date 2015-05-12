@@ -29,8 +29,15 @@ DROP TABLE schedule_assocarc;
 DROP TABLE schedule_entryarc;
 DROP TABLE schedulearc;
 
+DROP TABLE via;
+DROP TABLE location;
+DROP TABLE toc;
 DROP TABLE crs;
 DROP TABLE tiploc;
+
+DROP TABLE latereason;
+DROP TABLE cancreason;
+DROP TABLE cissource;
 
 -- ----------------------------------------------------------------------
 -- Normalisation table of tiplocs
@@ -49,18 +56,22 @@ RETURNS INTEGER AS $$
 DECLARE
     rec     RECORD;
 BEGIN
-    LOOP
-        SELECT * INTO rec FROM darwin.tiploc WHERE tpl=ptpl;
-        IF FOUND THEN
-            RETURN rec.id;
-        END IF;
-        BEGIN
-            INSERT INTO darwin.tiploc (tpl) VALUES (ptpl);
-            RETURN currval('darwin.tiploc_id_seq');
-        EXCEPTION WHEN unique_violation THEN
-            -- Do nothing, loop & try again
-        END;
-    END LOOP;
+    IF ptpl IS NULL OR ptpl = '' THEN
+        RETURN null;
+    ELSE
+        LOOP
+            SELECT * INTO rec FROM darwin.tiploc WHERE tpl=ptpl;
+            IF FOUND THEN
+                RETURN rec.id;
+            END IF;
+            BEGIN
+                INSERT INTO darwin.tiploc (tpl) VALUES (ptpl);
+                RETURN currval('darwin.tiploc_id_seq');
+            EXCEPTION WHEN unique_violation THEN
+                -- Do nothing, loop & try again
+            END;
+        END LOOP;
+    END IF;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -81,20 +92,137 @@ RETURNS INTEGER AS $$
 DECLARE
     rec     RECORD;
 BEGIN
-    LOOP
-        SELECT * INTO rec FROM darwin.crs WHERE crs=pcrs;
-        IF FOUND THEN
-            RETURN rec.id;
-        END IF;
-        BEGIN
-            INSERT INTO darwin.crs (crs) VALUES (pcrs);
-            RETURN currval('darwin.crs_id_seq');
-        EXCEPTION WHEN unique_violation THEN
-            -- Do nothing, loop & try again
-        END;
-    END LOOP;
+    IF pcrs IS NULL OR pcrs = '' THEN
+        RETURN NULL;
+    ELSE
+        LOOP
+            SELECT * INTO rec FROM darwin.crs WHERE crs=pcrs;
+            IF FOUND THEN
+                RETURN rec.id;
+            END IF;
+            BEGIN
+                INSERT INTO darwin.crs (crs) VALUES (pcrs);
+                RETURN currval('darwin.crs_id_seq');
+            EXCEPTION WHEN unique_violation THEN
+                -- Do nothing, loop & try again
+            END;
+        END LOOP;
+    END IF;
 END;
 $$ LANGUAGE plpgsql;
+
+-- ----------------------------------------------------------------------
+-- Darwin tocs
+-- ----------------------------------------------------------------------
+
+CREATE TABLE toc (
+    id      SERIAL NOT NULL,
+    code    CHAR(2) NOT NULL,
+    name    TEXT NOT NULL,
+    -- url of the toc? seems unused at
+    url TEXT,
+    PRIMARY KEY (id)
+);
+
+CREATE UNIQUE INDEX toc_c ON toc(code);
+CREATE INDEX toc_n ON toc(name);
+
+ALTER TABLE toc OWNER TO rail;
+
+-- ----------------------------------------------------------------------
+-- Darwin Location table - maps a single crs to multiple tiplocs
+-- ----------------------------------------------------------------------
+
+CREATE TABLE location (
+    id      SERIAL NOT NULL,
+    tpl     INTEGER NOT NULL REFERENCES tiploc(id),
+    crs     INTEGER REFERENCES crs(id),
+    toc     INTEGER REFERENCES toc(id),
+    name    NAME NOT NULL,
+    PRIMARY KEY (tpl)
+);
+
+CREATE INDEX location_i ON location(id);
+CREATE INDEX location_c ON location(crs);
+CREATE INDEX location_o ON location(toc);
+CREATE INDEX location_n ON location(name);
+
+ALTER TABLE location OWNER TO rail;
+ALTER SEQUENCE location_id_seq OWNER TO rail;
+
+-- ----------------------------------------------------------------------
+-- Darwin Late Running Reasons
+-- ----------------------------------------------------------------------
+
+CREATE TABLE latereason (
+    id      INTEGER NOT NULL,
+    name    TEXT NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE UNIQUE INDEX latereason_i ON latereason(id);
+
+ALTER TABLE latereason OWNER TO rail;
+
+-- ----------------------------------------------------------------------
+-- Darwin Late Running Reasons
+-- ----------------------------------------------------------------------
+
+CREATE TABLE cancreason (
+    id      INTEGER NOT NULL,
+    name    TEXT NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE UNIQUE INDEX cancreason_i ON cancreason(id);
+
+ALTER TABLE cancreason OWNER TO rail;
+
+-- ----------------------------------------------------------------------
+-- Darwin CIS source code
+-- ----------------------------------------------------------------------
+
+CREATE TABLE cissource (
+    id      SERIAL NOT NULL,
+    code    CHAR(4) NOT NULL,
+    name    TEXT NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE UNIQUE INDEX cissource_i ON cissource(id);
+CREATE UNIQUE INDEX cissource_c ON cissource(code);
+CREATE INDEX cissource_n ON cissource(name);
+
+ALTER TABLE cissource OWNER TO rail;
+
+-- ----------------------------------------------------------------------
+-- Darwin via
+-- ----------------------------------------------------------------------
+
+CREATE TABLE via (
+    id      SERIAL NOT NULL,
+    -- CRS of station where via is defined
+    at      INTEGER NOT NULL REFERENCES crs(id),
+    -- tiploc of destination for this via to be valid
+    dest    INTEGER NOT NULL REFERENCES tiploc(id),
+    -- Journey must call at this tiploc for via text to be valid
+    loc1    INTEGER NOT NULL REFERENCES tiploc(id),
+    -- if defined, Journey must call at this tiploc after loc1 for via text to be valid
+    loc2    INTEGER REFERENCES tiploc(id),
+    -- Text to display if journey matches
+    text    TEXT NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE UNIQUE INDEX via_i ON via(id);
+CREATE INDEX via_a ON via(at);
+CREATE INDEX via_d ON via(dest);
+CREATE INDEX via_l1 ON via(loc1);
+CREATE INDEX via_l2 ON via(loc2);
+CREATE INDEX via_i1 ON via(at,dest,loc1);
+CREATE INDEX via_i2 ON via(at,dest,loc1,loc2);
+
+ALTER TABLE via OWNER TO rail;
 
 -- ----------------------------------------------------------------------
 -- Schedule

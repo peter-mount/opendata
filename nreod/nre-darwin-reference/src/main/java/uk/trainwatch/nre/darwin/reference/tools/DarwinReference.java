@@ -26,8 +26,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import javax.xml.bind.JAXBException;
 import org.apache.commons.cli.CommandLine;
@@ -49,7 +51,7 @@ import uk.trainwatch.util.sql.SQLConsumer;
  * <p>
  * @author peter
  */
-@MetaInfServices(Utility.class)
+@MetaInfServices( Utility.class )
 public class DarwinReference
         extends DBUtility
 {
@@ -64,7 +66,7 @@ public class DarwinReference
     }
 
     @Override
-    @SuppressWarnings("ThrowableInstanceNeverThrown")
+    @SuppressWarnings( "ThrowableInstanceNeverThrown" )
     public boolean parseArgs( CommandLine cmd )
     {
         super.parseArgs( cmd );
@@ -85,26 +87,27 @@ public class DarwinReference
     private void parse( Connection con, Path p )
             throws SQLException
     {
-        try( InputStream is = new GZIPInputStream( new FileInputStream( p.toFile() ) ) ) {
-            try( Reader r = new InputStreamReader( is ) ) {
+        try( InputStream is = new GZIPInputStream( new FileInputStream( p.toFile() ) ) )
+        {
+            try( Reader r = new InputStreamReader( is ) )
+            {
                 PportTimetableRef t = DarwinJaxbContext.INSTANCE.unmarshall( r );
 
-                parseLocation( con, t.getLocationRef() );
+                Map<String, Integer> tocs = parseTocRef( con, t.getTocRef() );
+                parseLocation( con, t.getLocationRef(), tocs );
 
                 parseReasons( con, t.getCancellationReasons().getReason(), "cancreason" );
                 parseReasons( con, t.getLateRunningReasons().getReason(), "latereason" );
 
                 parseCISSource( con, t.getCISSource() );
 
-                parseTocRef( con, t.getTocRef() );
-
                 parseVia( con, t.getVia() );
             }
-        }
-        catch( IOException ex ) {
+        } catch( IOException ex )
+        {
             throw new UncheckedIOException( ex );
-        }
-        catch( JAXBException ex ) {
+        } catch( JAXBException ex )
+        {
             throw new RuntimeException( ex );
         }
     }
@@ -115,25 +118,30 @@ public class DarwinReference
         SQL.deleteIdTable( con, SCHEMA, "cissource" );
 
         LOG.log( Level.INFO, () -> "Importing cissource" );
-        try( PreparedStatement ps = SQL.prepare( con, "INSERT INTO " + SCHEMA + ".cissource (code,name) VALUES (?,?)" ) ) {
+        try( PreparedStatement ps = SQL.prepare( con, "INSERT INTO " + SCHEMA + ".cissource (code,name) VALUES (?,?)" ) )
+        {
             sources.forEach( SQLConsumer.guard( l -> SQL.executeUpdate( ps, l.getCode(), l.getName() ) ) );
         }
         LOG.log( Level.INFO, () -> "Imported " + sources.size() + " cissource" );
 
     }
 
-    private void parseLocation( Connection con, List<LocationRef> locs )
+    private void parseLocation( Connection con, List<LocationRef> locs, Map<String, Integer> tocs )
             throws SQLException
     {
         SQL.deleteIdTable( con, SCHEMA, "location" );
 
         LOG.log( Level.INFO, () -> "Importing location" );
-        try( PreparedStatement ps = SQL.prepare( con, "INSERT INTO " + SCHEMA + ".location (tpl,crs,toc,name) VALUES (darwin.tiploc(?),darwin.crs(?),?,?)" ) ) {
+        try( PreparedStatement ps = SQL.prepare( con,
+                "INSERT INTO " + SCHEMA + ".location"
+                + " (tpl,crs,toc,name)"
+                + " VALUES (darwin.tiploc(?),darwin.crs(?),?,?)" ) )
+        {
             locs.forEach( SQLConsumer.guard( l -> SQL.executeUpdate( ps,
-                                                                     l.getTpl(),
-                                                                     l.getCrs(),
-                                                                     l.getToc(),
-                                                                     l.getLocname()
+                    l.getTpl(),
+                    l.getCrs(),
+                    tocs.get( l.getToc() ),
+                    l.getLocname()
             ) ) );
         }
         LOG.log( Level.INFO, () -> "Imported " + locs.size() + " locations" );
@@ -145,21 +153,34 @@ public class DarwinReference
         SQL.deleteTable( con, SCHEMA, table );
 
         LOG.log( Level.INFO, () -> "Importing " + table );
-        try( PreparedStatement ps = SQL.prepare( con, "INSERT INTO " + SCHEMA + "." + table + "(id,name) VALUES (?,?)" ) ) {
+        try( PreparedStatement ps = SQL.prepare( con, "INSERT INTO " + SCHEMA + "." + table + "(id,name) VALUES (?,?)" ) )
+        {
             reasons.forEach( SQLConsumer.guard( l -> SQL.executeUpdate( ps, l.getCode(), l.getReasontext() ) ) );
         }
     }
 
-    private void parseTocRef( Connection con, List<TocRef> tocs )
+    private Map<String, Integer> parseTocRef( Connection con, List<TocRef> tocs )
             throws SQLException
     {
         SQL.deleteIdTable( con, SCHEMA, "toc" );
 
         LOG.log( Level.INFO, () -> "Importing toc" );
-        try( PreparedStatement ps = SQL.prepare( con, "INSERT INTO " + SCHEMA + ".toc (code,name,url) VALUES (?,?,?)" ) ) {
+        try( PreparedStatement ps = SQL.prepare( con, "INSERT INTO " + SCHEMA + ".toc (code,name,url) VALUES (?,?,?)" ) )
+        {
             tocs.forEach( SQLConsumer.guard( l -> SQL.executeUpdate( ps, l.getToc(), l.getTocname(), l.getUrl() ) ) );
         }
         LOG.log( Level.INFO, () -> "Imported " + tocs.size() + " tocs" );
+
+        try( PreparedStatement ps = SQL.prepare( con, "SELECT id,code FROM " + SCHEMA + ".toc" ) )
+        {
+            return SQL.stream( ps,
+                    rs -> new Object()
+                    {
+                        Integer id = rs.getInt( "id" );
+                        String code = rs.getString( "code" );
+                    }
+            ).collect( Collectors.toMap( o -> o.code, o -> o.id ) );
+        }
     }
 
     private void parseVia( Connection con, List<Via> vias )
@@ -168,13 +189,17 @@ public class DarwinReference
         SQL.deleteIdTable( con, SCHEMA, "via" );
 
         LOG.log( Level.INFO, () -> "Importing via" );
-        try( PreparedStatement ps = SQL.prepare( con, "INSERT INTO " + SCHEMA + ".via (at,dest,loc1,loc2,text) VALUES (?,?,?,?,?)" ) ) {
+        try( PreparedStatement ps = SQL.prepare( con,
+                "INSERT INTO " + SCHEMA + ".via"
+                + " (at,dest,loc1,loc2,text)"
+                + " VALUES (darwin.crs(?),darwin.tiploc(?),darwin.tiploc(?),darwin.tiploc(?),?)" ) )
+        {
             vias.forEach( SQLConsumer.guard( l -> SQL.executeUpdate( ps,
-                                                                     l.getAt(),
-                                                                     l.getDest(),
-                                                                     l.getLoc1(),
-                                                                     l.getLoc2(),
-                                                                     l.getViatext()
+                    l.getAt(),
+                    l.getDest(),
+                    l.getLoc1(),
+                    l.getLoc2(),
+                    l.getViatext()
             ) ) );
         }
         LOG.log( Level.INFO, () -> "Imported " + vias.size() + " vias" );
