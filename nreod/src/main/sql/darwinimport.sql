@@ -30,6 +30,47 @@ RETURNS INT AS $$
 $$ LANGUAGE sql STABLE;
 
 -- ----------------------------------------------------------------------
+-- Archives a train by rid
+-- Primarily used by darwinimport but is separate to allow maintenance
+-- scripts to archive entries
+-- ----------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION darwin.darwinarchive(tid TEXT)
+RETURNS VOID AS $$
+DECLARE
+    id2     BIGINT;
+    id3     BIGINT;
+BEGIN
+
+    SELECT id INTO id2 FROM darwin.schedule WHERE rid=tid;
+    SELECT id INTO id3 FROM darwin.forecast WHERE rid=tid;
+
+    -- Now archive the schedule
+    INSERT INTO darwin.schedulearc
+        SELECT * FROM darwin.schedule WHERE id=id2;
+    INSERT INTO darwin.schedule_entryarc
+        SELECT * FROM darwin.schedule_entry WHERE schedule=id2;
+    INSERT INTO darwin.schedule_assocarc
+        SELECT * FROM darwin.schedule_assoc WHERE mainid=id2 OR associd=id2;
+
+    -- archive the forecasts
+    INSERT INTO darwin.forecastarc
+        SELECT * FROM darwin.forecast WHERE id=id3;
+    INSERT INTO darwin.forecast_entryarc
+        SELECT * FROM darwin.forecast_entry WHERE fid=id3;
+
+    -- Now remove data from from the live tables
+    DELETE FROM darwin.forecast_entry WHERE fid=id3;
+    DELETE FROM darwin.forecast WHERE id=id3;
+    DELETE FROM darwin.schedule_entry WHERE schedule=id2;
+    DELETE FROM darwin.schedule_assoc WHERE mainid=id2 OR associd=id2;
+    DELETE FROM darwin.schedule WHERE id=id2;
+
+END;
+$$ LANGUAGE plpgsql;
+
+-- ----------------------------------------------------------------------
+
+-- ----------------------------------------------------------------------
 -- Parses a push port message importing its contents into the database
 -- ----------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION darwin.darwinimport(pxml XML)
@@ -532,30 +573,9 @@ BEGIN
 
         -- Mark the forecast as deactivated
         UPDATE darwin.forecast SET deactivated=true, ts=ats WHERE rid=tid;
-        SELECT id INTO id2 FROM darwin.schedule WHERE rid=tid;
-        SELECT id INTO id3 FROM darwin.forecast WHERE rid=tid;
 
-        -- Now archive the schedule
-        INSERT INTO darwin.schedulearc
-            SELECT * FROM darwin.schedule WHERE id=id2;
-        INSERT INTO darwin.schedule_entryarc
-            SELECT * FROM darwin.schedule_entry WHERE schedule=id2;
-        INSERT INTO darwin.schedule_assocarc
-            SELECT * FROM darwin.schedule_assoc WHERE mainid=id2 OR associd=id2;
-
-        -- archive the forecasts
-        INSERT INTO darwin.forecastarc
-            SELECT * FROM darwin.forecast WHERE id=id3;
-        INSERT INTO darwin.forecast_entryarc
-            SELECT * FROM darwin.forecast_entry WHERE fid=id3;
-
-        -- Now remove data from from the live tables
-        DELETE FROM darwin.forecast_entry WHERE fid=id3;
-        DELETE FROM darwin.forecast WHERE id=id3;
-        DELETE FROM darwin.schedule_entry WHERE schedule=id2;
-        DELETE FROM darwin.schedule_assoc WHERE mainid=id2 OR associd=id2;
-        DELETE FROM darwin.schedule WHERE id=id2;
-
+        -- Now archive it
+        PERFORM darwin.darwinarchive(tid);
     END LOOP;
 
 END;
