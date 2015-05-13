@@ -224,6 +224,7 @@ BEGIN
         LOOP
             SELECT  (xpath('local-name(/*)',axml2,ns))[1]::TEXT AS type,
                     (xpath('//@tpl',axml2,ns))[1]::TEXT AS tpl,
+                    (xpath('//@can',axml2,ns))[1]::TEXT::BOOLEAN AS can,
                     (xpath('//@act',axml2,ns))[1]::TEXT AS act,
                     (xpath('//@pta',axml2,ns))[1]::TEXT::TIME AS pta,
                     (xpath('//@ptd',axml2,ns))[1]::TEXT::TIME AS ptd,
@@ -232,14 +233,13 @@ BEGIN
                     (xpath('//@wtp',axml2,ns))[1]::TEXT::TIME AS wtp
                 INTO arec2 LIMIT 1;
             IF arec2.type != 'cancelReason' THEN
-                INSERT INTO darwin.schedule_entry (schedule,type,tpl,pta,ptd,wta,wtd,wtp,act)
-                    VALUES (id1,arec2.type,darwin.tiploc(arec2.tpl),arec2.pta,arec2.ptd,arec2.wta,arec2.wtd,arec2.wtp,arec2.act);
+                INSERT INTO darwin.schedule_entry (schedule,type,tpl,pta,ptd,wta,wtd,wtp,act,can)
+                    VALUES (id1,arec2.type,darwin.tiploc(arec2.tpl),arec2.pta,arec2.ptd,arec2.wta,arec2.wtd,arec2.wtp,arec2.act,arec2.can);
             END IF;
         END LOOP;
 
     END LOOP;
     -- End of schedules
---            INSERT INTO darwin.log VALUES (arec.type);
 
     -- ---------------------------------------------------------------------------
     -- Forecasts

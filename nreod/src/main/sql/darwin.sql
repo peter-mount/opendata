@@ -291,6 +291,7 @@ CREATE TABLE schedule_entry (
     wtd         TIME,
     wtp         TIME,
     act         NAME,
+    can         BOOLEAN DEFAULT false,
     PRIMARY KEY(id)
 );
 CREATE INDEX schedule_entry_s ON schedule_entry(schedule);
@@ -308,6 +309,7 @@ CREATE TABLE schedule_entryarc (
     wtd         TIME,
     wtp         TIME,
     act         NAME,
+    can         BOOLEAN DEFAULT false,
     PRIMARY KEY(id)
 );
 CREATE INDEX schedule_entryarc_s ON schedule_entryarc(schedule);
