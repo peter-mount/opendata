@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
+import uk.trainwatch.nre.darwin.stationmsg.StationMessageManager;
 import uk.trainwatch.nrod.location.TrainLocation;
 import uk.trainwatch.nrod.location.TrainLocationFactory;
 import uk.trainwatch.util.TimeUtils;
@@ -159,6 +160,11 @@ public class LDBServlet
             }
 
             req.put( "departures", departures );
+
+            req.put( "stationMessages",
+                     StationMessageManager.INSTANCE.
+                     getMessages( loc.getCrs() ).
+                     collect( Collectors.toList() ) );
         }
     }
 

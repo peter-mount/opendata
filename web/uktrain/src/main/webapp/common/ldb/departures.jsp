@@ -20,15 +20,52 @@
         <th class="ldbCol ldbForecast">Expected</th>
     </tr>
 
+    ${stationMessages}
+    <c:set var="row" value="false"/>
+
+    <c:set var="first" value="false"/>
+    <c:forEach var="msg" items="${stationMessages}">
+        <c:if test="${not msg.suppress}">
+            <c:if test="${not first}">
+                <c:set var="first" value="true"/>
+            </c:if>
+            <c:set var="row" value="${!row}"/>
+            <tr class="ldb-enttop<c:if test="${row}"> altrow</c:if>">
+                    <td colspan="4">
+                    ${msg.cat.value()} Update:
+                    <c:forEach var="m1" items="${msg.msg.content}">
+                        <c:set var="c" value="${m1.getClass().getName()}"/>
+                        <c:choose>
+                            <c:when test="${c.endsWith('.A')}"><a href="${m1.href}">${m1.value}</a></c:when>
+                            <c:when test="${c.endsWith('.P')}">
+                                <p>
+                                    <c:forEach var="m2" items="${m1.content}">
+                                        <c:set var="c" value="${m2.getClass().getName()}"/>
+                                        <c:choose>
+                                            <c:when test="${c.endsWith('.A')}"><a href="${m2.href}">${m2.value}</a></c:when>
+                                            <c:otherwise>${m2}</c:otherwise>
+                                        </c:choose>
+                                    </c:forEach>
+                                </p>
+                            </c:when>
+                            <c:otherwise>${m1}</c:otherwise>
+                        </c:choose>
+                    </c:forEach>
+                </td>
+            </tr>
+        </c:if>
+    </c:forEach>
+
     <c:forEach var="dep" varStatus="stat" items="${departures}">
         <c:if test="${!dep.sup}">
-            <tr class="ldb-enttop<c:if test="${stat.count%2==1}"> altrow</c:if>">
+            <c:set var="row" value="${!row}"/>
+            <tr class="ldb-enttop<c:if test="${row}"> altrow</c:if>">
                     <td>
                     <c:choose>
                         <c:when test="${dep.terminated}">Terminates Here</c:when>
                         <c:otherwise>
                             <d:tiploc value="${dep.dest}" link="false"/>
-                            <d:via value="${dep.via}"/>
+                            <span class="ldbVia"><d:via value="${dep.via}"/></span>
                         </c:otherwise>
                     </c:choose>
                 </td>
@@ -63,7 +100,7 @@
             </tr>
             <c:choose>
                 <c:when test="${dep.cancReason>0}">
-                    <tr class="ldb-entbot<c:if test="${stat.count%2==1}"> altrow</c:if>">
+                    <tr class="ldb-entbot<c:if test="${row}"> altrow</c:if>">
                             <td colspan="4">
                                 <span class=".ldbCancelled">
                                 <d:cancelReason value="${dep.cancReason}"/>
@@ -72,7 +109,7 @@
                     </tr>
                 </c:when>
                 <c:when test="${dep.lateReason>0}">
-                    <tr class="ldb-entbot<c:if test="${stat.count%2==1}"> altrow</c:if>">
+                    <tr class="ldb-entbot<c:if test="${row}"> altrow</c:if>">
                             <td colspan="4">
                                 <span class=".ldbLate">
                                 <d:lateReason value="${dep.lateReason}"/>
@@ -81,7 +118,7 @@
                     </tr>
                 </c:when>
             </c:choose>
-            <tr class="ldb-entbot<c:if test="${stat.count%2==1}"> altrow</c:if>">
+            <tr class="ldb-entbot<c:if test="${row}"> altrow</c:if>">
                     <td colspan="4">
                     <c:choose>
                         <c:when test="${dep.terminated}">
@@ -101,7 +138,12 @@
                             </span>
                         </c:when>
                         <c:otherwise>
-                            <span class="ldbHeader">Calling at:</span>
+                            <span class="ldbHeader">
+                                <c:choose>
+                                    <c:when test="${dep.cancReason>0}">This was the train calling at:</c:when>
+                                    <c:otherwise>Calling at:</c:otherwise>
+                                </c:choose>
+                            </span>
                             <c:forEach var="point" varStatus="pstat" items="${dep.points}">
                                 <c:choose>
                                     <c:when test="${pstat.last}">
@@ -115,7 +157,6 @@
                                             <d:tiploc value="${point.tpl}"/>
                                             (<t:time value="${point.time}"/>)
                                         </span>
-
                                     </c:when>
                                 </c:choose>
                             </c:forEach>

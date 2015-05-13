@@ -33,6 +33,11 @@ table.ldbTable th, table.ldbTable td {
     border-top: 2px solid #ffffff;
     font-size: 24pt;
 }
+.ldb-enttop .ldbVia {
+    font-size: 20pt;
+    color: #aaa;
+}
+
 .ldb-entwarn {
     font-size: 14pt;
 }
