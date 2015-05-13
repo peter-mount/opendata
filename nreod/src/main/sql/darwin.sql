@@ -243,6 +243,8 @@ CREATE TABLE schedule (
     ts          TIMESTAMP WITH TIME ZONE,
     trainId     CHAR(4),
     toc         CHAR(2),
+    cancreason  INTEGER,
+    via         INTEGER REFERENCES via(id),
     origin      INTEGER NOT NULL REFERENCES tiploc(id),
     dest        INTEGER NOT NULL REFERENCES tiploc(id),
     PRIMARY KEY(id)
@@ -264,6 +266,8 @@ CREATE TABLE schedulearc (
     ts          TIMESTAMP WITH TIME ZONE,
     trainId     CHAR(4),
     toc         CHAR(2),
+    cancreason  INTEGER,
+    via         INTEGER REFERENCES via(id),
     origin      INTEGER NOT NULL REFERENCES tiploc(id),
     dest        INTEGER NOT NULL REFERENCES tiploc(id),
     PRIMARY KEY(id)

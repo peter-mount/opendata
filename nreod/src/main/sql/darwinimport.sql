@@ -68,7 +68,8 @@ BEGIN
                 (xpath('//sched:OR/@tpl',axml,ns))[1]::TEXT AS por,
                 (xpath('//sched:OPOR/@tpl',axml,ns))[1]::TEXT AS wor,
                 (xpath('//sched:DT/@tpl',axml,ns))[1]::TEXT AS pdt,
-                (xpath('//sched:OPDT/@tpl',axml,ns))[1]::TEXT AS wdt
+                (xpath('//sched:OPDT/@tpl',axml,ns))[1]::TEXT AS wdt,
+                (xpath('//sched:cancelReason/text()',axml,ns))[1]::TEXT::INTEGER AS canc
             INTO arec LIMIT 1;
 
         -- Resolve origin & destination
@@ -88,13 +89,13 @@ BEGIN
         LOOP
             SELECT id INTO rec FROM darwin.schedule WHERE rid=arec.rid;
             IF FOUND THEN
-                UPDATE darwin.schedule SET ts = ats WHERE rid=arec.rid;
+                UPDATE darwin.schedule SET ts = ats, cancreason=arec.canc WHERE rid=arec.rid;
                 id1 = rec.id;
                 EXIT;
             ELSE
                 BEGIN
-                    INSERT INTO darwin.schedule (rid,uid,ssd,trainid,toc,ts,origin,dest)
-                        VALUES (arec.rid,arec.uid,arec.ssd,arec.trainid,arec.toc,ats,id2,id3);
+                    INSERT INTO darwin.schedule (rid,uid,ssd,trainid,toc,ts,origin,dest,cancreason)
+                        VALUES (arec.rid,arec.uid,arec.ssd,arec.trainid,arec.toc,ats,id2,id3,arec.canc);
                     id1=currval('darwin.schedule_id_seq');
                 EXCEPTION WHEN unique_violation THEN
                     -- Ignore & try again, the update will then be performed
@@ -121,7 +122,7 @@ BEGIN
         DELETE FROM darwin.schedule_entry WHERE schedule=id1;
         FOREACH axml2 IN ARRAY xpath('//sched:*',axml,ns)
         LOOP
-            SELECT  (xpath('name(/*)',axml2,ns))[1]::TEXT AS type,
+            SELECT  (xpath('local-name(/*)',axml2,ns))[1]::TEXT AS type,
                     (xpath('//@tpl',axml2,ns))[1]::TEXT AS tpl,
                     (xpath('//@act',axml2,ns))[1]::TEXT AS act,
                     (xpath('//@pta',axml2,ns))[1]::TEXT::TIME AS pta,
@@ -130,9 +131,10 @@ BEGIN
                     (xpath('//@wtd',axml2,ns))[1]::TEXT::TIME AS wtd,
                     (xpath('//@wtp',axml2,ns))[1]::TEXT::TIME AS wtp
                 INTO arec LIMIT 1;
-            INSERT INTO darwin.schedule_entry (schedule,type,tpl,pta,ptd,wta,wtd,wtp,act)
-                VALUES (id1,arec.type,darwin.tiploc(arec.tpl),arec.pta,arec.ptd,arec.wta,arec.wtd,arec.wtp,arec.act);
-            
+            IF arec.type != 'cancelReason' THEN
+                INSERT INTO darwin.schedule_entry (schedule,type,tpl,pta,ptd,wta,wtd,wtp,act)
+                    VALUES (id1,arec.type,darwin.tiploc(arec.tpl),arec.pta,arec.ptd,arec.wta,arec.wtd,arec.wtp,arec.act);
+            END IF;
         END LOOP;
 
     END LOOP;
