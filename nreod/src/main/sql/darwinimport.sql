@@ -9,6 +9,27 @@
 SET search_path = darwin;
 
 -- ----------------------------------------------------------------------
+-- Search index i array
+-- http://stackoverflow.com/questions/8798055/finding-the-position-of-a-value-in-postgresql-arrays
+-- ----------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION array_search(needle ANYELEMENT, haystack ANYARRAY)
+RETURNS INT AS $$
+    SELECT i
+      FROM generate_subscripts($2, 1) AS i
+     WHERE $2[i] = $1
+  ORDER BY i
+$$ LANGUAGE sql STABLE;
+
+CREATE OR REPLACE FUNCTION array_search(needle ANYELEMENT, haystack ANYARRAY, ofs INTEGER)
+RETURNS INT AS $$
+    SELECT i
+      FROM generate_subscripts($2, 1) AS i
+     WHERE i >= $3 AND $2[i] = $1
+  ORDER BY i
+$$ LANGUAGE sql STABLE;
+
+-- ----------------------------------------------------------------------
 -- Parses a push port message importing its contents into the database
 -- ----------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION darwin.darwinimport(pxml XML)
@@ -33,6 +54,7 @@ DECLARE
     ats         TIMESTAMP WITH TIME ZONE;
     -- record used in xml parsing
     arec        RECORD;
+    arec2       RECORD;
     aat         TIME;
     apt         TIME;
     awt         TIME;
@@ -51,6 +73,12 @@ DECLARE
     id1         BIGINT;
     id2         BIGINT;
     id3         BIGINT;
+    -- Resolve via
+    avia         BIGINT;
+    acrs        BIGINT;
+    tpls        INTEGER[];
+    aidx1       INTEGER;
+    aidx2       INTEGER;
 BEGIN
 
     ats = (xpath('//pport:Pport/@ts',pxml,ns))[1]::TEXT::TIMESTAMP WITH TIME ZONE;
@@ -85,17 +113,48 @@ BEGIN
             id3 = darwin.tiploc(arec.wdt);
         END IF;
         
+        -- resolve possible VIA entry
+        avia = NULL;
+        SELECT c.id INTO acrs FROM darwin.crs c INNER JOIN darwin.location l ON c.id=l.crs WHERE l.tpl = id2;
+        IF FOUND THEN
+            -- tiplocs in schedule
+            tpls = ARRAY[]::INTEGER[];
+            FOREACH axml2 IN ARRAY xpath('//sched:*/@tpl',axml,ns)
+            LOOP
+                tpls=array_append(tpls,darwin.tiploc(axml2::TEXT));
+            END LOOP;
+
+            FOR arec2 IN SELECT * FROM darwin.via WHERE at=acrs AND dest=id3 AND loc1=ANY(tpls) AND loc2=ANY(tpls)
+            LOOP
+                aidx1 = darwin.array_search(arec2.loc1,tpls);
+                aidx2 = darwin.array_search(arec2.loc2,tpls,aidx1+1);
+                IF aidx2 > 0 THEN
+                    avia = arec2.id;
+                    EXIT;
+                END IF;
+            END LOOP;
+
+            IF avia IS NULL THEN
+                SELECT id INTO arec2 FROM darwin.via WHERE at=acrs AND dest=id3 AND loc1=ANY(tpls) AND loc2 IS NULL LIMIT 1;
+                IF FOUND THEN
+                    avia = arec2.id;
+                END IF;
+            END IF;
+        END IF;
+
         -- Create/update the schedule table
         LOOP
             SELECT id INTO rec FROM darwin.schedule WHERE rid=arec.rid;
             IF FOUND THEN
-                UPDATE darwin.schedule SET ts = ats, cancreason=arec.canc WHERE rid=arec.rid;
+                UPDATE darwin.schedule
+                    SET ts = ats, cancreason=arec.canc, via=avia
+                    WHERE rid=arec.rid;
                 id1 = rec.id;
                 EXIT;
             ELSE
                 BEGIN
-                    INSERT INTO darwin.schedule (rid,uid,ssd,trainid,toc,ts,origin,dest,cancreason)
-                        VALUES (arec.rid,arec.uid,arec.ssd,arec.trainid,arec.toc,ats,id2,id3,arec.canc);
+                    INSERT INTO darwin.schedule (rid,uid,ssd,trainid,toc,ts,origin,dest,cancreason,via)
+                        VALUES (arec.rid,arec.uid,arec.ssd,arec.trainid,arec.toc,ats,id2,id3,arec.canc,avia);
                     id1=currval('darwin.schedule_id_seq');
                 EXCEPTION WHEN unique_violation THEN
                     -- Ignore & try again, the update will then be performed
@@ -130,10 +189,10 @@ BEGIN
                     (xpath('//@wta',axml2,ns))[1]::TEXT::TIME AS wta,
                     (xpath('//@wtd',axml2,ns))[1]::TEXT::TIME AS wtd,
                     (xpath('//@wtp',axml2,ns))[1]::TEXT::TIME AS wtp
-                INTO arec LIMIT 1;
-            IF arec.type != 'cancelReason' THEN
+                INTO arec2 LIMIT 1;
+            IF arec2.type != 'cancelReason' THEN
                 INSERT INTO darwin.schedule_entry (schedule,type,tpl,pta,ptd,wta,wtd,wtp,act)
-                    VALUES (id1,arec.type,darwin.tiploc(arec.tpl),arec.pta,arec.ptd,arec.wta,arec.wtd,arec.wtp,arec.act);
+                    VALUES (id1,arec2.type,darwin.tiploc(arec2.tpl),arec2.pta,arec2.ptd,arec2.wta,arec2.wtd,arec2.wtp,arec2.act);
             END IF;
         END LOOP;
 
