@@ -15,7 +15,7 @@
     <thead>
         <tr>
             <c:forEach var="idx" items="${index}">
-                <th style="width:1.5em;"><a href="/station/?s=${idx}">${idx}</a></th>
+                <th style="width:1.5em;"><a href="/ldb/?s=${idx}">${idx}</a></th>
                 </c:forEach>
         </tr>
         <tr>

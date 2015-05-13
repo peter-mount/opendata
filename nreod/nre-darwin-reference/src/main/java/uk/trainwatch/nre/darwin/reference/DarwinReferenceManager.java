@@ -179,6 +179,23 @@ public enum DarwinReferenceManager
         }
     }
 
+    public String getViaText( int via )
+    {
+        if( via == 0 ) {
+            return null;
+        }
+        try( Connection con = dataSource.getConnection();
+             PreparedStatement ps = SQL.prepare( con, "SELECT text FROM darwin.via WHERE id=?", via ) ) {
+            return SQL.stream( ps, SQL.STRING_LOOKUP ).
+                    findAny().
+                    orElse( null );
+        }
+        catch( SQLException ex ) {
+            LOG.log( Level.SEVERE, null, ex );
+            return null;
+        }
+    }
+
     /**
      * The CIS source
      * <p>

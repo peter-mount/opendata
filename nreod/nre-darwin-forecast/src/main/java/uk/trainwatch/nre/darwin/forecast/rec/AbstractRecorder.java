@@ -94,46 +94,10 @@ public abstract class AbstractRecorder<S>
             return;
         }
 
-        Pport.UR ur = p.getUR();
-
-        // Generate CSV of all tiplocs in schedule & forecast from the TplLocation's
-        Stream<TplLocation> stream = null;
-        if( ur.isSetSchedule() ) {
-            stream = Streams.concat( stream,
-                                     ur.getSchedule().stream().
-                                     flatMap( s -> s.getOROrOPOROrIP().stream() ).
-                                     map( TplLocation::castTplLocation )
-            );
-        }
-
-        if( ur.isSetTS() ) {
-            stream = Streams.concat( stream,
-                                     p.getUR().
-                                     getTS().
-                                     stream().
-                                     flatMap( t -> t.getLocation().stream() )
-            );
-        }
-
-        String tpl = stream == null ? "" : stream.
-                filter( Objects::nonNull ).
-                map( TplLocation::getTpl ).
-                //sorted().
-                collect( Collectors.joining( "," ) );
-
-        try( PreparedStatement ps = SQL.prepare( con, "SELECT darwin.forecast(?,?,?,?,?,?,?)" ) ) {
+        try( PreparedStatement ps = SQL.prepare( con, "SELECT darwin.forecast(?,?::xml)" ) ) {
             SQL.executeQuery( ps,
                               schedule.getRid(),
-                              schedule.getUid(),
-                              Objects.toString( schedule.getSsd(), null ),
-                              // Activated?
-                              ur.isSetSchedule(),
-                              // Deactivated?
-                              ur.isSetDeactivated(),
-                              // Copy of the final XML
-                              DarwinJaxbContext.toXML.apply( p ),
-                              // Tiploc list for crossreferencing
-                              tpl
+                              DarwinJaxbContext.toXML.apply( p )
             );
         }
     }

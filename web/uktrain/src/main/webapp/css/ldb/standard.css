@@ -23,12 +23,25 @@ table.ldbTable th {
     color: #ffff00;
     margin: 0px;
     padding: 6px 10px;
-    font-size: 24pt;
+    font-size: 20pt;
     text-align: left;
 }
 
 table.ldbTable th, table.ldbTable td {
-    border-bottom: 2px solid #ffffff;
+}
+.ldb-enttop {
+    border-top: 2px solid #ffffff;
+    font-size: 24pt;
+}
+.ldb-entwarn {
+    font-size: 14pt;
+}
+.ldb-entbot {
+    font-size: 14pt;
+    color: #ffff00;
+}
+.ldb-entbot p {
+    margin: 0;
 }
 
 tr.ldbHead {
@@ -55,9 +68,12 @@ th.ldbForecast {
 td.ldbForecast {
     text-align: left;
 }
-td.ldbOntime {
+.ldbOntime {
     color: white;
 }
-td.ldbDelayed {
+.ldbCancelled, .ldbDelayed {
     color: red;
+}
+.ldbHeader, .ldbDest {
+    color: white;
 }

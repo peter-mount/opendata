@@ -8,6 +8,7 @@ package uk.trainwatch.web.ldb;
 import java.sql.ResultSet;
 import java.time.Duration;
 import java.time.LocalTime;
+import java.util.Collection;
 import uk.trainwatch.util.TimeUtils;
 import uk.trainwatch.util.sql.SQLFunction;
 
@@ -21,7 +22,14 @@ public class LDB
     public static final SQLFunction<ResultSet, LDB> fromSQL = rs -> new LDB(
             TimeUtils.getLocalTime( rs, "tm" ),
             rs.getString( "toc" ),
+            rs.getString( "origin" ),
             rs.getString( "destination" ),
+            rs.getInt( "via" ),
+            rs.getInt( "cancreason" ),
+            rs.getInt( "latereason" ),
+            false,//rs.getBoolean( "canc" ),
+            // Identity
+            rs.getLong( "id" ),
             rs.getString( "rid" ),
             rs.getString( "uid" ),
             rs.getInt( "schedule" ),
@@ -50,7 +58,12 @@ public class LDB
     private final boolean terminated;
     private final String toc;
     private final String dest;
-
+    private final String origin;
+    private final int via;
+    private final int cancReason;
+    private final int lateReason;
+    private final boolean canc;
+    private final long id;
     private final String rid;
     private final String uid;
     private final int scheduleId;
@@ -65,12 +78,16 @@ public class LDB
     private final boolean platSup;
     private final boolean cisPlatSup;
     private final Duration delay;
+    private Collection<CallingPoint> points;
 
     private LDB(
             LocalTime time,
             String toc,
-            String dest,
-            String rid, String uid,
+            String origin,
+            String dest, int via,
+            Integer cancReason, Integer lateReason,
+            boolean canc,
+            long id, String rid, String uid,
             int scheduleId,
             LocalTime arr, LocalTime dep,
             LocalTime eta, LocalTime etd,
@@ -82,8 +99,15 @@ public class LDB
     {
         this.time = time;
         this.toc = toc;
+        this.origin = origin;
         this.dest = dest;
+        this.via = via;
 
+        this.cancReason = cancReason;
+        this.lateReason = lateReason;
+        this.canc = canc;
+
+        this.id = id;
         this.rid = rid;
         this.uid = uid;
         this.scheduleId = scheduleId;
@@ -99,6 +123,36 @@ public class LDB
         this.cisPlatSup = cisPlatSup;
         this.delay = delay;
         this.terminated = terminated;
+    }
+
+    public Collection<CallingPoint> getPoints()
+    {
+        return points;
+    }
+
+    public void setPoints( Collection<CallingPoint> points )
+    {
+        this.points = points;
+    }
+
+    public int getCancReason()
+    {
+        return cancReason;
+    }
+
+    public int getLateReason()
+    {
+        return lateReason;
+    }
+
+    public boolean isCanc()
+    {
+        return canc;
+    }
+
+    public int getVia()
+    {
+        return via;
     }
 
     /**
@@ -131,6 +185,11 @@ public class LDB
     public LocalTime getTime()
     {
         return time;
+    }
+
+    public long getId()
+    {
+        return id;
     }
 
     public String getRid()
@@ -244,9 +303,19 @@ public class LDB
         return delay;
     }
 
+    public boolean isDelayed()
+    {
+        return delay != null && !(delay.isNegative() || delay.isZero());
+    }
+
     public int getScheduleId()
     {
         return scheduleId;
+    }
+
+    public String getOrigin()
+    {
+        return origin;
     }
 
     public String getDest()

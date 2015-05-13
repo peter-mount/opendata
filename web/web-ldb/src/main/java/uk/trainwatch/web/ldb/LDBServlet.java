@@ -22,13 +22,15 @@ import uk.trainwatch.nrod.location.TrainLocation;
 import uk.trainwatch.nrod.location.TrainLocationFactory;
 import uk.trainwatch.util.TimeUtils;
 import uk.trainwatch.util.sql.SQL;
+import uk.trainwatch.util.sql.SQLConsumer;
+import uk.trainwatch.util.sql.UncheckedSQLException;
 
 /**
  * Performance Home
  * <p>
  * @author Peter T Mount
  */
-@WebServlet( name = "LDBServlet", urlPatterns = "/ldb/*" )
+@WebServlet(name = "LDBServlet", urlPatterns = "/ldb/*")
 public class LDBServlet
         extends AbstractServlet
 {
@@ -36,52 +38,48 @@ public class LDBServlet
     @Override
     protected void doGet( ApplicationRequest request )
             throws ServletException,
-            IOException
+                   IOException
     {
         String crs = request.getPathInfo().substring( 1 ).toUpperCase();
 
         TrainLocation loc = TrainLocationFactory.INSTANCE.getTrainLocationByCrs( crs );
-        if( loc == null )
-        {
+        if( loc == null ) {
             // See if they have used an alternate code
             loc = TrainLocationFactory.INSTANCE.resolveTrainLocation( crs );
 
-            if( loc == null )
-            {
+            if( loc == null ) {
                 request.sendError( HttpServletResponse.SC_NOT_FOUND );
-            } else
-            {
+            }
+            else {
                 // Redirect to the correct page
                 request.getResponse().
                         sendRedirect( "/ldb/" + loc.getCrs() );
             }
-        } else
-        {
+        }
+        else {
             show( request, loc );
         }
     }
 
     private void show( ApplicationRequest request, TrainLocation loc )
             throws ServletException,
-            IOException
+                   IOException
     {
         Map<String, Object> req = request.getRequestScope();
         req.put( "location", loc );
         req.put( "pageTitle", loc.getLocation() );
-        try
-        {
+        try {
             LocalTime time = TimeUtils.getLondonDateTime().toLocalTime();
             String otherTime = request.getParam().get( "t" );
-            if( otherTime != null )
-            {
+            if( otherTime != null ) {
                 time = LocalTime.parse( otherTime );
             }
 
             getDepartures( req, loc, time );
 
             request.renderTile( "ldb.info" );
-        } catch( SQLException ex )
-        {
+        }
+        catch( SQLException ex ) {
             log( "show " + loc, ex );
             request.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
         }
@@ -104,46 +102,60 @@ public class LDBServlet
         boolean midnight = time.getHour() > 20;
         req.put( "midnight", midnight );
 
-        try( Connection con = LDBContextListener.getDataSource().getConnection() )
-        {
+        try( Connection con = LDBContextListener.getDataSource().getConnection() ) {
             // must have a working departure
             // order by first of actual departure, estimated then working departure
             List<LDB> departures;
             try( PreparedStatement ps = SQL.prepare( con,
-                    "SELECT *,"
-                    + "   s.toc AS toc,"
-                    + "   d.name AS destination"
-                    //+ " COALESCE(fe.dep,fe.etdep,fe.wtd,fe.arr,fe.etarr,fe.wta) as time,"
-                    + " FROM darwin.forecast f"
-                    + " INNER JOIN darwin.schedule s ON f.schedule=s.id"
-                    + " INNER JOIN darwin.location d ON s.dest=d.tpl"
-                    + " INNER JOIN darwin.forecast_entry fe ON f.id=fe.fid"
-                    + " INNER JOIN darwin.location l ON fe.tpl=l.tpl"
-                    + " INNER JOIN darwin.crs c ON l.crs=c.id"
-                    // Only for this station
-                    + " WHERE c.crs=?"
-                    // Flagged for display
-                    + " AND fe.ldb=TRUE"
-                    // all non-passes required so we can use Terminates/Starts here etc
-                    + " AND fe.wtp IS NULL",
-                    // Order by the first valid time
-                    //+ " ORDER BY COALESCE(fe.dep,fe.etdep,fe.wtd)",
-                    loc.getCrs() ) )
-            {
+                                                     "SELECT *,"
+                                                     + "   s.toc AS toc,"
+                                                     + "   o.name AS origin,"
+                                                     + "   d.name AS destination"
+                                                     //+ " COALESCE(fe.dep,fe.etdep,fe.wtd,fe.arr,fe.etarr,fe.wta) as time,"
+                                                     + " FROM darwin.forecast f"
+                                                     + " INNER JOIN darwin.schedule s ON f.schedule=s.id"
+                                                     + " INNER JOIN darwin.location d ON s.dest=d.tpl"
+                                                     + " INNER JOIN darwin.location o ON s.origin=o.tpl"
+                                                     + " INNER JOIN darwin.forecast_entry fe ON f.id=fe.fid"
+                                                     + " INNER JOIN darwin.location l ON fe.tpl=l.tpl"
+                                                     + " INNER JOIN darwin.crs c ON l.crs=c.id"
+                                                     // Only for this station
+                                                     + " WHERE c.crs=?"
+                                                     // Flagged for display
+                                                     + " AND fe.ldb=TRUE"
+                                                     // all non-passes required so we can use Terminates/Starts here etc
+                                                     + " AND fe.wtp IS NULL",
+                                                     // Order by the first valid time
+                                                     //+ " ORDER BY COALESCE(fe.dep,fe.etdep,fe.wtd)",
+                                                     loc.getCrs() ) ) {
                 departures = SQL.stream( ps, LDB.fromSQL ).
                         // Filter only public entries
                         filter( LDB::isPublic ).
                         // Filter out those out of range, accounting for midnight
-                        filter( l ->
-                                {
-                                    boolean r = l.getTime().isAfter( timeAfter );
-                                    boolean b = l.getTime().isBefore( timeBefore );
+                        filter( l -> {
+                            boolean r = l.getTime().isAfter( timeAfter );
+                            boolean b = l.getTime().isBefore( timeBefore );
 
-                                    return midnight ? r | b : r & b;
+                            return midnight ? r | b : r & b;
                         } ).
                         // Sort to Darwin rules, accounts for midnight
                         sorted( ( a, b ) -> TimeUtils.compareLocalTimeDarwin.compare( a.getTime(), b.getTime() ) ).
                         collect( Collectors.toList() );
+            }
+
+            try( PreparedStatement ps = SQL.prepare( con,
+                                                     "SELECT t.tpl, COALESCE(e.dep, e.etdep, e.arr, e.etarr) AS time"
+                                                     + " FROM darwin.schedule_entry s"
+                                                     + " INNER JOIN darwin.forecast f ON s.schedule=f.schedule"
+                                                     + " INNER JOIN darwin.forecast_entry e ON f.id = e.fid AND s.tpl=e.tpl AND e.ldb=true"
+                                                     + " INNER JOIN darwin.tiploc t on e.tpl=t.id"
+                                                     + " WHERE f.id=?"
+                                                     + " ORDER BY s.id"
+            ) ) {
+                departures.forEach( SQLConsumer.guard( dep -> {
+                    ps.setLong( 1, dep.getId() );
+                    dep.setPoints( SQL.stream( ps, CallingPoint.fromSQL ).collect( Collectors.toList() ) );
+                } ) );
             }
 
             req.put( "departures", departures );

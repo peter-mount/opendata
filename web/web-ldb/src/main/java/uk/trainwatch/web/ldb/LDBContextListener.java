@@ -16,6 +16,9 @@
 package uk.trainwatch.web.ldb;
 
 import java.sql.SQLException;
+import java.util.logging.Level;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.annotation.WebListener;
 import javax.sql.DataSource;
@@ -42,8 +45,15 @@ public class LDBContextListener
     protected void init( ServletContextEvent sce )
             throws SQLException
     {
-        dataSource = getRailDataSource();
-
+        //dataSource = getRailDataSource();
+        try {
+            dataSource = InitialContext.
+                    doLookup( "java:/comp/env/jdbc/railDev" );
+        }
+        catch( NamingException ex ) {
+            log.log( Level.SEVERE, "Init failed", ex );
+            throw new RuntimeException( ex );
+        }
         StationMessageManager.INSTANCE.setDataSource( dataSource );
     }
 
