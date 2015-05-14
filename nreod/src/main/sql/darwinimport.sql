@@ -160,7 +160,8 @@ BEGIN
         IF FOUND THEN
             -- tiplocs in schedule
             tpls = ARRAY[]::INTEGER[];
-            FOREACH axml2 IN ARRAY xpath('//sched:*/@tpl',axml,ns)
+            -- condition restricts this to tpl where planned arrival or departure exists
+            FOREACH axml2 IN ARRAY xpath('//sched:*/@tpl[../@pta or ../@ptd]',axml,ns)
             LOOP
                 tpls=array_append(tpls,darwin.tiploc(axml2::TEXT));
             END LOOP;
