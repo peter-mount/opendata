@@ -21,9 +21,9 @@ import java.io.Writer;
 /**
  * {@link Writer} which strips whitespace from a page.
  * <p>
- * Note: This can add some whitespace between elements however that is preferable as it's not easily possible to
- * identify which elements require that whitespace - e.g. a link needs it if it's mid sentence otherwise words will
- * appear joined together on the page.
+ * Note: This can add some whitespace between elements however that is preferable as it's not easily possible to identify which
+ * elements require that whitespace - e.g. a link needs it if it's mid sentence otherwise words will appear joined together on
+ * the page.
  * <p>
  * @author Peter T Mount
  */
@@ -97,9 +97,65 @@ public class WhitespaceFilterWriter
                         if( c == '>' )
                         {
                             return TRIM;
+                        } else if( c == 'p' )
+                        {
+                            return START_PRE1;
                         }
 
                         return this;
+                    }
+                },
+        START_PRE1
+                {
+                    @Override
+                    public State filter( Writer out, char c )
+                    throws IOException
+                    {
+                        out.write( c );
+
+                        if( c == '>' )
+                        {
+                            return TRIM;
+                        } else if( c == 'r' )
+                        {
+                            return START_PRE2;
+                        }
+
+                        return START_TAG;
+                    }
+                },
+        START_PRE2
+                {
+                    @Override
+                    public State filter( Writer out, char c )
+                    throws IOException
+                    {
+                        out.write( c );
+
+                        if( c == '>' )
+                        {
+                            return TRIM;
+                        } else if( c == 'e' )
+                        {
+                            return START_PRE3;
+                        }
+
+                        return START_TAG;
+                    }
+                },
+        START_PRE3
+                {
+                    @Override
+                    public State filter( Writer out, char c )
+                    throws IOException
+                    {
+                        out.write( c );
+
+                        if( c == '>' )
+                        {
+                            return SKIP_PRE;
+                        }
+                        return START_TAG;
                     }
                 },
         TRIM
@@ -121,6 +177,108 @@ public class WhitespaceFilterWriter
                         }
 
                         return this;
+                    }
+
+                },
+        SKIP_PRE
+                {
+                    @Override
+                    public State filter( Writer out, char c )
+                    throws IOException
+                    {
+                        out.write( c );
+
+                        if( c == '<' )
+                        {
+                            return SKIP_PRE1;
+                        }
+
+                        return this;
+                    }
+
+                },
+        SKIP_PRE1
+                {
+                    @Override
+                    public State filter( Writer out, char c )
+                    throws IOException
+                    {
+                        out.write( c );
+
+                        if( c == '/' )
+                        {
+                            return SKIP_PRE2;
+                        }
+
+                        return SKIP_PRE;
+                    }
+
+                },
+        SKIP_PRE2
+                {
+                    @Override
+                    public State filter( Writer out, char c )
+                    throws IOException
+                    {
+                        out.write( c );
+
+                        if( c == 'p' )
+                        {
+                            return SKIP_PRE3;
+                        }
+
+                        return SKIP_PRE;
+                    }
+
+                },
+        SKIP_PRE3
+                {
+                    @Override
+                    public State filter( Writer out, char c )
+                    throws IOException
+                    {
+                        out.write( c );
+
+                        if( c == 'r' )
+                        {
+                            return SKIP_PRE4;
+                        }
+
+                        return SKIP_PRE;
+                    }
+
+                },
+        SKIP_PRE4
+                {
+                    @Override
+                    public State filter( Writer out, char c )
+                    throws IOException
+                    {
+                        out.write( c );
+
+                        if( c == 'e' )
+                        {
+                            return SKIP_PRE5;
+                        }
+
+                        return SKIP_PRE;
+                    }
+
+                },
+        SKIP_PRE5
+                {
+                    @Override
+                    public State filter( Writer out, char c )
+                    throws IOException
+                    {
+                        out.write( c );
+
+                        if( c == '>' )
+                        {
+                            return TRIM;
+                        }
+
+                        return SKIP_PRE;
                     }
 
                 },
