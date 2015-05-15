@@ -69,7 +69,10 @@ CREATE TABLE tiploc (
     tpsdesc     VARCHAR(32),
     stanox      INTEGER,
     crs         CHAR(3),
-    description VARCHAR(32)
+    description VARCHAR(32),
+    -- 2015/05/15 If true then created by schedule where no tiploc existed before
+    virtual     BOOLEAN NOT NULL DEFAULT FALSE,
+    PRIMARY KEY (id)
 );
 ALTER TABLE tiploc OWNER TO rail;
 ALTER SEQUENCE tiploc_id_seq OWNER TO rail;
@@ -85,18 +88,26 @@ CREATE UNIQUE INDEX tiploc_c ON tiploc(crs) WHERE crs IS NOT NULL;
 CREATE UNIQUE INDEX tiploc_n ON tiploc(nalco);
 
 -- Function to translate tiploc to it's bigint equivalent
+-- 2015 May 15 Now create a dummy entry 
 CREATE OR REPLACE FUNCTION tiploc(loc CHAR(7))
 RETURNS BIGINT AS $$
 DECLARE
     tmp RECORD;
 BEGIN
-    SELECT * INTO tmp FROM timetable.tiploc WHERE tiploc=loc;
-    IF FOUND THEN
-        RETURN tmp.id;
-    END IF;
+    LOOP
+        SELECT * INTO tmp FROM timetable.tiploc WHERE tiploc=loc;
+        IF FOUND THEN
+            RETURN tmp.id;
+        END IF;
 
-    RAISE EXCEPTION 'Nonexistent tiploc %', loc
-        USING HINT = 'Check tiplocs are up to date';
+        BEGIN
+            INSERT INTO timetable.tiploc (tiploc,virtual) VALUES (loc,true);
+            RETURN currval('timetable.tiploc_id_seq');
+        EXCEPTION WHEN unique_violation THEN
+            -- Do nothing, loop & try again
+        END;
+    END LOOP;
+
 END;
 $$ LANGUAGE plpgsql;
 

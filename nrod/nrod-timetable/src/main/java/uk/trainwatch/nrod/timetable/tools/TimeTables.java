@@ -318,24 +318,6 @@ public class TimeTables
                 Consumer<TrailerRecord> trailer = t -> LOG.log( Level.INFO,
                         () -> "Processed " + parser.lineCount() + " records." );
 
-                if( includeTiploc )
-                {
-                    trailer = trailer.andThen( t -> LOG.log( Level.INFO,
-                            () -> "Tiplocs " + tiplocs ) );
-                }
-
-                if( includeAssociations )
-                {
-                    trailer = trailer.andThen( t -> LOG.log( Level.INFO,
-                            () -> "Associations " + associations ) );
-                }
-
-                if( includeSchedules )
-                {
-                    trailer = trailer.andThen( t -> LOG.log( Level.INFO,
-                            () -> "Schedules " + schedules + ", locations " + scheduleLocations ) );
-                }
-
                 // Pick the type of builder - if not forming schedules or associations then there's no need to use
                 // the more expensive visitor
                 BasicRecordVisitor builder;
