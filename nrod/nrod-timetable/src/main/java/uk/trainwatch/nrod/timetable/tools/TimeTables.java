@@ -136,6 +136,11 @@ public class TimeTables
     public void runUtility()
             throws Exception
     {
+        if( !fullImport )
+        {
+            // Remove any old schedules first. No point if doing a full import
+            removeOldSchedules();
+        }
         importFiles( cifFiles, new Parser() );
     }
 
@@ -199,8 +204,7 @@ public class TimeTables
     /**
      * Prepares the daysrun table which maps days of week to a single id
      * <p>
-     * @param con
-     * <p>
+     * @param con <p>
      * @throws SQLException
      */
     private void prepareDaysRun( Connection con )
@@ -231,6 +235,42 @@ public class TimeTables
             }
         }
 
+    }
+
+    /**
+     * Removes old schedules which have now finished
+     *
+     * @param con
+     * @throws SQLException
+     */
+    private void removeOldSchedules()
+            throws SQLException
+    {
+        try( Connection con = getConnection() )
+        {
+            con.setAutoCommit( false );
+            LOG.log( Level.INFO, "Removing old schedules" );
+            try( Statement s = con.createStatement() )
+            {
+                int c = s.executeUpdate(
+                        "DELETE FROM " + SCHEMA + ".schedule_loc"
+                        + " WHERE scheduleid IN ("
+                        + "SELECT id FROM timetable.schedule WHERE runsto < now()::DATE"
+                        + ")"
+                );
+                LOG.log( Level.INFO, "Removed {0} schedule locations", c );
+
+                c = s.executeUpdate( "DELETE FROM " + SCHEMA + ".schedule WHERE runsto < now()::DATE" );
+                LOG.log( Level.INFO, "Removed {0} schedules", c );
+                con.commit();
+            } catch( SQLException ex )
+            {
+                LOG.log( Level.SEVERE, "Failed to remove old schedules", ex );
+                con.rollback();
+                throw ex;
+            }
+
+        }
     }
 
     private class Parser
