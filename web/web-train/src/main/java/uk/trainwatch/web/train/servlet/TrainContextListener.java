@@ -46,16 +46,7 @@ public class TrainContextListener
     protected void init( ServletContextEvent sce )
             throws SQLException
     {
-        //DataSource dataSource = getRailDataSource();
-
-        try {
-            dataSource = InitialContext.doLookup( "java:/comp/env/jdbc/railDev" );
-            log.log( Level.SEVERE, "Forecasts Running against DEV DB" );
-        }
-        catch( NamingException ex ) {
-            dataSource = getRailDataSource();
-            log.log( Level.SEVERE, "Forecasts Running against LIVE DB" );
-        }
+        DataSource dataSource = getRailDataSource();
 
         ForecastManager.INSTANCE.setDataSource( dataSource );
         DarwinReferenceManager.INSTANCE.setDataSource( dataSource );

@@ -48,7 +48,7 @@ public class LDBContextListener
         //dataSource = getRailDataSource();
         try {
             dataSource = InitialContext.
-                    doLookup( "java:/comp/env/jdbc/railDev" );
+                    doLookup( "java:/comp/env/jdbc/rail" );
         }
         catch( NamingException ex ) {
             log.log( Level.SEVERE, "Init failed", ex );
