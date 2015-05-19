@@ -27,6 +27,7 @@
         <module>web-timetable</module>
         <module>web-train</module>
         <module>web-workbench</module>
-    </modules>
+    <module>departureboards</module>
+  </modules>
     
 </project>

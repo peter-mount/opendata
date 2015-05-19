@@ -1,0 +1,122 @@
+/* LDB Standard Theme */
+
+.ldbLoc {
+    font-family: Arial;
+    font-size: 24pt;
+    padding: 3pt;
+}
+.ldbTable {
+    width: 100%;
+    font-family: Arial;
+    font-size: 24pt;
+    border-collapse: collapse;
+    table-layout: fixed;
+    background: #000;
+    color: #fff;
+}
+
+table.ldbTable tr {
+    height: 36px;
+}
+
+.altrow {
+    background: #121d34;
+}
+
+.ldbHead {
+    border-collapse: collapse;
+    color: #ffff00;
+    margin: 0px;
+    padding: 6px 10px;
+    font-size: 80%;
+    text-align: left;
+    font-weight: bold;
+}
+
+.ldb-enttop {
+    border-top: 2px solid #ffffff;
+}
+.ldb-enttop, .ldb-entmid {
+    font-size: 100%;
+}
+.ldbVia {
+    font-size: 80%;
+    color: #aaa;
+}
+
+.ldb-entwarn {
+    font-size: 60%;
+}
+.ldb-entbot {
+    font-size: 60%;
+    color: #ffff00;
+}
+.ldb-entbot p {
+    margin: 0;
+}
+
+.ldbCol {
+    text-align: center;
+    padding: 1px 10px;
+    float:right;
+}
+
+.ldbPlat {
+    width: 60px;
+}
+.ldbSched {
+    width: 115px;
+}
+.ldbForecast {
+    width: 170px;
+}
+.ldbCol .ldbForecast {
+    text-align: left;
+}
+.ldbOntime {
+    color: white;
+}
+.ldbCancelled, .ldbDelayed {
+    color: red;
+}
+.ldbHeader, .ldbDest {
+    color: white;
+}
+
+/* Samsung Note 3 Portrait */
+@media all and ( max-width: 443px ) {
+    .ldbLoc { font-size: 15pt; }
+    .ldbTable { font-size: 130%; }
+    .ldbHead {
+        font-size: 70%;
+        padding: 6px 4px;
+    }
+    .ldb-enttop, .ldb-entmid { font-size: 90%; }
+    .ldb-enttop .ldbVia { font-size: 70%; }
+    .ldb-entwarn { font-size: 60%; }
+    .ldb-entbot { font-size: 60%; }
+    .ldb-entbot p { margin: 0; }
+    .ldbPlat { width: 30px; }
+    .ldbSched { width: 55px; }
+    .ldbForecast { width: 64px; }
+    .ldbCol { font-size: 90%; padding: 1px 0px; }
+}
+
+/* Samsung Note 3 Portrait */
+@media all and ( max-width: 640px ) {
+    .ldbLoc { font-size: 15pt; }
+    .ldbTable { font-size: 130%; }
+    .ldbHead {
+        font-size: 70%;
+        padding: 6px 4px;
+    }
+    .ldb-enttop, .ldb-entmid { font-size: 90%; }
+    .ldb-enttop .ldbVia { font-size: 70%; }
+    .ldb-entwarn { font-size: 60%; }
+    .ldb-entbot { font-size: 60%; }
+    .ldb-entbot p { margin: 0; }
+    .ldbPlat { width: 30px; }
+    .ldbSched { width: 55px; }
+    .ldbForecast { width: 64px; }
+    .ldbCol { font-size: 90%; padding: 1px 0px; }
+}
