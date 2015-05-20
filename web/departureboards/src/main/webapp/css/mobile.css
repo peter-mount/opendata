@@ -59,6 +59,8 @@ a:visited {
 }
 #inner-footer {
     font-size: 60%;
+    border-top: 1px solid white;
+    margin-top: 2px;
 }
 
 #logo {
@@ -77,3 +79,12 @@ a:visited {
 #eu_cookie_notice a { color: #00f;}
 #eu_cookie_notice a:visited { color: #00f;}
 #eu_cookie_notice a:hover { color: #00f;}
+
+/* Override jquery */
+.ui-page {
+    background-color: #000;
+}
+
+.ui-icon-loading {
+    background: url(//ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/images/ajax-loader.gif);
+}

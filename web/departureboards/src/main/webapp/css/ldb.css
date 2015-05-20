@@ -5,7 +5,13 @@
     font-size: 24pt;
     padding: 3pt;
 }
+.ldbUpdated {
+    color:#fff;
+    float:right;
+    font-size: 80%;
+}
 .ldbTable {
+    clear: both;
     width: 100%;
     font-family: Arial;
     font-size: 24pt;
@@ -86,9 +92,10 @@ table.ldbTable tr {
 /* Samsung Note 3 Portrait */
 @media all and ( max-width: 443px ) {
     .ldbLoc { font-size: 15pt; }
-    .ldbTable { font-size: 130%; }
+    .ldbUpdated { font-size: 130%; }
+    .ldbTable { font-size: 60%; }
     .ldbHead {
-        font-size: 70%;
+        font-size: 60%;
         padding: 6px 4px;
     }
     .ldb-enttop, .ldb-entmid { font-size: 90%; }
@@ -105,6 +112,7 @@ table.ldbTable tr {
 /* Samsung Note 3 Portrait */
 @media all and ( max-width: 640px ) {
     .ldbLoc { font-size: 15pt; }
+    .ldbUpdated { font-size: 70%; }
     .ldbTable { font-size: 130%; }
     .ldbHead {
         font-size: 70%;

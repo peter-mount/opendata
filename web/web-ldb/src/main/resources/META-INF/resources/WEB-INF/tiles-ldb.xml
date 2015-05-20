@@ -17,16 +17,19 @@
     <definition name="ldb.info" extends="layout.main">
         <put-attribute name="title" value="Live Departure Boards" />
         <put-attribute name="body" value=".ldb.info" />
-        <!--put-attribute name="javascript" value="/common/jquery_map.jsp" />
-        <put-attribute name="footer" value="layout.footer.map" /-->
     </definition>
-    <!--
-    <definition name=".ldb.info" extends="layout.2col-left">
-    -->
     <definition name=".ldb.info" extends="layout.1col">
-        <put-attribute name="center" value=".ldb.info.center" />
-        <put-attribute name="left" value=".left" />
+        <put-attribute name="center" value="ldb.view" />
     </definition>
-    <definition name=".ldb.info.center" template="/common/ldb/departures.jsp" />
+    
+    <definition name="ldb.mobile" extends="layout.main">
+        <put-attribute name="title" value="Live Departure Boards" />
+        <put-attribute name="body" value=".ldb.mobile" />
+    </definition>
+    <definition name=".ldb.mobile" extends="layout.1col">
+        <put-attribute name="center" value="/common/ldb/mobiledepartures.jsp" />
+    </definition>
+    
+    <definition name="ldb.view" template="/common/ldb/departures.jsp" />
     
 </tiles-definitions>

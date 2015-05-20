@@ -12,21 +12,21 @@ import javax.servlet.annotation.WebServlet;
  * <p>
  * @author Peter T Mount
  */
-@WebServlet( name = "LDBServlet", urlPatterns = "/ldb/*" )
-public class LDBServlet
+@WebServlet( name = "ViewLDBServlet", urlPatterns = "/vldb/*" )
+public class ViewLDBServlet
         extends AbstractLDBViewServlet
 {
 
     @Override
     protected String getServletPrefix()
     {
-        return "/ldb/";
+        return "rawldb/";
     }
 
     @Override
     protected String getRenderTile()
     {
-        return "ldb.info";
+        return "ldb.view";
     }
 
 }

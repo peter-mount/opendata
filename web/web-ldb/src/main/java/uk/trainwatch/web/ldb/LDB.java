@@ -6,6 +6,7 @@
 package uk.trainwatch.web.ldb;
 
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.Collection;
@@ -21,6 +22,7 @@ public class LDB
 
     public static final SQLFunction<ResultSet, LDB> fromSQL = rs -> new LDB(
             TimeUtils.getLocalTime( rs, "tm" ),
+            rs.getTimestamp( "ts" ),
             rs.getString( "toc" ),
             rs.getString( "origin" ),
             rs.getString( "destination" ),
@@ -55,6 +57,7 @@ public class LDB
     );
 
     private final LocalTime time;
+    private final Timestamp ts;
     private final boolean terminated;
     private final String toc;
     private final String dest;
@@ -82,6 +85,7 @@ public class LDB
 
     private LDB(
             LocalTime time,
+            Timestamp ts,
             String toc,
             String origin,
             String dest, int via,
@@ -98,6 +102,7 @@ public class LDB
             boolean terminated )
     {
         this.time = time;
+        this.ts = ts;
         this.toc = toc;
         this.origin = origin;
         this.dest = dest;
@@ -123,6 +128,11 @@ public class LDB
         this.cisPlatSup = cisPlatSup;
         this.delay = delay;
         this.terminated = terminated;
+    }
+
+    public Timestamp getTs()
+    {
+        return ts;
     }
 
     public Collection<CallingPoint> getPoints()

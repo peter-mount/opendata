@@ -8,7 +8,6 @@ package uk.trainwatch.web.departureboards;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import uk.trainwatch.web.ldb.LDBContextListener;
 import uk.trainwatch.web.servlet.AbstractServlet;
 import uk.trainwatch.web.servlet.ApplicationRequest;
 

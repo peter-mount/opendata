@@ -9,7 +9,7 @@
 <c:if test="${requestScope.euCookie}">
     <div id="eu_cookie_notice">
         <img src="/images/cookie.png" class="left" width="48" height="48"/>
-        This site uses cookies for session management.</br>
+        This site uses cookies for session management.
         By continuing to use our website, you are agreeing to our use of cookies.
         [<a href="//uktra.in/Cookies">More Info</a>]
         <div class="clear"></div>
