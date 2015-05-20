@@ -20,10 +20,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 import uk.trainwatch.nrod.timetable.cif.record.TIPLOCAction;
 import uk.trainwatch.nrod.timetable.cif.record.TIPLOCAmend;
 import uk.trainwatch.nrod.timetable.cif.record.TIPLOCDelete;
 import uk.trainwatch.nrod.timetable.cif.record.TIPLOCInsert;
+import uk.trainwatch.util.sql.SQLConsumer;
 
 /**
  * Handles updating the tiploc table in the database
@@ -33,6 +36,8 @@ import uk.trainwatch.nrod.timetable.cif.record.TIPLOCInsert;
 public class TiplocDBUpdate
         extends CUDConsumer<TIPLOCAction>
 {
+
+    private List<TIPLOCDelete> deletedTiplocs = new ArrayList<>();
 
     public TiplocDBUpdate( Connection con )
     {
@@ -57,7 +62,7 @@ public class TiplocDBUpdate
             alter( (TIPLOCAmend) t );
         } else if( t instanceof TIPLOCDelete )
         {
-            delete( (TIPLOCDelete) t );
+            deletedTiplocs.add( (TIPLOCDelete) t );
         }
     }
 
@@ -122,15 +127,16 @@ public class TiplocDBUpdate
         updated();
     }
 
-    private void delete( TIPLOCDelete t )
+    public void deletePending()
             throws SQLException
     {
         PreparedStatement s = getDelete();
-
-        s.setString( 1, t.getTiploc().getKey() );
-        s.executeUpdate();
-
-        deleted();
+        deletedTiplocs.forEach( SQLConsumer.guard( t ->
+        {
+            s.setString( 1, t.getTiploc().getKey() );
+            s.executeUpdate();
+            deleted();
+        } ) );
     }
 
 }

@@ -350,9 +350,10 @@ public class TimeTables
                         includeAssociations,
                         () -> SQLConsumer.guard( new AssociationDBUpdate( con ) ) );
 
+                TiplocDBUpdate tiplocDBUpdate = new TiplocDBUpdate( con );
                 Consumer<TIPLOCAction> tiplocs = Consumers.createIf(
                         includeTiploc,
-                        () -> SQLConsumer.guard( new TiplocDBUpdate( con ) ) );
+                        () -> SQLConsumer.guard( tiplocDBUpdate ) );
 
                 // Now what to do at the end of the import
                 Consumer<TrailerRecord> trailer = t -> LOG.log( Level.INFO,
@@ -394,6 +395,10 @@ public class TimeTables
                             peek( recCount ).
                             forEach( r -> r.accept( builder ) );
                 }
+                
+                // Now we can delete any tiplocs, if this fails then theres a schedule still stuck
+                tiplocDBUpdate.deletePending();
+                
             } catch( IOException ex )
             {
                 LOG.log( Level.SEVERE, exceptionLogger );
