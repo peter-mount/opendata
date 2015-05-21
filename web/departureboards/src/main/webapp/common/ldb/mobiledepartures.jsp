@@ -10,23 +10,10 @@
 <%@ taglib prefix="d" uri="http://uktra.in/tld/darwin" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <div id="board"></div>
+<div id="message"></div>
 <script>
+    var ldb;
     $(document).ready(function () {
-        var reload = function () {
-            $.mobile.loading("show");
-            setTimeout(reload, 60000);
-            $.ajax({
-                url: '/vldb/${location.crs}',
-                type: 'GET',
-                async: true,
-                statusCode: {
-                    200: function (v) {
-                        $.mobile.loading('hide');
-                        $('#board').empty().append(v);
-                    }
-                }
-            });
-        };
-        reload();
+        ldb = new LDB('${location.crs}');
     });
 </script>

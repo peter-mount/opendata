@@ -94,7 +94,7 @@
                             <c:when test="${dep.terminated}">Terminates Here</c:when>
                             <c:otherwise>
                                 <d:tiploc value="${dep.dest}" link="false"/>
-                                <span class="ldbVia"><d:via value="${dep.via}"/></span>
+                                <div class="ldbVia"><d:via value="${dep.via}"/></div>
                             </c:otherwise>
                         </c:choose>
                     </div>
@@ -122,11 +122,6 @@
                                 <d:tiploc value="${dep.origin}" link="false"/>
                                 <d:via value="${dep.via}"/>
                                 to <d:tiploc value="${dep.dest}" link="false"/>
-                                <c:forEach var="point" varStatus="pstat" items="${dep.points}">
-                                    <c:if test="${pstat.last}">
-                                        due ${point.time}
-                                    </c:if>
-                                </c:forEach>
                             </span>
                         </c:when>
                         <c:otherwise>

@@ -120,6 +120,8 @@ public class LDBUtils
                 departures = SQL.stream( ps, LDB.fromSQL ).
                         // Filter only public entries
                         filter( LDB::isPublic ).
+                        // Filter those that have departed
+                        filter( l -> !l.isDeparted() ).
                         // Filter out those out of range, accounting for midnight
                         filter( l ->
                                 {

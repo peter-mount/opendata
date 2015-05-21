@@ -80,6 +80,30 @@ a:visited {
 #eu_cookie_notice a:visited { color: #00f;}
 #eu_cookie_notice a:hover { color: #00f;}
 
+.messageHidden {
+    display: none;
+}
+
+.messageVisible {
+    display: block;
+    text-align: center;
+    position: absolute;
+    top: 25%;
+    left: 0;
+    right: 0;
+}
+
+.messageVisible div {
+    background: #fff;
+    opacity: 0.8;
+    color: #000;
+    font-size: 20pt;
+    border: 2px solid black;
+    -webkit-border-radius: 30pt;
+    padding: 10pt;
+    width: auto;
+}
+
 /* Override jquery */
 .ui-page {
     background-color: #000;

@@ -187,6 +187,11 @@ public class LDB
         return arr != null;
     }
 
+    public boolean isDeparted()
+    {
+        return dep != null;
+    }
+
     public boolean isOntime()
     {
         return delay.isZero() || Math.abs( delay.getSeconds() ) < 60;
