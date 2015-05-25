@@ -19,11 +19,12 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.logging.Level;
-import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
-import uk.trainwatch.nre.darwin.parser.DarwinJaxbContext;
+import org.postgresql.ds.PGPoolingDataSource;
 import uk.trainwatch.rabbitmq.RabbitConnection;
 import uk.trainwatch.rabbitmq.RabbitMQ;
+import uk.trainwatch.util.app.Application;
 import uk.trainwatch.util.counter.RateMonitor;
+import uk.trainwatch.util.sql.SQLConsumer;
 
 /**
  * Simple standalone application that reads the full messages from Darwin and processes them into the database.
@@ -33,10 +34,17 @@ import uk.trainwatch.util.counter.RateMonitor;
  * @author Peter T Mount
  */
 public class Main
-        extends AbtractMain
+        extends Application
 {
 
+    private static final String QUEUE = "darwin.db";
+    private static final String ROUTING_KEY = "nre.push";
+
+    protected PGPoolingDataSource dataSource;
+    protected Properties darwinProperties;
+
     private RabbitConnection rabbitmq;
+    private Consumer<String> consumer;
 
     @Override
     protected void setupBrokers()
@@ -50,9 +58,34 @@ public class Main
     }
 
     @Override
+    protected void setupApplication()
+            throws IOException
+    {
+        darwinProperties = Application.loadProperties( "darwin.properties" );
+        dataSource = new PGPoolingDataSource();
+        dataSource.setDataSourceName( "Darwin" );
+        dataSource.setServerName( darwinProperties.getProperty( "url" ) );
+        dataSource.setDatabaseName( "rail" );
+        dataSource.setUser( darwinProperties.getProperty( "username" ) );
+        dataSource.setPassword( darwinProperties.getProperty( "password" ) );
+        dataSource.setMaxConnections( 10 );
+
+        LOG.log( Level.INFO, () -> "Initialising " + QUEUE );
+
+        consumer = SQLConsumer.guard( new DarwinImport( dataSource ) ).
+                andThen( RateMonitor.<String>log( LOG, QUEUE ) );
+    }
+
+    @Override
     protected void start()
     {
         super.start();
+
+        RabbitMQ.queueDurableStream( rabbitmq,
+                                     QUEUE, ROUTING_KEY,
+                                     s -> s.map( RabbitMQ.toString ).
+                                     forEach( consumer )
+        );
     }
 
     @Override
@@ -62,34 +95,10 @@ public class Main
         rabbitmq.close();
     }
 
-    @Override
-    protected void setupApplication()
-            throws IOException
-    {
-        super.setupApplication();
-
-        String queue = "darwin.db";
-
-        LOG.log( Level.INFO, () -> "Initialising " + queue );
-
-        Consumer<Pport> monitor = RateMonitor.<Pport>log( LOG, queue );
-
-        // Pass deactivated & TS messages to forecast
-        RabbitMQ.queueDurableStream( rabbitmq,
-                                     queue,
-                                     "nre.push",
-                                     s -> s.map( RabbitMQ.toString ).
-                                     map( DarwinJaxbContext.fromXML ).
-                                     peek( monitor ).
-                                     forEach( dispatcher )
-        );
-
-    }
-
     public static void main( String... args )
             throws Exception
     {
-        LOG.log( Level.INFO, "Initialising Darwin Database" );
+        LOG.log( Level.INFO, "Initialising Darwin Database Analyser" );
 
         new Main().run();
     }
