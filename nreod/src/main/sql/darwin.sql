@@ -430,6 +430,10 @@ CREATE TABLE forecast_entry (
     platsup     BOOLEAN DEFAULT false,
     cisplatsup  BOOLEAN DEFAULT false,
     platsrc     NAME,
+    -- length
+    length      INTEGER,
+    -- detach front
+    detachfront BOOLEAN,
     -- Appear on LDB and terminated status
     ldb         BOOLEAN,
     tm          TIME,
@@ -468,6 +472,10 @@ CREATE TABLE forecast_entryarc (
     platsup     BOOLEAN DEFAULT false,
     cisplatsup  BOOLEAN DEFAULT false,
     platsrc     NAME,
+    -- length
+    length      INTEGER,
+    -- detach front
+    detachfront BOOLEAN,
     -- Ignored in the archive
     ldb         BOOLEAN,
     tm          TIME,

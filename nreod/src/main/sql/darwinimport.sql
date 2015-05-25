@@ -291,6 +291,8 @@ BEGIN
                     (xpath('//fcst:plat/@platsrc',axml2,ns))[1]::TEXT AS platsrc,
                     (xpath('//fcst:plat/@platsup',axml2,ns))[1]::TEXT::BOOLEAN AS platsup,
                     (xpath('//fcst:plat/@cisPlatsup',axml2,ns))[1]::TEXT::BOOLEAN AS cisplatsup,
+                    (xpath('//fcst:length/text()',axml2,ns))[1]::TEXT::INTEGER AS length,
+                    (xpath('//fcst:detachFront/text()',axml2,ns))[1]::TEXT::BOOLEAN AS detachfront,
                     (xpath('//fcst:arr/@at',axml2,ns))[1]::TEXT::TIME AS arrat,
                     (xpath('//fcst:arr/@et',axml2,ns))[1]::TEXT::TIME AS arret,
                     (xpath('//fcst:dep/@at',axml2,ns))[1]::TEXT::TIME AS depat,
@@ -386,6 +388,8 @@ BEGIN
                             etarr=arec.arret,
                             etdep=arec.depet,
                             etpass=arec.passet,
+                            length=arec.length,
+                            detachfront=arec.detachfront,
                             delay=adelay,
                             plat=arec.plat,
                             platsup=arec.platsup,
@@ -404,6 +408,8 @@ BEGIN
                                 delay,
                                 arr,dep,pass,
                                 etarr,etdep,etpass,
+                                length,
+                                detachfront,
                                 plat,platsup,
                                 ldb,tm,term
                             ) VALUES (
@@ -412,6 +418,8 @@ BEGIN
                                 adelay,
                                 arec.arrat,arec.depat,arec.passat,
                                 arec.arret,arec.depet,arec.passet,
+                                arec.length,
+                                arec.detachfront,
                                 arec.plat,
                                 arec.platsup,
                                 aldb,aat,aterm
