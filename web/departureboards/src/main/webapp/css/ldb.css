@@ -44,6 +44,11 @@
     font-weight: bold;
 }
 
+.ldb-message a, .ldb-message a:visited, .ldb-message a:hover {
+    text-decoration: underline;
+    color: #aaa;
+}
+
 .ldb-enttop {
     border-top: 2px solid #ffffff;
 }
@@ -150,6 +155,7 @@ td.ldb-fsct-stat {
     width: 10pt;
     height: 10pt;
 }
+
 /* iPhone 3GS */
 @media all and ( max-width: 320px ) {
     .ldbLoc {

@@ -73,6 +73,8 @@ var LDB = (function () {
                 404: failure,
                 // Internal error
                 500: failure,
+                // Proxy error
+                502: failure,
                 // apache is up but no tomcat
                 503: failure,
             }

@@ -37,7 +37,7 @@ public class StationContextListener
     {
         DataSource dataSource = getRailDataSource();
 
-        //StationMessageManager.INSTANCE.setDataSource( dataSource );
+        StationMessageManager.INSTANCE.setDataSource( dataSource );
     }
 
 }

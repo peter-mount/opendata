@@ -80,7 +80,7 @@ public enum DarwinJaxbContext
         }
     }
 
-    public Pport unmarshall( String s )
+    public <T> T unmarshall( String s )
             throws JAXBException
     {
         return jaxb.unmarshall( s );

@@ -78,10 +78,15 @@ public enum StationMessageManager
                                                          + " ORDER BY m.id DESC",
                                                          talpha ) ) {
                     return SQL.stream( ps, SQL.STRING_LOOKUP ).
+                            map( xml -> "<Pport xmlns=\"http://www.thalesgroup.com/rtti/PushPort/v12\">"
+                                        + "<uR>"
+                                        + "<OW xmlns:mg=\"http://www.thalesgroup.com/rtti/PushPort/StationMessages/v1\">" + xml + "</OW>"
+                                        + "</uR>"
+                                        + "</Pport>" ).
                             map( DarwinJaxbContext.fromXML ).
                             filter( Objects::nonNull ).
                             flatMap( p -> p.getUR().getOW().stream() ).
-                            filter( ow -> ow.getStation().stream().filter( s -> s.getCrs().equals( talpha ) ).findAny().isPresent() ).
+                            //filter( ow -> ow.getStation().stream().filter( s -> s.getCrs().equals( talpha ) ).findAny().isPresent() ).
                             collect( Collectors.toList() ).
                             stream();
                 }

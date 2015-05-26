@@ -23,42 +23,40 @@
         </div>
 
         <c:set var="row" value="false"/>
-
         <c:set var="first" value="false"/>
-        <%-- Disable station messages
+        
+        <%-- Station messages --%>
         <c:forEach var="msg" items="${stationMessages}">
-            <c:if test="${not msg.suppress}">
+            <c:if test="${not empty msg.suppress}">
                 <c:if test="${not first}">
                     <c:set var="first" value="true"/>
                 </c:if>
                 <c:set var="row" value="${!row}"/>
-                <tr class="ldb-enttop<c:if test="${row}"> altrow</c:if>">
-                        <td colspan="4">
-                        ${msg.cat.value()} Update:
-                        <c:forEach var="m1" items="${msg.msg.content}">
-                            <c:set var="c" value="${m1.getClass().getName()}"/>
-                            <c:choose>
-                                <c:when test="${c.endsWith('.A')}"><a href="${m1.href}">${m1.value}</a></c:when>
-                                <c:when test="${c.endsWith('.P')}">
-                                    <p>
-                                        <c:forEach var="m2" items="${m1.content}">
-                                            <c:set var="c" value="${m2.getClass().getName()}"/>
-                                            <c:choose>
-                                                <c:when test="${c.endsWith('.A')}"><a href="${m2.href}">${m2.value}</a></c:when>
-                                                <c:otherwise>${m2}</c:otherwise>
-                                            </c:choose>
-                                        </c:forEach>
-                                    </p>
-                                </c:when>
-                                <c:otherwise>${m1}</c:otherwise>
-                            </c:choose>
-                        </c:forEach>
-                    </td>
-                </tr>
+                <div class="ldb-enttop<c:if test="${row}"> altrow</c:if> ldb-message">
+                        Update:
+                    <c:forEach var="m1" items="${msg.msg.content}">
+                        <c:set var="c" value="${m1.getClass().getName()}"/>
+                        <c:choose>
+                            <c:when test="${c.endsWith('.A')}"><a href="${m1.href}" target="_blank">${m1.value}</a></c:when>
+                            <c:when test="${c.endsWith('.P')}">
+                                <p>
+                                    <c:forEach var="m2" items="${m1.content}">
+                                        <c:set var="c" value="${m2.getClass().getName()}"/>
+                                        <c:choose>
+                                            <c:when test="${c.endsWith('.A')}"><a href="${m2.href}">${m2.value}</a></c:when>
+                                            <c:otherwise>${m2}</c:otherwise>
+                                        </c:choose>
+                                    </c:forEach>
+                                </p>
+                            </c:when>
+                            <c:otherwise>${m1}</c:otherwise>
+                        </c:choose>
+                    </c:forEach>
+                </div>
             </c:if>
         </c:forEach>
-        --%>
 
+        <%-- Departures --%>
         <c:forEach var="dep" varStatus="stat" items="${departures}">
             <c:if test="${!dep.sup and dep.timetabled}">
                 <c:set var="row" value="${!row}"/>
@@ -94,9 +92,9 @@
                     <div class="ldbCont">
                         <c:choose>
                             <c:when test="${dep.terminated}">
-                                <a onclick="document.location='/train/${dep.rid}';">Terminates Here</a></c:when>
+                                <a onclick="document.location = '/train/${dep.rid}';">Terminates Here</a></c:when>
                             <c:otherwise>
-                                <a onclick="document.location='/train/${dep.rid}';">
+                                <a onclick="document.location = '/train/${dep.rid}';">
                                     <d:tiploc value="${dep.dest}" link="false"/>
                                 </a>
                                 <div class="ldbVia"><d:via value="${dep.via}"/></div>

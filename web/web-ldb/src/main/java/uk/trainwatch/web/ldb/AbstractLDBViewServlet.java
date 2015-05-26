@@ -9,6 +9,7 @@ import uk.trainwatch.web.servlet.ApplicationRequest;
 import java.io.IOException;
 import java.util.Map;
 import javax.servlet.ServletException;
+import uk.trainwatch.nre.darwin.stationmsg.StationMessageManager;
 import uk.trainwatch.nrod.location.TrainLocation;
 import uk.trainwatch.nrod.location.TrainLocationFactory;
 
@@ -26,17 +27,17 @@ public abstract class AbstractLDBViewServlet
     @Override
     protected void doGet( ApplicationRequest request )
             throws ServletException,
-            IOException
+                   IOException
     {
         String crs = request.getPathInfo().substring( 1 ).toUpperCase();
 
         TrainLocation loc = LDBUtils.resolveLocation( request, getServletPrefix() );
         TrainLocationFactory.INSTANCE.getTrainLocationByCrs( crs );
-        if( loc != null )
-        {
+        if( loc != null ) {
             Map<String, Object> req = request.getRequestScope();
             req.put( "location", loc );
             req.put( "pageTitle", loc.getLocation() );
+            req.put( "stationMessages", StationMessageManager.INSTANCE.getMessages( crs ) );
             show( request, loc );
         }
     }
