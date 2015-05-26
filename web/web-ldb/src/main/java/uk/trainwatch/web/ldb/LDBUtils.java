@@ -175,18 +175,30 @@ public class LDBUtils
         }
     }
 
-    private static final SQLBiConsumer<Connection, Train> populator = Schedule.populate.
+    private static final SQLBiConsumer<Connection, Train> forecast = Schedule.populate.
             andThen( ScheduleEntry.populate ).
             andThen( Forecast.populate ).
             andThen( ForecastEntry.populate );
 
+    public static Train getSchedule( String rid )
+            throws SQLException
+    {
+        return getTrain( Schedule.populate, rid );
+    }
+
     public static Train getTrain( String rid )
+            throws SQLException
+    {
+        return getTrain( forecast, rid );
+    }
+
+    private static Train getTrain( SQLBiConsumer<Connection, Train> c, String rid )
             throws SQLException
     {
         Train train = new Train( rid );
 
         try( Connection con = LDBContextListener.getDataSource().getConnection() ) {
-            populator.accept( con, train );
+            c.accept( con, train );
         }
 
         return train;
