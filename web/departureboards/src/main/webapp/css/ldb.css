@@ -4,6 +4,7 @@
     font-family: Arial;
     font-size: 24pt;
     padding: 3pt;
+    text-align: center;
 }
 .ldbUpdated {
     color:#fff;
@@ -19,10 +20,7 @@
     table-layout: fixed;
     background: #000;
     color: #fff;
-}
-
-table.ldbTable tr {
-    height: 36px;
+    border-bottom: 2px solid #ffffff;
 }
 
 .altrow {
@@ -82,6 +80,7 @@ table.ldbTable tr {
 .ldbOntime {
     color: white;
 }
+.ldbLate {}
 .ldbCancelled, .ldbDelayed {
     color: red;
 }
@@ -89,13 +88,41 @@ table.ldbTable tr {
     color: white;
 }
 
-/* Samsung Note 3 Portrait */
-@media all and ( max-width: 443px ) {
-    .ldbLoc { font-size: 15pt; }
-    .ldbUpdated { font-size: 130%; }
-    .ldbTable { font-size: 60%; }
+/* iPhone 3GS */
+@media all and ( max-width: 320px ) {
+    .ldbLoc {
+        font-size: 15pt;
+        padding-top: 11pt;
+    }
+    .ldbUpdated { font-size: 70%; }
+    .ldbTable { font-size: 130%; }
     .ldbHead {
         font-size: 60%;
+        padding: 6px 4px;
+    }
+    .ldb-enttop, .ldb-entmid { font-size: 70%; }
+    .ldb-enttop .ldbVia { font-size: 70%; }
+    .ldb-entwarn { font-size: 60%; }
+    .ldb-entbot { font-size: 60%; }
+    .ldb-entbot p { margin: 0; }
+    .ldbPlat { width: 30px; }
+    .ldbSched { width: 55px; }
+    .ldbForecast { width: 64px; }
+    .ldbCol { font-size: 90%; padding: 1px 0px; }
+    .ldbLate, .ldbCancelled,.ldbDelayed {
+        padding-left: 15pt;
+        padding-right: 15pt;
+        text-align: center;
+    }
+}
+
+/* Samsung Note 3 Portrait */
+@media all and (min-width: 321px) and ( max-width: 443px ) {
+    .ldbLoc { font-size: 15pt; }
+    .ldbUpdated { font-size: 70%; }
+    .ldbTable { font-size: 130%; }
+    .ldbHead {
+        font-size: 70%;
         padding: 6px 4px;
     }
     .ldb-enttop, .ldb-entmid { font-size: 90%; }
@@ -110,7 +137,7 @@ table.ldbTable tr {
 }
 
 /* Samsung Note 3 Portrait */
-@media all and ( max-width: 640px ) {
+@media all and (min-width: 444px) and ( max-width: 640px ) {
     .ldbLoc { font-size: 15pt; }
     .ldbUpdated { font-size: 70%; }
     .ldbTable { font-size: 130%; }

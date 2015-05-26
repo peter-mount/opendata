@@ -34,4 +34,33 @@ public class Predicates
     {
         return o -> o == null ? null : clazz.isAssignableFrom( o.getClass() );
     }
+
+    public static final <T> Predicate<T> and( Predicate<T> a, Predicate<T> b )
+    {
+        return a == null ? b : b == null ? a : a.and( b );
+    }
+
+    public static final <T> Predicate<T> and( Predicate<T>... p )
+    {
+        Predicate<T> a = null;
+        for( Predicate<T> b: p ) {
+            a = and( a, b );
+        }
+        return a;
+    }
+
+    public static final <T> Predicate<T> or( Predicate<T> a, Predicate<T> b )
+    {
+        return a == null ? b : b == null ? a : a.or( b );
+    }
+
+    public static final <T> Predicate<T> or( Predicate<T>... p )
+    {
+        Predicate<T> a = null;
+        for( Predicate<T> b: p ) {
+            a = or( a, b );
+        }
+        return a;
+    }
+
 }

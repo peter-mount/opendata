@@ -17,6 +17,14 @@ a:visited {
     color: #fff;
 }
 
+h1 {
+    text-align: center;
+}
+
+p {
+    text-align: justify;
+}
+
 #outer {
     position: absolute;
     top: 0;
@@ -104,6 +112,21 @@ a:visited {
     width: auto;
 }
 
+.ldbbutton {
+    background: #121d34;
+    color: #fff;
+    border: 1px solid #121d34;
+    -webkit-border-radius: 5pt;
+    font-size: 14pt;
+    text-decoration: none;
+    top: 10pt;
+    position: relative;
+    padding: 1pt;
+}
+
+.ldbbutton:hover {
+    background: #00a37a;
+}
 /* Override jquery */
 .ui-page {
     background-color: #000;
@@ -112,3 +135,84 @@ a:visited {
 .ui-icon-loading {
     background: url(//ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/images/ajax-loader.gif);
 }
+
+input {
+    color: #fff;
+    font-size: 14pt;
+}
+
+.ui-input {
+    display: inline-block;
+}
+
+.ui-autocomplete {
+    border: 1px solid white;
+    background: #000;
+    margin-left: 3em;
+    margin-right: 3em;
+    display: inline-block;
+}
+.ui-autocomplete li {
+    display: block;
+    font-size: 16pt;
+}
+.ui-autocomplete ul {
+    display: block;
+    list-style-type: none;
+    -webkit-margin-before: 0px;
+    -webkit-margin-after: 0px;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+    -webkit-padding-start: 0px;
+}
+
+.ui-state-focus {
+    background: #888;
+}
+
+#stationlabel {
+
+}
+
+/* iPhone 3GS */
+@media all and ( max-width: 320px ) {
+    .ldbbutton {
+        font-size: 130%;
+        top: 5pt;
+    }
+    h1 {
+        font-size: 110%;
+        margin: 0;
+        -webkit-margin-before: 0;
+        -webkit-margin-after: 0.67em;
+    }
+    #stationlabel { font-size: 80%; }
+    .ui-autocomplete li { font-size: 12pt; }
+}
+
+/* Samsung Note 3 Portrait */
+@media all and (min-width: 321px) and ( max-width: 443px ) {
+    .ldbbutton { font-size: 80% }
+    h1 {
+        font-size: 130%;
+        margin: 0;
+        -webkit-margin-before: 0;
+        -webkit-margin-after: 0.67em;
+    }
+    #stationlabel { font-size: 90%; }
+    .ui-autocomplete li { font-size: 12pt; }
+}
+
+/* Samsung Note 3 Portrait */
+@media all and ( min-width: 444px ) and ( max-width: 640px ) {
+    .ldbbutton { font-size: 80% }
+    h1 {
+        font-size: 130%;
+        margin: 0;
+        -webkit-margin-before: 0;
+        -webkit-margin-after: 0.67em;
+    }
+    #stationlabel { font-size: 90%; }
+    .ui-autocomplete li { font-size: 12pt; }
+}
+

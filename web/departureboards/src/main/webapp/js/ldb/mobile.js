@@ -47,8 +47,8 @@ var LDB = (function () {
         reloadIn(60000);
         LDB.board.empty().append(v);
     };
-    
-    var notModified = function(v) {
+
+    var notModified = function (v) {
         hideLoader();
         reloadIn(10000);
     }
@@ -79,5 +79,16 @@ var LDB = (function () {
         });
     };
 
+    LDB.search = function () {
+        $("#stations").autocomplete({
+            source: "/search",
+            minLength: 3,
+            select: function (event, ui) {
+                document.location = "/mldb/"+ui.item.crs;
+            }
+        });
+    };
+
     return LDB;
 })();
+

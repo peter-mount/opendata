@@ -2,9 +2,20 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="t" uri="http://uktra.in/tld/opendata" %>
 <%@ taglib prefix="d" uri="http://uktra.in/tld/darwin" %>
-<div id="logo"><img src="/images/375-logo.png"/></div>
-<%--
+<c:choose>
+    <c:when test="${empty location}">
+        <div id="logo">
+            <a href="/">
+                <img src="/images/375-logo.png"/>
+            </a>
+        </div>
+    </c:when>
+    <c:otherwise>
+        <a class="ldbbutton" href="/">Choose Another Station</a>
+    </c:otherwise>
+</c:choose>
+<a class="ldbbutton" href="/about">About</a>
+<a class="ldbbutton" href="/contact">Contact Us</a>
 <c:if test="${not empty location}">
     <div class="ldbLoc">${location.location}</div>
 </c:if>
---%>

@@ -247,6 +247,15 @@ public class LDB
         return ptd;
     }
 
+    /**
+     * Is this timetabled. A working train will return false here
+     * @return 
+     */
+    public boolean isTimetabled()
+    {
+        return pta != null || ptd != null;
+    }
+
     public String getPlat()
     {
         return plat;

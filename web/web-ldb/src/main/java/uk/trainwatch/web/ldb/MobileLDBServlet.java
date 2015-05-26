@@ -38,6 +38,7 @@ public class MobileLDBServlet
             throws ServletException,
             IOException
     {
+        request.getRequestScope().put( "location", loc);
         request.renderTile( getRenderTile() );
     }
 

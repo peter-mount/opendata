@@ -11,7 +11,9 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <div class="ldbWrapper">
     <div class="ldbUpdated">Last updated: ${lastUpdated.toLocalTime()}</div>
+    <%--
     <div class="ldbLoc">${location.location}</div>
+    --%>
     <div class="ldbTable">
         <div class="ldbHead">
             <div class="ldbCol ldbForecast">Expected</div>
@@ -58,7 +60,7 @@
         --%>
 
         <c:forEach var="dep" varStatus="stat" items="${departures}">
-            <c:if test="${!dep.sup}">
+            <c:if test="${!dep.sup and dep.timetabled}">
                 <c:set var="row" value="${!row}"/>
                 <div class="ldb-enttop<c:if test="${row}"> altrow</c:if>">
                     <c:choose>
