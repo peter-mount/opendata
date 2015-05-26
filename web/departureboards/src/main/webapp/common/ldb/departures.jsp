@@ -93,9 +93,12 @@
                     </div>
                     <div class="ldbCont">
                         <c:choose>
-                            <c:when test="${dep.terminated}">Terminates Here</c:when>
+                            <c:when test="${dep.terminated}">
+                                <a onclick="document.location='/train/${dep.rid}';">Terminates Here</a></c:when>
                             <c:otherwise>
-                                <d:tiploc value="${dep.dest}" link="false"/>
+                                <a onclick="document.location='/train/${dep.rid}';">
+                                    <d:tiploc value="${dep.dest}" link="false"/>
+                                </a>
                                 <div class="ldbVia"><d:via value="${dep.via}"/></div>
                             </c:otherwise>
                         </c:choose>
@@ -121,6 +124,9 @@
                                 <c:forEach var="point" varStatus="pstat" items="${dep.points}">
                                     <c:if test="${pstat.first}">${point.time}</c:if>
                                 </c:forEach>
+                                <c:if test="${not empty dep.toc}">
+                                    <d:operator value="${dep.toc}"/> service from
+                                </c:if>
                                 <d:tiploc value="${dep.origin}" link="false"/>
                                 <d:via value="${dep.via}"/>
                                 to <d:tiploc value="${dep.dest}" link="false"/>
@@ -149,6 +155,11 @@
                                     </c:when>
                                 </c:choose>
                             </c:forEach>
+                            <c:if test="${not empty dep.toc}">
+                                <span>
+                                    <d:operator value="${dep.toc}"/> service.
+                                </span>
+                            </c:if>
                             <%-- do we want this?
                             <c:if test="${dep.delayed}">
                                 <p>

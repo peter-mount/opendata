@@ -6,6 +6,7 @@
 package uk.trainwatch.web.ldb;
 
 import java.io.IOException;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import uk.trainwatch.nrod.location.TrainLocation;
@@ -16,7 +17,7 @@ import uk.trainwatch.web.servlet.ApplicationRequest;
  * <p>
  * @author Peter T Mount
  */
-@WebServlet( name = "MobileLDBServlet", urlPatterns = "/mldb/*" )
+@WebServlet(name = "MobileLDBServlet", urlPatterns = "/mldb/*")
 public class MobileLDBServlet
         extends AbstractLDBViewServlet
 {
@@ -36,9 +37,11 @@ public class MobileLDBServlet
     @Override
     protected void show( ApplicationRequest request, TrainLocation loc )
             throws ServletException,
-            IOException
+                   IOException
     {
-        request.getRequestScope().put( "location", loc);
+        Map<String, Object> req = request.getRequestScope();
+        req.put( "location", loc );
+        req.put( "pageTitle", loc.getLocation() );
         request.renderTile( getRenderTile() );
     }
 

@@ -33,4 +33,13 @@
     
     <definition name="ldb.view" template="/common/ldb/departures.jsp" />
     
+    <definition name="ldb.train" extends="layout.main">
+        <put-attribute name="title" value="Train Details" />
+        <put-attribute name="javascript" value="/common/ldb/mobilejavascript.jsp" />
+        <put-attribute name="body" value=".ldb.train" />
+    </definition>
+    <definition name=".ldb.train" extends="layout.1col">
+        <put-attribute name="center" value="/common/ldb/details.jsp" />
+    </definition>
+    
 </tiles-definitions>

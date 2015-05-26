@@ -23,6 +23,13 @@
     border-bottom: 2px solid #ffffff;
 }
 
+.ldbTable a,
+.ldbTable a:hover,
+.ldbTable a:visited {
+    color: white;
+    text-decoration: none;
+}
+
 .altrow {
     background: #121d34;
 }
@@ -88,6 +95,61 @@
     color: white;
 }
 
+.ldb-row {
+    color: #fff;
+}
+
+.ldb-row .ldb-label {
+    display: inline-block;
+    width: 80pt;
+    text-align: right;
+    padding-right: 1pt;
+}
+
+.ldb-row .ldb-value {
+    display: inline-block;
+    text-align: left;
+    padding-left: 1pt;
+}
+
+.ldb-row table {
+    border-collapse: collapse;
+    font-size: 80%;
+    width: 100%;
+    border-bottom: 2px solid white;
+}
+td.ldb-fsct-arrived, td.ldb-fsct-departed {
+    font-weight: bold;
+    font-style: normal;
+}
+td.ldb-fsct-expected {
+    font-style: italic;
+}
+
+.ldb-row td {
+    text-align: center;
+}
+
+.ldb-row th {
+    color: #ffff00;
+    border-bottom: 2px solid white;
+}
+td.ldb-fsct-loc-arr, td.ldb-fsct-loc-expt {
+    text-align: left;
+}
+td.ldb-fsct-loc-arr, td.ldb-fsct-plat-arr {
+    font-style: normal;
+    font-weight: bold;
+}
+td.ldb-fsct-loc-expt, td.ldb-fsct-plat-expt {
+    font-style: italic;
+    font-weight: normal;
+}
+
+td.ldb-fsct-stat {
+    width: 10pt;
+    height: 10pt;
+}
 /* iPhone 3GS */
 @media all and ( max-width: 320px ) {
     .ldbLoc {
@@ -114,13 +176,20 @@
         padding-right: 15pt;
         text-align: center;
     }
+
+    .ldb-row {
+        font-size: 80%;
+    }
 }
 
 /* Samsung Note 3 Portrait */
 @media all and (min-width: 321px) and ( max-width: 443px ) {
-    .ldbLoc { font-size: 15pt; }
+    .ldbLoc { 
+        font-size: 12pt;
+        padding-top: 5pt;
+    }
     .ldbUpdated { font-size: 70%; }
-    .ldbTable { font-size: 130%; }
+    .ldbTable { font-size: 110%; }
     .ldbHead {
         font-size: 70%;
         padding: 6px 4px;
@@ -134,6 +203,10 @@
     .ldbSched { width: 55px; }
     .ldbForecast { width: 64px; }
     .ldbCol { font-size: 90%; padding: 1px 0px; }
+
+    .ldb-row {
+        font-size: 100%;
+    }
 }
 
 /* Samsung Note 3 Portrait */
@@ -154,4 +227,38 @@
     .ldbSched { width: 55px; }
     .ldbForecast { width: 64px; }
     .ldbCol { font-size: 90%; padding: 1px 0px; }
+
+    .ldb-row {
+        font-size: 100%;
+    }
+}
+
+/* Samsung Tab 7.7+ */
+@media all and (min-width: 641px ) {
+    .ldbLoc {
+        font-size: 25pt;
+        padding-top: 10pt;
+    }
+    .ldbUpdated { font-size: 70%; }
+    .ldbTable { font-size: 130%; }
+    .ldbHead {
+        font-size: 70%;
+        padding: 6px 4px;
+    }
+    .ldb-enttop, .ldb-entmid { font-size: 130%; }
+    .ldb-enttop .ldbVia { font-size: 110%; }
+    .ldb-entwarn { font-size: 100%; }
+    .ldb-entbot { font-size: 100%; }
+    .ldb-entbot p { margin: 0; }
+    .ldbPlat { width: 60px; }
+    .ldbSched { width: 95px; }
+    .ldbForecast { width: 104px; }
+    .ldbCol { font-size: 120%; padding: 1px 0px; }
+
+    .ldb-row {
+        font-size: 210%;
+    }
+    .ldb-row .ldb-label {
+        width: 200pt;
+    }
 }

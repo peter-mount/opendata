@@ -46,7 +46,9 @@ public class LDBSearchServlet
             Predicate<TrainLocation> filter
                                      = l -> l.getLocation() != null && !l.getLocation().isEmpty()
                                             && l.isStation()
-                                            && l.getLocation().contains( searchTerm );
+                                            && (l.getLocation().contains( searchTerm )
+                                                || (l.getCrs() != null && l.getCrs().contains( searchTerm ))
+                                                || (l.getTiploc() != null && l.getTiploc().contains( searchTerm )));
 
             TrainLocationFactory.INSTANCE.getStations().
                     stream().

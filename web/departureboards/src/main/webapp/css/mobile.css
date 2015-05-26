@@ -192,7 +192,10 @@ input {
 
 /* Samsung Note 3 Portrait */
 @media all and (min-width: 321px) and ( max-width: 443px ) {
-    .ldbbutton { font-size: 80% }
+    .ldbbutton {
+        font-size: 150%;
+        top: 3pt;
+    }
     h1 {
         font-size: 130%;
         margin: 0;

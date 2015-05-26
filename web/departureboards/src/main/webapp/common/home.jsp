@@ -14,6 +14,14 @@
     and <a href="http://uktra.in">uktra.in</a>.
 </p>
 
+<p>
+    To use simply enter the UK Rail station name in the box above and you will be shown the current boards for that station.
+</p>
+
+<p>
+    By clicking the destination name on those boards you will be able to view the current progress of that service.
+</p>
+
 <script>
     $(document).ready(function () {
         LDB.search();
