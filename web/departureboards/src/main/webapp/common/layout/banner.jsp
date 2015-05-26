@@ -9,6 +9,10 @@
                 <img src="/images/375-logo.png"/>
             </a>
         </div>
+        <a class="ldbbutton" href="/">Choose a Station</a>
+    </c:when>
+    <c:when test="${not empty backTo}">
+        <a class="ldbbutton" onclick="document.location='/mldb/${backTo.crs}'">Back to ${backTo.location}</a>
     </c:when>
     <c:otherwise>
         <a class="ldbbutton" href="/">Choose Another Station</a>

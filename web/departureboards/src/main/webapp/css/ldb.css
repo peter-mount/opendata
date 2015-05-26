@@ -119,7 +119,6 @@
 
 .ldb-row table {
     border-collapse: collapse;
-    font-size: 80%;
     width: 100%;
     border-bottom: 2px solid white;
 }
@@ -215,7 +214,7 @@ td.ldb-fsct-stat {
     .ldbCol { font-size: 90%; padding: 1px 0px; }
 
     .ldb-row {
-        font-size: 100%;
+        font-size: 80%;
     }
 }
 

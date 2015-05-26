@@ -7,11 +7,11 @@
 <div id="board"></div>
 <div id="message"></div>
 <script>
-    var ldb;
+    var train;
     $(document).ready(function () {
         setTimeout(function () {
-            if (!ldb)
-                ldb = new Train('${rid}');
+            if (!train)
+                train = new Train('${train.rid}');
         }, 250);
     });
 </script>
