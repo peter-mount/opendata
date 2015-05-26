@@ -85,6 +85,7 @@ var LDB = (function () {
         $("#stations").autocomplete({
             source: "/search",
             minLength: 3,
+            autoFocus: true,
             select: function (event, ui) {
                 document.location = "/mldb/" + ui.item.crs;
             }
