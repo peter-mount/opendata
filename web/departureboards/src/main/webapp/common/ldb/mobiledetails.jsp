@@ -1,8 +1,3 @@
-<%-- 
-    Document   : mobiledepartures
-    Created on : 20-May-2015, 08:39:33
-    Author     : peter
---%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -16,8 +11,7 @@
     $(document).ready(function () {
         setTimeout(function () {
             if (!ldb)
-                ldb = new LDB('${location.crs}');
-            
+                ldb = new Train('${rid}');
         }, 250);
     });
 </script>

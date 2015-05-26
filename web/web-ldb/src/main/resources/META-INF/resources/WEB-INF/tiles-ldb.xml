@@ -39,7 +39,9 @@
         <put-attribute name="body" value=".ldb.train" />
     </definition>
     <definition name=".ldb.train" extends="layout.1col">
-        <put-attribute name="center" value="/common/ldb/details.jsp" />
+        <put-attribute name="center" value="/common/ldb/mobiledetails.jsp" />
     </definition>
+    
+    <definition name="ldb.train.view" template="/common/ldb/details.jsp" />
     
 </tiles-definitions>

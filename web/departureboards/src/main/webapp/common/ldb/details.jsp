@@ -47,6 +47,9 @@
                 </tr>
                 <c:forEach var="entry" varStatus="status" items="${train.forecastEntries}">
                     <c:choose>
+                        <c:when test="${train.isSchedulePresent() and train.schedule.cancReason>0}">
+                            <c:set var="style" value="can"/>
+                        </c:when>
                         <c:when test="${status.count <= lastRepInd}">
                             <c:set var="style" value="arr"/>
                         </c:when>
@@ -66,6 +69,11 @@
                                 </c:if>
                             </td>
                             <c:choose>
+                                <c:when test="${train.isSchedulePresent() and train.schedule.cancReason>0}">
+                                    <td colspan="2" class="ldb-fsct-cancelled">
+                                        Cancelled
+                                    </td>
+                                </c:when>
                                 <c:when test="${status.count<lastRepInd and empty entry.dep and empty entry.arr}">
                                     <td colspan="2" class="ldb-fsct-expected">
                                         No report

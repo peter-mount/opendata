@@ -139,7 +139,7 @@ td.ldb-fsct-expected {
     color: #ffff00;
     border-bottom: 2px solid white;
 }
-td.ldb-fsct-loc-arr, td.ldb-fsct-loc-expt {
+td.ldb-fsct-loc-arr, td.ldb-fsct-loc-expt, td.ldb-fsct-loc-can {
     text-align: left;
 }
 td.ldb-fsct-loc-arr, td.ldb-fsct-plat-arr {
@@ -150,7 +150,11 @@ td.ldb-fsct-loc-expt, td.ldb-fsct-plat-expt {
     font-style: italic;
     font-weight: normal;
 }
-
+td.ldb-fsct-loc-can, .ldb-fsct-cancelled {
+    font-style: italic;
+    font-weight: normal;
+    color: red;
+}
 td.ldb-fsct-stat {
     width: 10pt;
     height: 10pt;

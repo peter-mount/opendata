@@ -25,6 +25,5 @@
 <script>
     $(document).ready(function () {
         LDB.search();
-        $('#stations').focus();
     });
 </script>
