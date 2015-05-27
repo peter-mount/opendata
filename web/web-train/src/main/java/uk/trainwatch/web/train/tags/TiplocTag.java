@@ -5,8 +5,8 @@
  */
 package uk.trainwatch.web.train.tags;
 
-import uk.trainwatch.nre.darwin.model.ctt.referenceschema.LocationRef;
 import uk.trainwatch.nre.darwin.reference.DarwinReferenceManager;
+import uk.trainwatch.nrod.location.TrainLocation;
 
 /**
  *
@@ -17,7 +17,7 @@ public class TiplocTag
 {
 
     @Override
-    protected LocationRef getLocationRef( String value )
+    protected TrainLocation getLocationRef( String value )
     {
         return DarwinReferenceManager.INSTANCE.getLocationRefFromTiploc( value );
     }

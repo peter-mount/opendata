@@ -45,7 +45,12 @@ public class TrainLocation
     {
     }
 
-    TrainLocation( long id, String location, String crs, String nlc, String tiploc, long stanox, String notes )
+    public TrainLocation( String location, String crs, String tiploc )
+    {
+        this( 0L, location, crs, null, tiploc, 0L, "" );
+    }
+
+    public TrainLocation( long id, String location, String crs, String nlc, String tiploc, long stanox, String notes )
     {
         this.id = id;
         this.location = location == null ? null : location.trim();
@@ -109,6 +114,11 @@ public class TrainLocation
         return location;
     }
 
+    public boolean isSetLocation()
+    {
+        return location != null;
+    }
+
     public String getLocationIndex()
     {
         return location == null || location.isEmpty() ? "?" : location.substring( 0, 1 );
@@ -117,6 +127,11 @@ public class TrainLocation
     public String getCrs()
     {
         return crs;
+    }
+
+    public boolean isSetCrs()
+    {
+        return crs != null;
     }
 
     public String getNlc()

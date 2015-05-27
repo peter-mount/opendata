@@ -7,17 +7,14 @@ package uk.trainwatch.web.train.servlet;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import uk.trainwatch.nre.darwin.forecast.ForecastManager;
-import uk.trainwatch.nre.darwin.model.ctt.referenceschema.LocationRef;
 import uk.trainwatch.nre.darwin.model.ctt.referenceschema.Reason;
 import uk.trainwatch.nre.darwin.model.ctt.referenceschema.Via;
 import uk.trainwatch.nre.darwin.model.ppt.schedules.OR;
@@ -26,6 +23,7 @@ import uk.trainwatch.nre.darwin.model.util.PublicDeparture;
 import uk.trainwatch.nre.darwin.model.util.TplLocation;
 import uk.trainwatch.nre.darwin.model.util.WorkDeparture;
 import uk.trainwatch.nre.darwin.reference.DarwinReferenceManager;
+import uk.trainwatch.nrod.location.TrainLocation;
 import uk.trainwatch.nrod.timetable.util.TrainCategory;
 import uk.trainwatch.nrod.timetable.util.TrainStatus;
 import uk.trainwatch.util.TimeUtils;
@@ -50,7 +48,8 @@ public abstract class AbstractTrainServlet
                    IOException
     {
         Train train = getTrain( request );
-        if( train != null ) {
+        if( train != null )
+        {
             setHeaders( request, train );
             show( request, train.getRid(), train );
         }
@@ -62,7 +61,8 @@ public abstract class AbstractTrainServlet
                    IOException
     {
         Train train = getTrain( request );
-        if( train != null ) {
+        if( train != null )
+        {
             setHeaders( request, train );
         }
     }
@@ -88,18 +88,20 @@ public abstract class AbstractTrainServlet
         req.put( "untilNextReport", untilNextReport );
 
         // Set the cache headers accordingly
-        if( untilNextReport == null ) {
+        if( untilNextReport == null )
+        {
             // No max time then cache to 2 hours
             CacheControl.TWO_HOURS.addHeaders( resp );
         }
-        else {
+        else
+        {
             // Cache up until half way to the next expected time
             // This will fail for entries with missing reports but it'll do
             long maxAge = Math.max( 0, untilNextReport.toMillis() >>> 1 );
             resp.addHeader( "Cache-Control",
                             maxAge > 0
-                            ? "public, max-age=" + maxAge + ", s-maxage=" + maxAge + ", no-transform"
-                            : "public, must-revalidate, no-transform, proxy-revalidate"
+                                    ? "public, max-age=" + maxAge + ", s-maxage=" + maxAge + ", no-transform"
+                                    : "public, must-revalidate, no-transform, proxy-revalidate"
             );
             resp.addDateHeader( "Expires", System.currentTimeMillis() + maxAge );
         }
@@ -112,13 +114,15 @@ public abstract class AbstractTrainServlet
         String rid = request.getPathInfo().substring( 1 );
         Pport pport = ForecastManager.INSTANCE.get( rid );
         Train train = Train.create( pport );
-        if( train == null ) {
+        if( train == null )
+        {
             request.sendError( HttpServletResponse.SC_NOT_FOUND, rid );
             return null;
         }
 
         // if schedule deleted we cannot show it
-        if( train.isSchedulePresent() && train.getSchedule().getDeleted() ) {
+        if( train.isSchedulePresent() && train.getSchedule().getDeleted() )
+        {
             request.sendError( HttpServletResponse.SC_GONE, rid );
             return null;
         }
@@ -139,39 +143,45 @@ public abstract class AbstractTrainServlet
     {
         // Get the origin location as seen by darwin
         TplLocation originLoc = train.getOrigin();
-        LocationRef origin = originLoc == null ? null : DarwinReferenceManager.INSTANCE.getLocationRefFromTiploc( originLoc.getTpl() );
+        TrainLocation origin = originLoc == null ? null : DarwinReferenceManager.INSTANCE.getLocationRefFromTiploc( originLoc.getTpl() );
         TrainMovement originMvt = originLoc == null ? null : train.getMovement( originLoc.getTpl() );
-        String originName=Objects.toString( origin.getLocname(), originLoc.getTpl() );
+        String originName = Objects.toString( origin.getLocation(), originLoc.getTpl() );
 
         // Get the destination location as seen by darwin
         TplLocation destLoc = train.getDestination();
-        LocationRef dest = destLoc == null ? null : DarwinReferenceManager.INSTANCE.getLocationRefFromTiploc( destLoc.getTpl() );
+        TrainLocation dest = destLoc == null ? null : DarwinReferenceManager.INSTANCE.getLocationRefFromTiploc( destLoc.getTpl() );
         TrainMovement destMvt = destLoc == null ? null : train.getMovement( destLoc.getTpl() );
-        String destName=Objects.toString( dest.getLocname(), destLoc.getTpl() );
+        String destName = Objects.toString( dest.getLocation(), destLoc.getTpl() );
 
         // Any via text
         Via via = null;
-        if( origin != null && dest != null && origin.isSetCrs() ) {
+        if( origin != null && dest != null && origin.isSetCrs() )
+        {
             List<String> locs = train.getMovement().stream().map( TplLocation::getTpl ).collect( Collectors.toList() );
 
-            via = DarwinReferenceManager.INSTANCE.getVia( origin.getCrs(), dest.getTpl(), locs );
+            via = DarwinReferenceManager.INSTANCE.getVia( origin.getCrs(), dest.getTiploc(), locs );
         }
 
         // Train name
         String title;
-        if( train.isSchedulePresent() ) {
-            if( originLoc instanceof OR ) {
+        if( train.isSchedulePresent() )
+        {
+            if( originLoc instanceof OR )
+            {
                 title = ((PublicDeparture) originLoc).getPtd();
             }
-            else {
+            else
+            {
                 title = ((WorkDeparture) originLoc).getWtd();
             }
             title = title + " " + originName + " to " + destName;
-            if( via != null ) {
+            if( via != null )
+            {
                 title = title + " " + via.getViatext();
             }
         }
-        else {
+        else
+        {
             title = "Train: " + rid;
         }
         Map<String, Object> req = request.getRequestScope();
@@ -201,14 +211,16 @@ public abstract class AbstractTrainServlet
 
         // Reason for being late
         Reason lateReason = null;
-        if( train.isTsPresent() && train.getTs().isSetLateReason() ) {
+        if( train.isTsPresent() && train.getTs().isSetLateReason() )
+        {
             lateReason = DarwinReferenceManager.INSTANCE.getLateReason( train.getTs().getLateReason().getValue() );
         }
         req.put( "lateReason", lateReason );
 
         // Reason for being cancelled
         Reason cancReason = null;
-        if( train.isSchedulePresent() && train.getSchedule().isSetCancelReason() ) {
+        if( train.isSchedulePresent() && train.getSchedule().isSetCancelReason() )
+        {
             cancReason = DarwinReferenceManager.INSTANCE.getLateReason( train.getSchedule().getCancelReason().getValue() );
         }
         req.put( "cancReason", cancReason );
@@ -219,9 +231,11 @@ public abstract class AbstractTrainServlet
 
         // Is it being delayed?
         Duration delay = null;
-        if( running ) {
+        if( running )
+        {
             TrainMovement l = train.getLastReportedMovement();
-            if( l != null ) {
+            if( l != null )
+            {
                 delay = l.getDelay();
             }
         }
@@ -238,12 +252,14 @@ public abstract class AbstractTrainServlet
     protected final void getStatus( ApplicationRequest request, String rid, Train train )
     {
         TrainStatus trainStatus = TrainStatus.UNKNOWN;
-        if( train.isSchedulePresent() && train.getSchedule().isSetStatus() ) {
+        if( train.isSchedulePresent() && train.getSchedule().isSetStatus() )
+        {
             trainStatus = TrainStatus.lookup( train.getSchedule().getStatus() );
         }
 
         TrainCategory trainCategory = TrainCategory.UNKNOWN;
-        if( train.isSchedulePresent() && train.getSchedule().isSetTrainCat() ) {
+        if( train.isSchedulePresent() && train.getSchedule().isSetTrainCat() )
+        {
             trainCategory = TrainCategory.lookup( train.getSchedule().getTrainCat() );
         }
 

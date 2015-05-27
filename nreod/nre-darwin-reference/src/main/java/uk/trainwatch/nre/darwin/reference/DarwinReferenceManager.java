@@ -11,7 +11,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,6 +25,7 @@ import uk.trainwatch.nre.darwin.model.ctt.referenceschema.LocationRef;
 import uk.trainwatch.nre.darwin.model.ctt.referenceschema.Reason;
 import uk.trainwatch.nre.darwin.model.ctt.referenceschema.TocRef;
 import uk.trainwatch.nre.darwin.model.ctt.referenceschema.Via;
+import uk.trainwatch.nrod.location.TrainLocation;
 import uk.trainwatch.util.sql.SQL;
 
 /**
@@ -43,8 +43,9 @@ public enum DarwinReferenceManager
     /**
      * Cache LocationRef as used often
      */
-    private final Map<String, LocationRef> tiplocCache = new ConcurrentHashMap<>();
-    private final Map<String, List<LocationRef>> crsCache = new ConcurrentHashMap<>();
+    private List<TrainLocation> locs;
+    private final Map<String, TrainLocation> tiplocCache = new ConcurrentHashMap<>();
+    private final Map<String, List<TrainLocation>> crsCache = new ConcurrentHashMap<>();
     private final Map<String, TocRef> tocCache = new ConcurrentHashMap<>();
     private final Map<String, CISSource> cisCache = new ConcurrentHashMap<>();
     private final Map<Integer, Reason> cancCache = new ConcurrentHashMap<>();
@@ -78,21 +79,34 @@ public enum DarwinReferenceManager
 
     private void refresh()
     {
-        if( refreshRequired() ) {
-            synchronized( this ) {
-                if( refreshRequired() ) {
+        if( refreshRequired() )
+        {
+            synchronized( this )
+            {
+                if( refreshRequired() )
+                {
                     try( Connection con = dataSource.getConnection();
-                         Statement s = con.createStatement() ) {
+                            Statement s = con.createStatement() )
+                    {
 
-                        List<LocationRef> locs = SQL.stream( s.executeQuery( "SELECT * FROM darwin.location" ), DarwinReferenceManager::readLocationRef ).
+                        locs = SQL.stream( s.executeQuery(
+                                "SELECT l.name, c.crs, t.tpl"
+                                + " FROM darwin.location l"
+                                + " INNER JOIN darwin.crs c ON l.crs=c.id"
+                                + " INNER JOIN darwin.tiploc t ON l.tpl=t.id" ),
+                                           rs -> new TrainLocation(
+                                                   rs.getString( "name" ),
+                                                   rs.getString( "crs" ),
+                                                   rs.getString( "tpl" )
+                                           ) ).
                                 collect( Collectors.toList() );
 
-                        updateMap( tiplocCache, locs.stream(), LocationRef::getTpl );
+                        updateMap( tiplocCache, locs.stream(), TrainLocation::getTiploc );
 
                         // CRS can map to multiple locations
                         updateMap( crsCache, locs.stream().
                                    filter( l -> l.isSetCrs() ).
-                                   collect( Collectors.groupingBy( LocationRef::getCrs ) ) );
+                                   collect( Collectors.groupingBy( TrainLocation::getCrs ) ) );
 
                         updateMap( cisCache,
                                    SQL.stream( s.executeQuery( "SELECT * FROM darwin.cissource" ), DarwinReferenceManager::readCISSource ),
@@ -109,8 +123,8 @@ public enum DarwinReferenceManager
                                    Reason::getCode );
 
                         locationCacheUpdated = LocalDateTime.now();
-                    }
-                    catch( SQLException ex ) {
+                    } catch( SQLException ex )
+                    {
                         LOG.log( Level.SEVERE, null, ex );
                     }
                 }
@@ -118,17 +132,71 @@ public enum DarwinReferenceManager
         }
     }
 
-    public LocationRef getLocationRefFromTiploc( String tpl )
+    /**
+     * Search the location table for entries that match the given search term
+     *
+     * @param term Term to search fo. Minimum 3 charactersr
+     * @return stream of {@link LocationRef} entries
+     */
+    public Stream<TrainLocation> searchLocations( String term )
+    {
+        if( term == null )
+        {
+            return Stream.empty();
+        }
+
+        String searchTerm = term.trim().toUpperCase();
+        if( searchTerm.length() < 3 )
+        {
+            return Stream.empty();
+        }
+
+        refresh();
+
+        // Search by location name
+        Stream<TrainLocation> search = locs.//tiplocCache.values().
+                stream().
+                filter( l -> l.getLocation().toUpperCase().contains( searchTerm ) ).
+                //filter( TrainLocation::isSetCrs ).
+                //filter( TrainLocation::isSetLocation ).
+                sorted( ( a, b ) -> a.getLocation().compareToIgnoreCase( b.getLocation() ) );//.
+                //distinct();
+
+        // Check for crs match, only if term is 3 characters
+        TrainLocation crsLocation = null;
+        if( searchTerm.length() == 3 )
+        {
+            crsLocation = getLocationRefFromCrs( searchTerm );
+        }
+
+        // Now sort & make distinct by name
+        // Merge crs result to front
+        if( crsLocation != null )
+        {
+            search = Stream.concat( Stream.of( crsLocation ),
+                                    // filter it out of main search if present
+                                    search.filter( l -> !searchTerm.equals( l.getCrs() ) )
+            );
+        }
+
+        return search;
+    }
+
+    public TrainLocation getLocationRefFromTiploc( String tpl )
     {
         refresh();
         return tiplocCache.get( tpl );
     }
 
-    public Collection<LocationRef> getLocationRefFromCrs( String crs )
+    public TrainLocation getLocationRefFromCrs( String crs )
     {
-        if( refreshRequired() ) {
-            refresh();
-        }
+        final List<TrainLocation> l = getLocationRefsFromCrs( crs );
+        return l == null || l.isEmpty() ? null : l.get( 0 );
+    }
+
+    public List<TrainLocation> getLocationRefsFromCrs( String crs )
+    {
+        refresh();
         return crsCache.get( crs );
     }
 
@@ -137,8 +205,8 @@ public enum DarwinReferenceManager
      * <p>
      * This will try to match via text from a specific crs location and a given destination tiploc to get the via text.
      * <p>
-     * For example, getVia("VIC","CNTBW",list) with list containing "MSTONEE" and "ASHFKY" then we should get the via saying "via Maidstone East & Ashford
-     * International".
+     * For example, getVia("VIC","CNTBW",list) with list containing "MSTONEE" and "ASHFKY" then we should get the via saying
+     * "via Maidstone East & Ashford International".
      * <p>
      * @param at   The crs this text is defined for
      * @param dest The destination tiploc
@@ -148,32 +216,39 @@ public enum DarwinReferenceManager
      */
     public Via getVia( String at, String dest, List<String> locs )
     {
-        try( Connection con = dataSource.getConnection() ) {
-            try( PreparedStatement ps = SQL.prepare( con, "SELECT * FROM darwin.via WHERE at=? AND dest=?", at, dest ) ) {
+        try( Connection con = dataSource.getConnection() )
+        {
+            try( PreparedStatement ps = SQL.prepare( con, "SELECT * FROM darwin.via WHERE at=? AND dest=?", at, dest ) )
+            {
                 return SQL.stream( ps, DarwinReferenceManager::readVia ).
                         filter( v -> locs.contains( v.getLoc1() ) ).
                         filter( v -> v.getLoc2() == null || locs.contains( v.getLoc2() ) ).
-                        sorted( ( a, b ) -> {
-                            int r = Integer.compare( locs.indexOf( a.getLoc1() ), locs.indexOf( b.getLoc1() ) );
-                            if( r == 0 ) {
-                                String a2 = a.getLoc2(), b2 = a.getLoc2();
-                                if( a2 == null ) {
-                                    r = 1;
-                                }
-                                else if( b2 == null ) {
-                                    r = -1;
-                                }
-                                else {
-                                    r = Integer.compare( locs.indexOf( a2 ), locs.indexOf( b2 ) );
-                                }
-                            }
-                            return r;
+                        sorted( ( a, b ) ->
+                                {
+                                    int r = Integer.compare( locs.indexOf( a.getLoc1() ), locs.indexOf( b.getLoc1() ) );
+                                    if( r == 0 )
+                                    {
+                                        String a2 = a.getLoc2(), b2 = a.getLoc2();
+                                        if( a2 == null )
+                                        {
+                                            r = 1;
+                                        }
+                                        else if( b2 == null )
+                                        {
+                                            r = -1;
+                                        }
+                                        else
+                                        {
+                                            r = Integer.compare( locs.indexOf( a2 ), locs.indexOf( b2 ) );
+                                        }
+                                    }
+                                    return r;
                         } ).
                         findAny().
                         orElse( null );
             }
-        }
-        catch( SQLException ex ) {
+        } catch( SQLException ex )
+        {
             LOG.log( Level.SEVERE, null, ex );
             return null;
         }
@@ -181,16 +256,18 @@ public enum DarwinReferenceManager
 
     public String getViaText( int via )
     {
-        if( via == 0 ) {
+        if( via == 0 )
+        {
             return null;
         }
         try( Connection con = dataSource.getConnection();
-             PreparedStatement ps = SQL.prepare( con, "SELECT text FROM darwin.via WHERE id=?", via ) ) {
+                PreparedStatement ps = SQL.prepare( con, "SELECT text FROM darwin.via WHERE id=?", via ) )
+        {
             return SQL.stream( ps, SQL.STRING_LOOKUP ).
                     findAny().
                     orElse( null );
-        }
-        catch( SQLException ex ) {
+        } catch( SQLException ex )
+        {
             LOG.log( Level.SEVERE, null, ex );
             return null;
         }
@@ -212,8 +289,7 @@ public enum DarwinReferenceManager
     /**
      * The toc ref from the atoc code
      * <p>
-     * @param code
-     *             <p>
+     * @param code <p>
      * @return
      */
     public TocRef getTocRef( String code )
@@ -225,8 +301,7 @@ public enum DarwinReferenceManager
     /**
      * The cancel reason
      * <p>
-     * @param code
-     *             <p>
+     * @param code <p>
      * @return
      */
     public Reason getCancelReason( int code )
@@ -238,8 +313,7 @@ public enum DarwinReferenceManager
     /**
      * The late reason
      * <p>
-     * @param code
-     *             <p>
+     * @param code <p>
      * @return
      */
     public Reason getLateReason( int code )

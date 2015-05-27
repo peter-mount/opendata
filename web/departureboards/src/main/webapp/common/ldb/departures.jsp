@@ -10,7 +10,7 @@
 <%@ taglib prefix="d" uri="http://uktra.in/tld/darwin" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <div class="ldbWrapper">
-    <div class="ldbUpdated">Last updated: ${lastUpdated.toLocalTime()}</div>
+    <div class="ldbUpdated">Last updated: <t:time value="${lastUpdated}"/></div>
     <%--
     <div class="ldbLoc">${location.location}</div>
     --%>
@@ -58,7 +58,8 @@
 
         <%-- Departures --%>
         <c:forEach var="dep" varStatus="stat" items="${departures}">
-            <c:if test="${!dep.sup and dep.timetabled}">
+            <%-- PhilMonkey requested no terminated trains. TODO make this optional --%>
+            <c:if test="${!dep.sup and dep.timetabled and not dep.terminated}">
                 <c:set var="row" value="${!row}"/>
                 <div class="ldb-enttop<c:if test="${row}"> altrow</c:if>">
                     <c:choose>
@@ -76,11 +77,11 @@
                     </c:choose>
                     <div class="ldbCol ldbSched">
                         <c:choose>
-                            <c:when test="${not empty dep.pta}">
-                                <t:time value="${dep.pta}"/>
+                            <c:when test="${not empty dep.ptd}">
+                                <t:time value="${dep.ptd}"/>
                             </c:when>
                             <c:otherwise>
-                                <t:time value="${dep.ptd}"/>
+                                <t:time value="${dep.pta}"/>
                             </c:otherwise>
                         </c:choose>
                     </div>

@@ -137,9 +137,9 @@ public class TrainSearchServlet
             throws SQLException
     {
         // Map CRS to TIPLOC(s)
-        Collection<LocationRef> locs = null;
+        Collection<TrainLocation> locs = null;
         if( crs != null && !crs.isEmpty() ) {
-            locs = DarwinReferenceManager.INSTANCE.getLocationRefFromCrs( crs );
+            locs = DarwinReferenceManager.INSTANCE.getLocationRefsFromCrs( crs );
         }
 
         if( locs != null && !locs.isEmpty() ) {
@@ -151,7 +151,7 @@ public class TrainSearchServlet
                             + " INNER JOIN darwin.tiploc t ON fe.tpl=t.id"
                             + " WHERE t.tpl IN (" );
             locs.forEach( l -> {
-                args.add( l.getTpl() );
+                args.add( l.getTiploc() );
                 sb.append( "?," );
             } );
             sb.setLength( sb.length() - 1 );

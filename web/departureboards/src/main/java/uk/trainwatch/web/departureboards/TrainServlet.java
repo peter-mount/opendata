@@ -13,7 +13,7 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
-import uk.trainwatch.nrod.location.TrainLocationFactory;
+import uk.trainwatch.nre.darwin.reference.DarwinReferenceManager;
 import uk.trainwatch.util.TimeUtils;
 import uk.trainwatch.web.ldb.LDBUtils;
 import uk.trainwatch.web.servlet.AbstractServlet;
@@ -44,7 +44,7 @@ public class TrainServlet
             req.put( "pageTitle", rid );
 
             if( args.length > 1 ) {
-                req.put( "backTo", TrainLocationFactory.INSTANCE.getTrainLocationByCrs( args[1] ) );
+                req.put( "backTo", DarwinReferenceManager.INSTANCE.getLocationRefFromTiploc( args[1] ) );
             }
 
             // Force 1 minute cache setting

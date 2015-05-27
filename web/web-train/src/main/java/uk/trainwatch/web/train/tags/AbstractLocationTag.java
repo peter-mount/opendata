@@ -9,9 +9,7 @@ import java.io.IOException;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.BodyTagSupport;
-import uk.trainwatch.nre.darwin.model.ctt.referenceschema.LocationRef;
 import uk.trainwatch.nrod.location.TrainLocation;
-import uk.trainwatch.nrod.location.TrainLocationFactory;
 
 /**
  *
@@ -31,7 +29,7 @@ public abstract class AbstractLocationTag
         link = true;
     }
 
-    protected abstract LocationRef getLocationRef( String value );
+    protected abstract TrainLocation getLocationRef( String value );
 
     @Override
     public int doStartTag()
@@ -41,18 +39,19 @@ public abstract class AbstractLocationTag
 
             String name = null;
 
-            LocationRef ref = getLocationRef( value );
-            if( ref != null && ref.isSetLocname() ) {
-                name = ref.getLocname();
+            TrainLocation ref = getLocationRef( value );
+            if( ref != null && ref.isSetLocation()) {
+                name = ref.getLocation();
             }
 
             // Try our own, has depot's etc in there
-            if( name == null || name.equals( value ) ) {
-                TrainLocation loc = TrainLocationFactory.INSTANCE.resolveTrainLocation( value );
-                if( loc != null ) {
-                    name = loc.getLocation();
-                }
-            }
+            // FIXME reimplement
+//            if( name == null || name.equals( value ) ) {
+//                TrainLocation loc = TrainLocationFactory.INSTANCE.resolveTrainLocation( value );
+//                if( loc != null ) {
+//                    name = loc.getLocation();
+//                }
+//            }
 
             if( name == null ) {
                 name = value;

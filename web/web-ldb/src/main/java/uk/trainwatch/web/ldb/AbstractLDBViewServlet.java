@@ -32,7 +32,6 @@ public abstract class AbstractLDBViewServlet
         String crs = request.getPathInfo().substring( 1 ).toUpperCase();
 
         TrainLocation loc = LDBUtils.resolveLocation( request, getServletPrefix() );
-        TrainLocationFactory.INSTANCE.getTrainLocationByCrs( crs );
         if( loc != null ) {
             Map<String, Object> req = request.getRequestScope();
             req.put( "location", loc );

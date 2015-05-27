@@ -20,9 +20,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
+import uk.trainwatch.nre.darwin.reference.DarwinReferenceManager;
 import uk.trainwatch.nre.darwin.stationmsg.StationMessageManager;
 import uk.trainwatch.nrod.location.TrainLocation;
-import uk.trainwatch.nrod.location.TrainLocationFactory;
 import uk.trainwatch.util.TimeUtils;
 import uk.trainwatch.util.sql.SQL;
 import uk.trainwatch.util.sql.SQLBiConsumer;
@@ -45,8 +45,7 @@ public class LDBUtils
      * Resolves a CRS, issuing a not found or redirect to the correct one as needed
      *
      * @param request
-     * @param prefix
-     *                <p>
+     * @param prefix  <p>
      * @return TrainLocation or null if none
      * <p>
      * @throws ServletException
@@ -58,19 +57,25 @@ public class LDBUtils
     {
         String crs = request.getPathInfo().substring( 1 ).toUpperCase();
 
-        TrainLocation loc = TrainLocationFactory.INSTANCE.getTrainLocationByCrs( crs );
-        if( loc == null ) {
+        TrainLocation loc = DarwinReferenceManager.INSTANCE.getLocationRefFromCrs( crs );
+        if( loc == null )
+        {
             // See if they have used an alternate code
-            loc = TrainLocationFactory.INSTANCE.resolveTrainLocation( crs );
+            loc = DarwinReferenceManager.INSTANCE.getLocationRefFromTiploc( crs );
 
-            if( loc == null ) {
+            if( loc == null )
+            {
                 request.sendError( HttpServletResponse.SC_NOT_FOUND );
             }
-            else {
+            else
+            {
                 // Redirect to the correct page
                 request.getResponse().
                         sendRedirect( prefix + loc.getCrs() );
             }
+
+            // Force redirect or error
+            return null;
         }
         return loc;
     }
@@ -80,10 +85,8 @@ public class LDBUtils
      * <p>
      * @param req
      * @param loc  <p>
-     * @param time
-     *             <p>
-     * @return
-     *         <p>
+     * @param time <p>
+     * @return <p>
      * @throws SQLException
      */
     public static Instant getDepartures( Map<String, Object> req, TrainLocation loc, LocalTime time )
@@ -96,7 +99,8 @@ public class LDBUtils
         boolean midnight = time.getHour() > 20;
         req.put( "midnight", midnight );
 
-        try( Connection con = LDBContextListener.getDataSource().getConnection() ) {
+        try( Connection con = LDBContextListener.getDataSource().getConnection() )
+        {
             // must have a working departure
             // order by first of actual departure, estimated then working departure
             List<LDB> departures;
@@ -122,18 +126,20 @@ public class LDBUtils
                                                      + " AND fe.wtp IS NULL",
                                                      // Order by the first valid time
                                                      //+ " ORDER BY COALESCE(fe.dep,fe.etdep,fe.wtd)",
-                                                     loc.getCrs() ) ) {
+                                                     loc.getCrs() ) )
+            {
                 departures = SQL.stream( ps, LDB.fromSQL ).
                         // Filter only public entries
                         filter( LDB::isPublic ).
                         // Filter those that have departed
                         filter( l -> !l.isDeparted() ).
                         // Filter out those out of range, accounting for midnight
-                        filter( l -> {
-                            boolean r = l.getTime().isAfter( timeAfter );
-                            boolean b = l.getTime().isBefore( timeBefore );
+                        filter( l ->
+                                {
+                                    boolean r = l.getTime().isAfter( timeAfter );
+                                    boolean b = l.getTime().isBefore( timeBefore );
 
-                            return midnight ? r | b : r & b;
+                                    return midnight ? r | b : r & b;
                         } ).
                         // Sort to Darwin rules, accounts for midnight
                         sorted( ( a, b ) -> TimeUtils.compareLocalTimeDarwin.compare( a.getTime(), b.getTime() ) ).
@@ -148,8 +154,10 @@ public class LDBUtils
                                                      + " INNER JOIN darwin.tiploc t on e.tpl=t.id"
                                                      + " WHERE f.id=?"
                                                      + " ORDER BY s.id"
-            ) ) {
-                departures.forEach( SQLConsumer.guard( dep -> {
+            ) )
+            {
+                departures.forEach( SQLConsumer.guard( dep ->
+                {
                     ps.setLong( 1, dep.getId() );
                     dep.setPoints( SQL.stream( ps, CallingPoint.fromSQL ).collect( Collectors.toList() ) );
                 } ) );
@@ -197,7 +205,8 @@ public class LDBUtils
     {
         Train train = new Train( rid );
 
-        try( Connection con = LDBContextListener.getDataSource().getConnection() ) {
+        try( Connection con = LDBContextListener.getDataSource().getConnection() )
+        {
             c.accept( con, train );
         }
 
