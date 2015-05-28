@@ -17,6 +17,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
@@ -95,9 +96,14 @@ public class LDBUtils
         // FIXME allow to be shown whilst at the platform. However this might cause issues
         // with a train sitting at the platform but not on the boards?
         LocalTime timeAfter = time.minusMinutes( 2 );
-        LocalTime timeBefore = timeAfter.plusHours( 1 );
-        boolean midnight = time.getHour() > 20;
+        LocalTime timeBefore = time.plusHours( 1 );
+        boolean midnight = timeBefore.isBefore( timeAfter );//time.getHour() > 20;
         req.put( "midnight", midnight );
+
+        // Filter a LocalTime to fit between the required times, accounting for midnight
+        Predicate<LocalTime> filter = midnight
+                ? t -> t.isAfter( timeAfter ) || t.isBefore( timeBefore )
+                : t -> t.isAfter( timeAfter ) && t.isBefore( timeBefore );
 
         try( Connection con = LDBContextListener.getDataSource().getConnection() )
         {
@@ -134,13 +140,7 @@ public class LDBUtils
                         // Filter those that have departed
                         filter( l -> !l.isDeparted() ).
                         // Filter out those out of range, accounting for midnight
-                        filter( l ->
-                                {
-                                    boolean r = l.getTime().isAfter( timeAfter );
-                                    boolean b = l.getTime().isBefore( timeBefore );
-
-                                    return midnight ? r | b : r & b;
-                        } ).
+                        filter( l -> filter.test( l.getTime() ) ).
                         // Sort to Darwin rules, accounts for midnight
                         sorted( ( a, b ) -> TimeUtils.compareLocalTimeDarwin.compare( a.getTime(), b.getTime() ) ).
                         collect( Collectors.toList() );
