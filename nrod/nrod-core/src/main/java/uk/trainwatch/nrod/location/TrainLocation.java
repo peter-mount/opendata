@@ -6,6 +6,7 @@ package uk.trainwatch.nrod.location;
 
 import java.sql.ResultSet;
 import java.util.Comparator;
+import java.util.Objects;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -169,11 +170,7 @@ public class TrainLocation
             return false;
         }
         final TrainLocation other = (TrainLocation) obj;
-        if( this.id != other.id )
-        {
-            return false;
-        }
-        return true;
+        return this.id == other.id && Objects.equals( location, other.location );
     }
 
     @Override

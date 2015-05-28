@@ -154,13 +154,14 @@ public enum DarwinReferenceManager
         refresh();
 
         // Search by location name
-        Stream<TrainLocation> search = locs.//tiplocCache.values().
+        Stream<TrainLocation> search = tiplocCache.values().
                 stream().
                 filter( l -> l.getLocation().toUpperCase().contains( searchTerm ) ).
-                //filter( TrainLocation::isSetCrs ).
-                //filter( TrainLocation::isSetLocation ).
-                sorted( ( a, b ) -> a.getLocation().compareToIgnoreCase( b.getLocation() ) );//.
-                //distinct();
+                filter( TrainLocation::isSetCrs ).
+                filter( TrainLocation::isSetLocation ).
+                filter( l -> !l.getTiploc().equals( l.getLocation() ) ).
+                sorted( ( a, b ) -> a.getLocation().compareToIgnoreCase( b.getLocation() ) ).
+                distinct();
 
         // Check for crs match, only if term is 3 characters
         TrainLocation crsLocation = null;
