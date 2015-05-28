@@ -23,14 +23,10 @@
         </div>
 
         <c:set var="row" value="false"/>
-        <c:set var="first" value="false"/>
-        
+
         <%-- Station messages --%>
         <c:forEach var="msg" items="${stationMessages}">
             <c:if test="${not empty msg.suppress}">
-                <c:if test="${not first}">
-                    <c:set var="first" value="true"/>
-                </c:if>
                 <c:set var="row" value="${!row}"/>
                 <div class="ldb-enttop<c:if test="${row}"> altrow</c:if> ldb-message">
                         Update:
@@ -57,9 +53,11 @@
         </c:forEach>
 
         <%-- Departures --%>
+        <c:set var="shown" value="false"/>
         <c:forEach var="dep" varStatus="stat" items="${departures}">
             <%-- PhilMonkey requested no terminated trains. TODO make this optional --%>
             <c:if test="${!dep.sup and dep.timetabled and not dep.terminated}">
+                <c:set var="shown" value="true"/>
                 <c:set var="row" value="${!row}"/>
                 <div class="ldb-enttop<c:if test="${row}"> altrow</c:if>">
                     <c:choose>
@@ -173,5 +171,16 @@
                 </div>
             </c:if>
         </c:forEach>
+        
+        <c:if test="${!shown}">
+                <div class="ldb-enttop">
+                    <span class="centered">
+                        No information is currently available.
+                    </span>
+                </div>
+                <div class="ldb-entbot">
+                    <span>&nbsp;</span>
+                </div>
+        </c:if>
     </div>
 </div>

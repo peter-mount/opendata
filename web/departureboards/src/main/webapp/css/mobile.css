@@ -5,6 +5,7 @@ body {
     margin:0;
     padding: 0;
     overflow: hidden;
+    overflow-y: hidden;
 }
 
 a {
@@ -150,7 +151,9 @@ input {
     background: #000;
     margin-left: 3em;
     margin-right: 3em;
-    display: inline-block;
+    display: block;
+    max-height: 10em;
+    overflow-y: auto;
 }
 .ui-autocomplete li {
     display: block;
