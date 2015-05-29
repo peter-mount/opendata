@@ -23,6 +23,7 @@ public class DelayTag
     private Object value;
     private boolean ontime;
     private boolean absolute;
+    private boolean early;
 
     @Override
     public void release()
@@ -30,48 +31,62 @@ public class DelayTag
         value = null;
         ontime = false;
         absolute = false;
+        early = false;
     }
 
     @Override
     public int doStartTag()
             throws JspException
     {
-        if( value != null ) {
+        if( value != null )
+        {
 
             Integer delayValue = null;
 
-            if( value instanceof Number ) {
+            if( value instanceof Number )
+            {
                 delayValue = ((Number) value).intValue();
             }
-            else if( value instanceof Duration ) {
+            else if( value instanceof Duration )
+            {
                 delayValue = (int) ((Duration) value).getSeconds();
             }
 
-            if( delayValue != null ) {
-                try {
+            if( delayValue != null )
+            {
+                try
+                {
                     JspWriter w = pageContext.getOut();
 
-                    boolean early = absolute ? false : delayValue < 0;
+                    boolean isEarly = delayValue < 0;
+                    boolean showEarly = isEarly && !(absolute || early);
                     int delay = Math.abs( delayValue );
                     boolean half = (delay % 60) >= 30;
                     int mins = (delay / 60) % 60;
                     int hours = delay / 3600;
 
-                    if( ontime && delay == 0 ) {
+                    if( ontime && delay == 0 )
+                    {
                         w.print( "OT" );
                     }
-                    else {
+                    else
+                    {
                         w.print( String.format(
                                 hours > 0 ? "%1$s%2$dh%3$02d%4$s" : mins > 0 ? "%1$s%3$d%4$s" : "%1$s%4$s",
-                                early ? "-" : "",
+                                showEarly ? "-" : "",
                                 hours,
                                 mins,
                                 // Show 1/2 or a space if not unless absolute mode is enabled
                                 half ? "&frac12;" : absolute ? "" : "&emsp;"
                         ) );
+
+                        if( early && isEarly )
+                        {
+                            w.print( " E" );
+                        }
                     }
-                }
-                catch( IOException ex ) {
+                } catch( IOException ex )
+                {
                     throw new JspException( ex );
                 }
             }
@@ -93,6 +108,11 @@ public class DelayTag
     public void setAbsolute( boolean absolute )
     {
         this.absolute = absolute;
+    }
+
+    public void setEarly( boolean early )
+    {
+        this.early = early;
     }
 
 }

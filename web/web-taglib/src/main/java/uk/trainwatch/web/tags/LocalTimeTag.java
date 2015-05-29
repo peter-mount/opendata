@@ -24,35 +24,56 @@ public class LocalTimeTag
 
     private Object value;
     private boolean working;
+    private char modifier;
+
+    @Override
+    public void release()
+    {
+        value = null;
+        working = false;
+        modifier = 0;
+    }
 
     @Override
     public int doStartTag()
             throws JspException
     {
         LocalTime time = null;
-        if( value instanceof LocalTime ) {
+        if( value instanceof LocalTime )
+        {
             time = (LocalTime) value;
         }
-        else if( value instanceof LocalDateTime ) {
+        else if( value instanceof LocalDateTime )
+        {
             time = ((LocalDateTime) value).toLocalTime();
         }
-        else if( value instanceof String ) {
+        else if( value instanceof String )
+        {
             time = TimeUtils.getLocalTime( (String) value );
         }
 
-        if( time != null ) {
-            try {
+        if( time != null )
+        {
+            try
+            {
                 JspWriter w = pageContext.getOut();
 
                 boolean half = time.getSecond() != 0;
-                w.print( time.truncatedTo( ChronoUnit.MINUTES ).
-                        toString() );
+                String s = time.truncatedTo( ChronoUnit.MINUTES ).toString();
 
-                if( working ) {
+                if( modifier != 0 )
+                {
+                    s = s.replace( ':', modifier );
+                }
+
+                w.print( s );
+
+                if( working )
+                {
                     w.print( half ? "&frac12;" : "&emsp;" );
                 }
-            }
-            catch( IOException ex ) {
+            } catch( IOException ex )
+            {
                 throw new JspException( ex );
             }
 
@@ -69,6 +90,18 @@ public class LocalTimeTag
     public void setWorking( boolean working )
     {
         this.working = working;
+    }
+
+    public void setModifier( String modifier )
+    {
+        if( modifier == null || modifier.isEmpty() )
+        {
+            this.modifier = 0;
+        }
+        else
+        {
+            this.modifier = modifier.charAt( 0 );
+        }
     }
 
 }

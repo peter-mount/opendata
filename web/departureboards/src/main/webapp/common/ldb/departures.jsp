@@ -61,8 +61,11 @@
                 <c:set var="row" value="${!row}"/>
                 <div class="ldb-enttop<c:if test="${row}"> altrow</c:if>">
                     <c:choose>
-                        <c:when test="${dep.cancReason>0}">
+                        <c:when test="${dep.canc}">
                             <div class="ldbCol ldbForecast ldbCancelled">Cancelled</div>
+                        </c:when>
+                        <c:when test="${dep.onPlatform}">
+                            <div class="ldbCol ldbForecast ldbOntime">Arrived</div>
                         </c:when>
                         <c:when test="${dep.ontime}">
                             <div class="ldbCol ldbForecast ldbOntime">On&nbsp;Time</div>

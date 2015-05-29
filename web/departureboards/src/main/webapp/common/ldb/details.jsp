@@ -24,10 +24,12 @@
     <c:set var="lastRepInd" value="0"/>
     <c:if test="${train.isForecastPresent()}">
         <c:forEach var="entry" varStatus="status" items="${train.forecastEntries}">
+            <%-- Find the last reported entry --%>
             <c:if test="${not empty entry.arr or not empty entry.dep}">
                 <c:set var="lastRep" value="${entry}"/>
                 <c:set var="lastRepInd" value="${status.count}"/>
             </c:if>
+            <%-- Just one entry with a length then add the column --%>
             <c:if test="${entry.length>0}">
                 <c:set var="showlength" value="true"/>
             </c:if>
@@ -47,7 +49,7 @@
                 </tr>
                 <c:forEach var="entry" varStatus="status" items="${train.forecastEntries}">
                     <c:choose>
-                        <c:when test="${train.isSchedulePresent() and train.schedule.cancReason>0}">
+                        <c:when test="${entry.canc}">
                             <c:set var="style" value="can"/>
                         </c:when>
                         <c:when test="${status.count <= lastRepInd}">
@@ -69,7 +71,7 @@
                                 </c:if>
                             </td>
                             <c:choose>
-                                <c:when test="${train.isSchedulePresent() and train.schedule.cancReason>0}">
+                                <c:when test="${entry.canc}">
                                     <td colspan="2" class="ldb-fsct-cancelled">
                                         Cancelled
                                     </td>
@@ -81,9 +83,20 @@
                                 </c:when>
                                 <c:otherwise>
                                     <c:choose>
-                                        <c:when test="${not empty entry.dep or not empty entry.arr}">
+                                        <c:when test="${entry.departed}">
                                             <td class="ldb-fsct-arrived">
-                                                <t:time value="${entry.tm}"/>
+                                                <t:time value="${entry.dep}"/>
+                                            </td>
+                                        </c:when>
+                                        <%-- On platform but not departed show arrival but with a not : --%>
+                                        <c:when test="${entry.onPlatform}">
+                                            <td class="ldb-fsct-arrived">
+                                                <t:time value="${entry.arr}" modifier="a"/>ͣͣ
+                                            </td>
+                                        </c:when>
+                                        <c:when test="${entry.arrived}">
+                                            <td class="ldb-fsct-arrived">
+                                                <t:time value="${entry.arr}"/>ͣͣ
                                             </td>
                                         </c:when>
                                         <c:when test="${not empty entry.etdep}">
@@ -101,12 +114,19 @@
                                             </td>
                                         </c:otherwise>
                                     </c:choose>
-                                    <td class="ldb-fsct-arrived">
-                                        <c:if test="${status.count<=lastRepInd}">
-                                            <t:delay value="${entry.delay}" ontime="true" absolute="true"/>
-                                            <c:if test="${entry.delay.isNegative()}">E</c:if>
-                                        </c:if>
-                                    </td>
+                                    <%-- Show delay or expected delay --%>
+                                    <c:choose>
+                                        <c:when test="${status.count<=lastRepInd}">
+                                            <td class="ldb-fsct-arrived">
+                                                <t:delay value="${entry.delay}" ontime="true" early="true"/>
+                                            </td>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <td class="ldb-fsct-expected">
+                                                <t:delay value="${entry.delay}" ontime="true" early="true"/>
+                                            </td>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </c:otherwise>
                             </c:choose>
                             <c:if test="${showlength}">

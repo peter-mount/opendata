@@ -97,7 +97,7 @@ public class LDBUtils
         // with a train sitting at the platform but not on the boards?
         LocalTime timeAfter = time.minusMinutes( 2 );
         LocalTime timeBefore = time.plusHours( 1 );
-        boolean midnight = timeBefore.isBefore( timeAfter );//time.getHour() > 20;
+        boolean midnight = timeBefore.isBefore( timeAfter );
         req.put( "midnight", midnight );
 
         // Filter a LocalTime to fit between the required times, accounting for midnight

@@ -17,6 +17,13 @@
             <name>working</name>
             <rtexprvalue>true</rtexprvalue>
             <type>boolean</type>
+            <description>If true then show space for seconds 0..29 or 1/2 for 30..59 </description>
+        </attribute>
+        <attribute>
+            <name>modifier</name>
+            <rtexprvalue>true</rtexprvalue>
+            <type>java.lang.String</type>
+            <description>If present the character to use instead of : in the time</description>
         </attribute>
     </tag>
     <tag>
@@ -62,6 +69,12 @@
             <rtexprvalue>true</rtexprvalue>
             <type>boolean</type>
             <description>If set then all delays are treated as positive</description>
+        </attribute>
+        <attribute>
+            <name>early</name>
+            <rtexprvalue>true</rtexprvalue>
+            <type>boolean</type>
+            <description>If set then when early (negative delay) suffix with E</description>
         </attribute>
     </tag>
 </taglib>

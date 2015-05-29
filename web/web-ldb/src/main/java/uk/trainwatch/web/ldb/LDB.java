@@ -178,7 +178,9 @@ public class LDB
     }
 
     /**
-     * Has this train arrived
+     * Has this train arrived.
+     *
+     * Note to see if the train has arrived but not yet departed use {@link #isOnPlatform()}
      *
      * @return
      */
@@ -187,16 +189,63 @@ public class LDB
         return arr != null;
     }
 
+    /**
+     * Has the train departed
+     *
+     * @return
+     */
     public boolean isDeparted()
     {
         return dep != null;
     }
 
+    /**
+     * Is the train on the platform.
+     *
+     * This is defined as having an arrival but no departure time. However a cancelled, terminated or non-timetabled (working)
+     * train will not show regardless of the times.
+     *
+     * @return
+     */
+    public boolean isOnPlatform()
+    {
+        // Cancelled, terminated or not timetabled then no
+        if( isCanc() || isTerminated() || !isTimetabled() )
+        {
+            return false;
+        }
+
+        // True if arrived but not departed
+        return isArrived() && !isDeparted();
+    }
+
+    /**
+     * Is the train on time. This is defined as being within ±1 minute of the timetable,
+     *
+     * @return
+     */
     public boolean isOntime()
     {
         return delay.isZero() || Math.abs( delay.getSeconds() ) < 60;
     }
 
+    /**
+     * No report. This is defined as having no reported arrival nor departure times
+     *
+     * @return
+     */
+    public boolean isNoReport()
+    {
+        return !isArrived() && !isDeparted();
+    }
+
+    /**
+     * The recorded time for this entry as defined by the database.
+     *
+     * This is the first value in the following sequence that is present: dep, arr, detet, arret, ptd, pta, wtd, wta or wtp.
+     *
+     * @return
+     */
     public LocalTime getTime()
     {
         return time;
@@ -249,7 +298,8 @@ public class LDB
 
     /**
      * Is this timetabled. A working train will return false here
-     * @return 
+     *
+     * @return
      */
     public boolean isTimetabled()
     {
