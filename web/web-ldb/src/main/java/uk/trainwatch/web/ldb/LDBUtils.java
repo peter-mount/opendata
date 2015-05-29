@@ -17,6 +17,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.servlet.ServletException;
@@ -115,7 +116,8 @@ public class LDBUtils
                                                      + "   s.toc AS toc,"
                                                      + "   o.name AS origin,"
                                                      + "   d.name AS destination,"
-                                                     + "   f.ts AS ts"
+                                                     + "   f.ts AS ts,"
+                                                     + "   se.can"
                                                      //+ " COALESCE(fe.dep,fe.etdep,fe.wtd,fe.arr,fe.etarr,fe.wta) as time,"
                                                      + " FROM darwin.forecast f"
                                                      + " INNER JOIN darwin.schedule s ON f.schedule=s.id"
@@ -124,14 +126,17 @@ public class LDBUtils
                                                      + " INNER JOIN darwin.forecast_entry fe ON f.id=fe.fid"
                                                      + " INNER JOIN darwin.location l ON fe.tpl=l.tpl"
                                                      + " INNER JOIN darwin.crs c ON l.crs=c.id"
+                                                     // Link forecast & schedule to get cancelled status
+                                                     + " INNER JOIN darwin.schedule_entry se ON s.id=se.schedule"
+                                                     + "   AND se.tpl=fe.tpl"
+                                                     + "   AND se.pta=fe.pta"
+                                                     + "   AND se.ptd=fe.ptd"
                                                      // Only for this station
                                                      + " WHERE c.crs=?"
                                                      // Flagged for display
                                                      + " AND fe.ldb=TRUE"
                                                      // all non-passes required so we can use Terminates/Starts here etc
                                                      + " AND fe.wtp IS NULL",
-                                                     // Order by the first valid time
-                                                     //+ " ORDER BY COALESCE(fe.dep,fe.etdep,fe.wtd)",
                                                      loc.getCrs() ) )
             {
                 departures = SQL.stream( ps, LDB.fromSQL ).
@@ -147,7 +152,8 @@ public class LDBUtils
             }
 
             try( PreparedStatement ps = SQL.prepare( con,
-                                                     "SELECT t.tpl, COALESCE(e.dep, e.etdep, e.arr, e.etarr) AS time"
+                                                     "SELECT t.tpl, COALESCE(e.dep, e.etdep, e.arr, e.etarr) AS time, "
+                                                     + " (e.dep IS NOT NULL OR e.arr IS NOT NULL) AS report"
                                                      + " FROM darwin.schedule_entry s"
                                                      + " INNER JOIN darwin.forecast f ON s.schedule=f.schedule"
                                                      + " INNER JOIN darwin.forecast_entry e ON f.id = e.fid AND s.tpl=e.tpl AND e.ldb=true"
@@ -208,6 +214,20 @@ public class LDBUtils
         try( Connection con = LDBContextListener.getDataSource().getConnection() )
         {
             c.accept( con, train );
+        }
+
+        if( train.isForecastPresent() && train.isSchedulePresent() )
+        {
+            train.getForecastEntries().forEach( f ->
+            {
+                train.getScheduleEntries().
+                        stream().
+                        filter( s -> s.getTpl().equals( f.getTpl() ) ).
+                        filter( s -> Objects.equals( s.getPta(), f.getPta() ) ).
+                        filter( s -> Objects.equals( s.getPtd(), f.getPtd() ) ).
+                        findAny().
+                        ifPresent( f::setScheduleEntry );
+            } );
         }
 
         return train;

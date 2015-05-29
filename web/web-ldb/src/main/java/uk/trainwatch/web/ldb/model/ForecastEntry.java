@@ -25,15 +25,15 @@ public class ForecastEntry
 {
 
     private static final String SELECT = "SELECT f.fid, t.tpl, f.supp,"
-                                         + "f.pta, f.ptd, f.wta, f.wtd, f.wtp,"
-                                         + "f.delay,"
-                                         + "f.arr, f.dep, f.etarr, f.etdep, f.etpass,"
-                                         + "f.plat, f.platsup, f.cisplatsup, f.platsrc,"
-                                         + "f.length, f.detachfront,"
-                                         + "f.tm"
-                                         + " FROM darwin.forecast_entry f"
-                                         + " INNER JOIN darwin.tiploc t ON f.tpl=t.id"
-                                         + " WHERE f.fid=?";
+            + "f.pta, f.ptd, f.wta, f.wtd, f.wtp,"
+            + "f.delay,"
+            + "f.arr, f.dep, f.etarr, f.etdep, f.etpass,"
+            + "f.plat, f.platsup, f.cisplatsup, f.platsrc,"
+            + "f.length, f.detachfront,"
+            + "f.tm"
+            + " FROM darwin.forecast_entry f"
+            + " INNER JOIN darwin.tiploc t ON f.tpl=t.id"
+            + " WHERE f.fid=?";
 
     public static final SQLFunction<ResultSet, ForecastEntry> fromSQL = rs -> new ForecastEntry(
             rs.getLong( "fid" ),
@@ -59,9 +59,12 @@ public class ForecastEntry
             TimeUtils.getLocalTime( rs, "tm" )
     );
 
-    public static final SQLBiConsumer<Connection, Train> populate = ( c, t ) -> {
-        if( t.isForecastPresent() ) {
-            try( PreparedStatement ps = SQL.prepare( c, SELECT, t.getForecastId() ) ) {
+    public static final SQLBiConsumer<Connection, Train> populate = ( c, t ) ->
+    {
+        if( t.isForecastPresent() )
+        {
+            try( PreparedStatement ps = SQL.prepare( c, SELECT, t.getForecastId() ) )
+            {
                 t.setForecastEntries( SQL.stream( ps, fromSQL ).
                         sorted().
                         collect( Collectors.toList() )
@@ -69,7 +72,7 @@ public class ForecastEntry
             }
         }
     };
-    
+
     private final long id;
     private final String tpl;
     private final boolean sup;
@@ -92,8 +95,12 @@ public class ForecastEntry
     private final boolean detatchfront;
     private final LocalTime tm;
 
-    public ForecastEntry( long id, String tpl, boolean sup, LocalTime pta, LocalTime ptd, LocalTime wta, LocalTime wtd, LocalTime wtp, Duration delay,
-                          LocalTime arr, LocalTime dep, LocalTime etarr, LocalTime etdep, LocalTime etpass, String plat, boolean platsup, boolean cisplatsup,
+    private ScheduleEntry scheduleEntry;
+
+    public ForecastEntry( long id, String tpl, boolean sup, LocalTime pta, LocalTime ptd, LocalTime wta, LocalTime wtd,
+                          LocalTime wtp, Duration delay,
+                          LocalTime arr, LocalTime dep, LocalTime etarr, LocalTime etdep, LocalTime etpass, String plat,
+                          boolean platsup, boolean cisplatsup,
                           String platsrc, int length, boolean detatchfront, LocalTime tm )
     {
         this.id = id;
@@ -222,6 +229,16 @@ public class ForecastEntry
     public LocalTime getTm()
     {
         return tm;
+    }
+
+    public ScheduleEntry getScheduleEntry()
+    {
+        return scheduleEntry;
+    }
+
+    public void setScheduleEntry( ScheduleEntry scheduleEntry )
+    {
+        this.scheduleEntry = scheduleEntry;
     }
 
     @Override

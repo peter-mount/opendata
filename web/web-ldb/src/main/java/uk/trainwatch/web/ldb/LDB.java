@@ -29,7 +29,7 @@ public class LDB
             rs.getInt( "via" ),
             rs.getInt( "cancreason" ),
             rs.getInt( "latereason" ),
-            false,//rs.getBoolean( "canc" ),
+            rs.getBoolean( "can" ),
             // Identity
             rs.getLong( "id" ),
             rs.getString( "rid" ),
@@ -82,6 +82,7 @@ public class LDB
     private final boolean cisPlatSup;
     private final Duration delay;
     private Collection<CallingPoint> points;
+    private CallingPoint lastReport;
 
     private LDB(
             LocalTime time,
@@ -143,6 +144,13 @@ public class LDB
     public void setPoints( Collection<CallingPoint> points )
     {
         this.points = points;
+        points.forEach( pt ->
+        {
+            if( pt.isReport() )
+            {
+                lastReport = pt;
+            }
+        } );
     }
 
     public int getCancReason()
@@ -402,4 +410,13 @@ public class LDB
         return toc;
     }
 
+    public CallingPoint getLastReport()
+    {
+        return lastReport;
+    }
+
+    public boolean isLastReportPresent()
+    {
+        return lastReport != null;
+    }
 }

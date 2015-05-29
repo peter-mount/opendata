@@ -82,7 +82,7 @@ public class DelayTag
 
                         if( early && isEarly )
                         {
-                            w.print( " E" );
+                            w.print( 'E' );
                         }
                     }
                 } catch( IOException ex )

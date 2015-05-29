@@ -17,15 +17,21 @@ import uk.trainwatch.util.sql.SQLFunction;
 public class CallingPoint
 {
 
-    public static final SQLFunction<ResultSet, CallingPoint> fromSQL = rs -> new CallingPoint( rs.getString( "tpl" ), TimeUtils.getLocalTime( rs, "time" ) );
+    public static final SQLFunction<ResultSet, CallingPoint> fromSQL = rs -> new CallingPoint(
+            rs.getString( "tpl" ),
+            TimeUtils.getLocalTime( rs, "time" ),
+            rs.getBoolean( "report" )
+    );
 
     private final String tpl;
     private final LocalTime time;
+    private final boolean report;
 
-    private CallingPoint( String tpl, LocalTime time )
+    private CallingPoint( String tpl, LocalTime time, boolean report )
     {
         this.tpl = tpl;
         this.time = time;
+        this.report = report;
     }
 
     public String getTpl()
@@ -36,6 +42,11 @@ public class CallingPoint
     public LocalTime getTime()
     {
         return time;
+    }
+
+    public boolean isReport()
+    {
+        return report;
     }
 
 }
