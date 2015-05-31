@@ -29,7 +29,6 @@ public class LDB
             rs.getInt( "via" ),
             rs.getInt( "cancreason" ),
             rs.getInt( "latereason" ),
-            rs.getBoolean( "can" ),
             // Identity
             rs.getLong( "id" ),
             rs.getString( "rid" ),
@@ -65,7 +64,7 @@ public class LDB
     private final int via;
     private final int cancReason;
     private final int lateReason;
-    private final boolean canc;
+    private boolean canc;
     private final long id;
     private final String rid;
     private final String uid;
@@ -91,7 +90,6 @@ public class LDB
             String origin,
             String dest, int via,
             Integer cancReason, Integer lateReason,
-            boolean canc,
             long id, String rid, String uid,
             int scheduleId,
             LocalTime arr, LocalTime dep,
@@ -111,7 +109,6 @@ public class LDB
 
         this.cancReason = cancReason;
         this.lateReason = lateReason;
-        this.canc = canc;
 
         this.id = id;
         this.rid = rid;
@@ -144,10 +141,8 @@ public class LDB
     public void setPoints( Collection<CallingPoint> points )
     {
         this.points = points;
-        points.forEach( pt ->
-        {
-            if( pt.isReport() )
-            {
+        points.forEach( pt -> {
+            if( pt.isReport() ) {
                 lastReport = pt;
             }
         } );
@@ -166,6 +161,11 @@ public class LDB
     public boolean isCanc()
     {
         return canc;
+    }
+
+    public void setCanc( boolean canc )
+    {
+        this.canc = canc;
     }
 
     public int getVia()
@@ -218,8 +218,7 @@ public class LDB
     public boolean isOnPlatform()
     {
         // Cancelled, terminated or not timetabled then no
-        if( isCanc() || isTerminated() || !isTimetabled() )
-        {
+        if( isCanc() || isTerminated() || !isTimetabled() ) {
             return false;
         }
 

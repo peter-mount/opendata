@@ -60,17 +60,14 @@ public class LDBUtils
         String crs = request.getPathInfo().substring( 1 ).toUpperCase();
 
         TrainLocation loc = DarwinReferenceManager.INSTANCE.getLocationRefFromCrs( crs );
-        if( loc == null )
-        {
+        if( loc == null ) {
             // See if they have used an alternate code
             loc = DarwinReferenceManager.INSTANCE.getLocationRefFromTiploc( crs );
 
-            if( loc == null )
-            {
+            if( loc == null ) {
                 request.sendError( HttpServletResponse.SC_NOT_FOUND );
             }
-            else
-            {
+            else {
                 // Redirect to the correct page
                 request.getResponse().
                         sendRedirect( prefix + loc.getCrs() );
@@ -103,11 +100,12 @@ public class LDBUtils
 
         // Filter a LocalTime to fit between the required times, accounting for midnight
         Predicate<LocalTime> filter = midnight
-                ? t -> t.isAfter( timeAfter ) || t.isBefore( timeBefore )
-                : t -> t.isAfter( timeAfter ) && t.isBefore( timeBefore );
+                                      ? t -> t.isAfter( timeAfter ) || t.isBefore( timeBefore )
+                                      : t -> t.isAfter( timeAfter ) && t.isBefore( timeBefore );
 
-        try( Connection con = LDBContextListener.getDataSource().getConnection() )
-        {
+        final String crs = loc.getCrs();
+
+        try( Connection con = LDBContextListener.getDataSource().getConnection() ) {
             // must have a working departure
             // order by first of actual departure, estimated then working departure
             List<LDB> departures;
@@ -116,9 +114,7 @@ public class LDBUtils
                                                      + "   s.toc AS toc,"
                                                      + "   o.name AS origin,"
                                                      + "   d.name AS destination,"
-                                                     + "   f.ts AS ts,"
-                                                     + "   se.can"
-                                                     //+ " COALESCE(fe.dep,fe.etdep,fe.wtd,fe.arr,fe.etarr,fe.wta) as time,"
+                                                     + "   f.ts AS ts"
                                                      + " FROM darwin.forecast f"
                                                      + " INNER JOIN darwin.schedule s ON f.schedule=s.id"
                                                      + " INNER JOIN darwin.location d ON s.dest=d.tpl"
@@ -126,19 +122,13 @@ public class LDBUtils
                                                      + " INNER JOIN darwin.forecast_entry fe ON f.id=fe.fid"
                                                      + " INNER JOIN darwin.location l ON fe.tpl=l.tpl"
                                                      + " INNER JOIN darwin.crs c ON l.crs=c.id"
-                                                     // Link forecast & schedule to get cancelled status
-                                                     + " INNER JOIN darwin.schedule_entry se ON s.id=se.schedule"
-                                                     + "   AND se.tpl=fe.tpl"
-                                                     + "   AND se.pta=fe.pta"
-                                                     + "   AND se.ptd=fe.ptd"
                                                      // Only for this station
                                                      + " WHERE c.crs=?"
                                                      // Flagged for display
                                                      + " AND fe.ldb=TRUE"
                                                      // all non-passes required so we can use Terminates/Starts here etc
                                                      + " AND fe.wtp IS NULL",
-                                                     loc.getCrs() ) )
-            {
+                                                     loc.getCrs() ) ) {
                 departures = SQL.stream( ps, LDB.fromSQL ).
                         // Filter only public entries
                         filter( LDB::isPublic ).
@@ -152,20 +142,27 @@ public class LDBUtils
             }
 
             try( PreparedStatement ps = SQL.prepare( con,
-                                                     "SELECT t.tpl, COALESCE(e.dep, e.etdep, e.arr, e.etarr) AS time, "
-                                                     + " (e.dep IS NOT NULL OR e.arr IS NOT NULL) AS report"
+                                                     "SELECT t.tpl,"
+                                                     + " COALESCE(e.dep, e.etdep, e.arr, e.etarr) AS time,"
+                                                     + " (e.dep IS NOT NULL OR e.arr IS NOT NULL) AS report,"
+                                                     + " s.can"
                                                      + " FROM darwin.schedule_entry s"
                                                      + " INNER JOIN darwin.forecast f ON s.schedule=f.schedule"
                                                      + " INNER JOIN darwin.forecast_entry e ON f.id = e.fid AND s.tpl=e.tpl AND e.ldb=true"
                                                      + " INNER JOIN darwin.tiploc t on e.tpl=t.id"
                                                      + " WHERE f.id=?"
                                                      + " ORDER BY s.id"
-            ) )
-            {
-                departures.forEach( SQLConsumer.guard( dep ->
-                {
+            ) ) {
+                departures.forEach( SQLConsumer.guard( dep -> {
                     ps.setLong( 1, dep.getId() );
-                    dep.setPoints( SQL.stream( ps, CallingPoint.fromSQL ).collect( Collectors.toList() ) );
+
+                    dep.setPoints( SQL.stream( ps, CallingPoint.fromSQL ).
+                            peek( c -> {
+                                if( DarwinReferenceManager.INSTANCE.isCrs( crs, c.getTpl() ) ) {
+                                    dep.setCanc( c.isCanc() );
+                                }
+                            } ).
+                            collect( Collectors.toList() ) );
                 } ) );
             }
 
@@ -189,6 +186,9 @@ public class LDBUtils
         }
     }
 
+    private static final SQLBiConsumer<Connection, Train> schedules = Schedule.populate.
+            andThen( ScheduleEntry.populate );
+
     private static final SQLBiConsumer<Connection, Train> forecast = Schedule.populate.
             andThen( ScheduleEntry.populate ).
             andThen( Forecast.populate ).
@@ -211,15 +211,12 @@ public class LDBUtils
     {
         Train train = new Train( rid );
 
-        try( Connection con = LDBContextListener.getDataSource().getConnection() )
-        {
+        try( Connection con = LDBContextListener.getDataSource().getConnection() ) {
             c.accept( con, train );
         }
 
-        if( train.isForecastPresent() && train.isSchedulePresent() )
-        {
-            train.getForecastEntries().forEach( f ->
-            {
+        if( train.isForecastPresent() && train.isSchedulePresent() ) {
+            train.getForecastEntries().forEach( f -> {
                 train.getScheduleEntries().
                         stream().
                         filter( s -> s.getTpl().equals( f.getTpl() ) ).

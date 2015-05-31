@@ -50,7 +50,7 @@
                 <c:forEach var="entry" varStatus="status" items="${train.forecastEntries}">
                     <c:set var="canc" value="false"/>
                     <c:if test="${not empty entry.scheduleEntry}">
-                        <c:set var="can" value="${entry.scheduleEntry.can}"/>
+                        <c:set var="canc" value="${entry.scheduleEntry.can}"/>
                     </c:if>
                     <c:choose>
                         <c:when test="${canc}">

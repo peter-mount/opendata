@@ -20,18 +20,21 @@ public class CallingPoint
     public static final SQLFunction<ResultSet, CallingPoint> fromSQL = rs -> new CallingPoint(
             rs.getString( "tpl" ),
             TimeUtils.getLocalTime( rs, "time" ),
-            rs.getBoolean( "report" )
+            rs.getBoolean( "report" ),
+            rs.getBoolean( "can" )
     );
 
     private final String tpl;
     private final LocalTime time;
     private final boolean report;
+    private final boolean canc;
 
-    private CallingPoint( String tpl, LocalTime time, boolean report )
+    private CallingPoint( String tpl, LocalTime time, boolean report, boolean canc )
     {
         this.tpl = tpl;
         this.time = time;
         this.report = report;
+        this.canc = canc;
     }
 
     public String getTpl()
@@ -47,6 +50,11 @@ public class CallingPoint
     public boolean isReport()
     {
         return report;
+    }
+
+    public boolean isCanc()
+    {
+        return canc;
     }
 
 }
