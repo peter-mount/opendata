@@ -139,11 +139,21 @@ p {
 input {
     color: #fff;
     font-size: 14pt;
+    display: block;
+    border: 1px solid white;
+    background: #000;
+    color: #fff;
+    margin: 0 2em;
+    height: 1.2em;
+    width: 80%;
 }
 
 .ui-input {
     display: inline-block;
 }
+/* Hide UI helper */
+.ui-helper-hidden-accessible,
+.ui-helper-hidden-accessible div {display: none;}
 
 .ui-autocomplete {
     border: 1px solid white;
@@ -151,7 +161,7 @@ input {
     margin-left: 3em;
     margin-right: 3em;
     display: block;
-    max-height: 10em;
+    max-height: 7em;
     overflow-y: auto;
 }
 .ui-autocomplete li {
@@ -235,7 +245,7 @@ input {
 }
 
 /* Samsung Tab 7.7+ */
-@media all and (min-width: 641px ) {
+@media all and (min-width: 641px ) and (max-width: 1023px){
     .ldbbutton { font-size: 80% }
     h1 {
         font-size: 130%;
@@ -245,4 +255,44 @@ input {
     }
     #stationlabel { font-size: 90%; }
     .ui-autocomplete li { font-size: 12pt; }
+}
+
+/* iPad 3/4 */
+@media all and (min-width: 1024px) and (max-width: 1599px){
+    .ldbbutton { font-size: 150% }
+    h1 {
+        font-size: 130%;
+        margin: 0;
+        -webkit-margin-before: 0;
+        -webkit-margin-after: 0.67em;
+    }
+    #stationlabel { font-size: 90%; }
+    .ui-autocomplete li { font-size: 12pt; }
+}
+
+/* Kindle Fire HDX - Massive resolution 2560x1600 */
+@media all and (min-width: 1600px){
+    .ldbbutton { font-size: 350% }
+    h1 {
+        font-size: 130%;
+        margin: 0;
+        -webkit-margin-before: 0;
+        -webkit-margin-after: 0.67em;
+    }
+    #stationlabel { font-size: 90%; }
+    .ui-autocomplete li { font-size: 12pt; }
+
+    #outer-body { top: 10em; }
+    #home { font-size: 240%; }
+    #eu_cookie_notice { font-size: 250%; }
+    #eu_cookie_notice img {
+        width: 96px;
+        height: 96px;
+    }
+
+    .ui-widget input {
+        font-size: 150%;
+        width: 90%;
+    }
+    .ui-autocomplete li { font-size: 250%; }
 }
