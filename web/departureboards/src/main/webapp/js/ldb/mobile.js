@@ -1,29 +1,81 @@
+// Common UI functions
+var UI = (function () {
+    function UI() {
+        UI.messageSpan = $('<div></div>');
+        UI.message = $('#message').empty().append(UI.messageSpan);
+        UI.loader = $('#loader');
+    }
+
+    var showLoaderImpl = function () {
+        UI.loader.css({display: 'block'});
+    };
+
+    /**
+     * Hide the error message
+     */
+    UI.hideError = function () {
+        UI.message.removeClass('messageVisible').addClass('messageHidden');
+        UI.messageSpan.empty();
+    };
+
+    /**
+     * Show an error message
+     * @param {type} msg Message to show
+     */
+    UI.showError = function (msg) {
+        UI.message.addClass('messageVisible').removeClass('messageHidden');
+        UI.messageSpan.empty().append(msg);
+    };
+
+    /**
+     * Shows the loading icon when connection is slow
+     */
+    UI.showLoader = function () {
+        UI.hideError();
+        UI.timer = setTimeout(showLoaderImpl, 25);
+    };
+
+    /**
+     * Hine the loader icon
+     */
+    UI.hideLoader = function () {
+        if (UI.timer) {
+            clearTimeout(UI.timer);
+            delete(UI.timer);
+        }
+        UI.loader.css({display: 'none'});
+    };
+
+    /**
+     * Configure the station search box
+     */
+    UI.search = function () {
+        $("#stations").autocomplete({
+            source: "/search",
+            minLength: 3,
+            autoFocus: true,
+            select: function (event, ui) {
+                document.location = "/mldb/" + ui.item.crs;
+            }
+        });
+        
+        // Give the search focus
+        setTimeout(function () {
+            $('#stations').focus();
+        }, 250);
+    };
+
+    return UI;
+})();
+
+// Live Departure Boards, refresh every 60s
 var LDB = (function () {
 
     function LDB(crs) {
         LDB.url = '/vldb/' + crs;
-        LDB.messageSpan = $('<div></div>');
-        LDB.message = $('#message').append(LDB.messageSpan);
         LDB.board = $('#board');
         reload();
     }
-
-    var showLoaderImpl = function () {
-        $.mobile.loading("show");
-    };
-
-    var showLoader = function () {
-        hideError();
-        LDB.timer = setTimeout(showLoaderImpl, 250);
-    };
-
-    var hideLoader = function () {
-        if (LDB.timer) {
-            clearTimeout(LDB.timer);
-            delete(LDB.timer);
-        }
-        $.mobile.loading('hide');
-    };
 
     var reloadIn = function (timeout) {
         if (timeout)
@@ -32,35 +84,25 @@ var LDB = (function () {
             LDB.reload();
     };
 
-    var hideError = function () {
-        LDB.message.removeClass('messageVisible').addClass('messageHidden');
-        LDB.messageSpan.empty();
-    };
-
-    var showError = function (msg) {
-        LDB.message.addClass('messageVisible').removeClass('messageHidden');
-        LDB.messageSpan.empty().append(msg);
-    };
-
     var success = function (v) {
-        hideLoader();
+        UI.hideLoader();
         reloadIn(60000);
         LDB.board.empty().append(v);
     };
 
     var notModified = function (v) {
-        hideLoader();
+        UI.hideLoader();
         reloadIn(10000);
     }
 
     var failure = function (v) {
-        hideLoader();
-        showError("Failed to connect to server<br />Will attempt again shortly.");
+        UI.hideLoader();
+        UI.showError("Failed to connect to server<br />Will attempt again shortly.");
         reloadIn(10000);
     };
 
     var reload = function () {
-        showLoader();
+        UI.showLoader();
         $.ajax({
             url: LDB.url,
             type: 'GET',
@@ -81,24 +123,10 @@ var LDB = (function () {
         });
     };
 
-    LDB.search = function () {
-        $("#stations").autocomplete({
-            source: "/search",
-            minLength: 3,
-            autoFocus: true,
-            select: function (event, ui) {
-                document.location = "/mldb/" + ui.item.crs;
-            }
-        });
-        setTimeout(function () {
-            $('#stations').focus();
-        }, 250);
-
-    };
-
     return LDB;
 })();
 
+// Train details - refresh every 60s
 var Train = (function () {
     function Train(rid) {
         Train.url = '/vtrain/' + rid;
@@ -108,23 +136,6 @@ var Train = (function () {
         reload();
     }
 
-    var showLoaderImpl = function () {
-        $.mobile.loading("show");
-    };
-
-    var showLoader = function () {
-        hideError();
-        Train.timer = setTimeout(showLoaderImpl, 250);
-    };
-
-    var hideLoader = function () {
-        if (Train.timer) {
-            clearTimeout(Train.timer);
-            delete(Train.timer);
-        }
-        $.mobile.loading('hide');
-    };
-
     var reloadIn = function (timeout) {
         if (timeout)
             setTimeout(reload, timeout);
@@ -132,35 +143,25 @@ var Train = (function () {
             Train.reload();
     };
 
-    var hideError = function () {
-        Train.message.removeClass('messageVisible').addClass('messageHidden');
-        Train.messageSpan.empty();
-    };
-
-    var showError = function (msg) {
-        Train.message.addClass('messageVisible').removeClass('messageHidden');
-        Train.messageSpan.empty().append(msg);
-    };
-
     var success = function (v) {
-        hideLoader();
+        UI.hideLoader();
         reloadIn(60000);
         Train.board.empty().append(v);
     };
 
     var notModified = function (v) {
-        hideLoader();
+        UI.hideLoader();
         reloadIn(10000);
-    }
+    };
 
     var failure = function (v) {
-        hideLoader();
-        showError("Failed to connect to server<br />Will attempt again shortly.");
+        UI.hideLoader();
+        UI.showError("Failed to connect to server<br />Will attempt again shortly.");
         reloadIn(10000);
     };
 
     var reload = function () {
-        showLoader();
+        UI.showLoader();
         $.ajax({
             url: Train.url,
             type: 'GET',

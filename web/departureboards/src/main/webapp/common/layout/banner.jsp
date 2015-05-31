@@ -29,7 +29,9 @@
         </c:when>
         <c:when test="${not empty train}">
             <d:tiploc value="${train.schedule.dest}" link="false"/>
-            <d:via value="${train.schedule.via}"/>
+            <span class="ldbVia">
+                <d:via value="${train.schedule.via}"/>
+            </span>
         </c:when>
         <c:otherwise>
             <h1>

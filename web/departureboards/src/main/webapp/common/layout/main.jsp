@@ -39,5 +39,6 @@
             </div>
             <tiles:insertAttribute name="cookie"/>
         </div>
+        <div id="loading"></div>
     </body>
 </html>

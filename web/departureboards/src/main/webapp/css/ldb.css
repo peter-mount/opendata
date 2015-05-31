@@ -254,7 +254,7 @@ td.ldb-fsct-stat {
         font-size: 70%;
         padding: 6px 4px;
     }
-    .ldb-enttop, .ldb-entmid { font-size: 130%; }
+    .ldb-enttop, .ldb-entmid { font-size: 90%; }
     .ldb-enttop .ldbVia { font-size: 110%; }
     .ldb-entwarn { font-size: 100%; }
     .ldb-entbot { font-size: 100%; }

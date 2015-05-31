@@ -7,9 +7,11 @@
 <div id="board"></div>
 <div id="message"></div>
 <script>
-    var train;
+    var train, ui;
     $(document).ready(function () {
         setTimeout(function () {
+            if (!ui)
+                ui = new UI();
             if (!train)
                 train = new Train('${train.rid}');
         }, 250);

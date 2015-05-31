@@ -12,12 +12,13 @@
 <div id="board"></div>
 <div id="message"></div>
 <script>
-    var ldb;
+    var ldb, ui;
     $(document).ready(function () {
         setTimeout(function () {
+            if (!ui)
+                ui = new UI();
             if (!ldb)
                 ldb = new LDB('${location.crs}');
-            
         }, 250);
     });
 </script>
