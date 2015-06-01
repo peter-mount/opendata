@@ -11,7 +11,6 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import uk.trainwatch.nre.darwin.stationmsg.StationMessageManager;
 import uk.trainwatch.nrod.location.TrainLocation;
-import uk.trainwatch.nrod.location.TrainLocationFactory;
 
 /**
  * Performance Home

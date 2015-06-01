@@ -20,7 +20,7 @@ public class ViewLDBServlet
     @Override
     protected String getServletPrefix()
     {
-        return "rawldb/";
+        return "/vldb/";
     }
 
     @Override

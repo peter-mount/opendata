@@ -19,14 +19,17 @@ public abstract class AbstractLocationTag
         extends BodyTagSupport
 {
 
+    private static final String DEFAULT_PREFIX = "/station/";
     private String value;
     private boolean link = true;
+    private String prefix = DEFAULT_PREFIX;
 
     @Override
     public void release()
     {
         value = null;
         link = true;
+        prefix = DEFAULT_PREFIX;
     }
 
     protected abstract TrainLocation getLocationRef( String value );
@@ -35,12 +38,14 @@ public abstract class AbstractLocationTag
     public int doStartTag()
             throws JspException
     {
-        if( value != null ) {
+        if( value != null )
+        {
 
             String name = null;
 
             TrainLocation ref = getLocationRef( value );
-            if( ref != null && ref.isSetLocation()) {
+            if( ref != null && ref.isSetLocation() )
+            {
                 name = ref.getLocation();
             }
 
@@ -52,25 +57,29 @@ public abstract class AbstractLocationTag
 //                    name = loc.getLocation();
 //                }
 //            }
-
-            if( name == null ) {
+            if( name == null )
+            {
                 name = value;
             }
 
-            try {
+            try
+            {
                 JspWriter w = pageContext.getOut();
 
-                if( link && ref != null && ref.isSetCrs() ) {
-                    w.write( "<a href=\"/station/" );
+                if( link && ref != null && ref.isSetCrs() )
+                {
+                    w.write( "<a href=\"" );
+                    w.write( prefix );
                     w.write( ref.getCrs() );
                     w.write( "\">" );
                 }
                 w.write( name );
-                if( link && ref != null && ref.isSetCrs() ) {
+                if( link && ref != null && ref.isSetCrs() )
+                {
                     w.write( "</a>" );
                 }
-            }
-            catch( IOException ex ) {
+            } catch( IOException ex )
+            {
                 throw new JspException( ex );
             }
         }
@@ -88,4 +97,8 @@ public abstract class AbstractLocationTag
         this.link = link;
     }
 
+    public void setPrefix( String prefix )
+    {
+        this.prefix = prefix;
+    }
 }

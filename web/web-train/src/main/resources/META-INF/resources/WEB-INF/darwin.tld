@@ -12,11 +12,19 @@
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
             <type>java.lang.String</type>
+            <description>The CRS or 3Alpha code to translate</description>
         </attribute>
         <attribute>
             <name>link</name>
             <rtexprvalue>true</rtexprvalue>
             <type>boolean</type>
+            <description>If true (default) then generate a link</description>
+        </attribute>
+        <attribute>
+            <name>prefix</name>
+            <rtexprvalue>true</rtexprvalue>
+            <type>java.lang.String</type>
+            <description>The link prefix, defaults to "/station/"</description>
         </attribute>
     </tag>
     <tag>
@@ -28,11 +36,19 @@
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
             <type>java.lang.String</type>
+            <description>The TIPLOC code to translate</description>
         </attribute>
         <attribute>
             <name>link</name>
             <rtexprvalue>true</rtexprvalue>
             <type>boolean</type>
+            <description>If true (default) then generate a link</description>
+        </attribute>
+        <attribute>
+            <name>prefix</name>
+            <rtexprvalue>true</rtexprvalue>
+            <type>java.lang.String</type>
+            <description>The link prefix, defaults to "/station/"</description>
         </attribute>
     </tag>
     <tag>
@@ -44,11 +60,13 @@
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
             <type>java.lang.String</type>
+            <description>The 2 character operator code to translate</description>
         </attribute>
         <attribute>
             <name>link</name>
             <rtexprvalue>true</rtexprvalue>
             <type>boolean</type>
+            <description>If true then link to the operator's website if they have one defined at ATOC</description>
         </attribute>
     </tag>
     <tag>
@@ -60,6 +78,7 @@
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
             <type>java.lang.Integer</type>
+            <description>The cancellation reason id</description>
         </attribute>
     </tag>
     <tag>
@@ -71,6 +90,7 @@
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
             <type>java.lang.Integer</type>
+            <description>The late reason id</description>
         </attribute>
     </tag>
     <tag>
@@ -82,6 +102,7 @@
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
             <type>java.lang.Integer</type>
+            <description>The via text id</description>
         </attribute>
     </tag>
 </taglib>

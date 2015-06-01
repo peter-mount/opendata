@@ -94,7 +94,10 @@
                     <div class="ldbCont">
                         <c:choose>
                             <c:when test="${dep.terminated}">
-                                <a onclick="document.location = '/train/${dep.rid}/${location.crs}';">Terminates Here</a></c:when>
+                                <a onclick="document.location = '/train/${dep.rid}/${location.crs}';">
+                                    Terminates Here
+                                </a>
+                            </c:when>
                             <c:otherwise>
                                 <a onclick="document.location = '/train/${dep.rid}/${location.crs}';">
                                     <d:tiploc value="${dep.dest}" link="false"/>
@@ -105,7 +108,8 @@
                     </div>
                 </div>
                 <c:choose>
-                    <c:when test="${dep.cancReason>0}">
+                    <%-- check both as cancReason could be for another location when only partially cancelled --%>
+                    <c:when test="${dep.canc and dep.cancReason>0}">
                         <div class="ldb-entbot<c:if test="${row}"> altrow</c:if>">
                             <div class=".ldbCancelled"><d:cancelReason value="${dep.cancReason}"/></div>
                         </div>
@@ -135,25 +139,27 @@
                         <c:otherwise>
                             <span class="ldbHeader">
                                 <c:choose>
-                                    <c:when test="${dep.cancReason>0}">This was the train calling at:</c:when>
+                                    <c:when test="${dep.canc}">This was the train calling at:</c:when>
                                     <c:otherwise>Calling at:</c:otherwise>
                                 </c:choose>
                             </span>
                             <c:forEach var="point" varStatus="pstat" items="${dep.points}">
-                                <c:choose>
-                                    <c:when test="${pstat.last}">
-                                        <span class="ldbDest">
-                                            <d:tiploc value="${point.tpl}"/>
-                                            (<t:time value="${point.time}"/>)
-                                        </span>
-                                    </c:when>
-                                    <c:when test="${point.time.isAfter(dep.time)}">
-                                        <span>
-                                            <d:tiploc value="${point.tpl}"/>
-                                            (<t:time value="${point.time}"/>)
-                                        </span>
-                                    </c:when>
-                                </c:choose>
+                                <c:if test="${not empty point.crs}">
+                                    <c:choose>
+                                        <c:when test="${pstat.last}">
+                                            <span class="ldbDest">
+                                                <d:crs value="${point.crs}" link="true" prefix="/mldb/"/>
+                                                (<t:time value="${point.time}"/>)
+                                            </span>
+                                        </c:when>
+                                        <c:when test="${point.time.isAfter(dep.time)}">
+                                            <span>
+                                                <d:crs value="${point.crs}" link="true" prefix="/mldb/"/>
+                                                (<t:time value="${point.time}"/>)
+                                            </span>
+                                        </c:when>
+                                    </c:choose>
+                                </c:if>
                             </c:forEach>
                             <c:if test="${not empty dep.toc}">
                                 <span>
@@ -174,16 +180,16 @@
                 </div>
             </c:if>
         </c:forEach>
-        
+
         <c:if test="${!shown}">
-                <div class="ldb-enttop">
-                    <span class="centered">
-                        No information is currently available.
-                    </span>
-                </div>
-                <div class="ldb-entbot">
-                    <span>&nbsp;</span>
-                </div>
+            <div class="ldb-enttop">
+                <span class="centered">
+                    No information is currently available.
+                </span>
+            </div>
+            <div class="ldb-entbot">
+                <span>&nbsp;</span>
+            </div>
         </c:if>
     </div>
 </div>
