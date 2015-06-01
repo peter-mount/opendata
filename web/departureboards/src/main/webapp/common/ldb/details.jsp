@@ -160,7 +160,7 @@
         <div class="ldb-row">
             <div class="ldb-label">Last Report</div>
             <div class="ldb-value">
-                <d:tiploc value="${lastRep.tpl}"/> at <t:time value="${lastRep.tm}"/>
+                <d:tiploc value="${lastRep.tpl}" prefix="/mldb/"/> at <t:time value="${lastRep.tm}"/>
             </div>
         </div>
     </c:if>
