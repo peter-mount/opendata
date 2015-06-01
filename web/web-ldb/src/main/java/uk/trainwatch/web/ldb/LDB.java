@@ -52,7 +52,9 @@ public class LDB
             // Delay tbi
             TimeUtils.getDuration( rs, "delay" ),
             // Terminated/terminates here
-            rs.getBoolean( "term" )
+            rs.getBoolean( "term" ),
+            // Train length, 0 for unknown
+            rs.getInt( "length" )
     );
 
     private final LocalTime time;
@@ -80,6 +82,7 @@ public class LDB
     private final boolean platSup;
     private final boolean cisPlatSup;
     private final Duration delay;
+    private final int length;
     private Collection<CallingPoint> points;
     private CallingPoint lastReport;
 
@@ -98,7 +101,8 @@ public class LDB
             String plat,
             boolean sup, boolean platSup, boolean cisPlatSup,
             Duration delay,
-            boolean terminated )
+            boolean terminated,
+            int length )
     {
         this.time = time;
         this.ts = ts;
@@ -126,6 +130,7 @@ public class LDB
         this.cisPlatSup = cisPlatSup;
         this.delay = delay;
         this.terminated = terminated;
+        this.length = length;
     }
 
     public Timestamp getTs()
@@ -141,8 +146,10 @@ public class LDB
     public void setPoints( Collection<CallingPoint> points )
     {
         this.points = points;
-        points.forEach( pt -> {
-            if( pt.isReport() ) {
+        points.forEach( pt ->
+        {
+            if( pt.isReport() )
+            {
                 lastReport = pt;
             }
         } );
@@ -218,7 +225,8 @@ public class LDB
     public boolean isOnPlatform()
     {
         // Cancelled, terminated or not timetabled then no
-        if( isCanc() || isTerminated() || !isTimetabled() ) {
+        if( isCanc() || isTerminated() || !isTimetabled() )
+        {
             return false;
         }
 
@@ -417,5 +425,15 @@ public class LDB
     public boolean isLastReportPresent()
     {
         return lastReport != null;
+    }
+
+    /**
+     * The train length at this location
+     *
+     * @return number of carriages, 0 for unknown
+     */
+    public int getLength()
+    {
+        return length;
     }
 }

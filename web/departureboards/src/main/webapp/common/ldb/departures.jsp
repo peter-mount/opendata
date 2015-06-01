@@ -161,9 +161,14 @@
                                     </c:choose>
                                 </c:if>
                             </c:forEach>
+                            <c:if test="${dep.length gt 0}">
+                                <span>
+                                    Formed&nbsp;of&nbsp;${dep.length}&nbsp;coaches.
+                                </span>
+                            </c:if>
                             <c:if test="${not empty dep.toc}">
                                 <span>
-                                    <d:operator value="${dep.toc}"/> service.
+                                    <d:operator value="${dep.toc}"/>&nbsp;service.
                                 </span>
                             </c:if>
                             <%-- do we want this?
