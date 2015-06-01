@@ -148,13 +148,13 @@
                                     <c:choose>
                                         <c:when test="${pstat.last}">
                                             <span class="ldbDest">
-                                                <d:crs value="${point.crs}" link="true" prefix="/mldb/"/>
+                                                <d:crs value="${point.crs}" nowrap="true" link="true" prefix="/mldb/"/>
                                                 (<t:time value="${point.time}"/>)
                                             </span>
                                         </c:when>
                                         <c:when test="${point.time.isAfter(dep.time)}">
                                             <span>
-                                                <d:crs value="${point.crs}" link="true" prefix="/mldb/"/>
+                                                <d:crs value="${point.crs}" nowrap="true" link="true" prefix="/mldb/"/>
                                                 (<t:time value="${point.time}"/>)
                                             </span>
                                         </c:when>

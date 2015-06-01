@@ -18,31 +18,33 @@ import uk.trainwatch.nrod.location.TrainLocation;
 public abstract class AbstractLocationTag
         extends BodyTagSupport
 {
-
+    
     private static final String DEFAULT_PREFIX = "/station/";
     private String value;
     private boolean link = true;
     private String prefix = DEFAULT_PREFIX;
-
+    private boolean nowrap = false;
+    
     @Override
     public void release()
     {
         value = null;
         link = true;
         prefix = DEFAULT_PREFIX;
+        nowrap = false;
     }
-
+    
     protected abstract TrainLocation getLocationRef( String value );
-
+    
     @Override
     public int doStartTag()
             throws JspException
     {
         if( value != null )
         {
-
+            
             String name = null;
-
+            
             TrainLocation ref = getLocationRef( value );
             if( ref != null && ref.isSetLocation() )
             {
@@ -61,11 +63,16 @@ public abstract class AbstractLocationTag
             {
                 name = value;
             }
-
+            
+            if( nowrap )
+            {
+                name = name.replace( " ", "&nbsp;" );
+            }
+            
             try
             {
                 JspWriter w = pageContext.getOut();
-
+                
                 if( link && ref != null && ref.isSetCrs() )
                 {
                     w.write( "<a href=\"" );
@@ -83,22 +90,28 @@ public abstract class AbstractLocationTag
                 throw new JspException( ex );
             }
         }
-
+        
         return SKIP_BODY;
     }
-
+    
     public void setValue( String value )
     {
         this.value = value;
     }
-
+    
     public void setLink( boolean link )
     {
         this.link = link;
     }
-
+    
     public void setPrefix( String prefix )
     {
         this.prefix = prefix;
     }
+    
+    public void setNowrap( boolean nowrap )
+    {
+        this.nowrap = nowrap;
+    }
+    
 }

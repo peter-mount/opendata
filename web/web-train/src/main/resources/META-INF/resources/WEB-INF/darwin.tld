@@ -21,6 +21,12 @@
             <description>If true (default) then generate a link</description>
         </attribute>
         <attribute>
+            <name>nowrap</name>
+            <rtexprvalue>true</rtexprvalue>
+            <type>boolean</type>
+            <description>If true then replace spaces with non-breaking spaces</description>
+        </attribute>
+        <attribute>
             <name>prefix</name>
             <rtexprvalue>true</rtexprvalue>
             <type>java.lang.String</type>
@@ -43,6 +49,12 @@
             <rtexprvalue>true</rtexprvalue>
             <type>boolean</type>
             <description>If true (default) then generate a link</description>
+        </attribute>
+        <attribute>
+            <name>nowrap</name>
+            <rtexprvalue>true</rtexprvalue>
+            <type>boolean</type>
+            <description>If true then replace spaces with non-breaking spaces</description>
         </attribute>
         <attribute>
             <name>prefix</name>
