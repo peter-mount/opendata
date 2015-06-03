@@ -109,6 +109,7 @@ DECLARE
     --
     tid         TEXT;
     aldb        BOOLEAN;
+    aldbdel     BOOLEAN;
     aterm       BOOLEAN;
     -- ID's
     id1         BIGINT;
@@ -295,10 +296,13 @@ BEGIN
                     (xpath('//fcst:detachFront/text()',axml2,ns))[1]::TEXT::BOOLEAN AS detachfront,
                     (xpath('//fcst:arr/@at',axml2,ns))[1]::TEXT::TIME AS arrat,
                     (xpath('//fcst:arr/@et',axml2,ns))[1]::TEXT::TIME AS arret,
+                    (xpath('//fcst:arr/@delayed',axml2,ns))[1]::TEXT::BOOLEAN AS arrdel,
                     (xpath('//fcst:dep/@at',axml2,ns))[1]::TEXT::TIME AS depat,
                     (xpath('//fcst:dep/@et',axml2,ns))[1]::TEXT::TIME AS depet,
+                    (xpath('//fcst:dep/@delayed',axml2,ns))[1]::TEXT::BOOLEAN AS depdel,
                     (xpath('//fcst:pass/@at',axml2,ns))[1]::TEXT::TIME AS passat,
-                    (xpath('//fcst:pass/@et',axml2,ns))[1]::TEXT::TIME AS passet
+                    (xpath('//fcst:pass/@et',axml2,ns))[1]::TEXT::TIME AS passet,
+                    (xpath('//fcst:pass/@delayed',axml2,ns))[1]::TEXT::BOOLEAN AS passdel
                 INTO arec LIMIT 1;
             
             id2 = darwin.tiploc(arec.tpl);
@@ -311,6 +315,7 @@ BEGIN
                     apt = arec.ptd;
                     awt = arec.wtd;
                     aldb = FALSE;
+                    aldbdel = FALSE;
                     aterm = FALSE;
                 -- train arrived but not departed, may be terminated though
                 WHEN arec.arrat IS NOT NULL THEN
@@ -318,6 +323,7 @@ BEGIN
                     apt = arec.pta;
                     awt = arec.wta;
                     aldb = TRUE;
+                    aldbdel = FALSE;
                     aterm = arec.wtd IS NULL;
                 -- train has passed
                 WHEN arec.passat IS NOT NULL THEN
@@ -326,12 +332,14 @@ BEGIN
                     awt = arec.wtp;
                     aldb = FALSE;
                     aterm = FALSE;
+                    aldbdel = FALSE;
                 -- departs eta
                 WHEN arec.depet IS NOT NULL THEN
                     aat = arec.depet;
                     apt = arec.ptd;
                     awt = arec.wtd;
                     aldb = TRUE;
+                    aldbdel = arec.depdel;
                     aterm = FALSE;
                 -- arrived eta - in this case terminating
                 WHEN arec.arret IS NOT NULL THEN
@@ -339,18 +347,21 @@ BEGIN
                     apt = arec.pta;
                     awt = arec.wta;
                     aldb = TRUE;
+                    aldbdel = arec.arrdel;
                     aterm = arec.wtd IS NULL;
                 WHEN arec.passet IS NOT NULL THEN
                     aat = arec.passet;
                     apt = NULL;
                     awt = arec.wtp;
                     aldb = FALSE;
+                    aldbdel = arec.passdel;
                     aterm = FALSE;
                 ELSE
                     aat = NULL;
                     apt = NULL;
                     awt = NULL;
                     aldb = FALSE;
+                    aldbdel = FALSE;
                     aterm = FALSE;
             END CASE;
             
@@ -388,6 +399,9 @@ BEGIN
                             etarr=arec.arret,
                             etdep=arec.depet,
                             etpass=arec.passet,
+                            etarrdel=arec.arrdel,
+                            etdepdel=arec.depdel,
+                            etpassdel=arec.passdel,
                             length=arec.length,
                             detachfront=arec.detachfront,
                             delay=adelay,
@@ -395,6 +409,7 @@ BEGIN
                             platsup=arec.platsup,
                             cisplatsup=arec.cisplatsup,
                             ldb=aldb,
+                            ldbdel=aldbdel,
                             tm=aat,
                             term=aterm
                         WHERE fid=id1 AND tpl=id2;
@@ -408,21 +423,25 @@ BEGIN
                                 delay,
                                 arr,dep,pass,
                                 etarr,etdep,etpass,
+                                etarrdel,etdepdel,etpassdel,
                                 length,
                                 detachfront,
                                 plat,platsup,
-                                ldb,tm,term
+                                ldb,ldbdel,
+                                tm,term
                             ) VALUES (
                                 id1,id2,
                                 arec.pta,arec.ptd,arec.wta,arec.wtd,arec.wtp,
                                 adelay,
                                 arec.arrat,arec.depat,arec.passat,
                                 arec.arret,arec.depet,arec.passet,
+                                arec.arrdel,arec.depdel,arec.passdel,
                                 arec.length,
                                 arec.detachfront,
                                 arec.plat,
                                 arec.platsup,
-                                aldb,aat,aterm
+                                aldb,aldbdel,
+                                aat,aterm
                             );
                     EXCEPTION WHEN unique_violation THEN
                         -- Do nothing, loop & try again.
