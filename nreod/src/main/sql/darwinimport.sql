@@ -426,7 +426,7 @@ BEGIN
                                 etarrdel,etdepdel,etpassdel,
                                 length,
                                 detachfront,
-                                plat,platsup,
+                                plat,platsup,cisplatsup,
                                 ldb,ldbdel,
                                 tm,term
                             ) VALUES (
@@ -440,6 +440,7 @@ BEGIN
                                 arec.detachfront,
                                 arec.plat,
                                 arec.platsup,
+                                arec.cisplatsup,
                                 aldb,aldbdel,
                                 aat,aterm
                             );
