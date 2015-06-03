@@ -92,7 +92,9 @@
 .ldbOntime {
     color: white;
 }
-.ldbLate {}
+.ldbLate {
+    color: yellow;
+}
 .ldbCancelled, .ldbDelayed {
     color: red;
 }

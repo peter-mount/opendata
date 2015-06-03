@@ -64,6 +64,9 @@
                         <c:when test="${dep.canc}">
                             <div class="ldbCol ldbForecast ldbCancelled">Cancelled</div>
                         </c:when>
+                        <c:when test="${dep.delayUnknown}">
+                            <div class="ldbCol ldbForecast ldbLate">Delayed</div>
+                        </c:when>
                         <c:when test="${dep.onPlatform}">
                             <div class="ldbCol ldbForecast ldbOntime">Arrived</div>
                         </c:when>
@@ -198,3 +201,4 @@
         </c:if>
     </div>
 </div>
+
