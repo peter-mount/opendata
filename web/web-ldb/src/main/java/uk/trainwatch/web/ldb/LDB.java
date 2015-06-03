@@ -53,6 +53,8 @@ public class LDB
             TimeUtils.getDuration( rs, "delay" ),
             // Terminated/terminates here
             rs.getBoolean( "term" ),
+            // Is the delay unknown
+            rs.getBoolean( "ldbdel" ),
             // Train length, 0 for unknown
             rs.getInt( "length" )
     );
@@ -60,6 +62,7 @@ public class LDB
     private final LocalTime time;
     private final Timestamp ts;
     private final boolean terminated;
+    private final boolean delayUnknown;
     private final String toc;
     private final String dest;
     private final String origin;
@@ -102,6 +105,7 @@ public class LDB
             boolean sup, boolean platSup, boolean cisPlatSup,
             Duration delay,
             boolean terminated,
+            boolean delayUnknown,
             int length )
     {
         this.time = time;
@@ -130,6 +134,7 @@ public class LDB
         this.cisPlatSup = cisPlatSup;
         this.delay = delay;
         this.terminated = terminated;
+        this.delayUnknown = delayUnknown;
         this.length = length;
     }
 
@@ -395,6 +400,16 @@ public class LDB
     public boolean isDelayed()
     {
         return delay != null && !(delay.isNegative() || delay.isZero());
+    }
+
+    /**
+     * Is the service delayed. This will be true if the delay is unknown and "Delayed" should be shown on any display boards.
+     *
+     * @return
+     */
+    public boolean isDelayUnknown()
+    {
+        return delayUnknown;
     }
 
     public int getScheduleId()
