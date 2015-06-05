@@ -64,30 +64,30 @@ public enum ForecastManager
         return Collections.emptyList();
     }
 
-    public Stream<TS> getForecasts( String tpl )
-    {
-        if( tpl != null && !tpl.isEmpty() ) {
-            try( Connection con = dataSource.getConnection() ) {
-                try( PreparedStatement ps = SQL.prepare( con, "SELECT f.xml FROM darwin.forecast f"
-                                                              + " INNER JOIN darwin.forecast_entry fe ON f.id=fe.fid"
-                                                              + " INNER JOIN darwin.tiploc t ON fe.tpl=t.id"
-                                                              + " WHERE t.tpl=?",
-                                                         tpl.toUpperCase() ) ) {
-                    return SQL.stream( ps, SQL.STRING_LOOKUP ).
-                            map( DarwinJaxbContext.fromXML ).
-                            flatMap( p -> p.getUR().getTS().stream() ).
-                            // Sort data into correct order
-                            peek( ts -> ts.getLocation().sort( TSLocationComparator.INSTANCE ) ).
-                            collect( Collectors.toList() ).
-                            stream();
-                }
-            }
-            catch( SQLException ex ) {
-                log.log( Level.SEVERE, ex, () -> "getLocation " + tpl );
-            }
-        }
-        return Stream.empty();
-    }
+//    public Stream<TS> getForecasts( String tpl )
+//    {
+//        if( tpl != null && !tpl.isEmpty() ) {
+//            try( Connection con = dataSource.getConnection() ) {
+//                try( PreparedStatement ps = SQL.prepare( con, "SELECT f.xml FROM darwin.forecast f"
+//                                                              + " INNER JOIN darwin.forecast_entry fe ON f.id=fe.fid"
+//                                                              + " INNER JOIN darwin.tiploc t ON fe.tpl=t.id"
+//                                                              + " WHERE t.tpl=?",
+//                                                         tpl.toUpperCase() ) ) {
+//                    return SQL.stream( ps, SQL.STRING_LOOKUP ).
+//                            map( DarwinJaxbContext.fromXML ).
+//                            flatMap( p -> p.getUR().getTS().stream() ).
+//                            // Sort data into correct order
+//                            peek( ts -> ts.getLocation().sort( TSLocationComparator.INSTANCE ) ).
+//                            collect( Collectors.toList() ).
+//                            stream();
+//                }
+//            }
+//            catch( SQLException ex ) {
+//                log.log( Level.SEVERE, ex, () -> "getLocation " + tpl );
+//            }
+//        }
+//        return Stream.empty();
+//    }
 
     /**
      * Return the TS for a rid

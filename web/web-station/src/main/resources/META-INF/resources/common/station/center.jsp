@@ -12,4 +12,7 @@
 <h1>${location.location}</h1>
 <tiles:insertAttribute name="messages"/>
 <tiles:insertAttribute name="map"/>
+<tiles:insertAttribute name="details"/>
+<tiles:insertAttribute name="nearby"/>
+
 <cms:page page="${location.crs}"/>

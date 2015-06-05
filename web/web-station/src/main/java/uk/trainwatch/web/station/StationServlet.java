@@ -9,8 +9,6 @@ import uk.trainwatch.web.servlet.AbstractServlet;
 import uk.trainwatch.web.servlet.ApplicationRequest;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,12 +17,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
 import uk.trainwatch.gis.StationPosition;
 import uk.trainwatch.gis.StationPositionManager;
-import uk.trainwatch.nre.darwin.forecast.ForecastManager;
 import uk.trainwatch.nre.darwin.stationmsg.StationMessageManager;
 import uk.trainwatch.nrod.location.TrainLocation;
 import uk.trainwatch.nrod.location.TrainLocationFactory;
-import uk.trainwatch.util.TimeUtils;
-import uk.trainwatch.web.timetable.ScheduleSQL;
 
 /**
  * Performance Home
@@ -75,7 +70,6 @@ public class StationServlet
         {
             getMessages( req, loc );
             showMap( req, loc );
-            getDepartures( req, loc );
 
             request.renderTile( "station.info" );
         } catch( SQLException ex )
@@ -100,38 +94,6 @@ public class StationServlet
                 StationMessageManager.INSTANCE.
                 getMessages( loc.getCrs() ).
                 collect( Collectors.toList() ) );
-
-        req.put( "forecasts",
-                ForecastManager.INSTANCE.
-                getForecasts( loc.getTiploc() ).
-                collect( Collectors.toList() ) );
-    }
-
-    /**
-     * Timetabled departures
-     * <p>
-     * @param req
-     * @param loc
-     * <p>
-     * @throws SQLException
-     */
-    private void getDepartures( Map<String, Object> req, TrainLocation loc )
-            throws SQLException
-    {
-        LocalDateTime dateTime = TimeUtils.getLondonDateTime();
-        req.put( "dateTime", dateTime );
-        LocalDate date = dateTime.toLocalDate();
-        req.put( "date", date );
-
-        // Now filter to include just PUBLIC trains that depart in the next hour
-        // Note: Don't remove from schedule else timetable in cache is affected
-        req.put( "departures",
-                ScheduleSQL.getSchedules( loc, date ).
-                stream().
-                filter( ScheduleSQL.PUBLIC_TRAIN.and( ScheduleSQL.departuresOnly( loc.getTiploc(), dateTime, 1L ) ) ).
-                collect( Collectors.toList() )
-        );
-
     }
 
     /**

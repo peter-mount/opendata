@@ -1,0 +1,46 @@
+/* LDB Small Theme */
+
+.ldbCol, .ldbCont { font-size: 80%; }
+.ldbForecast, .ldbSched, .ldbPlat { font-size: 70%; }
+/* iPhone 3GS */
+@media all and ( max-width: 320px ) {
+    .ldbForecast { width: 54px; }
+    .ldbSched { width: 45px; }
+    .ldbPlat { width: 30px; }
+}
+
+/* Samsung Note 3 Portrait */
+@media all and (min-width: 321px) and ( max-width: 443px ) {
+    .ldbForecast { width: 54px; }
+    .ldbSched { width: 45px; }
+    .ldbPlat { width: 30px; }
+}
+
+/* Samsung Note 3 Portrait */
+@media all and (min-width: 444px) and ( max-width: 640px ) {
+    .ldbForecast { width: 54px; }
+    .ldbSched { width: 45px; }
+    .ldbPlat { width: 30px; }
+}
+
+/* Samsung Tab 7.7+ */
+@media all and (min-width: 641px ) and (max-width: 1023px) {
+    .ldbForecast { width: 54px; }
+    .ldbSched { width: 45px; }
+    .ldbPlat { width: 30px; }
+}
+
+/* iPad 3/4 */
+@media all and (min-width: 1024px ) and (max-width: 1599px) {
+    .ldbForecast { width: 54px; }
+    .ldbSched { width: 45px; }
+    .ldbPlat { width: 30px; }
+}
+
+/* Kindle Fire HDX - Massive resolution 2560x1600 */
+@media all and (min-width: 1600px ) {
+    .ldbCol, .ldbCont { font-size: 70%; }
+    .ldbForecast { width: 134px; }
+    .ldbSched { width: 115px; }
+    .ldbPlat { width: 80px; }
+}
