@@ -58,7 +58,7 @@ var UI = (function () {
                 document.location = "/mldb/" + ui.item.crs;
             }
         });
-        
+
         // Give the search focus
         setTimeout(function () {
             $('#stations').focus();
@@ -71,8 +71,8 @@ var UI = (function () {
 // Live Departure Boards, refresh every 60s
 var LDB = (function () {
 
-    function LDB(crs) {
-        LDB.url = '/vldb/' + crs;
+    function LDB(crs, small) {
+        LDB.url = (small ? '/sldb/' : '/vldb/') + crs;
         LDB.board = $('#board');
         reload();
     }
