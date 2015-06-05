@@ -7,9 +7,32 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <h1>UK Station Index</h1>
+
+<div class="ui-widget">
+    <label id="stationlabel" for="station">Search by station name:</label>
+    <input id="station"/>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#station").autocomplete({
+            source: "/api/rail/1/station/search",
+            minLength: 3,
+            autoFocus: true,
+            select: function (event, ui) {
+                document.location = "/station/" + ui.item.crs;
+            }
+        });
+
+        setTimeout(function () {
+            $('#station').focus();
+        }, 250);
+    });
+</script>
+
 <p>
-    The following table shows the Public Performance Measure for all UK Train Operating Companies so far for today ${perfdate}.
+    Alternatively use the following table to locate the station you are looking for.
 </p>
+
 <c:set var="colspan" value="${index.size()-8}"/>
 <table class="wikitable">
     <thead>
