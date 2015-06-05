@@ -29,6 +29,7 @@
         </div>
     </div>
     <div id="message"></div>
+    <a href="//departureboards.mobi/mldb/${location.crs}">Mobile friendly version</a></p>
 </div>
 <script>
     var ldb, ui;
