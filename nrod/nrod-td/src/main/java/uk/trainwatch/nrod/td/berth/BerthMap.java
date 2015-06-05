@@ -31,6 +31,8 @@ import uk.trainwatch.util.sql.KeyValue;
 public interface BerthMap
 {
 
+    long getLastUpdate();
+
     /**
      * Put a head code into a berth
      * <p>

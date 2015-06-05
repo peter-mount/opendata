@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.time.Duration;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonStructure;
@@ -28,7 +29,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
-import uk.trainwatch.rabbitmq.RabbitMQ;
+import uk.trainwatch.util.JsonUtils;
 
 /**
  * Custom {@link MessageBodyWriter} which generates proper json output, specifically lists are not wrapped in another object.
@@ -39,48 +40,32 @@ import uk.trainwatch.rabbitmq.RabbitMQ;
  * @author Peter T Mount
  */
 @Provider
-@Produces( "application/json" )
+@Produces("application/json")
 public class JsonMessageBodyWriter
-        implements MessageBodyWriter
+        extends AbstractMessageBodyWriter
 {
 
     @Override
-    public long getSize( Object obj, Class type, Type genericType,
-            Annotation[] annotations, MediaType mediaType )
-    {
-        return -1;
-    }
-
-    @Override
-    public boolean isWriteable( Class type, Type genericType,
-            Annotation annotations[], MediaType mediaType )
-    {
-        return true;
-    }
-
-    @Override
-    public void writeTo( Object target, Class type, Type genericType,
-            Annotation[] annotations, MediaType mediaType,
-            MultivaluedMap httpHeaders, OutputStream outputStream )
+    protected void writeBodyTo( Object target, Class type, Type genericType,
+                                Annotation[] annotations, MediaType mediaType,
+                                MultivaluedMap httpHeaders, OutputStream outputStream )
             throws IOException
     {
         Object t = target;
 
         // Handle Json builders by building the new target
-        if( t instanceof JsonObjectBuilder )
-        {
+        if( t instanceof JsonObjectBuilder ) {
             t = ((JsonObjectBuilder) t).build();
-        } else if( t instanceof JsonArrayBuilder )
-        {
+        }
+        else if( t instanceof JsonArrayBuilder ) {
             t = ((JsonArrayBuilder) t).build();
         }
 
         // Handle json by converting into a string
-        if( t instanceof JsonStructure )
-        {
-            outputStream.write( RabbitMQ.jsonToBytes.apply( (JsonStructure) t ) );
-        } else
-        {
+        if( t instanceof JsonStructure ) {
+            outputStream.write( JsonUtils.toString.apply( (JsonStructure) t ).getBytes( "UTF-8" ) );
+        }
+        else {
             // Normal mapper
             new ObjectMapper().
                     // Comment INDENT_OUTPUT on public site, this is used during development only

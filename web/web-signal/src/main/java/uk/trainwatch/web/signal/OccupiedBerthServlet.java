@@ -8,7 +8,9 @@ package uk.trainwatch.web.signal;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,68 +47,64 @@ public class OccupiedBerthServlet
                    IOException
     {
         String pathInfo = request.getPathInfo();
-        try
-        {
+        try {
             String area = "";
             Optional<SignalArea> signalArea = Optional.empty();
 
-            if( pathInfo != null && !pathInfo.isEmpty() )
-            {
+            if( pathInfo != null && !pathInfo.isEmpty() ) {
                 area = pathInfo.substring( 1 ).
                         toUpperCase();
                 signalArea = SignalManager.INSTANCE.getSignalArea( area );
             }
 
-            if( signalArea.isPresent() )
-            {
+            if( signalArea.isPresent() ) {
                 JsonObjectBuilder berths = Json.createObjectBuilder();
                 SignalManager.INSTANCE.getArea( area ).
                         forEach( ( b, n ) -> berths.add( b, n ) );
 
                 JsonArrayBuilder recent = Json.createArrayBuilder();
                 SignalManager.INSTANCE.getRecent( area ).
-                        forEach( t ->
-                                {
-                                    LocalTime time = TimeUtils.getLocalDateTime( t.getTime() ).
-                                    toLocalTime();
-                                    
-                                    JsonObjectBuilder ob = Json.createObjectBuilder().
-                                    add( "type", t.getMsg_type().
-                                         getType() ).
-                                    add( "time", time.toString() );
+                        forEach( t -> {
+                            LocalTime time = TimeUtils.getLocalDateTime( t.getTime() ).
+                            toLocalTime();
 
-                                    switch( t.getMsg_type() )
-                                    {
-                                        case CA:
-                                        {
-                                            BerthStep bs = (BerthStep) t;
-                                            recent.add( ob.
-                                                    add( "descr", bs.getDescr() ).
-                                                    add( "from", bs.getFrom() ).
-                                                    add( "to", bs.getTo() )
-                                            );
-                                            break;
-                                        }
-                                        case CB:
-                                        {
-                                            BerthCancel bs = (BerthCancel) t;
-                                            recent.add( ob.
-                                                    add( "descr", bs.getDescr() ).
-                                                    add( "from", bs.getFrom() )
-                                            );
-                                            break;
-                                        }
-                                        case CC:
-                                        {
-                                            BerthInterpose bs = (BerthInterpose) t;
-                                            recent.add( ob.
-                                                    add( "descr", bs.getDescr() ).
-                                                    add( "to", bs.getTo() )
-                                            );
-                                            break;
-                                        }
-                                    }
+                            JsonObjectBuilder ob = Json.createObjectBuilder().
+                            add( "type", t.getMsg_type().
+                                 getType() ).
+                            add( "time", time.toString() );
+
+                            switch( t.getMsg_type() ) {
+                                case CA: {
+                                    BerthStep bs = (BerthStep) t;
+                                    recent.add( ob.
+                                            add( "descr", bs.getDescr() ).
+                                            add( "from", bs.getFrom() ).
+                                            add( "to", bs.getTo() )
+                                    );
+                                    break;
+                                }
+                                case CB: {
+                                    BerthCancel bs = (BerthCancel) t;
+                                    recent.add( ob.
+                                            add( "descr", bs.getDescr() ).
+                                            add( "from", bs.getFrom() )
+                                    );
+                                    break;
+                                }
+                                case CC: {
+                                    BerthInterpose bs = (BerthInterpose) t;
+                                    recent.add( ob.
+                                            add( "descr", bs.getDescr() ).
+                                            add( "to", bs.getTo() )
+                                    );
+                                    break;
+                                }
+                            }
                         } );
+
+                request.expiresIn( 10, ChronoUnit.SECONDS );
+                request.maxAge( 10, ChronoUnit.SECONDS );
+                request.lastModified( Instant.now() );
 
                 request.getResponseHeaders().
                         setValue( "Content-Type", MediaType.APPLICATION_JSON );
@@ -119,13 +117,11 @@ public class OccupiedBerthServlet
                 ) );
                 w.flush();
             }
-            else
-            {
+            else {
                 request.sendError( HttpServletResponse.SC_NOT_FOUND, "Unknown signaling area " + area );
             }
         }
-        catch( SQLException ex )
-        {
+        catch( SQLException ex ) {
             LOG.log( Level.SEVERE, ex, () -> "Failed for " + pathInfo );
         }
     }

@@ -35,10 +35,24 @@ public class BerthHashMap
 {
 
     private final Map<String, String> map = new ConcurrentHashMap<>();
+    private long lastUpdate;
 
+    private void tick()
+    {
+        lastUpdate = System.currentTimeMillis();
+    }
+
+    @Override
+    public long getLastUpdate()
+    {
+        return lastUpdate;
+    }
+
+    
     @Override
     public BerthMap put( String berth, String code )
     {
+        tick();
         map.put( berth, code );
         return this;
     }
@@ -46,6 +60,7 @@ public class BerthHashMap
     @Override
     public void clear( String berth )
     {
+        tick();
         map.remove( berth );
     }
 
@@ -76,12 +91,14 @@ public class BerthHashMap
     @Override
     public void clear()
     {
+        tick();
         map.clear();
     }
 
     @Override
     public BerthMap cancel( String berth, String code )
     {
+        tick();
         map.remove( berth, code );
         return this;
     }
@@ -109,7 +126,10 @@ public class BerthHashMap
     @Override
     public String computeIfAbsent( String berth, Function<? super String, ? extends String> mappingFunction )
     {
-        return map.computeIfAbsent( berth, mappingFunction );
+        return map.computeIfAbsent( berth, k -> {
+            tick();
+            return mappingFunction.apply( k );
+        } );
     }
 
     @Override

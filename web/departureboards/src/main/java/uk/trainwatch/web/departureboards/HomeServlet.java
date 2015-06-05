@@ -6,6 +6,8 @@
 package uk.trainwatch.web.departureboards;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import uk.trainwatch.web.servlet.AbstractServlet;
@@ -25,6 +27,10 @@ public class HomeServlet
             throws ServletException,
             IOException
     {
+        request.expiresIn( 1, ChronoUnit.DAYS );
+        request.maxAge( 1, ChronoUnit.DAYS );
+        request.lastModified( Instant.now() );
+        
         request.renderTile( "homepage" );
     }
 

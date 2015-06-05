@@ -26,6 +26,12 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
         
+        <dependency>
+            <groupId>uk.trainwatch.web</groupId>
+            <artifactId>web-rest</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        
         <!-- Open data -->
         <dependency>
             <groupId>uk.trainwatch</groupId>

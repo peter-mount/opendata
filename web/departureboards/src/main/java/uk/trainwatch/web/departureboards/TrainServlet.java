@@ -7,15 +7,14 @@ package uk.trainwatch.web.departureboards;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.time.Instant;
-import java.util.Date;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
 import uk.trainwatch.nre.darwin.reference.DarwinReferenceManager;
-import uk.trainwatch.util.TimeUtils;
 import uk.trainwatch.web.ldb.LDBUtils;
+import uk.trainwatch.web.ldb.model.Train;
 import uk.trainwatch.web.servlet.AbstractServlet;
 import uk.trainwatch.web.servlet.ApplicationRequest;
 
@@ -39,22 +38,20 @@ public class TrainServlet
         log( "Retrieving train " + rid );
 
         try {
+            Train train = LDBUtils.getSchedule( rid );
+
             Map<String, Object> req = request.getRequestScope();
-            req.put( "train", LDBUtils.getSchedule( rid ) );
+            req.put( "train", train );
             req.put( "pageTitle", rid );
 
             if( args.length > 1 ) {
                 req.put( "backTo", DarwinReferenceManager.INSTANCE.getLocationRefFromTiploc( args[1] ) );
             }
 
-            // Force 1 minute cache setting
-            long now = System.currentTimeMillis();
-            Instant lastUpdate = TimeUtils.getInstant( now );
-
-            HttpServletResponse response = request.getResponse();
-            response.addHeader( "Cache-Control", "public, max-age=60, s-maxage=60, no-transform" );
-            response.addDateHeader( "Expires", now + 60000L );
-            response.addDateHeader( "last-modified", Date.from( lastUpdate ).getTime() );
+            // Set headers for caching
+            request.expiresIn( 1, ChronoUnit.MINUTES );
+            request.lastModified( train.getLastUpdate() );
+            request.maxAge( 1, ChronoUnit.MINUTES );
 
             request.renderTile( "ldb.train" );
         }

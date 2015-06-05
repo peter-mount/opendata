@@ -7,6 +7,8 @@ package uk.trainwatch.web.signal;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -21,11 +23,11 @@ import uk.trainwatch.web.servlet.ApplicationRequest;
  *
  * @author peter
  */
-@WebServlet(name = "SignalServlet", urlPatterns =
-    {
-        "/signal/map",
-        "/signal/map/*"
-})
+@WebServlet(name = "SignalServlet", urlPatterns
+                                    = {
+            "/signal/map",
+            "/signal/map/*"
+        })
 public class SignalServlet
         extends AbstractServlet
 {
@@ -38,19 +40,15 @@ public class SignalServlet
                    IOException
     {
         String pathInfo = request.getPathInfo();
-        try
-        {
-            if( pathInfo == null || pathInfo.isEmpty() )
-            {
+        try {
+            if( pathInfo == null || pathInfo.isEmpty() ) {
                 showIndex( request );
             }
-            else
-            {
+            else {
                 showArea( request, pathInfo.substring( 1 ) );
             }
         }
-        catch( SQLException ex )
-        {
+        catch( SQLException ex ) {
             LOG.log( Level.SEVERE, ex, () -> "Failed for " + pathInfo );
         }
     }
@@ -62,6 +60,11 @@ public class SignalServlet
     {
         Map<String, Object> req = request.getRequestScope();
         req.put( "areas", SignalManager.INSTANCE.getSignalAreas() );
+
+        request.expiresIn( 1, ChronoUnit.DAYS );
+        request.maxAge( 1, ChronoUnit.DAYS );
+        request.lastModified( Instant.now() );
+        
         request.renderTile( "signal.home" );
     }
 
@@ -72,17 +75,19 @@ public class SignalServlet
     {
         Optional<SignalArea> signalArea = SignalManager.INSTANCE.getSignalArea( area );
 
-        if( signalArea.isPresent() )
-        {
+        if( signalArea.isPresent() ) {
             Map<String, Object> req = request.getRequestScope();
             req.put( "area", signalArea.get() );
             req.put( "berthmap", SignalManager.INSTANCE.getArea( area ) );
             req.put( "recent", SignalManager.INSTANCE.getRecent( area ) );
 
+            request.expiresIn( 1, ChronoUnit.DAYS );
+            request.maxAge( 1, ChronoUnit.DAYS );
+            request.lastModified( Instant.now() );
+
             request.renderTile( "signal.map" );
         }
-        else
-        {
+        else {
             request.sendError( HttpServletResponse.SC_NOT_FOUND, "Unknown signaling area " + area );
         }
     }

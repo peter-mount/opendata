@@ -5,9 +5,9 @@
  */
 package uk.trainwatch.web.signal;
 
-import java.sql.SQLException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.ws.rs.GET;
@@ -18,6 +18,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import uk.trainwatch.nrod.td.berth.BerthMap;
 import uk.trainwatch.util.sql.KeyValue;
+import uk.trainwatch.web.rest.Cache;
+import uk.trainwatch.web.rest.Rest;
 
 /**
  *
@@ -39,9 +41,10 @@ public class SignalRest
     @Path("/occupied/{area}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Cache(maxAge = 10, expires = 10, unit = ChronoUnit.SECONDS)
     public Response occupied( @PathParam("area") String area )
     {
-        try {
+        return Rest.invoke( response -> {
             Optional<SignalArea> signalArea = Optional.empty();
             if( area != null ) {
                 signalArea = SignalManager.INSTANCE.getSignalArea( area );
@@ -50,20 +53,11 @@ public class SignalRest
             if( signalArea.isPresent() ) {
                 BerthMap map = SignalManager.INSTANCE.getArea( area );
                 if( map != null ) {
-                    return Response.ok( map.stream().
+                    response.entity( map.stream().
                             collect( Collectors.toMap( KeyValue::getKey, KeyValue::getValue ) ) ).
-                            build();
+                            lastModified( Instant.ofEpochMilli( map.getLastUpdate() ) );
                 }
             }
-        }
-        catch( SQLException ex ) {
-            LOG.log( Level.SEVERE, ex, () -> "Signal area " + area );
-            return Response.serverError().
-                    entity( ex ).
-                    build();
-        }
-
-        return Response.status( Response.Status.NOT_FOUND ).
-                build();
+        } );
     }
 }

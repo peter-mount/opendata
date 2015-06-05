@@ -28,6 +28,7 @@
         <module>web-train</module>
         <module>web-workbench</module>
     <module>departureboards</module>
-  </modules>
+        <module>web-rest</module>
+    </modules>
     
 </project>

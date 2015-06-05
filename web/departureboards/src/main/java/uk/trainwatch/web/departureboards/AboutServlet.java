@@ -6,6 +6,8 @@
 package uk.trainwatch.web.departureboards;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import uk.trainwatch.web.servlet.AbstractServlet;
@@ -15,7 +17,7 @@ import uk.trainwatch.web.servlet.ApplicationRequest;
  *
  * @author peter
  */
-@WebServlet( name = "AboutServlet", urlPatterns = "/about" )
+@WebServlet(name = "AboutServlet", urlPatterns = "/about")
 public class AboutServlet
         extends AbstractServlet
 {
@@ -23,8 +25,12 @@ public class AboutServlet
     @Override
     protected void doGet( ApplicationRequest request )
             throws ServletException,
-            IOException
+                   IOException
     {
+        request.expiresIn( 1, ChronoUnit.DAYS );
+        request.maxAge( 1, ChronoUnit.DAYS );
+        request.lastModified( Instant.now() );
+        
         request.renderTile( "about" );
     }
 

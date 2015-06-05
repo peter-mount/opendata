@@ -5,8 +5,14 @@
  */
 package uk.trainwatch.web.ldb.model;
 
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
+import uk.trainwatch.util.Streams;
+import uk.trainwatch.util.TimeUtils;
 
 /**
  *
@@ -24,6 +30,27 @@ public class Train
     public Train( String rid )
     {
         this.rid = rid;
+    }
+
+    public LocalDateTime getLastUpdate()
+    {
+        Timestamp t = null;
+        if( forecast != null ) {
+            t = forecast.getTs();
+        }
+        else if( schedule != null ) {
+            t = schedule.getTs();
+        }
+        if( t == null ) {
+            return LocalDateTime.now();
+        }
+
+        LocalDateTime dt = t.toLocalDateTime();
+
+        // Fix as DB time is wrong
+        dt.plus( TimeUtils.LONDON.getRules().getDaylightSavings( t.toInstant() ) );
+
+        return dt;
     }
 
     public String getRid()
@@ -84,6 +111,11 @@ public class Train
     public List<ForecastEntry> getForecastEntries()
     {
         return forecastEntries;
+    }
+
+    public Stream<ForecastEntry> forecastEntries()
+    {
+        return Streams.stream( forecastEntries );
     }
 
     public void setForecastEntries( List<ForecastEntry> forecastEntries )

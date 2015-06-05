@@ -7,6 +7,7 @@ package uk.trainwatch.web.performance;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,8 +17,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import uk.trainwatch.nrod.rtppm.sql.OperatorDailyPerformance;
 import uk.trainwatch.nrod.rtppm.sql.OperatorManager;
 import uk.trainwatch.nrod.rtppm.sql.PerformanceManager;
+import uk.trainwatch.web.rest.Cache;
 
 /**
  *
@@ -39,10 +42,11 @@ public class RTPPMRest
     @Path("/live/{operatorId}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Cache(maxAge = 1, unit = ChronoUnit.MINUTES)
     public Response live( @PathParam("operatorId") int id )
     {
         try {
-            Optional ppm = PerformanceManager.INSTANCE.getOperatorPerformance( id, LocalDate.now() );
+            Optional<OperatorDailyPerformance> ppm = PerformanceManager.INSTANCE.getOperatorPerformance( id, LocalDate.now() );
             if( ppm.isPresent() ) {
                 return Response.ok( ppm.get() ).
                         build();
