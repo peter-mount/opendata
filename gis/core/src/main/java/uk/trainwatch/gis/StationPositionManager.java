@@ -12,8 +12,6 @@ import java.sql.Statement;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import uk.trainwatch.gis.kml.Placemark;
@@ -46,14 +44,17 @@ public enum StationPositionManager
         double r = center.getDistance();
         try( Connection con = dataSource.getConnection() ) {
             try( PreparedStatement ps = SQL.prepare( con,
-                                                     "SELECT * FROM gis.stations WHERE latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ?",
+                                                     // Restrict to darwin only stations
+                                                     //"SELECT * FROM gis.stations WHERE latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ?",
+                                                     "SELECT g.*"
+                                                     + " FROM gis.stations g"
+                                                     + " INNER JOIN darwin.tiploc t ON g.tiploc = t.tpl"
+                                                     + " WHERE latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ?",
                                                      center.getLatitude() - r,
                                                      center.getLatitude() + r,
                                                      center.getLongitude() - r,
                                                      center.getLongitude() + r
             ) ) {
-                Logger.getGlobal().
-                        log( Level.INFO, () -> "ps " + ps );
                 List<StationPosition> l = SQL.stream( ps, StationPosition.fromSQL ).
                         // We want to set the distance from pos
                         map( GIS.setDistance( center ) ).
@@ -63,9 +64,6 @@ public enum StationPositionManager
                         sorted( Distance.COMPARATOR ).
                         limit( 10 ).
                         collect( Collectors.toList() );
-
-                Logger.getLogger( "XXX" ).
-                        log( Level.WARNING, () -> "Center " + center + " Range " + r + " returning " + l );
                 return l;
             }
         }
@@ -95,6 +93,26 @@ public enum StationPositionManager
         return nameCache.computeSQLIfAbsent( tiploc, () -> {
             try( Connection con = dataSource.getConnection() ) {
                 try( PreparedStatement ps = SQL.prepare( con, "SELECT * FROM gis.stations WHERE tiploc=?", tiploc ) ) {
+                    return SQL.stream( ps, StationPosition.fromSQL ).
+                            collect( Collectors.toList() );
+                }
+            }
+        } );
+    }
+
+    public List<StationPosition> findCrs( String crs )
+            throws SQLException
+    {
+        return nameCache.computeSQLIfAbsent( crs, () -> {
+            try( Connection con = dataSource.getConnection() ) {
+                try( PreparedStatement ps = SQL.prepare( con,
+                                                         "SELECT g.*"
+                                                         + " FROM gis.stations g"
+                                                         + " INNER JOIN darwin.tiploc t ON g.tiploc = t.tpl"
+                                                         + " INNER JOIN darwin.location l ON t.id = l.tpl"
+                                                         + " INNER JOIN darwin.crs c ON l.crs = c.id"
+                                                         + " WHERE c.crs=?",
+                                                         crs ) ) {
                     return SQL.stream( ps, StationPosition.fromSQL ).
                             collect( Collectors.toList() );
                 }

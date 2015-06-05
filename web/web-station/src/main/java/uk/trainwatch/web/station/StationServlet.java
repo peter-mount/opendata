@@ -26,7 +26,7 @@ import uk.trainwatch.nrod.location.TrainLocationFactory;
  * <p>
  * @author Peter T Mount
  */
-@WebServlet( name = "StationServlet", urlPatterns = "/station/*" )
+@WebServlet(name = "StationServlet", urlPatterns = "/station/*")
 public class StationServlet
         extends AbstractServlet
 {
@@ -34,46 +34,43 @@ public class StationServlet
     @Override
     protected void doGet( ApplicationRequest request )
             throws ServletException,
-            IOException
+                   IOException
     {
         String crs = request.getPathInfo().substring( 1 ).toUpperCase();
 
         TrainLocation loc = TrainLocationFactory.INSTANCE.getTrainLocationByCrs( crs );
-        if( loc == null )
-        {
+        if( loc == null ) {
             // See if they have used an alternate code
             loc = TrainLocationFactory.INSTANCE.resolveTrainLocation( crs );
 
-            if( loc == null )
-            {
+            if( loc == null ) {
                 request.sendError( HttpServletResponse.SC_NOT_FOUND );
-            } else
-            {
+            }
+            else {
                 // Redirect to the correct page
                 request.getResponse().
                         sendRedirect( "/station/" + loc.getCrs() );
             }
-        } else
-        {
+        }
+        else {
             show( request, loc );
         }
     }
 
     private void show( ApplicationRequest request, TrainLocation loc )
             throws ServletException,
-            IOException
+                   IOException
     {
         Map<String, Object> req = request.getRequestScope();
         req.put( "location", loc );
         req.put( "pageTitle", loc.getLocation() );
-        try
-        {
+        try {
             getMessages( req, loc );
             showMap( req, loc );
 
             request.renderTile( "station.info" );
-        } catch( SQLException ex )
-        {
+        }
+        catch( SQLException ex ) {
             log( "show " + loc, ex );
             request.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
         }
@@ -84,16 +81,16 @@ public class StationServlet
      * <p>
      * @param req
      * @param loc
-     * <p>
+     *            <p>
      * @throws SQLException
      */
     private void getMessages( Map<String, Object> req, TrainLocation loc )
             throws SQLException
     {
         req.put( "stationMessages",
-                StationMessageManager.INSTANCE.
-                getMessages( loc.getCrs() ).
-                collect( Collectors.toList() ) );
+                 StationMessageManager.INSTANCE.
+                 getMessages( loc.getCrs() ).
+                 collect( Collectors.toList() ) );
     }
 
     /**
@@ -101,7 +98,7 @@ public class StationServlet
      * <p>
      * @param req
      * @param loc
-     * <p>
+     *            <p>
      * @throws ServletException
      * @throws IOException
      */
@@ -109,9 +106,8 @@ public class StationServlet
             throws SQLException
     {
 
-        List<StationPosition> stationPosition = StationPositionManager.INSTANCE.find( loc.getLocation() );
-        if( !stationPosition.isEmpty() )
-        {
+        List<StationPosition> stationPosition = StationPositionManager.INSTANCE.findCrs( loc.getCrs() );
+        if( !stationPosition.isEmpty() ) {
             StationPosition station = stationPosition.get( 0 );
             req.put( "stationPosition", station );
             req.put( "nearBy", StationPositionManager.INSTANCE.nearby( station, 3 ) );
