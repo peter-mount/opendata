@@ -33,6 +33,8 @@
     
     <definition name="ldb.view" template="/common/ldb/departures.jsp" />
     
+    <definition name="ldb.small" template="/common/ldb/smalldepartures.jsp" />
+    
     <definition name="ldb.train" extends="layout.main">
         <put-attribute name="title" value="Train Details" />
         <put-attribute name="javascript" value="/common/ldb/mobilejavascript.jsp" />
