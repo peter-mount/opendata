@@ -52,3 +52,13 @@
     <li>If the date being shown is the current Rail Day then the figures will cover the time from 02:00 up to the current time only.</li>
     <li>Data can be incomplete due to downtime upstream. So if the system was unavailable at the end of the day then the data can be incomplete.</li>
 </ul>
+
+<c:if test="${refresh=true}">
+    <script>
+        $(document).ready(function () {
+            setTimeout(function () {
+                location.reload();
+            }, 60000);
+        });
+    </script>
+</c:if>

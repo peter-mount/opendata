@@ -10,10 +10,14 @@ import uk.trainwatch.web.servlet.ApplicationRequest;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.DayOfWeek;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.TextStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.IntSummaryStatistics;
@@ -45,6 +49,8 @@ public class PPMCurrentServlet
         extends AbstractServlet
 {
 
+    private static final LocalTime DAY_START = LocalTime.of( 2, 0 );
+
     @Override
     protected void doGet( ApplicationRequest request )
             throws ServletException,
@@ -53,12 +59,18 @@ public class PPMCurrentServlet
         String path = request.getPathInfo();
 
         if( path == null ) {
+            // Autorefresh enabled
+            request.getRequestScope().put( "refresh", true );
+
             // Convert now to rail date - so 01:59 will show the previous day
             show( request, TimeUtils.getLocalDateTime().
                   minusHours( 2 ).
                   toLocalDate() );
         }
         else {
+            // Autorefresh disabled
+            request.getRequestScope().put( "refresh", false );
+
             // This will always be >1 as it leads with a /
             String comp[] = path.split( "/" );
             switch( comp.length ) {
@@ -209,6 +221,23 @@ public class PPMCurrentServlet
             Collection<OperatorDailyPerformance> performance = PerformanceManager.INSTANCE.getPerformance( date );
             req.put( "performance", performance );
             req.put( "perfdate", LocalDate.now( ZoneId.of( "Europe/London" ) ) );
+
+            // Ensure we have the correct cache headers
+            boolean refresh = (boolean) req.getOrDefault( "refresh", false );
+            if( refresh ) {
+                // Cache for only 1 minute
+                request.expiresIn( 1, ChronoUnit.MINUTES );
+                request.lastModified( Instant.now() );
+                request.maxAge( 1, ChronoUnit.MINUTES );
+            }
+            else {
+                // Cache for a day
+                request.expiresIn( 1, ChronoUnit.DAYS );
+                request.maxAge( 1, ChronoUnit.DAYS );
+
+                // Last modified becomes the end of the rail day which is 0200 the following day
+                request.lastModified( LocalDateTime.of( date.plus( 1, ChronoUnit.DAYS ), DAY_START ) );
+            }
 
             request.renderTile( "performance.ppm.view" );
         }
