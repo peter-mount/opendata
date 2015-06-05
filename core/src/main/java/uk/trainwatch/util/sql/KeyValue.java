@@ -18,6 +18,7 @@ package uk.trainwatch.util.sql;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Consumer;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -38,6 +39,8 @@ public class KeyValue<K, V>
      * Mapping function that returns a {@link KeyValue} keyed by a long and a String value
      */
     public static final SQLResultSetHandler<KeyValue<Long, String>> LONG_STRING = rs -> new KeyValue<>( rs.getLong( 1 ), rs.getString( 2 ) );
+
+    public static final SQLResultSetHandler<KeyValue<String, String>> STRING_STRING = rs -> new KeyValue<>( rs.getString( 1 ), rs.getString( 2 ) );
 
     private final K key;
     private final int hashCode;
@@ -105,5 +108,10 @@ public class KeyValue<K, V>
     public static <K, U> Collector<KeyValue<K, U>, ?, ConcurrentMap<K, U>> toConcurrentMap()
     {
         return Collectors.toConcurrentMap( KeyValue::getKey, KeyValue::getValue );
+    }
+
+    public static <K, U> Consumer<KeyValue<K, U>> putAll( Map<K, U> map )
+    {
+        return v -> map.put( v.getKey(), v.getValue() );
     }
 }

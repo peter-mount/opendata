@@ -8,10 +8,8 @@ package uk.trainwatch.web.timetable;
 import uk.trainwatch.web.servlet.AbstractServlet;
 import uk.trainwatch.web.servlet.ApplicationRequest;
 import java.io.IOException;
-import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import uk.trainwatch.nrod.location.TrainLocationFactory;
 
 /**
  * TimeTable home
@@ -28,10 +26,6 @@ public class HomeServlet
             throws ServletException,
                    IOException
     {
-        Map<String, Object> req = request.getRequestScope();
-
-        req.put( "stations", TrainLocationFactory.INSTANCE.getStations() );
-
         request.renderTile( "timetable.home" );
     }
 
