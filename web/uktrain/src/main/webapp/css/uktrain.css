@@ -43,10 +43,31 @@ div.ldbLate {
     font-size: 100%;
 }
 
-#main-content #board .ldb-row table th {
+#main-content #board .ldb-row table tr th {
+    border-collapse: collapse;
     color: black;
     font-size: 100%;
+}
+
+#main-content #board .ldb-row table tr.head th {
+    border-collapse: collapse;
     border-bottom: 1px solid black;
+}
+
+#main-content #board .ldb-row table tr th.sep,
+#main-content #board .ldb-row table tr td.sep {
+    border-left: 1px solid #ccc;
+}
+
+#main-content #board .ldb-row table tr {
+    color: black;
+    font-size: 100%;
+    border-bottom: 1px solid #ccc;
+}
+
+#main-content #board .ldb-row table {
+    border-collapse: collapse;
+    border: 1px solid #ccc;
 }
 
 /* New uktra.in skin */

@@ -71,14 +71,29 @@
         </c:forEach>
         <div class="ldb-row">
             <table>
-                <tr>
+                <c:if test="${detailed}">
+                    <tr class="headtop">
+                        <th colspan="2"></th>
+                        <th colspan="4" class="sep">Observed</th>
+                        <th colspan="2" class="sep">GBTT</th>
+                        <th colspan="3" class="sep">WTT</th>
+                    </tr>
+                </c:if>
+                <tr class="head">
                     <th>&nbsp;</th>
                     <th>Location</th>
-                    <th>Plat</th>
+                    <th class="sep">Plat</th>
                     <th>Time</th>
                     <th>Delay</th>
                         <c:if test="${showlength}">
                         <th>Len</th>
+                        </c:if>
+                        <c:if test="${detailed}">
+                        <th class="sep">Arr</th>
+                        <th>Dep</th>
+                        <th class="sep">Arr</th>
+                        <th>Dep</th>
+                        <th>Pass</th>
                         </c:if>
                 </tr>
                 <c:forEach var="entry" varStatus="status" items="${train.forecastEntries}">
@@ -117,7 +132,7 @@
                             <td class="ldb-fsct-loc-${style}">
                                 <d:tiploc value="${entry.tpl}" link="false"/>
                             </td>
-                            <td class="ldb-fsct-plat-${style}">
+                            <td class="ldb-fsct-plat-${style} sep">
                                 <c:if test="${(not entry.platsup and not entry.cisplatsup) or showPlat}">
                                     ${entry.plat}
                                 </c:if>
@@ -197,6 +212,13 @@
                                         ${entry.length}
                                     </c:if>
                                 </td>
+                            </c:if>
+                            <c:if test="${detailed}">
+                                <td class="sep"><t:time value="${entry.pta}"/></td>
+                                <td><t:time value="${entry.ptd}"/></td>
+                                <td class="sep"><t:time value="${entry.wta}"/></td>
+                                <td><t:time value="${entry.wtd}"/></td>
+                                <td class="ldbPass"><t:time value="${entry.wtp}"/></td>
                             </c:if>
                         </tr>
                     </c:if>
