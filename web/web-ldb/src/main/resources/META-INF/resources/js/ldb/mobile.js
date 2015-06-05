@@ -61,7 +61,7 @@ var UI = (function () {
 
         // Give the search focus
         setTimeout(function () {
-            $('#stations').focus();
+            $('#stations').val('').focus();
         }, 250);
     };
 

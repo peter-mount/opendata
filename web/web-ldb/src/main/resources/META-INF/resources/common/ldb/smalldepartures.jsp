@@ -72,7 +72,26 @@
                                 <a onclick="document.location = '/train/${dep.rid}/${location.crs}';">
                                     <d:tiploc value="${dep.dest}" link="false"/>
                                 </a>
-                                <div class="ldbVia"><d:via value="${dep.via}"/></div>
+                                <div class="ldbVia">
+                                    <c:if test="${$dep.length gt 0 or not empty dep.toc}">
+                                        <div class="ldbCol ldbOperator">
+                                            <c:if test="${dep.length gt 0}">
+                                                ${dep.length}&nbsp;coaches
+                                            </c:if>
+                                            <c:if test="${not empty dep.toc}">
+                                                <d:operator value="${dep.toc}" link="false"/>
+                                            </c:if>
+                                        </div>
+                                    </c:if>
+                                    <c:choose>
+                                        <c:when test="${dep.via eq 0}">
+                                            &nbsp;
+                                        </c:when>
+                                        <c:otherwise>
+                                            <d:via value="${dep.via}"/>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
                             </c:otherwise>
                         </c:choose>
                     </div>

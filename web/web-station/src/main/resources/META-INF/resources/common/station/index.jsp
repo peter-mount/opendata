@@ -24,7 +24,7 @@
         });
 
         setTimeout(function () {
-            $('#station').focus();
+            $('#station').val('').focus();
         }, 250);
     });
 </script>

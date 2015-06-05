@@ -8,7 +8,7 @@ package uk.trainwatch.web.ldb;
 import javax.servlet.annotation.WebServlet;
 
 /**
- * Shows the small LDB page
+ * Performance Home
  * <p>
  * @author Peter T Mount
  */

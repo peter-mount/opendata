@@ -2,6 +2,18 @@
 
 .ldbCol, .ldbCont { font-size: 80%; }
 .ldbForecast, .ldbSched, .ldbPlat { font-size: 70%; }
+
+.ldb-entbot {
+    clear: both;
+    text-align: center;
+}
+
+.ldbOperator {
+    text-align: right;
+    color: yellow;
+    font-size: 100%;
+}
+
 /* iPhone 3GS */
 @media all and ( max-width: 320px ) {
     .ldbForecast { width: 54px; }
