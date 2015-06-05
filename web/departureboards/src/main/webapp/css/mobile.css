@@ -199,6 +199,12 @@ input {
     z-index: -1;
     opacity: 0.3;
 }
+
+/* Hidden on mobile site */
+#trainTop {
+    display: none;
+}
+
 /* iPhone 3GS */
 @media all and ( max-width: 320px ) {
     .ldbbutton {

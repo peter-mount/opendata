@@ -13,6 +13,42 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+#trainTop {
+    font-size: 210%;
+    text-align: center;
+    padding-bottom: 0.5em;
+}
+
+#main-content #board .ldbWrapper {
+    width: auto;
+    display: inline-block;
+}
+
+div.ldbCancelled {
+    color: red;
+    text-align: center;
+}
+
+div.ldbLate {
+    color: black;
+    text-align: center;
+}
+.ldbPass {
+    color: #999;
+}
+
+#main-content #board .ldb-row {
+    color: black;
+    font-size: 100%;
+}
+
+#main-content #board .ldb-row table th {
+    color: black;
+    font-size: 100%;
+    border-bottom: 1px solid black;
+}
+
 /* New uktra.in skin */
 #main-outer{}
 #top-menu,#banner_left,#banner_right {

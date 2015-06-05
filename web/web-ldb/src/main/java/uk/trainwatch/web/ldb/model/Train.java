@@ -98,6 +98,11 @@ public class Train
         return isForecastPresent() ? forecast.getId() : 0;
     }
 
+    public boolean isDeactivated()
+    {
+        return isForecastPresent() ? forecast.isDeactivated() : false;
+    }
+
     public Forecast getForecast()
     {
         return forecast;

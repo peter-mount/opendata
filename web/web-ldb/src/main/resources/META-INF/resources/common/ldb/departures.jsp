@@ -97,12 +97,12 @@
                     <div class="ldbCont">
                         <c:choose>
                             <c:when test="${dep.terminated}">
-                                <a onclick="document.location = '/train/${dep.rid}/${location.crs}';">
+                                <a onclick="document.location = '/train/${dep.rid}';">
                                     Terminates Here
                                 </a>
                             </c:when>
                             <c:otherwise>
-                                <a onclick="document.location = '/train/${dep.rid}/${location.crs}';">
+                                <a onclick="document.location = '/train/${dep.rid}}';">
                                     <d:tiploc value="${dep.dest}" link="false"/>
                                 </a>
                                 <div class="ldbVia"><d:via value="${dep.via}"/></div>

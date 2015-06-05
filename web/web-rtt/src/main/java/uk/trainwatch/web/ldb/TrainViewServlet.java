@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package uk.trainwatch.web.departureboards;
+package uk.trainwatch.web.ldb;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -12,7 +12,6 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
-import uk.trainwatch.web.ldb.LDBUtils;
 import uk.trainwatch.web.ldb.model.Train;
 import uk.trainwatch.web.servlet.AbstractServlet;
 import uk.trainwatch.web.servlet.ApplicationRequest;
@@ -40,6 +39,9 @@ public class TrainViewServlet
             Map<String, Object> req = request.getRequestScope();
             req.put( "train", train );
             req.put( "pageTitle", rid );
+
+            // Show all details
+            req.put( "detailed", true );
 
             // Set headers for caching
             request.expiresIn( 1, ChronoUnit.MINUTES );

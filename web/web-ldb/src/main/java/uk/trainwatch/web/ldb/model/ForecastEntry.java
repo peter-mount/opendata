@@ -25,15 +25,16 @@ public class ForecastEntry
 {
 
     private static final String SELECT = "SELECT f.fid, t.tpl, f.supp,"
-            + "f.pta, f.ptd, f.wta, f.wtd, f.wtp,"
-            + "f.delay,"
-            + "f.arr, f.dep, f.etarr, f.etdep, f.etpass,"
-            + "f.plat, f.platsup, f.cisplatsup, f.platsrc,"
-            + "f.length, f.detachfront,"
-            + "f.tm"
-            + " FROM darwin.forecast_entry f"
-            + " INNER JOIN darwin.tiploc t ON f.tpl=t.id"
-            + " WHERE f.fid=?";
+                                         + "f.pta, f.ptd, f.wta, f.wtd, f.wtp,"
+                                         + "f.delay,"
+                                         + "f.arr, f.dep, f.etarr, f.etdep,"
+                                         + "f.pass, f.etpass,"
+                                         + "f.plat, f.platsup, f.cisplatsup, f.platsrc,"
+                                         + "f.length, f.detachfront,"
+                                         + "f.tm"
+                                         + " FROM darwin.forecast_entry f"
+                                         + " INNER JOIN darwin.tiploc t ON f.tpl=t.id"
+                                         + " WHERE f.fid=?";
 
     public static final SQLFunction<ResultSet, ForecastEntry> fromSQL = rs -> new ForecastEntry(
             rs.getLong( "fid" ),
@@ -49,6 +50,7 @@ public class ForecastEntry
             TimeUtils.getLocalTime( rs, "dep" ),
             TimeUtils.getLocalTime( rs, "etarr" ),
             TimeUtils.getLocalTime( rs, "etdep" ),
+            TimeUtils.getLocalTime( rs, "pass" ),
             TimeUtils.getLocalTime( rs, "etpass" ),
             rs.getString( "plat" ),
             rs.getBoolean( "platsup" ),
@@ -59,12 +61,9 @@ public class ForecastEntry
             TimeUtils.getLocalTime( rs, "tm" )
     );
 
-    public static final SQLBiConsumer<Connection, Train> populate = ( c, t ) ->
-    {
-        if( t.isForecastPresent() )
-        {
-            try( PreparedStatement ps = SQL.prepare( c, SELECT, t.getForecastId() ) )
-            {
+    public static final SQLBiConsumer<Connection, Train> populate = ( c, t ) -> {
+        if( t.isForecastPresent() ) {
+            try( PreparedStatement ps = SQL.prepare( c, SELECT, t.getForecastId() ) ) {
                 t.setForecastEntries( SQL.stream( ps, fromSQL ).
                         sorted().
                         collect( Collectors.toList() )
@@ -86,6 +85,7 @@ public class ForecastEntry
     private final LocalTime dep;
     private final LocalTime etarr;
     private final LocalTime etdep;
+    private final LocalTime pass;
     private final LocalTime etpass;
     private final String plat;
     private final boolean platsup;
@@ -99,7 +99,9 @@ public class ForecastEntry
 
     public ForecastEntry( long id, String tpl, boolean sup, LocalTime pta, LocalTime ptd, LocalTime wta, LocalTime wtd,
                           LocalTime wtp, Duration delay,
-                          LocalTime arr, LocalTime dep, LocalTime etarr, LocalTime etdep, LocalTime etpass, String plat,
+                          LocalTime arr, LocalTime dep, LocalTime etarr, LocalTime etdep,
+                          LocalTime pass, LocalTime etpass,
+                          String plat,
                           boolean platsup, boolean cisplatsup,
                           String platsrc, int length, boolean detatchfront, LocalTime tm )
     {
@@ -116,6 +118,7 @@ public class ForecastEntry
         this.dep = dep;
         this.etarr = etarr;
         this.etdep = etdep;
+        this.pass = pass;
         this.etpass = etpass;
         this.plat = plat;
         this.platsup = platsup;
@@ -189,6 +192,11 @@ public class ForecastEntry
     public LocalTime getEtdep()
     {
         return etdep;
+    }
+
+    public LocalTime getPass()
+    {
+        return pass;
     }
 
     public LocalTime getEtpass()
