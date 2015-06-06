@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+<tiles-definitions>
+    
+    <definition name="rtt.home" extends="layout.main">
+        <put-attribute name="title" value="Real Time Tracking" />
+        <!--
+        <put-attribute name="javascript" value="/common/rtt/mobilejavascript.jsp" />
+        -->
+        <put-attribute name="body" value=".rtt.home" />
+    </definition>
+    <definition name=".rtt.home" extends="layout.2col-left">
+        <put-attribute name="left" value=".left" />
+        <put-attribute name="center" value="/common/rtt/index.jsp" />
+    </definition>
+    
+    <!-- The search results page -->
+    <definition name="rtt.search" extends="layout.main">
+        <put-attribute name="title" value="Real Time Tracking" />
+        <put-attribute name="body" value=".rtt.search" />
+    </definition>
+    <definition name=".rtt.search" extends="layout.2col-left">
+        <put-attribute name="left" value=".left" />
+        <put-attribute name="center" value="/common/rtt/search.jsp" />
+    </definition>
+    
+    <!-- The RTT details page -->
+    <definition name="rtt.details" extends="layout.main">
+        <put-attribute name="title" value="Train Details" />
+        <put-attribute name="body" value=".rtt.details" />
+    </definition>
+    <definition name=".rtt.details" extends="layout.2col-left">
+        <put-attribute name="left" value=".left" />
+        <put-attribute name="center" value="rtt.details.view" />
+    </definition>
+    
+    <!-- The real time view, used in main page but also when auto-updating a train -->
+    <definition name="rtt.details.view" template="/common/rtt/details.jsp" />
+    
+</tiles-definitions>
