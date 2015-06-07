@@ -20,11 +20,15 @@ import uk.trainwatch.util.sql.SQLFunction;
 public class Schedule
 {
 
-    public static final String SELECT = "SELECT s.id, s.rid, s.uid, s.ssd, s.ts, s.trainid, s.toc, s.cancreason, s.via, o.tpl as origin, d.tpl as dest"
-                                        + " FROM darwin.schedule s"
-                                        + " INNER JOIN darwin.tiploc o ON s.origin=o.id"
-                                        + " INNER JOIN darwin.tiploc d ON s.dest=d.id"
-                                        + " WHERE s.rid=?";
+    private static final String SELECT_PATTERN = "SELECT s.id, s.rid, s.uid, s.ssd, s.ts, s.trainid, s.toc, s.cancreason, s.via, o.tpl as origin, d.tpl as dest"
+                                                 + " FROM darwin.%s s"
+                                                 + " INNER JOIN darwin.tiploc o ON s.origin=o.id"
+                                                 + " INNER JOIN darwin.tiploc d ON s.dest=d.id"
+                                                 + " WHERE s.rid=?"
+                                                 + " ORDER BY s.id DESC";
+
+    public static final String SELECT = String.format( SELECT_PATTERN, "schedule" );
+    public static final String SELECT_ARC = String.format( SELECT_PATTERN, "schedulearc" );
 
     public static final SQLFunction<ResultSet, Schedule> fromSQL = rs -> new Schedule(
             rs.getLong( "id" ),
@@ -42,6 +46,12 @@ public class Schedule
 
     public static final SQLBiConsumer<Connection, Train> populate = ( c, t ) -> {
         try( PreparedStatement ps = SQL.prepare( c, SELECT, t.getRid() ) ) {
+            t.setSchedule( SQL.stream( ps, fromSQL ).findAny().orElse( null ) );
+        }
+    };
+
+    public static final SQLBiConsumer<Connection, Train> populateArc = ( c, t ) -> {
+        try( PreparedStatement ps = SQL.prepare( c, SELECT_ARC, t.getRid() ) ) {
             t.setSchedule( SQL.stream( ps, fromSQL ).findAny().orElse( null ) );
         }
     };

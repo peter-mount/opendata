@@ -30,6 +30,7 @@
         <module>departureboards</module>
         <module>web-rest</module>
         <module>web-rtt</module>
+        <module>web-reference</module>
     </modules>
     
 </project>

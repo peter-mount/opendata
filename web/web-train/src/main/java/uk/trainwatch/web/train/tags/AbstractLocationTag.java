@@ -10,6 +10,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import uk.trainwatch.nrod.location.TrainLocation;
+import uk.trainwatch.nrod.location.TrainLocationFactory;
 
 /**
  *
@@ -52,13 +53,13 @@ public abstract class AbstractLocationTag
             }
 
             // Try our own, has depot's etc in there
-            // FIXME reimplement
-//            if( name == null || name.equals( value ) ) {
-//                TrainLocation loc = TrainLocationFactory.INSTANCE.resolveTrainLocation( value );
-//                if( loc != null ) {
-//                    name = loc.getLocation();
-//                }
-//            }
+            if( name == null || name.equals( value ) ) {
+                TrainLocation loc = TrainLocationFactory.INSTANCE.resolveTrainLocation( value );
+                if( loc != null ) {
+                    name = loc.getLocation();
+                }
+            }
+            
             if( name == null )
             {
                 name = value;

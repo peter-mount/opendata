@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.Duration;
 import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 import uk.trainwatch.util.TimeUtils;
 import uk.trainwatch.util.sql.SQL;
@@ -24,17 +25,20 @@ public class ForecastEntry
         implements Comparable<ForecastEntry>
 {
 
-    private static final String SELECT = "SELECT f.fid, t.tpl, f.supp,"
-                                         + "f.pta, f.ptd, f.wta, f.wtd, f.wtp,"
-                                         + "f.delay,"
-                                         + "f.arr, f.dep, f.etarr, f.etdep,"
-                                         + "f.pass, f.etpass,"
-                                         + "f.plat, f.platsup, f.cisplatsup, f.platsrc,"
-                                         + "f.length, f.detachfront,"
-                                         + "f.tm"
-                                         + " FROM darwin.forecast_entry f"
-                                         + " INNER JOIN darwin.tiploc t ON f.tpl=t.id"
-                                         + " WHERE f.fid=?";
+    private static final String SELECT_PATTERN = "SELECT f.fid, t.tpl, f.supp,"
+                                                 + "f.pta, f.ptd, f.wta, f.wtd, f.wtp,"
+                                                 + "f.delay,"
+                                                 + "f.arr, f.dep, f.etarr, f.etdep,"
+                                                 + "f.pass, f.etpass,"
+                                                 + "f.plat, f.platsup, f.cisplatsup, f.platsrc,"
+                                                 + "f.length, f.detachfront,"
+                                                 + "f.tm"
+                                                 + " FROM darwin.%s f"
+                                                 + " INNER JOIN darwin.tiploc t ON f.tpl=t.id"
+                                                 + " WHERE f.fid=?";
+
+    public static final String SELECT = String.format( SELECT_PATTERN, "forecast_entry" );
+    public static final String SELECT_ARC = String.format( SELECT_PATTERN, "forecast_entryarc" );
 
     public static final SQLFunction<ResultSet, ForecastEntry> fromSQL = rs -> new ForecastEntry(
             rs.getLong( "fid" ),
@@ -64,6 +68,17 @@ public class ForecastEntry
     public static final SQLBiConsumer<Connection, Train> populate = ( c, t ) -> {
         if( t.isForecastPresent() ) {
             try( PreparedStatement ps = SQL.prepare( c, SELECT, t.getForecastId() ) ) {
+                t.setForecastEntries( SQL.stream( ps, fromSQL ).
+                        sorted().
+                        collect( Collectors.toList() )
+                );
+            }
+        }
+    };
+
+    public static final SQLBiConsumer<Connection, Train> populateArc = ( c, t ) -> {
+        if( t.isForecastPresent() ) {
+            try( PreparedStatement ps = SQL.prepare( c, SELECT_ARC, t.getForecastId() ) ) {
                 t.setForecastEntries( SQL.stream( ps, fromSQL ).
                         sorted().
                         collect( Collectors.toList() )
@@ -252,7 +267,23 @@ public class ForecastEntry
     @Override
     public int compareTo( ForecastEntry o )
     {
-        return TimeUtils.compareLocalTimeDarwin.compare( tm, o.tm );
+        return SORT.compare( this, o );
     }
+
+    public static LocalTime getTime( ForecastEntry e )
+    {
+        if( e.getWtd() != null ) {
+            return e.getWtd();
+        }
+        if( e.getWta() != null ) {
+            return e.getWta();
+        }
+        if( e.getWtp() != null ) {
+            return e.getWtp();
+        }
+        return null;
+    }
+    public static Comparator<ForecastEntry> SORT = ( a, b ) -> TimeUtils.compareLocalTimeDarwin.compare( getTime( a ), getTime( b ) );
+    public static Comparator<ForecastEntry> SORT_REVERSE = ( a, b ) -> TimeUtils.compareLocalTimeDarwin.compare( getTime( b ), getTime( a ) );
 
 }

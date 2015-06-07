@@ -20,7 +20,7 @@ import uk.trainwatch.web.servlet.ApplicationRequest;
  *
  * @author peter
  */
-@WebServlet(name = "TrainServlet", urlPatterns = "/train/*")
+@WebServlet(name = "TrainServlet", urlPatterns = "/rtt/train/*")
 public class TrainServlet
         extends AbstractServlet
 {
@@ -36,22 +36,28 @@ public class TrainServlet
         log( "Retrieving train " + rid );
 
         try {
-            Train train = LDBUtils.getSchedule( rid );
+            // Unlike mobile we retrieve the entire train here & show in one go.
+            Train train = LDBUtils.getTrain( rid );
+
+            // Also we lookup from the archive as necessary
+            if( !train.isSchedulePresent() && !train.isForecastPresent() ) {
+                train = LDBUtils.getArchivedTrain( rid );
+            }
 
             Map<String, Object> req = request.getRequestScope();
             req.put( "train", train );
             req.put( "pageTitle", rid );
 
             // Set headers for caching
-            ChronoUnit unit = train.isSchedulePresent() ? ChronoUnit.HOURS : ChronoUnit.MINUTES;
+            ChronoUnit unit = train.isArchived() ? ChronoUnit.HOURS : ChronoUnit.MINUTES;
             request.expiresIn( 1, unit );
             request.maxAge( 1, unit );
-            
+
             if( train.isSchedulePresent() ) {
                 request.lastModified( train.getLastUpdate() );
             }
 
-            request.renderTile( "ldb.train" );
+            request.renderTile( "rtt.details" );
         }
         catch( SQLException ex ) {
             log( "Failed rid " + rid, ex );

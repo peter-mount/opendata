@@ -6,9 +6,6 @@
     
     <definition name="rtt.home" extends="layout.main">
         <put-attribute name="title" value="Real Time Tracking" />
-        <!--
-        <put-attribute name="javascript" value="/common/rtt/mobilejavascript.jsp" />
-        -->
         <put-attribute name="body" value=".rtt.home" />
     </definition>
     <definition name=".rtt.home" extends="layout.2col-left">
@@ -29,11 +26,15 @@
     <!-- The RTT details page -->
     <definition name="rtt.details" extends="layout.main">
         <put-attribute name="title" value="Train Details" />
+        <put-attribute name="javascript" value="/common/rtt/javascript.jsp" />
         <put-attribute name="body" value=".rtt.details" />
     </definition>
     <definition name=".rtt.details" extends="layout.2col-left">
         <put-attribute name="left" value=".left" />
-        <put-attribute name="center" value="rtt.details.view" />
+        <put-attribute name="center" value=".rtt.details.body" />
+    </definition>
+    <definition name=".rtt.details.body" template="/common/rtt/detailswrapper.jsp">
+        <put-attribute name="details" value="rtt.details.view" />
     </definition>
     
     <!-- The real time view, used in main page but also when auto-updating a train -->

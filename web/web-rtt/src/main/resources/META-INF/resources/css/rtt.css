@@ -1,0 +1,102 @@
+/* CSS for the train detail page, overrides ldb.css */
+#trainTop {
+    font-size: 210%;
+    text-align: center;
+    padding-bottom: 0.5em;
+}
+
+.ldbWrapper {
+    width: auto;
+    display: inline-block;
+}
+
+.ldb-label {
+    display: inline-block;
+    width: 10em;
+    text-align: right;
+    font-weight: bold;
+}
+
+.ldb-value {
+    display: inline-block;
+    text-align: left;
+}
+
+.ldbVia {
+    font-size: 80%;
+    color: #999;
+}
+
+.ldb-fsct-len-arr,
+.ldb-fsct-loc-arr,
+.ldb-fsct-plat-arr,
+.ldb-fsct-len-arr,
+.ldb-fsct-arrived { font-weight: bold; }
+
+.ldb-fsct-len-expt,
+.ldb-fsct-loc-expt,
+.ldb-fsct-plat-expt,
+.ldb-fsct-len-expt,
+.ldb-fsct-expected { font-style: italic; }
+
+.ldb-fsct-len-can,
+.ldb-fsct-loc-can,
+.ldb-fsct-plat-can,
+.ldb-fsct-len-can,
+.ldb-fsct-cancelled,
+.ldbCancelled { color: red; }
+
+.ldb-fsct-len-arr,
+.ldb-fsct-plat-arr,
+.ldb-fsct-len-arr,
+.ldb-fsct-arrived,
+.ldb-fsct-len-expt,
+.ldb-fsct-plat-expt,
+.ldb-fsct-len-expt,
+.ldb-fsct-expected,
+.ldb-fsct-len-can,
+.ldb-fsct-plat-can,
+.ldb-fsct-len-can,
+.ldb-fsct-cancelled,
+.ldbCancelled { text-align: center; }
+
+.ldbLate {
+    color: black;
+    text-align: center;
+}
+.ldbPass { color: #999; }
+
+.ldb-row {
+    color: black;
+    font-size: 100%;
+}
+
+th, td {
+    padding: 0 0.5em;
+}
+.ldb-row table tr th {
+    border-collapse: collapse;
+    color: black;
+    font-size: 100%;
+}
+
+.ldb-row table tr.head th {
+    border-collapse: collapse;
+    border-bottom: 1px solid black;
+}
+
+.ldb-row table tr th.sep,
+.ldb-row table tr td.sep {
+    border-left: 1px solid #ccc;
+}
+
+.ldb-row table tr {
+    color: black;
+    font-size: 100%;
+    border-bottom: 1px solid #ccc;
+}
+
+.ldb-row table {
+    border-collapse: collapse;
+    border: 1px solid #ccc;
+}

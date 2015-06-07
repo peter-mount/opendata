@@ -6,11 +6,11 @@
 package uk.trainwatch.web.ldb.model;
 
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
+import jersey.repackaged.com.google.common.base.Objects;
 import uk.trainwatch.util.Streams;
 import uk.trainwatch.util.TimeUtils;
 
@@ -26,10 +26,24 @@ public class Train
     private List<ScheduleEntry> scheduleEntries = Collections.emptyList();
     private Forecast forecast;
     private List<ForecastEntry> forecastEntries = Collections.emptyList();
+    private boolean archived;
+
+    private ForecastEntry lastReport;
 
     public Train( String rid )
     {
         this.rid = rid;
+    }
+
+    public boolean isArchived()
+    {
+        return archived;
+    }
+
+    public Train setArchived( boolean archived )
+    {
+        this.archived = archived;
+        return this;
     }
 
     public LocalDateTime getLastUpdate()
@@ -51,6 +65,11 @@ public class Train
         dt.plus( TimeUtils.LONDON.getRules().getDaylightSavings( t.toInstant() ) );
 
         return dt;
+    }
+
+    public ForecastEntry getLastReport()
+    {
+        return lastReport;
     }
 
     public String getRid()
@@ -98,9 +117,14 @@ public class Train
         return isForecastPresent() ? forecast.getId() : 0;
     }
 
+    public boolean isActivated()
+    {
+        return !archived && (isForecastPresent() && forecast.isActivated());
+    }
+
     public boolean isDeactivated()
     {
-        return isForecastPresent() ? forecast.isDeactivated() : false;
+        return archived || (isForecastPresent() && forecast.isDeactivated());
     }
 
     public Forecast getForecast()
@@ -126,6 +150,18 @@ public class Train
     public void setForecastEntries( List<ForecastEntry> forecastEntries )
     {
         this.forecastEntries = forecastEntries;
+        if( forecastEntries != null && !forecastEntries.isEmpty() ) {
+            // Find last arr/dep/pass
+            lastReport = forecastEntries.stream().
+                    filter( e -> e.getArr() != null || e.getDep() != null || e.getPass() != null ).
+                    sorted( ForecastEntry.SORT_REVERSE ).
+                    findAny().
+                    orElse( null );
+        }
+        else {
+            lastReport = null;
+        }
+
     }
 
 }

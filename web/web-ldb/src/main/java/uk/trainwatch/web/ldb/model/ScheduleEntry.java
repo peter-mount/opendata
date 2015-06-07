@@ -22,10 +22,14 @@ import uk.trainwatch.util.sql.SQLFunction;
 public class ScheduleEntry
 {
 
-    public static final String SELECT = "SELECT s.id, s.schedule, s.type, t.tpl as tpl, s.pta, s.ptd, s.wta, s.wtd, s.wtp, s.act, s.can"
-                                        + " FROM darwin.schedule_entry s"
-                                        + " INNER JOIN darwin.tiploc t ON s.tpl=t.id"
-                                        + " WHERE s.schedule=?";
+    private static final String SELECT_PATTERN = "SELECT s.id, s.schedule, s.type, t.tpl as tpl, s.pta, s.ptd, s.wta, s.wtd, s.wtp, s.act, s.can"
+                                                 + " FROM darwin.%s s"
+                                                 + " INNER JOIN darwin.tiploc t ON s.tpl=t.id"
+                                                 + " WHERE s.schedule=?"
+                                                 + " ORDER BY s.id";
+
+    public static final String SELECT = String.format( SELECT_PATTERN, "schedule_entry" );
+    public static final String SELECT_ARC = String.format( SELECT_PATTERN, "schedule_entryarc" );
 
     public static final SQLFunction<ResultSet, ScheduleEntry> fromSQL = rs -> new ScheduleEntry(
             rs.getLong( "id" ),
@@ -44,6 +48,14 @@ public class ScheduleEntry
     public static final SQLBiConsumer<Connection, Train> populate = ( c, t ) -> {
         if( t.isSchedulePresent() ) {
             try( PreparedStatement ps = SQL.prepare( c, SELECT, t.getScheduleId() ) ) {
+                t.setScheduleEntries( SQL.stream( ps, fromSQL ).collect( Collectors.toList() ) );
+            }
+        }
+    };
+
+    public static final SQLBiConsumer<Connection, Train> populateArc = ( c, t ) -> {
+        if( t.isSchedulePresent() ) {
+            try( PreparedStatement ps = SQL.prepare( c, SELECT_ARC, t.getScheduleId() ) ) {
                 t.setScheduleEntries( SQL.stream( ps, fromSQL ).collect( Collectors.toList() ) );
             }
         }

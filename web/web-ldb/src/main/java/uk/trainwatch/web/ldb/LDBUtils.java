@@ -189,24 +189,42 @@ public class LDBUtils
     private static final SQLBiConsumer<Connection, Train> schedules = Schedule.populate.
             andThen( ScheduleEntry.populate );
 
-    private static final SQLBiConsumer<Connection, Train> forecast = Schedule.populate.
-            andThen( ScheduleEntry.populate ).
+    private static final SQLBiConsumer<Connection, Train> forecast = schedules.
             andThen( Forecast.populate ).
             andThen( ForecastEntry.populate );
+
+    private static final SQLBiConsumer<Connection, Train> schedulesArc = Schedule.populateArc.
+            andThen( ScheduleEntry.populateArc );
+
+    private static final SQLBiConsumer<Connection, Train> forecastArc = schedulesArc.
+            andThen( Forecast.populateArc ).
+            andThen( ForecastEntry.populateArc );
 
     public static Train getSchedule( String rid )
             throws SQLException
     {
-        return getTrain( Schedule.populate, rid );
+        return getTrain( Schedule.populate, rid, false );
+    }
+
+    public static Train getArchivedSchedule( String rid )
+            throws SQLException
+    {
+        return getTrain( Schedule.populateArc, rid, true );
     }
 
     public static Train getTrain( String rid )
             throws SQLException
     {
-        return getTrain( forecast, rid );
+        return getTrain( forecast, rid, false );
     }
 
-    private static Train getTrain( SQLBiConsumer<Connection, Train> c, String rid )
+    public static Train getArchivedTrain( String rid )
+            throws SQLException
+    {
+        return getTrain( forecastArc, rid, true );
+    }
+
+    private static Train getTrain( SQLBiConsumer<Connection, Train> c, String rid, boolean archive )
             throws SQLException
     {
         Train train = new Train( rid );
@@ -225,6 +243,10 @@ public class LDBUtils
                         findAny().
                         ifPresent( f::setScheduleEntry );
             } );
+        }
+
+        if( archive ) {
+            train.setArchived( archive );
         }
 
         return train;

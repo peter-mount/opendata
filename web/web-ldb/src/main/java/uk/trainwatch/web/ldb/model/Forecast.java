@@ -20,7 +20,10 @@ import uk.trainwatch.util.sql.SQLFunction;
 public class Forecast
 {
 
-    public static final String SELECT = "SELECT * FROM darwin.forecast WHERE rid=?";
+    private static final String SELECT_PATTERN = "SELECT * FROM darwin.%s WHERE rid=? ORDER BY id DESC";
+
+    public static final String SELECT = String.format( SELECT_PATTERN, "forecast" );
+    public static final String SELECT_ARC = String.format( SELECT_PATTERN, "forecastarc" );
 
     public static final SQLFunction<ResultSet, Forecast> fromSQL = rs -> new Forecast(
             rs.getLong( "id" ),
@@ -39,7 +42,13 @@ public class Forecast
             t.setForecast( SQL.stream( ps, fromSQL ).findAny().orElse( null ) );
         }
     };
-    
+
+    public static final SQLBiConsumer<Connection, Train> populateArc = ( c, t ) -> {
+        try( PreparedStatement ps = SQL.prepare( c, SELECT_ARC, t.getRid() ) ) {
+            t.setForecast( SQL.stream( ps, fromSQL ).findAny().orElse( null ) );
+        }
+    };
+
     private final long id;
     private final String rid;
     private final String uid;

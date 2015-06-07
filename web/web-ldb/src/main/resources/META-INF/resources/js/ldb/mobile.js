@@ -128,10 +128,13 @@ var LDB = (function () {
 
 // Train details - refresh every 60s
 var Train = (function () {
-    function Train(rid) {
-        Train.url = '/vtrain/' + rid;
+    function Train(rid, rtt) {
+        Train.url = (rtt ? '/rtt/vtrain/' : '/vtrain/') + rid;
         Train.board = $('#board');
-        reload();
+        if (rtt)
+            reloadIn(60000);
+        else
+            reload();
     }
 
     var reloadIn = function (timeout) {
