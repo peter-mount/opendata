@@ -4,39 +4,7 @@
 <%@ taglib prefix="t" uri="http://uktra.in/tld/opendata" %>
 <%@ taglib prefix="d" uri="http://uktra.in/tld/darwin" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
-<c:choose>
-    <c:when test="${detailed}">
-        <c:set var="stationPrefix" value="/station/"/>
-    </c:when>
-    <c:otherwise>
-        <c:set var="stationPrefix" value="/mldb/"/>
-    </c:otherwise>
-</c:choose>
-
 <div class="ldbWrapper">
-
-    <div id="trainTop">
-        <c:if test="${detailed}">
-            <%-- FIXME add origin departure time
-                <c:choose>
-                    <c:when test="${not empty train.schedule.origin.ptd}">
-                        <t:time value="${train.schedule.origin.ptd}"/>ͣͣ
-                    </c:when>
-                    <c:otherwise>
-                        <t:time value="${train.schedule.origin.wtd}"/>ͣͣ
-                    </c:otherwise>
-                </c:choose>
-            --%>
-            <d:tiploc value="${train.schedule.origin}" link="false"/>
-            <span class="ldbVia">
-                to
-            </span>
-        </c:if>
-        <d:tiploc value="${train.schedule.dest}" link="false"/>
-        <span class="ldbVia">
-            <d:via value="${train.schedule.via}"/>
-        </span>
-    </div>
 
     <c:choose>
         <c:when test="${train.isSchedulePresent() and train.schedule.cancReason>0}">
@@ -51,10 +19,7 @@
         </c:when>
     </c:choose>
 
-    <%-- Show full details only if deactivated --%>
-    <c:set var="showPlat" value="${detailed and train.deactivated}"/>
-
-    <c:set var="showlength" value="${detailed}"/>
+    <c:set var="showlength" value="false"/>
     <c:set var="lastRep" value=""/>
     <c:set var="lastRepInd" value="0"/>
     <c:if test="${train.isForecastPresent()}">
@@ -69,31 +34,17 @@
                 <c:set var="showlength" value="true"/>
             </c:if>
         </c:forEach>
+
         <div class="ldb-row">
             <table>
-                <c:if test="${detailed}">
-                    <tr class="headtop">
-                        <th colspan="2"></th>
-                        <th colspan="4" class="sep">Observed</th>
-                        <th colspan="2" class="sep">GBTT</th>
-                        <th colspan="3" class="sep">WTT</th>
-                    </tr>
-                </c:if>
-                <tr class="head">
+                <tr>
                     <th>&nbsp;</th>
                     <th>Location</th>
-                    <th class="sep">Plat</th>
+                    <th>Plat</th>
                     <th>Time</th>
                     <th>Delay</th>
                         <c:if test="${showlength}">
                         <th>Len</th>
-                        </c:if>
-                        <c:if test="${detailed}">
-                        <th class="sep">Arr</th>
-                        <th>Dep</th>
-                        <th class="sep">Arr</th>
-                        <th>Dep</th>
-                        <th>Pass</th>
                         </c:if>
                 </tr>
                 <c:forEach var="entry" varStatus="status" items="${train.forecastEntries}">
@@ -101,39 +52,25 @@
                     <c:if test="${not empty entry.scheduleEntry}">
                         <c:set var="canc" value="${entry.scheduleEntry.can}"/>
                     </c:if>
-                    <c:set var="altStyle" value=""/>
                     <c:choose>
-                        <c:when test="${detailed and not empty entry.pass}">
-                            <c:set var="style" value="arr ldbPass"/>
-                            <c:set var="altStyle" value=" ldbPass"/>
-                        </c:when>
-                        <c:when test="${detailed and ((empty entry.pta and empty entry.ptd) or not empty entry.wtp)}">
-                            <%-- detailed pages show passes as expected --%>
-                            <c:set var="style" value="expt ldbPass"/>
-                            <c:set var="altStyle" value=" ldbPass"/>
-                        </c:when>
                         <c:when test="${canc}">
                             <c:set var="style" value="can"/>
                         </c:when>
                         <c:when test="${status.count <= lastRepInd}">
                             <c:set var="style" value="arr"/>
                         </c:when>
-                        <c:when test="${detailed and not empty entry.etpass}">
-                            <c:set var="style" value="expt ldbPass"/>
-                            <c:set var="altStyle" value=" ldbPass"/>
-                        </c:when>
                         <c:otherwise>
                             <c:set var="style" value="expt"/>
                         </c:otherwise>
                     </c:choose>
-                    <c:if test="${detailed or not empty entry.pta or not empty entry.ptd}">
+                    <c:if test="${not empty entry.pta or not empty entry.ptd}">
                         <tr>
                             <td class="ldb-fsct-stat"></td>
                             <td class="ldb-fsct-loc-${style}">
                                 <d:tiploc value="${entry.tpl}" link="false"/>
                             </td>
-                            <td class="ldb-fsct-plat-${style} sep">
-                                <c:if test="${(not entry.platsup and not entry.cisplatsup) or showPlat}">
+                            <td class="ldb-fsct-plat-${style}">
+                                <c:if test="${not entry.platsup and not entry.cisplatsup}">
                                     ${entry.plat}
                                 </c:if>
                             </td>
@@ -143,8 +80,8 @@
                                         Cancelled
                                     </td>
                                 </c:when>
-                                <c:when test="${status.count<lastRepInd and empty entry.dep and empty entry.arr and (not detailed or (detailed and empty entry.pass))}">
-                                    <td colspan="2" class="ldb-fsct-expected${altStyle}">
+                                <c:when test="${status.count<lastRepInd and empty entry.dep and empty entry.arr}">
+                                    <td colspan="2" class="ldb-fsct-expected">
                                         No report
                                     </td>
                                 </c:when>
@@ -166,11 +103,6 @@
                                                 <t:time value="${entry.arr}"/>ͣͣ
                                             </td>
                                         </c:when>
-                                        <c:when test="${detailed and not empty entry.pass}">
-                                            <td class="ldb-fsct-arrived ldbPass">
-                                                <t:time value="${entry.pass}"/>
-                                            </td>
-                                        </c:when>
                                         <c:when test="${not empty entry.etdep}">
                                             <td class="ldb-fsct-expected">
                                                 <t:time value="${entry.etdep}"/>
@@ -181,11 +113,6 @@
                                                 <t:time value="${entry.etarr}"/>
                                             </td>
                                         </c:when>
-                                        <c:when test="${detailed and not empty entry.etpass}">
-                                            <td class="ldb-fsct-expected ldbPass">
-                                                <t:time value="${entry.etpass}"/>
-                                            </td>
-                                        </c:when>
                                         <c:otherwise>
                                             <td class="ldb-fsct-expected">
                                             </td>
@@ -194,12 +121,12 @@
                                     <%-- Show delay or expected delay --%>
                                     <c:choose>
                                         <c:when test="${status.count<=lastRepInd}">
-                                            <td class="ldb-fsct-arrived${altStyle}">
+                                            <td class="ldb-fsct-arrived">
                                                 <t:delay value="${entry.delay}" ontime="true" absolute="true" early="true"/>
                                             </td>
                                         </c:when>
                                         <c:otherwise>
-                                            <td class="ldb-fsct-expected${altStyle}">
+                                            <td class="ldb-fsct-expected">
                                                 <t:delay value="${entry.delay}" ontime="true" absolute="true" early="true"/>
                                             </td>
                                         </c:otherwise>
@@ -208,17 +135,8 @@
                             </c:choose>
                             <c:if test="${showlength}">
                                 <td>
-                                    <c:if test="${entry.length gt 0}">
-                                        ${entry.length}
-                                    </c:if>
+                                    ${entry.length}
                                 </td>
-                            </c:if>
-                            <c:if test="${detailed}">
-                                <td class="sep"><t:time value="${entry.pta}"/></td>
-                                <td><t:time value="${entry.ptd}"/></td>
-                                <td class="sep"><t:time value="${entry.wta}"/></td>
-                                <td><t:time value="${entry.wtd}"/></td>
-                                <td class="ldbPass"><t:time value="${entry.wtp}"/></td>
                             </c:if>
                         </tr>
                     </c:if>
@@ -238,18 +156,11 @@
         </div>
     </c:if>
 
-    <c:if test="${train.isForecastPresent()}">
-        <div class="ldb-row">
-            <div class="ldb-label">Start date</div>
-            <div class="ldb-value">${train.forecast.ssd}</div>
-        </div>
-    </c:if>
-
     <c:if test="${not empty lastRep}">
         <div class="ldb-row">
             <div class="ldb-label">Last Report</div>
             <div class="ldb-value">
-                <d:tiploc value="${lastRep.tpl}" prefix="${stationPrefix}"/> at <t:time value="${lastRep.tm}"/>
+                <d:tiploc value="${lastRep.tpl}" prefix="/mldb/"/> at <t:time value="${lastRep.tm}"/>
             </div>
         </div>
     </c:if>
@@ -265,11 +176,5 @@
         <div class="ldb-label">RID</div>
         <div class="ldb-value">${train.rid}</div>
     </div>
-
-    <c:if test="${not train.deactivated}">
-        <div class="ldb-row">
-            Note: This train is currently active so some details cannot be shown at this time.
-        </div>
-    </c:if>
 
 </div>

@@ -102,7 +102,7 @@
                                 </a>
                             </c:when>
                             <c:otherwise>
-                                <a onclick="document.location = '/train/${dep.rid}}';">
+                                <a onclick="document.location = '/train/${dep.rid}';">
                                     <d:tiploc value="${dep.dest}" link="false"/>
                                 </a>
                                 <div class="ldbVia"><d:via value="${dep.via}"/></div>

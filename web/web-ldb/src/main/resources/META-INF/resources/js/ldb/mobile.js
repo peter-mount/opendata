@@ -3,7 +3,7 @@ var UI = (function () {
     function UI() {
         UI.messageSpan = $('<div></div>');
         UI.message = $('#message').empty().append(UI.messageSpan);
-        UI.loader = $('#loader');
+        UI.loader = $('#loading');
     }
 
     var showLoaderImpl = function () {
@@ -130,8 +130,6 @@ var LDB = (function () {
 var Train = (function () {
     function Train(rid) {
         Train.url = '/vtrain/' + rid;
-        Train.messageSpan = $('<div></div>');
-        Train.message = $('#message').append(Train.messageSpan);
         Train.board = $('#board');
         reload();
     }
