@@ -92,7 +92,7 @@
 
         // Clear the form. Handles case of someone using back button
         var clearcomps = [
-            '#station', '#stationCrs', '#searchTime'
+            '#station', '#stationCrs', '#searchTime',
             '#railid'
         ];
         setTimeout(function () {
