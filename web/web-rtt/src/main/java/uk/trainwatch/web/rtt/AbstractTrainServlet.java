@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package uk.trainwatch.web.ldb;
+package uk.trainwatch.web.rtt;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
+import uk.trainwatch.web.ldb.LDBUtils;
 import uk.trainwatch.web.ldb.model.Train;
 import uk.trainwatch.web.servlet.AbstractServlet;
 import uk.trainwatch.web.servlet.ApplicationRequest;
@@ -20,11 +21,12 @@ import uk.trainwatch.web.servlet.ApplicationRequest;
  *
  * @author peter
  */
-@WebServlet(name = "TrainServlet", urlPatterns = "/rtt/train/*")
-public class TrainServlet
+public abstract class AbstractTrainServlet
         extends AbstractServlet
 {
 
+    protected abstract String getTile();
+    
     @Override
     protected void doGet( ApplicationRequest request )
             throws ServletException,
@@ -57,7 +59,7 @@ public class TrainServlet
                 request.lastModified( train.getLastUpdate() );
             }
 
-            request.renderTile( "rtt.details" );
+            request.renderTile( getTile() );
         }
         catch( SQLException ex ) {
             log( "Failed rid " + rid, ex );
