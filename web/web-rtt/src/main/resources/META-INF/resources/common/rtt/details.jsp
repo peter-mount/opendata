@@ -155,7 +155,8 @@
                     <th>&nbsp;</th>
                     <th>Location</th>
                     <th class="sep">Plat</th>
-                    <th>Time</th>
+                    <th>Arr</th>
+                    <th>Dep</th>
                     <th>Delay</th>
                         <c:if test="${showlength}">
                         <th>Len</th>
@@ -208,56 +209,68 @@
                         </td>
                         <c:choose>
                             <c:when test="${canc}">
-                                <td colspan="2" class="ldb-fsct-cancelled">
+                                <td colspan="3" class="ldb-fsct-cancelled">
                                     Cancelled
                                 </td>
                             </c:when>
                             <c:when test="${status.count<lastRepInd and empty entry.dep and empty entry.arr and empty entry.pass}">
-                                <td colspan="2" class="ldb-fsct-expected${altStyle}">
+                                <td colspan="3" class="ldb-fsct-expected${altStyle}">
                                     No report
                                 </td>
                             </c:when>
                             <c:otherwise>
                                 <c:choose>
-                                    <c:when test="${not empty entry.dep}">
-                                        <td class="ldb-fsct-arrived">
-                                            <t:time value="${entry.dep}"/>
-                                        </td>
-                                    </c:when>
-                                    <%-- On platform but not departed show arrival but with a not : --%>
-                                    <c:when test="${not empty entry.arr and empty entry.dep}">
-                                        <td class="ldb-fsct-arrived">
-                                            <t:time value="${entry.arr}" modifier="a"/>
-                                        </td>
-                                    </c:when>
-                                    <c:when test="${not empty entry.arr}">
-                                        <td class="ldb-fsct-arrived">
-                                            <t:time value="${entry.arr}"/>ͣͣ
-                                        </td>
-                                    </c:when>
-                                    <c:when test="${not empty entry.pass}">
-                                        <td class="ldb-fsct-arrived ldbPass">
-                                            <t:time value="${entry.pass}"/>
-                                        </td>
-                                    </c:when>
-                                    <c:when test="${not empty entry.etdep}">
-                                        <td class="ldb-fsct-expected">
-                                            <t:time value="${entry.etdep}"/>
-                                        </td>
-                                    </c:when>
-                                    <c:when test="${not empty entry.etarr}">
-                                        <td class="ldb-fsct-expected">
-                                            <t:time value="${entry.etarr}"/>
-                                        </td>
-                                    </c:when>
-                                    <c:when test="${not empty entry.etpass}">
-                                        <td class="ldb-fsct-expected ldbPass">
-                                            <t:time value="${entry.etpass}"/>
-                                        </td>
+                                    <c:when test="${not empty entry.arr or not empty entry.etarr or not empty entry.dep or not empty entry.etdep}">
+                                        <c:choose>
+                                            <c:when test="${not empty entry.arr}">
+                                                <td class="ldb-fsct-arrived">
+                                                    <t:time value="${entry.arr}"/>
+                                                </td>
+                                            </c:when>
+                                            <c:when test="${not empty entry.etarr}">
+                                                <td class="ldb-fsct-expected">
+                                                    <t:time value="${entry.etarr}"/>
+                                                </td>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <td class="ldb-fsct-expected">
+                                                </td>
+                                            </c:otherwise>
+                                        </c:choose>
+                                        <c:choose>
+                                            <c:when test="${not empty entry.dep}">
+                                                <td class="ldb-fsct-arrived">
+                                                    <t:time value="${entry.dep}"/>
+                                                </td>
+                                            </c:when>
+                                            <c:when test="${not empty entry.etdep}">
+                                                <td class="ldb-fsct-expected">
+                                                    <t:time value="${entry.etdep}"/>
+                                                </td>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <td class="ldb-fsct-expected">
+                                                </td>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </c:when>
                                     <c:otherwise>
-                                        <td class="ldb-fsct-expected">
-                                        </td>
+                                        <c:choose>
+                                            <c:when test="${not empty entry.pass}">
+                                                <td colspan="2" class="ldb-fsct-arrived ldbPass">
+                                                    Pass&nbsp;<t:time value="${entry.pass}"/>
+                                                </td>
+                                            </c:when>
+                                            <c:when test="${not empty entry.etpass}">
+                                                <td colspan="2" class="ldb-fsct-expected ldbPass">
+                                                    Pass&nbsp;<t:time value="${entry.etpass}"/>
+                                                </td>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <td colspan="2" class="ldb-fsct-expected">
+                                                </td>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </c:otherwise>
                                 </c:choose>
                                 <%-- Show delay or expected delay --%>
@@ -284,9 +297,9 @@
                         </c:if>
                         <td class="sep"><t:time value="${entry.pta}"/></td>
                         <td><t:time value="${entry.ptd}"/></td>
-                        <td class="sep"><t:time value="${entry.wta}"/></td>
-                        <td><t:time value="${entry.wtd}"/></td>
-                        <td class="ldbPass"><t:time value="${entry.wtp}"/></td>
+                        <td class="sep"><t:time value="${entry.wta}" working="true"/></td>
+                        <td><t:time value="${entry.wtd}" working="true"/></td>
+                        <td class="ldbPass"><t:time value="${entry.wtp}" working="true"/></td>
                     </tr>
                 </c:forEach>
             </table>
