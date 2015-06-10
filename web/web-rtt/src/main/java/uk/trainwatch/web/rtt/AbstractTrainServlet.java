@@ -10,7 +10,6 @@ import java.sql.SQLException;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
 import uk.trainwatch.web.ldb.LDBUtils;
 import uk.trainwatch.web.ldb.model.Train;
@@ -26,7 +25,7 @@ public abstract class AbstractTrainServlet
 {
 
     protected abstract String getTile();
-    
+
     @Override
     protected void doGet( ApplicationRequest request )
             throws ServletException,
@@ -37,13 +36,22 @@ public abstract class AbstractTrainServlet
 
         log( "Retrieving train " + rid );
 
-        try {
+        try
+        {
             // Unlike mobile we retrieve the entire train here & show in one go.
             Train train = LDBUtils.getTrain( rid );
 
             // Also we lookup from the archive as necessary
-            if( !train.isSchedulePresent() && !train.isForecastPresent() ) {
+            if( !train.isSchedulePresent() && !train.isForecastPresent() )
+            {
                 train = LDBUtils.getArchivedTrain( rid );
+            }
+
+            // Still nothing then we didn't find it
+            if( !train.isSchedulePresent() && !train.isForecastPresent() )
+            {
+                request.sendError( HttpServletResponse.SC_NOT_FOUND, rid );
+                return;
             }
 
             Map<String, Object> req = request.getRequestScope();
@@ -55,13 +63,14 @@ public abstract class AbstractTrainServlet
             request.expiresIn( 1, unit );
             request.maxAge( 1, unit );
 
-            if( train.isSchedulePresent() ) {
+            if( train.isSchedulePresent() )
+            {
                 request.lastModified( train.getLastUpdate() );
             }
 
             request.renderTile( getTile() );
-        }
-        catch( SQLException ex ) {
+        } catch( SQLException ex )
+        {
             log( "Failed rid " + rid, ex );
             request.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
         }
