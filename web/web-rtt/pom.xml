@@ -10,7 +10,7 @@
     <artifactId>web-rtt</artifactId>
     <packaging>jar</packaging>
     
-    <name>Webapps Real Time Train reporting</name>
+    <name>Webapps uktra.in Real Time Tracking</name>
     
     <description>Displays realtime reports on trains</description>
     

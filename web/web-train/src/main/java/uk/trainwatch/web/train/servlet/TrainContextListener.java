@@ -46,7 +46,7 @@ public class TrainContextListener
     protected void init( ServletContextEvent sce )
             throws SQLException
     {
-        DataSource dataSource = getRailDataSource();
+        dataSource = getRailDataSource();
 
         ForecastManager.INSTANCE.setDataSource( dataSource );
         DarwinReferenceManager.INSTANCE.setDataSource( dataSource );

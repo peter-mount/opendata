@@ -36,7 +36,7 @@ public class RTTHomeServlet
         req.put( "start", start );
         req.put( "end", end );
 
-        req.put( "time", LocalTime.now() );
+        req.put( "time", LocalTime.now().getHour() );
 
         request.renderTile( "rtt.home" );
     }

@@ -79,11 +79,15 @@ public enum DarwinReferenceManager
 
     private void refresh()
     {
-        if( refreshRequired() ) {
-            synchronized( this ) {
-                if( refreshRequired() ) {
+        if( refreshRequired() )
+        {
+            synchronized( this )
+            {
+                if( refreshRequired() )
+                {
                     try( Connection con = dataSource.getConnection();
-                         Statement s = con.createStatement() ) {
+                            Statement s = con.createStatement() )
+                    {
 
                         locs = SQL.stream( s.executeQuery(
                                 "SELECT l.name, c.crs, t.tpl"
@@ -119,8 +123,8 @@ public enum DarwinReferenceManager
                                    Reason::getCode );
 
                         locationCacheUpdated = LocalDateTime.now();
-                    }
-                    catch( SQLException ex ) {
+                    } catch( SQLException ex )
+                    {
                         LOG.log( Level.SEVERE, null, ex );
                     }
                 }
@@ -137,12 +141,14 @@ public enum DarwinReferenceManager
      */
     public Stream<TrainLocation> searchLocations( String term )
     {
-        if( term == null ) {
+        if( term == null )
+        {
             return Stream.empty();
         }
 
         String searchTerm = term.trim().toUpperCase();
-        if( searchTerm.length() < 3 ) {
+        if( searchTerm.length() < 3 )
+        {
             return Stream.empty();
         }
 
@@ -160,13 +166,15 @@ public enum DarwinReferenceManager
 
         // Check for crs match, only if term is 3 characters
         TrainLocation crsLocation = null;
-        if( searchTerm.length() == 3 ) {
+        if( searchTerm.length() == 3 )
+        {
             crsLocation = getLocationRefFromCrs( searchTerm );
         }
 
         // Now sort & make distinct by name
         // Merge crs result to front
-        if( crsLocation != null ) {
+        if( crsLocation != null )
+        {
             search = Stream.concat( Stream.of( crsLocation ),
                                     // filter it out of main search if present
                                     search.filter( l -> !searchTerm.equals( l.getCrs() ) )
@@ -184,6 +192,10 @@ public enum DarwinReferenceManager
 
     public TrainLocation getLocationRefFromCrs( String crs )
     {
+        if( crs == null || crs.isEmpty() )
+        {
+            return null;
+        }
         final List<TrainLocation> l = getLocationRefsFromCrs( crs );
         return l == null || l.isEmpty() ? null : l.get( 0 );
     }
@@ -210,32 +222,39 @@ public enum DarwinReferenceManager
      */
     public Via getVia( String at, String dest, List<String> locs )
     {
-        try( Connection con = dataSource.getConnection() ) {
-            try( PreparedStatement ps = SQL.prepare( con, "SELECT * FROM darwin.via WHERE at=? AND dest=?", at, dest ) ) {
+        try( Connection con = dataSource.getConnection() )
+        {
+            try( PreparedStatement ps = SQL.prepare( con, "SELECT * FROM darwin.via WHERE at=? AND dest=?", at, dest ) )
+            {
                 return SQL.stream( ps, DarwinReferenceManager::readVia ).
                         filter( v -> locs.contains( v.getLoc1() ) ).
                         filter( v -> v.getLoc2() == null || locs.contains( v.getLoc2() ) ).
-                        sorted( ( a, b ) -> {
-                            int r = Integer.compare( locs.indexOf( a.getLoc1() ), locs.indexOf( b.getLoc1() ) );
-                            if( r == 0 ) {
-                                String a2 = a.getLoc2(), b2 = a.getLoc2();
-                                if( a2 == null ) {
-                                    r = 1;
-                                }
-                                else if( b2 == null ) {
-                                    r = -1;
-                                }
-                                else {
-                                    r = Integer.compare( locs.indexOf( a2 ), locs.indexOf( b2 ) );
-                                }
-                            }
-                            return r;
+                        sorted( ( a, b ) ->
+                                {
+                                    int r = Integer.compare( locs.indexOf( a.getLoc1() ), locs.indexOf( b.getLoc1() ) );
+                                    if( r == 0 )
+                                    {
+                                        String a2 = a.getLoc2(), b2 = a.getLoc2();
+                                        if( a2 == null )
+                                        {
+                                            r = 1;
+                                        }
+                                        else if( b2 == null )
+                                        {
+                                            r = -1;
+                                        }
+                                        else
+                                        {
+                                            r = Integer.compare( locs.indexOf( a2 ), locs.indexOf( b2 ) );
+                                        }
+                                    }
+                                    return r;
                         } ).
                         findAny().
                         orElse( null );
             }
-        }
-        catch( SQLException ex ) {
+        } catch( SQLException ex )
+        {
             LOG.log( Level.SEVERE, null, ex );
             return null;
         }
@@ -243,16 +262,18 @@ public enum DarwinReferenceManager
 
     public String getViaText( int via )
     {
-        if( via == 0 ) {
+        if( via == 0 )
+        {
             return null;
         }
         try( Connection con = dataSource.getConnection();
-             PreparedStatement ps = SQL.prepare( con, "SELECT text FROM darwin.via WHERE id=?", via ) ) {
+                PreparedStatement ps = SQL.prepare( con, "SELECT text FROM darwin.via WHERE id=?", via ) )
+        {
             return SQL.stream( ps, SQL.STRING_LOOKUP ).
                     findAny().
                     orElse( null );
-        }
-        catch( SQLException ex ) {
+        } catch( SQLException ex )
+        {
             LOG.log( Level.SEVERE, null, ex );
             return null;
         }

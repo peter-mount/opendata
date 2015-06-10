@@ -37,15 +37,33 @@ public class Forecast
             rs.getLong( "schedule" )
     );
 
-    public static final SQLBiConsumer<Connection, Train> populate = ( c, t ) -> {
-        try( PreparedStatement ps = SQL.prepare( c, SELECT, t.getRid() ) ) {
+    public static final SQLFunction<ResultSet, Forecast> fromArchivedSQL = rs -> new Forecast(
+            rs.getLong( "id" ),
+            rs.getString( "rid" ),
+            rs.getString( "uid" ),
+            rs.getString( "ssd" ),
+            rs.getTimestamp( "ts" ),
+            rs.getInt( "latereason" ),
+            rs.getBoolean( "activated" ),
+            rs.getBoolean( "deactivated" ),
+            rs.getLong( "schedule" ),
+            true
+    );
+
+    public static final SQLBiConsumer<Connection, Train> populate = ( c, t ) ->
+    {
+        try( PreparedStatement ps = SQL.prepare( c, SELECT, t.getRid() ) )
+        {
             t.setForecast( SQL.stream( ps, fromSQL ).findAny().orElse( null ) );
         }
     };
 
-    public static final SQLBiConsumer<Connection, Train> populateArc = ( c, t ) -> {
-        try( PreparedStatement ps = SQL.prepare( c, SELECT_ARC, t.getRid() ) ) {
-            t.setForecast( SQL.stream( ps, fromSQL ).findAny().orElse( null ) );
+    public static final SQLBiConsumer<Connection, Train> populateArc = ( c, t ) ->
+    {
+        try( PreparedStatement ps = SQL.prepare( c, SELECT_ARC, t.getRid() ) )
+        {
+            t.setForecast( SQL.stream( ps, fromArchivedSQL ).findAny().orElse( null ) );
+            t.setArchived( true );
         }
     };
 
@@ -58,8 +76,16 @@ public class Forecast
     private final boolean activated;
     private final boolean deactivated;
     private final long schedule;
+    private final boolean archived;
 
-    public Forecast( long id, String rid, String uid, String ssd, Timestamp ts, int lateReason, boolean activated, boolean deactivated, long schedule )
+    public Forecast( long id, String rid, String uid, String ssd, Timestamp ts, int lateReason, boolean activated,
+                     boolean deactivated, long schedule )
+    {
+        this( id, rid, uid, ssd, ts, lateReason, activated, deactivated, schedule, false );
+    }
+
+    public Forecast( long id, String rid, String uid, String ssd, Timestamp ts, int lateReason, boolean activated,
+                     boolean deactivated, long schedule, boolean archived )
     {
         this.id = id;
         this.rid = rid;
@@ -70,6 +96,7 @@ public class Forecast
         this.activated = activated;
         this.deactivated = deactivated;
         this.schedule = schedule;
+        this.archived = archived;
     }
 
     public long getId()
@@ -109,7 +136,12 @@ public class Forecast
 
     public boolean isDeactivated()
     {
-        return deactivated;
+        return deactivated || archived;
+    }
+
+    public boolean isArchived()
+    {
+        return archived;
     }
 
     public long getSchedule()

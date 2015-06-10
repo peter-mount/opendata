@@ -1,26 +1,12 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="f" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="t" uri="http://uktra.in/tld/opendata" %>
 <%@ taglib prefix="d" uri="http://uktra.in/tld/darwin" %>
 
-<style>
-    .ui-widget {
-        padding-bottom: 0.25em;
-    }
-    .ui-widget label {
-        width:15em;
-        display: inline-block;
-        text-align: right;
-    }
-    .ui-widget input {
-        width: 10em;
-        display: inline-block;
-    }
-</style>
+<h2>Search results for ${location.location}</h2>
 
-<h2>Live train monitoring</h2>
 <p>
+    Date range: <time dateTime="${start}"
     From this page you can search for any train that's due to run from any station and monitor it's progress.
     You can even go back a few days as well to see how earlier trains performed.
 </p>
@@ -44,24 +30,11 @@
     <div class="ui-widget">
         <label for="searchDate">Date to search:</label>
         <input id="searchDate" name="date" type="date" value="${end}" min="${start}" max="${end}"/>
-    </div>
-    <div class="ui-widget">
-        <label></label>
         <span>You can select dates from ${start} to ${end}</span>
     </div>
     <div class="ui-widget">
         <label for="searchTime">Time</label>
-        <select name="time" id="searchTime">
-            <c:forEach var="h" begin="0" end="23">
-                <c:set var="v" value=""/>
-                <c:if test="${h==time}">
-                <c:set var="v" value="selected=\"selected\""/>
-                </c:if>
-                <option value="${h}"${v}>
-                    <f:formatNumber value="${h}" pattern="00"/> - <f:formatNumber value="${h+1}" pattern="00"/>
-                </option>
-            </c:forEach>
-        </select>
+        <input id="searchTime" name="time" type="time"/>
     </div>
     <div class="ui-widget">
         <label></label>
@@ -87,7 +60,7 @@
                     f(c);
             });
         }
-
+        
         $("#searchStation").autocomplete({
             source: "/api/rail/1/station/search",
             minLength: 3,
@@ -101,7 +74,7 @@
 
         keypress($('#railid'), function (c) {
             // TODO add validation here
-            document.location = "/rtt/train/" + c.val()
+            document.location = "/rtt/train/"+c.val()
         });
 
         // Clear the form. Handles case of someone using back button

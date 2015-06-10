@@ -18,7 +18,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.TextStyle;
@@ -128,7 +127,8 @@ public class TimeUtils
      * TODO order these so the most used one is first
      */
     private static final DateTimeFormatter DATETIMES[]
-                                             = {
+            =
+            {
                 DateTimeFormatter.ISO_DATE_TIME,
                 DateTimeFormatter.ISO_LOCAL_DATE_TIME,
                 DateTimeFormatter.ISO_INSTANT,
@@ -143,7 +143,8 @@ public class TimeUtils
      * TODO order these so the most used one is first
      */
     private static final DateTimeFormatter DATES[]
-                                             = {
+            =
+            {
                 DateTimeFormatter.ISO_DATE,
                 DateTimeFormatter.ISO_LOCAL_DATE,
                 DateTimeFormatter.ISO_OFFSET_DATE,
@@ -156,7 +157,8 @@ public class TimeUtils
      * TODO order these so the most used one is first
      */
     private static final DateTimeFormatter TIMES[]
-                                             = {
+            =
+            {
                 DateTimeFormatter.ISO_TIME,
                 DateTimeFormatter.ISO_LOCAL_TIME,
                 DateTimeFormatter.ISO_OFFSET_TIME
@@ -170,12 +172,15 @@ public class TimeUtils
      */
     public static final LocalDateTime getLocalDateTime( final String s )
     {
-        if( s != null && !s.isEmpty() ) {
-            for( DateTimeFormatter dtf: DATETIMES ) {
-                try {
+        if( s != null && !s.isEmpty() )
+        {
+            for( DateTimeFormatter dtf : DATETIMES )
+            {
+                try
+                {
                     return LocalDateTime.parse( s, dtf );
-                }
-                catch( DateTimeParseException ex ) {
+                } catch( DateTimeParseException ex )
+                {
                     // Ignore
                 }
             }
@@ -191,12 +196,15 @@ public class TimeUtils
      */
     public static final LocalDate getLocalDate( final String s )
     {
-        if( s != null && !s.isEmpty() ) {
-            for( DateTimeFormatter dtf: DATES ) {
-                try {
+        if( s != null && !s.isEmpty() )
+        {
+            for( DateTimeFormatter dtf : DATES )
+            {
+                try
+                {
                     return LocalDate.parse( s, dtf );
-                }
-                catch( DateTimeParseException ex ) {
+                } catch( DateTimeParseException ex )
+                {
                     // Ignore
                 }
             }
@@ -223,38 +231,45 @@ public class TimeUtils
      */
     public static final LocalTime getLocalTime( final String s )
     {
-        if( s != null && !s.isEmpty() ) {
+        if( s != null && !s.isEmpty() )
+        {
             // Custom formats
-            if( s.length() == 6 ) {
+            if( s.length() == 6 )
+            {
                 // hhmmss
-                try {
+                try
+                {
                     return LocalTime.of(
                             Integer.parseInt( s.substring( 0, 2 ) ),
                             Integer.parseInt( s.substring( 2, 4 ) ),
                             Integer.parseInt( s.substring( 4, 6 ) ) );
-                }
-                catch( Exception ex ) {
+                } catch( Exception ex )
+                {
                     LOG.log( Level.SEVERE, "Parse fail for: " + s, ex );
                 }
             }
-            else if( s.length() == 4 ) {
+            else if( s.length() == 4 )
+            {
                 // hhmm
-                try {
+                try
+                {
                     return LocalTime.of(
                             Integer.parseInt( s.substring( 0, 2 ) ),
                             Integer.parseInt( s.substring( 2, 4 ) ) );
-                }
-                catch( Exception ex ) {
+                } catch( Exception ex )
+                {
                     LOG.log( Level.SEVERE, "Parse fail for: " + s, ex );
                 }
             }
 
             // Check default formats
-            for( DateTimeFormatter dtf: TIMES ) {
-                try {
+            for( DateTimeFormatter dtf : TIMES )
+            {
+                try
+                {
                     return LocalTime.parse( s, dtf );
-                }
-                catch( DateTimeParseException ex ) {
+                } catch( DateTimeParseException ex )
+                {
                     // Ignore
                 }
             }
@@ -266,7 +281,8 @@ public class TimeUtils
             throws SQLException
     {
         Time t = rs.getTime( col );
-        if( t == null ) {
+        if( t == null )
+        {
             return null;
         }
         return t.toLocalTime();
@@ -283,7 +299,8 @@ public class TimeUtils
     public static Duration getDuration( String s )
             throws SQLException
     {
-        if( s == null || s.isEmpty() ) {
+        if( s == null || s.isEmpty() )
+        {
             return null;
         }
         boolean negative = s.startsWith( "-" );
@@ -299,7 +316,8 @@ public class TimeUtils
 
     public static Date toDate( LocalDate ld )
     {
-        if( ld == null ) {
+        if( ld == null )
+        {
             return null;
         }
         return Date.from( ld.atStartOfDay( UTC ).toInstant() );
@@ -310,13 +328,20 @@ public class TimeUtils
         return ld == null ? null : java.sql.Date.valueOf( ld );
     }
 
+    public static java.sql.Time toSqlTime( LocalTime lt )
+    {
+        return lt == null ? null : java.sql.Time.valueOf( lt );
+    }
+
     public static void setDate( PreparedStatement s, int col, LocalDate ld )
             throws SQLException
     {
-        if( ld == null ) {
+        if( ld == null )
+        {
             s.setNull( col, Types.DATE );
         }
-        else {
+        else
+        {
             s.setDate( col, java.sql.Date.valueOf( ld ) );
         }
     }
@@ -324,10 +349,12 @@ public class TimeUtils
     public static void setDateTime( PreparedStatement s, int col, LocalDateTime ld )
             throws SQLException
     {
-        if( ld == null ) {
+        if( ld == null )
+        {
             s.setNull( col, Types.TIMESTAMP );
         }
-        else {
+        else
+        {
             s.setTimestamp( col, Timestamp.valueOf( ld ) );
         }
     }
@@ -336,7 +363,8 @@ public class TimeUtils
             throws SQLException
     {
         Date d = rs.getDate( n );
-        if( rs.wasNull() ) {
+        if( rs.wasNull() )
+        {
             return null;
         }
         return getLocalDate( d.getTime() );
@@ -346,7 +374,8 @@ public class TimeUtils
             throws SQLException
     {
         Date d = rs.getDate( i );
-        if( rs.wasNull() ) {
+        if( rs.wasNull() )
+        {
             return null;
         }
         return getLocalDate( d.getTime() );
@@ -474,7 +503,8 @@ public class TimeUtils
      */
     public static Predicate<LocalDateTime> isWithin( LocalDateTime start, LocalDateTime end )
     {
-        if( !start.isBefore( end ) ) {
+        if( !start.isBefore( end ) )
+        {
             throw new IllegalArgumentException( "Start " + start + " must be before end " + end );
         }
 
@@ -501,4 +531,37 @@ public class TimeUtils
                               dt.toLocalTime()
         );
     }
+
+    public static LocalDate parseLocalDate( String s )
+    {
+        if( s == null || s.isEmpty() )
+        {
+            return null;
+        }
+        try
+        {
+            return LocalDate.parse( s );
+        } catch( DateTimeParseException ex )
+        {
+            LOG.log( Level.WARNING, () -> "Failed to parse date \"%s\"" );
+            return null;
+        }
+    }
+
+    public static LocalTime parseLocalTime( String s )
+    {
+        if( s == null || s.isEmpty() )
+        {
+            return null;
+        }
+        try
+        {
+            return LocalTime.parse( s );
+        } catch( DateTimeParseException ex )
+        {
+            LOG.log( Level.WARNING, () -> "Failed to parse time \"%s\"" );
+            return null;
+        }
+    }
+
 }

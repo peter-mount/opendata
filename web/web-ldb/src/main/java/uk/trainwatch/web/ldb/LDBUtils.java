@@ -15,11 +15,13 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import uk.trainwatch.nre.darwin.reference.DarwinReferenceManager;
@@ -28,11 +30,14 @@ import uk.trainwatch.nrod.location.TrainLocation;
 import uk.trainwatch.util.TimeUtils;
 import uk.trainwatch.util.sql.SQL;
 import uk.trainwatch.util.sql.SQLBiConsumer;
+import uk.trainwatch.util.sql.SQLBiFunction;
 import uk.trainwatch.util.sql.SQLConsumer;
+import uk.trainwatch.util.sql.SQLFunction;
 import uk.trainwatch.web.ldb.model.Forecast;
 import uk.trainwatch.web.ldb.model.ForecastEntry;
 import uk.trainwatch.web.ldb.model.Schedule;
 import uk.trainwatch.web.ldb.model.ScheduleEntry;
+import uk.trainwatch.web.ldb.model.SearchResult;
 import uk.trainwatch.web.ldb.model.Train;
 import uk.trainwatch.web.servlet.ApplicationRequest;
 
@@ -60,14 +65,17 @@ public class LDBUtils
         String crs = request.getPathInfo().substring( 1 ).toUpperCase();
 
         TrainLocation loc = DarwinReferenceManager.INSTANCE.getLocationRefFromCrs( crs );
-        if( loc == null ) {
+        if( loc == null )
+        {
             // See if they have used an alternate code
             loc = DarwinReferenceManager.INSTANCE.getLocationRefFromTiploc( crs );
 
-            if( loc == null ) {
+            if( loc == null )
+            {
                 request.sendError( HttpServletResponse.SC_NOT_FOUND );
             }
-            else {
+            else
+            {
                 // Redirect to the correct page
                 request.getResponse().
                         sendRedirect( prefix + loc.getCrs() );
@@ -100,12 +108,13 @@ public class LDBUtils
 
         // Filter a LocalTime to fit between the required times, accounting for midnight
         Predicate<LocalTime> filter = midnight
-                                      ? t -> t.isAfter( timeAfter ) || t.isBefore( timeBefore )
-                                      : t -> t.isAfter( timeAfter ) && t.isBefore( timeBefore );
+                ? t -> t.isAfter( timeAfter ) || t.isBefore( timeBefore )
+                : t -> t.isAfter( timeAfter ) && t.isBefore( timeBefore );
 
         final String crs = loc.getCrs();
 
-        try( Connection con = LDBContextListener.getDataSource().getConnection() ) {
+        try( Connection con = LDBContextListener.getDataSource().getConnection() )
+        {
             // must have a working departure
             // order by first of actual departure, estimated then working departure
             List<LDB> departures;
@@ -128,7 +137,8 @@ public class LDBUtils
                                                      + " AND fe.ldb=TRUE"
                                                      // all non-passes required so we can use Terminates/Starts here etc
                                                      + " AND fe.wtp IS NULL",
-                                                     loc.getCrs() ) ) {
+                                                     loc.getCrs() ) )
+            {
                 departures = SQL.stream( ps, LDB.fromSQL ).
                         // Filter only public entries
                         filter( LDB::isPublic ).
@@ -152,15 +162,19 @@ public class LDBUtils
                                                      + " INNER JOIN darwin.tiploc t on e.tpl=t.id"
                                                      + " WHERE f.id=?"
                                                      + " ORDER BY s.id"
-            ) ) {
-                departures.forEach( SQLConsumer.guard( dep -> {
+            ) )
+            {
+                departures.forEach( SQLConsumer.guard( dep ->
+                {
                     ps.setLong( 1, dep.getId() );
 
                     dep.setPoints( SQL.stream( ps, CallingPoint.fromSQL ).
-                            peek( c -> {
-                                if( DarwinReferenceManager.INSTANCE.isCrs( crs, c.getTpl() ) ) {
-                                    dep.setCanc( c.isCanc() );
-                                }
+                            peek( c ->
+                                    {
+                                        if( DarwinReferenceManager.INSTANCE.isCrs( crs, c.getTpl() ) )
+                                        {
+                                            dep.setCanc( c.isCanc() );
+                                        }
                             } ).
                             collect( Collectors.toList() ) );
                 } ) );
@@ -186,19 +200,48 @@ public class LDBUtils
         }
     }
 
+    private static final SQLBiConsumer<Connection, Train> forecastFilter = ( con, train ) ->
+    {
+        if( train.isForecastPresent() && train.isSchedulePresent() )
+        {
+            train.getForecastEntries().forEach( f ->
+            {
+                train.getScheduleEntries().
+                        stream().
+                        filter( s -> s.getTpl().equals( f.getTpl() ) ).
+                        filter( s -> Objects.equals( s.getPta(), f.getPta() ) ).
+                        filter( s -> Objects.equals( s.getPtd(), f.getPtd() ) ).
+                        findAny().
+                        ifPresent( f::setScheduleEntry );
+            } );
+        }
+    };
+
     private static final SQLBiConsumer<Connection, Train> schedules = Schedule.populate.
             andThen( ScheduleEntry.populate );
-
-    private static final SQLBiConsumer<Connection, Train> forecast = schedules.
-            andThen( Forecast.populate ).
-            andThen( ForecastEntry.populate );
 
     private static final SQLBiConsumer<Connection, Train> schedulesArc = Schedule.populateArc.
             andThen( ScheduleEntry.populateArc );
 
+    private static final SQLBiFunction<Connection, Train, Train> getSchedule = ( c, t ) ->
+    {
+        Schedule.populate.accept( c, t );
+        if( !t.isSchedulePresent() )
+        {
+            Schedule.populateArc.accept( c, t );
+        }
+        return t;
+    };
+
+    private static final SQLBiConsumer<Connection, Train> forecast = schedules.
+            andThen( Forecast.populate ).
+            andThen( ForecastEntry.populate ).
+            andThen( forecastFilter );
+
     private static final SQLBiConsumer<Connection, Train> forecastArc = schedulesArc.
             andThen( Forecast.populateArc ).
-            andThen( ForecastEntry.populateArc );
+            andThen( ForecastEntry.populateArc ).
+            andThen( forecastFilter );
 
     public static Train getSchedule( String rid )
             throws SQLException
@@ -229,26 +272,70 @@ public class LDBUtils
     {
         Train train = new Train( rid );
 
-        try( Connection con = LDBContextListener.getDataSource().getConnection() ) {
+        try( Connection con = LDBContextListener.getDataSource().getConnection() )
+        {
             c.accept( con, train );
-        }
 
-        if( train.isForecastPresent() && train.isSchedulePresent() ) {
-            train.getForecastEntries().forEach( f -> {
-                train.getScheduleEntries().
-                        stream().
-                        filter( s -> s.getTpl().equals( f.getTpl() ) ).
-                        filter( s -> Objects.equals( s.getPta(), f.getPta() ) ).
-                        filter( s -> Objects.equals( s.getPtd(), f.getPtd() ) ).
-                        findAny().
-                        ifPresent( f::setScheduleEntry );
-            } );
-        }
-
-        if( archive ) {
-            train.setArchived( archive );
+            if( archive )
+            {
+                train.setArchived( archive );
+            }
         }
 
         return train;
+    }
+
+    /**
+     * Return a collection of Train's with main schedule populated
+     *
+     * @param start Start LocalDateTime.
+     * @param crs
+     * @return
+     * @throws SQLException
+     */
+    public static Collection<Train> search( LocalDateTime start, String crs )
+            throws SQLException
+    {
+        // Restrict to top of the hour. This then limits us to within midnight
+        start = start.truncatedTo( ChronoUnit.HOURS );
+        java.sql.Date ssd = java.sql.Date.valueOf( start.toLocalDate() );
+        LocalTime fromTime = start.toLocalTime();
+        java.sql.Time from = java.sql.Time.valueOf( fromTime );
+        // to is exclusive so add 1 hour then -1s so we search :00:00 to :59:59
+        java.sql.Time to = java.sql.Time.valueOf( fromTime.plusHours( 1 ).minusSeconds( 1) );
+
+        try( Connection con = LDBContextListener.getDataSource().getConnection() )
+        {
+
+            try( PreparedStatement ps = SQL.prepare( con,
+                                                     "SELECT f.rid"
+                                                     + " FROM darwin.forecast f"
+                                                     + " INNER JOIN darwin.forecast_entry e ON f.id=e.fid"
+                                                     + " INNER JOIN darwin.location l ON e.tpl=l.tpl"
+                                                     + " INNER JOIN darwin.crs c on l.crs=c.id"
+                                                     + " WHERE c.crs=?"
+                                                     + " AND f.ssd = ?"
+                                                     + " AND COALESCE(e.wtd,e.wta,e.wtp) BETWEEN ? AND ?"
+                                                     + " UNION "
+                                                     + "SELECT f.rid"
+                                                     + " FROM darwin.forecastarc f"
+                                                     + " INNER JOIN darwin.forecast_entryarc e ON f.id=e.fid"
+                                                     + " INNER JOIN darwin.location l ON e.tpl=l.tpl"
+                                                     + " INNER JOIN darwin.crs c on l.crs=c.id"
+                                                     + " WHERE c.crs=?"
+                                                     + " AND f.ssd =?"
+                                                     + " AND COALESCE(e.wtd,e.wta,e.wtp) BETWEEN ? AND ?",
+                                                     crs, ssd, from, to,
+                                                     crs, ssd, from, to
+            ) )
+            {
+                return SQL.stream( ps, SQL.STRING_LOOKUP ).
+                        map( Train::new ).
+                        map( t -> SQLBiFunction.guard( getSchedule ).apply( con, t ) ).
+                        filter( Train::isSchedulePresent ).
+                        sorted().
+                        collect( Collectors.toList() );
+            }
+        }
     }
 }
