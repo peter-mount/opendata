@@ -10,7 +10,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.Duration;
 import java.time.LocalTime;
-import java.util.Comparator;
 import java.util.stream.Collectors;
 import uk.trainwatch.util.TimeUtils;
 import uk.trainwatch.util.sql.SQL;
@@ -22,10 +21,13 @@ import uk.trainwatch.util.sql.SQLFunction;
  * @author peter
  */
 public class ForecastEntry
-        implements Comparable<ForecastEntry>
+        implements TimetableEntry,
+                   Comparable<ForecastEntry>
 {
 
-    private static final String SELECT_PATTERN = "SELECT f.fid, t.tpl, f.supp,"
+    private static final String SELECT_PATTERN = "SELECT f.fid,"
+                                                 + " t.tpl, f.tpl as tplid,"
+                                                 + " f.supp,"
                                                  + "f.pta, f.ptd, f.wta, f.wtd, f.wtp,"
                                                  + "f.delay,"
                                                  + "f.arr, f.dep, f.etarr, f.etdep,"
@@ -43,6 +45,7 @@ public class ForecastEntry
     public static final SQLFunction<ResultSet, ForecastEntry> fromSQL = rs -> new ForecastEntry(
             rs.getLong( "fid" ),
             rs.getString( "tpl" ),
+            rs.getInt( "tplid" ),
             rs.getBoolean( "supp" ),
             TimeUtils.getLocalTime( rs, "pta" ),
             TimeUtils.getLocalTime( rs, "ptd" ),
@@ -89,6 +92,7 @@ public class ForecastEntry
 
     private final long id;
     private final String tpl;
+    private final int tplid;
     private final boolean sup;
     private final LocalTime pta;
     private final LocalTime ptd;
@@ -112,7 +116,9 @@ public class ForecastEntry
 
     private ScheduleEntry scheduleEntry;
 
-    public ForecastEntry( long id, String tpl, boolean sup, LocalTime pta, LocalTime ptd, LocalTime wta, LocalTime wtd,
+    public ForecastEntry( long id,
+                          String tpl, int tplid,
+                          boolean sup, LocalTime pta, LocalTime ptd, LocalTime wta, LocalTime wtd,
                           LocalTime wtp, Duration delay,
                           LocalTime arr, LocalTime dep, LocalTime etarr, LocalTime etdep,
                           LocalTime pass, LocalTime etpass,
@@ -122,6 +128,7 @@ public class ForecastEntry
     {
         this.id = id;
         this.tpl = tpl;
+        this.tplid = tplid;
         this.sup = sup;
         this.pta = pta;
         this.ptd = ptd;
@@ -149,9 +156,16 @@ public class ForecastEntry
         return id;
     }
 
+    @Override
     public String getTpl()
     {
         return tpl;
+    }
+
+    @Override
+    public int getTplid()
+    {
+        return tplid;
     }
 
     public boolean isSup()
@@ -159,26 +173,31 @@ public class ForecastEntry
         return sup;
     }
 
+    @Override
     public LocalTime getPta()
     {
         return pta;
     }
 
+    @Override
     public LocalTime getPtd()
     {
         return ptd;
     }
 
+    @Override
     public LocalTime getWta()
     {
         return wta;
     }
 
+    @Override
     public LocalTime getWtd()
     {
         return wtd;
     }
 
+    @Override
     public LocalTime getWtp()
     {
         return wtp;
@@ -269,21 +288,5 @@ public class ForecastEntry
     {
         return SORT.compare( this, o );
     }
-
-    public static LocalTime getTime( ForecastEntry e )
-    {
-        if( e.getWtd() != null ) {
-            return e.getWtd();
-        }
-        if( e.getWta() != null ) {
-            return e.getWta();
-        }
-        if( e.getWtp() != null ) {
-            return e.getWtp();
-        }
-        return null;
-    }
-    public static Comparator<ForecastEntry> SORT = ( a, b ) -> TimeUtils.compareLocalTimeDarwin.compare( getTime( a ), getTime( b ) );
-    public static Comparator<ForecastEntry> SORT_REVERSE = ( a, b ) -> TimeUtils.compareLocalTimeDarwin.compare( getTime( b ), getTime( a ) );
 
 }

@@ -131,6 +131,7 @@ var Train = (function () {
     function Train(rid, rtt) {
         Train.url = (rtt ? '/rtt/vtrain/' : '/vtrain/') + rid;
         Train.board = $('#board');
+        Train.rtt = rtt;
         if (rtt)
             reloadIn(60000);
         else
@@ -148,6 +149,8 @@ var Train = (function () {
         UI.hideLoader();
         reloadIn(60000);
         Train.board.empty().append(v);
+        if (Train.rtt)
+            Track.update();
     };
 
     var notModified = function (v) {

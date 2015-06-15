@@ -90,6 +90,14 @@ th, td {
     border-left: 1px solid #ccc;
 }
 
+.ldb-row table tr th.track,
+.ldb-row table tr td.track {
+    border-left: 1px solid #ccc;
+    border-top: 1px solid #fff;
+    border-bottom: 1px solid #fff;
+    width: 1.5em;
+}
+
 .ldb-row table tr {
     color: black;
     font-size: 100%;
@@ -99,4 +107,42 @@ th, td {
 .ldb-row table {
     border-collapse: collapse;
     border: 1px solid #ccc;
+}
+
+
+.track-stop-canc,
+.track-line-canc {
+    fill: #f00;
+    stroke: #f00;
+}
+
+.track-stop-past {
+    stroke: #0AA;
+    fill: #04A;
+}
+
+.track-stop-expt {
+    stroke: #0AA;
+    fill: #0ff;
+}
+
+.track-line-past {
+    stroke: #099;
+}
+
+.track-line-expt {
+    fill: #0ff;
+    stroke: #0ff;
+}
+
+#track svt circle {
+    stroke-width: 1;
+}
+
+#track svg rect {
+    stroke-width: 1;
+}
+
+#track svg line {
+    stroke-width: 4px;
 }

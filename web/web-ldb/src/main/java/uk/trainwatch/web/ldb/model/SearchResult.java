@@ -5,10 +5,9 @@
  */
 package uk.trainwatch.web.ldb.model;
 
-import java.sql.ResultSet;
 import java.time.LocalTime;
+import java.util.function.Predicate;
 import uk.trainwatch.util.TimeUtils;
-import uk.trainwatch.util.sql.SQLFunction;
 
 /**
  *
@@ -18,34 +17,34 @@ public class SearchResult
         implements Comparable<SearchResult>
 {
 
-    public static final SQLFunction<ResultSet, SearchResult> fromSQL = rs -> new SearchResult(
-            rs.getString( "rid" ),
-            TimeUtils.getLocalTime( rs, "wtm" )
-    );
+    private final Train train;
+    private final TimetableEntry time;
 
-    private final String rid;
-    private final LocalTime time;
-
-    private SearchResult( String rid, LocalTime time )
+    public SearchResult( Train train, Predicate<Integer> filter )
     {
-        this.rid = rid;
-        this.time = time;
+        this.train = train;
+        time = train.findTime( filter );
     }
 
-    public String getRid()
+    public Train getTrain()
     {
-        return rid;
+        return train;
     }
 
-    public LocalTime getTime()
+    public TimetableEntry getTime()
     {
         return time;
+    }
+
+    public boolean isValid()
+    {
+        return train.isValid() && time != null;
     }
 
     @Override
     public int compareTo( SearchResult o )
     {
-        return TimeUtils.compareLocalTimeDarwin.compare( time, o.time );
+        return TimetableEntry.SORT.compare( time, o.time );
     }
 
 }

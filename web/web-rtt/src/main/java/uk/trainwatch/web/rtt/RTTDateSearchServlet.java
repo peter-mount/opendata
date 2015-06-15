@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
@@ -25,45 +27,39 @@ import uk.trainwatch.web.servlet.ApplicationRequest;
  *
  * @author peter
  */
-@WebServlet( name = "RTTDateSearchServlet", urlPatterns = "/rtt/search" )
+@WebServlet(name = "RTTDateSearchServlet", urlPatterns = "/rtt/trains/*")
 public class RTTDateSearchServlet
         extends RTTHomeServlet
 {
 
-    private void error( ApplicationRequest request, String error )
-            throws ServletException,
-                   IOException
-    {
-        request.getRequestScope().put( "msg", error );
-        doGet( request );
-    }
+    private static final Pattern PATTERN = Pattern.compile( "/([A-Z][A-Z][A-Z])/([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9])/([0-9][0-9])" );
 
     @Override
-    protected void doPost( ApplicationRequest request )
+    protected void doGet( ApplicationRequest request )
             throws ServletException,
                    IOException
     {
-        Map<String, String> params = request.getParam();
+        Matcher m = PATTERN.matcher( request.getPathInfo() );
+        if( m.matches() ) {
+            doSearch( request, m.group( 1 ), m.group( 2 ), m.group( 3 ) );
+        }
+        else {
+            request.sendError( HttpServletResponse.SC_NOT_FOUND );
+        }
+    }
 
-        String crs = params.get( "crs" );
-        LocalDate date = TimeUtils.parseLocalDate( params.get( "date" ) );
-        LocalTime time = LocalTime.of( Integer.parseInt( params.get( "time" ) ), 0 );
+    private void doSearch( ApplicationRequest request, String crs, String sDate, String sHour )
+            throws ServletException,
+                   IOException
+    {
+        LocalDate date = TimeUtils.parseLocalDate( sDate );
+        LocalTime time = LocalTime.of( Integer.parseInt( sHour ), 0 );
         TrainLocation loc = DarwinReferenceManager.INSTANCE.getLocationRefFromCrs( crs );
 
-        if( loc == null || !loc.isSetCrs() )
-        {
-            error( request, "No station has been provided" );
+        if( loc == null || !loc.isSetCrs() || date == null || time == null ) {
+            request.sendError( HttpServletResponse.SC_NOT_FOUND );
         }
-        else if( date == null )
-        {
-            error( request, "Invalid search date" );
-        }
-        else if( time == null )
-        {
-            search( request, loc, date, LocalTime.now( TimeUtils.LONDON ) );
-        }
-        else
-        {
+        else {
             search( request, loc, date, time );
         }
     }
@@ -74,16 +70,13 @@ public class RTTDateSearchServlet
     {
         LocalDateTime start = LocalDateTime.of( date, time ).truncatedTo( ChronoUnit.HOURS );
         LocalDateTime now = LocalDateTime.now( TimeUtils.LONDON );
-        if( start.isBefore( now.minusDays( 7 ) ) )
-        {
-            error( request, "Requested date/time is too far in the past" );
+        if( start.isBefore( now.minusDays( 7 ) ) ) {
+            request.sendError( HttpServletResponse.SC_GONE, "Requested date/time is too far in the past" );
         }
-        else if( now.truncatedTo( ChronoUnit.DAYS ).plusDays( 1 ).isBefore( start ) )
-        {
-            error( request, "Requested date/time is in the future" );
+        else if( now.truncatedTo( ChronoUnit.DAYS ).plusDays( 1 ).isBefore( start ) ) {
+            request.sendError( HttpServletResponse.SC_NOT_FOUND, "Requested date/time is in the future" );
         }
-        else
-        {
+        else {
             search( request, loc, start, now );
         }
     }
@@ -92,8 +85,7 @@ public class RTTDateSearchServlet
             throws ServletException,
                    IOException
     {
-        try
-        {
+        try {
             Map<String, Object> req = request.getRequestScope();
             req.put( "trains", LDBUtils.search( start, loc.getCrs() ) );
 
@@ -111,19 +103,19 @@ public class RTTDateSearchServlet
             req.put( "start", start );
 
             LocalDateTime back = start.minusHours( 1 );
-            if( back.isAfter( now.minusDays( 7 ) ) )
-            {
+            if( back.isAfter( now.minusDays( 7 ) ) ) {
                 req.put( "back", back );
             }
 
-            if( !current )
-            {
+            // Allow up to 2am tomorrow
+            LocalDateTime next = start.plusHours( 1 );
+            if( next.isBefore( now.truncatedTo( ChronoUnit.DAYS ).plusDays( 1 ).plusHours( 2 ).minusSeconds( 1 ) ) ) {
                 req.put( "next", start.plusHours( 1 ) );
             }
 
             request.renderTile( "rtt.search" );
-        } catch( SQLException ex )
-        {
+        }
+        catch( SQLException ex ) {
             log( "Failed to search \"" + loc.getCrs() + "\" for " + start, ex );
             request.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage() );
         }

@@ -9,8 +9,8 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
-import jersey.repackaged.com.google.common.base.Objects;
 import uk.trainwatch.util.Streams;
 import uk.trainwatch.util.TimeUtils;
 
@@ -49,16 +49,13 @@ public class Train
     public LocalDateTime getLastUpdate()
     {
         Timestamp t = null;
-        if( forecast != null )
-        {
+        if( forecast != null ) {
             t = forecast.getTs();
         }
-        else if( schedule != null )
-        {
+        else if( schedule != null ) {
             t = schedule.getTs();
         }
-        if( t == null )
-        {
+        if( t == null ) {
             return LocalDateTime.now();
         }
 
@@ -82,7 +79,7 @@ public class Train
 
     public boolean isValid()
     {
-        return isSchedulePresent() && isForecastPresent();
+        return isSchedulePresent() || isForecastPresent();
     }
 
     public boolean isSchedulePresent()
@@ -158,8 +155,7 @@ public class Train
     public void setForecastEntries( List<ForecastEntry> forecastEntries )
     {
         this.forecastEntries = forecastEntries;
-        if( forecastEntries != null && !forecastEntries.isEmpty() )
-        {
+        if( forecastEntries != null && !forecastEntries.isEmpty() ) {
             // Find last arr/dep/pass
             lastReport = forecastEntries.stream().
                     filter( e -> e.getArr() != null || e.getDep() != null || e.getPass() != null ).
@@ -167,11 +163,23 @@ public class Train
                     findAny().
                     orElse( null );
         }
-        else
-        {
+        else {
             lastReport = null;
         }
 
     }
 
+    public TimetableEntry findTime( Predicate<Integer> tplFilter )
+    {
+        TimetableEntry e = null;
+
+        if( isForecastPresent() ) {
+            e = TimetableEntry.findTime( forecastEntries, tplFilter );
+        }
+        if( e == null && isSchedulePresent() ) {
+            e = TimetableEntry.findTime( scheduleEntries, tplFilter );
+        }
+
+        return e;
+    }
 }

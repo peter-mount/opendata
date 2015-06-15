@@ -6,11 +6,20 @@
 package uk.trainwatch.web.rtt;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
+import uk.trainwatch.util.JsonUtils;
+import uk.trainwatch.util.Streams;
 import uk.trainwatch.web.ldb.LDBUtils;
 import uk.trainwatch.web.ldb.model.Train;
 import uk.trainwatch.web.servlet.AbstractServlet;
@@ -26,6 +35,19 @@ public abstract class AbstractTrainServlet
 
     protected abstract String getTile();
 
+    private Train getTrain( String rid )
+            throws SQLException
+    {
+        // Unlike mobile we retrieve the entire train here & show in one go.
+        Train train = LDBUtils.getTrain( rid );
+
+        // Also we lookup from the archive as necessary
+        if( !train.isSchedulePresent() && !train.isForecastPresent() ) {
+            train = LDBUtils.getArchivedTrain( rid );
+        }
+        return train;
+    }
+
     @Override
     protected void doGet( ApplicationRequest request )
             throws ServletException,
@@ -36,20 +58,11 @@ public abstract class AbstractTrainServlet
 
         log( "Retrieving train " + rid );
 
-        try
-        {
-            // Unlike mobile we retrieve the entire train here & show in one go.
-            Train train = LDBUtils.getTrain( rid );
-
-            // Also we lookup from the archive as necessary
-            if( !train.isSchedulePresent() && !train.isForecastPresent() )
-            {
-                train = LDBUtils.getArchivedTrain( rid );
-            }
+        try {
+            Train train = getTrain( rid );
 
             // Still nothing then we didn't find it
-            if( !train.isSchedulePresent() && !train.isForecastPresent() )
-            {
+            if( !train.isSchedulePresent() && !train.isForecastPresent() ) {
                 request.sendError( HttpServletResponse.SC_NOT_FOUND, rid );
                 return;
             }
@@ -63,14 +76,38 @@ public abstract class AbstractTrainServlet
             request.expiresIn( 1, unit );
             request.maxAge( 1, unit );
 
-            if( train.isSchedulePresent() )
-            {
-                request.lastModified( train.getLastUpdate() );
-            }
+            request.lastModified( train.getLastUpdate() );
+
+            // The train track details
+            AtomicInteger row = new AtomicInteger( 0 );
+            Collection<Track> track = Streams.stream( train.getForecastEntries() ).
+                    map( e -> new Track( train, e ) ).
+                    sorted().
+                    // Now sorted set the row number
+                    map( t -> t.setRow( row.getAndIncrement() ) ).
+                    collect( Collectors.toList() );
+
+            // Now check for last report & if we have one set past flag to everything before it
+            track.stream().
+                    sorted( Track.reverseSort ).
+                    filter( Track::isPast ).
+                    findAny().
+                    ifPresent( lr -> {
+                        track.stream().
+                        filter( t -> t.getRow() <= lr.getRow() ).
+                        forEach( Track::setPast );
+                    } );
+
+            // TODO cancelled entries where we start at a new station
+            // Finally generate the json
+//            JsonArrayBuilder builder = Json.createArrayBuilder();
+//            track.forEach( t -> builder.add( t.toBuilder() ) );
+//            req.put( "track", JsonUtils.toString.apply( builder.build() ) );
+            req.put( "track", track );
 
             request.renderTile( getTile() );
-        } catch( SQLException ex )
-        {
+        }
+        catch( SQLException ex ) {
             log( "Failed rid " + rid, ex );
             request.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
         }

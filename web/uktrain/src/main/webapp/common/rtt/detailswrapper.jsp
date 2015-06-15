@@ -21,6 +21,7 @@
                 ui = new UI();
             if (!train)
                 train = new Train('${train.rid}',true);
+            Track.update();
         }, 250);
     });
 </script>

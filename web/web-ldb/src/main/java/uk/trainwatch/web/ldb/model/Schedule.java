@@ -53,6 +53,7 @@ public class Schedule
     public static final SQLBiConsumer<Connection, Train> populateArc = ( c, t ) -> {
         try( PreparedStatement ps = SQL.prepare( c, SELECT_ARC, t.getRid() ) ) {
             t.setSchedule( SQL.stream( ps, fromSQL ).findAny().orElse( null ) );
+            t.setArchived( t.isArchived() || t.isSchedulePresent() );
         }
     };
 

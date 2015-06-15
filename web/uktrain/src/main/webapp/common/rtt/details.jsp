@@ -127,7 +127,7 @@
     <c:if test="${train.isForecastPresent()}">
         <c:forEach var="entry" varStatus="status" items="${train.forecastEntries}">
             <%-- Find the last reported entry --%>
-            <c:if test="${not empty entry.arr or not empty entry.dep}">
+            <c:if test="${not empty entry.arr or not empty entry.dep or not empty entry.pass}">
                 <c:set var="lastRep" value="${entry}"/>
                 <c:set var="lastRepInd" value="${status.count}"/>
             </c:if>
@@ -139,7 +139,7 @@
         <div class="ldb-row">
             <table>
                 <tr class="headtop">
-                    <th colspan="2"></th>
+                    <th></th>
                         <c:choose>
                             <c:when test="${showLength}">
                             <th colspan="5" class="sep">&nbsp;</th>
@@ -148,10 +148,11 @@
                             <th colspan="4" class="sep">&nbsp;</th>
                             </c:otherwise>
                         </c:choose>
+                    <th class="track" rowspan="3">&nbsp;</th>
                     <th colspan="5" class="sep">Timetable</th>
                 </tr>
                 <tr class="headtop">
-                    <th colspan="2"></th>
+                    <th></th>
                         <c:choose>
                             <c:when test="${showLength}">
                             <th colspan="5" class="sep">Observed</th>
@@ -164,7 +165,6 @@
                     <th colspan="3" class="sep">Working</th>
                 </tr>
                 <tr class="head">
-                    <th>&nbsp;</th>
                     <th>Location</th>
                     <th class="sep">Plat</th>
                     <th>Arr</th>
@@ -209,8 +209,7 @@
                             <c:set var="style" value="expt"/>
                         </c:otherwise>
                     </c:choose>
-                    <tr>
-                        <td class="ldb-fsct-stat"></td>
+                    <tr id="row${status.index}" class="trackrow">
                         <td class="ldb-fsct-loc-${style}">
                             <d:tiploc value="${entry.tpl}" link="false"/>
                         </td>
@@ -305,6 +304,53 @@
                                 <c:if test="${entry.length gt 0}">
                                     ${entry.length}
                                 </c:if>
+                            </td>
+                        </c:if>
+                        <c:if test="${status.first}">
+                            <td id="track" class="track" rowspan="${train.forecastEntries.size()}" rows="${train.forecastEntries.size()}">
+                                <svg width="2" height="${train.forecastEntries.size()}">
+
+                                <%-- Track lines --%>
+                                <c:forEach var="t" items="${track}" varStatus="tstat">
+                                    <c:if test="${not tstat.first}">
+                                        <c:choose>
+                                            <c:when test="${t.cancelled}">
+                                                <c:set var="style" value="canc"/>
+                                            </c:when>
+                                            <c:when test="${t.past}">
+                                                <c:set var="style" value="past"/>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <c:set var="style" value="expt"/>
+                                            </c:otherwise>
+                                        </c:choose>
+                                        <line x1="${last.col+0.5}" y1="${last.row+0.5}" x2="${t.col+0.5}" y2="${t.row+0.5}" class="track-line-${style}"/>
+                                        <%--
+                                        <rect x="${t.col+0.5-0.125}" y="${t.row}" width="0.25" height="1" class="track-line-${style}"/>
+                                        --%>
+                                    </c:if>
+                                    <c:set var="last" value="${t}"/>
+                                </c:forEach>
+
+                                <%-- Stop's --%>
+                                <c:forEach var="t" items="${track}">
+                                    <c:if test="${not t.pass}">
+                                        <c:choose>
+                                            <c:when test="${t.cancelled}">
+                                                <c:set var="style" value="canc"/>
+                                            </c:when>
+                                            <c:when test="${t.past}">
+                                                <c:set var="style" value="past"/>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <c:set var="style" value="expt"/>
+                                            </c:otherwise>
+                                        </c:choose>
+                                        <circle cx="${t.col+0.5}" cy="${t.row+0.5}" r="0.5" class="track-stop-${style}"/>
+                                    </c:if>
+                                </c:forEach>
+
+                                </svg>
                             </td>
                         </c:if>
                         <td class="sep"><t:time value="${entry.pta}"/></td>

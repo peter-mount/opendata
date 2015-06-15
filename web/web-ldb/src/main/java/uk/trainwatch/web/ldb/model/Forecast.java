@@ -50,20 +50,16 @@ public class Forecast
             true
     );
 
-    public static final SQLBiConsumer<Connection, Train> populate = ( c, t ) ->
-    {
-        try( PreparedStatement ps = SQL.prepare( c, SELECT, t.getRid() ) )
-        {
+    public static final SQLBiConsumer<Connection, Train> populate = ( c, t ) -> {
+        try( PreparedStatement ps = SQL.prepare( c, SELECT, t.getRid() ) ) {
             t.setForecast( SQL.stream( ps, fromSQL ).findAny().orElse( null ) );
         }
     };
 
-    public static final SQLBiConsumer<Connection, Train> populateArc = ( c, t ) ->
-    {
-        try( PreparedStatement ps = SQL.prepare( c, SELECT_ARC, t.getRid() ) )
-        {
+    public static final SQLBiConsumer<Connection, Train> populateArc = ( c, t ) -> {
+        try( PreparedStatement ps = SQL.prepare( c, SELECT_ARC, t.getRid() ) ) {
             t.setForecast( SQL.stream( ps, fromArchivedSQL ).findAny().orElse( null ) );
-            t.setArchived( true );
+            t.setArchived( t.isArchived() || t.isForecastPresent() );
         }
     };
 

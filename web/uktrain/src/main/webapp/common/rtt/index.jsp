@@ -33,41 +33,29 @@
 
 <h2>Search by station and date</h2>
 
-<form method="POST" action="/rtt/search">
-    <div>
-        <div class="ui-widget">
-            <label for="searchStation">Station name:</label>
-            <input id="searchStation"/>
-            <input id="searchCrs" name="crs" type="hidden"/>
-        </div>
-    </div>
+<div>
     <div class="ui-widget">
-        <label for="searchDate">Date to search:</label>
-        <input id="searchDate" name="date" type="date" value="${end}" min="${start}" max="${end}"/>
+        <label for="searchStation">Station name:</label>
+        <input id="searchStation"/>
+        <input id="searchCrs" name="crs" type="hidden"/>
     </div>
-    <div class="ui-widget">
-        <label></label>
-        <span>You can select dates from ${start} to ${end}</span>
-    </div>
-    <div class="ui-widget">
-        <label for="searchTime">Time</label>
-        <select name="time" id="searchTime">
-            <c:forEach var="h" begin="0" end="23">
-                <c:set var="v" value=""/>
-                <c:if test="${h==time}">
-                <c:set var="v" value="selected=\"selected\""/>
-                </c:if>
-                <option value="${h}"${v}>
-                    <f:formatNumber value="${h}" pattern="00"/> - <f:formatNumber value="${h+1}" pattern="00"/>
-                </option>
-            </c:forEach>
-        </select>
-    </div>
-    <div class="ui-widget">
-        <label></label>
-        <input name="submit" type="submit" value="Search"/>
-    </div>
-</form>
+</div>
+<div class="ui-widget">
+    <label for="searchDate">Date to search:</label>
+    <input id="searchDate" name="date" type="date" value="${end}" min="${start}" max="${end}"/>
+</div>
+<div class="ui-widget">
+    <label></label>
+    <span>You can select dates from ${start} to ${end}</span>
+</div>
+<div class="ui-widget">
+    <label for="searchTime">Time</label>
+    <select name="time" id="searchTime"></select>
+</div>
+<div class="ui-widget">
+    <label></label>
+    <input id="submit" name="submit" type="submit" value="Search"/>
+</div>
 
 <h3>Alternative searches</h3>
 
@@ -88,22 +76,60 @@
             });
         }
 
+        var crs = null;
         $("#searchStation").autocomplete({
             source: "/api/rail/1/station/search",
             minLength: 3,
             autoFocus: true,
             select: function (event, ui) {
                 //document.location = "/station/" + ui.item.crs;
-                $('#searchCrs').val(ui.item.crs);
+                crs = ui.item.crs;
+                $('#searchCrs').val(crs);
                 $('#searchDate').focus();
             }
         });
+        var f = function (v) {
+            return (v < 10 ? '0' : '') + v;
+        };
+        var setHour = function () {
+            var c = $('#searchTime');
+            var h = c.val();
+            if (h === null)
+                h =${time};
+            else
+                h = parseInt(h);
+            var mh = 23;
+            //var mh = $('#searchDate').val() === '${end}' ? ${time} : 23;
+            //if (h > mh)
+            //    h = mh;
+            c.empty();
+            for (var i = 0; i <= mh; i++) {
+                var o = $('<option></option>').
+                        appendTo(c).
+                        attr({value: i}).
+                        text(f(i) + '-' + f(i === 23 ? 0 : i + 1));
+                if (i === h)
+                    o.attr({selected: 'selected'});
+            }
+        };
+        keypress($('#searchDate'), function (c) {
+            setHour();
+            $('#searchTime').focus();
+        });
+        $('#searchDate').change(setHour);
 
+        var search = function () {
+            var dt = $('#searchDate').val(), hr = $('#searchTime').val();
+            if (crs !== null && dt !== null && typeof dt !== 'undefined' && hr !== null && hr !== 'undefined')
+                document.location = '/rtt/trains/' + crs + '/' + dt + '/' + hr;
+        };
+        keypress($('#searchTime'), search);
+
+        $('#searchSubmit').click(search);
         keypress($('#railid'), function (c) {
             // TODO add validation here
             document.location = "/rtt/train/" + c.val()
         });
-
         // Clear the form. Handles case of someone using back button
         var clearcomps = [
             '#station', '#stationCrs', '#searchTime',
@@ -114,6 +140,7 @@
                 $(v).val('');
             });
             $('stationDate').val('${end}');
+            setHour();
             $('#searchStation').focus();
         }, 250);
     });
