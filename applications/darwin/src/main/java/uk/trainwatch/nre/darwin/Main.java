@@ -16,12 +16,15 @@
 package uk.trainwatch.nre.darwin;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 import org.postgresql.ds.PGPoolingDataSource;
 import uk.trainwatch.rabbitmq.RabbitConnection;
-import uk.trainwatch.rabbitmq.RabbitMQ;
 import uk.trainwatch.util.app.Application;
 import uk.trainwatch.util.counter.RateMonitor;
 import uk.trainwatch.util.sql.SQLConsumer;
@@ -81,11 +84,26 @@ public class Main
     {
         super.start();
 
-        RabbitMQ.queueDurableStream( rabbitmq,
-                                     QUEUE, ROUTING_KEY,
-                                     s -> s.map( RabbitMQ.toString ).
-                                     forEach( consumer )
-        );
+//        RabbitMQ.queueDurableStream( rabbitmq,
+//                                     QUEUE, ROUTING_KEY,
+//                                     s -> s.map( RabbitMQ.toString ).
+//                                     forEach( consumer )
+//        );
+    }
+
+    @Override
+    protected void mainLoop()
+            throws Exception
+    {
+        for( int i = 6; i < 9; i++ )
+        {
+            Path p = Paths.get( "/home/peter/11", String.valueOf( i ) );
+            System.out.println( "Parsing " + p );
+            try( Stream<String> s = Files.lines( p ) )
+            {
+                s.forEach( consumer );
+            }
+        }
     }
 
     @Override

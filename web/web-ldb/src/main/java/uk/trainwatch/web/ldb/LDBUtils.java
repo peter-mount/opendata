@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -286,6 +287,15 @@ public class LDBUtils
     }
 
     /**
+     * Searches made before 0500 will do an extra check with the previous SSD.
+     *
+     * We use 0500 not 0200 for the rare cases of long running trains, specifically sleepers.
+     *
+     * This should be a rare case so the extra overhead should be minimal.
+     */
+    private static final LocalTime MIDNIGHT_TIME = LocalTime.of( 5, 0 );
+
+    /**
      * Return a collection of Train's with main schedule populated
      *
      * @param start Start LocalDateTime.
@@ -302,7 +312,10 @@ public class LDBUtils
         LocalTime fromTime = start.toLocalTime();
         java.sql.Time from = java.sql.Time.valueOf( fromTime );
         // to is exclusive so add 1 hour then -1s so we search :00:00 to :59:59
-        java.sql.Time to = java.sql.Time.valueOf( fromTime.plusHours( 1 ).minusSeconds( 1) );
+        java.sql.Time to = java.sql.Time.valueOf( fromTime.plusHours( 1 ).minusSeconds( 1 ) );
+
+        // If searching in the early hours also check previous SSD to handle trains starting before midnight.
+        boolean midnight = fromTime.isBefore( MIDNIGHT_TIME );
 
         try( Connection con = LDBContextListener.getDataSource().getConnection() )
         {
@@ -329,13 +342,31 @@ public class LDBUtils
                                                      crs, ssd, from, to
             ) )
             {
-                return SQL.stream( ps, SQL.STRING_LOOKUP ).
+                System.out.println( ps );
+                Stream<String> stream = SQL.stream( ps, SQL.STRING_LOOKUP );
+
+                // Check across previous midnight?
+                if( midnight )
+                {
+                    ssd = java.sql.Date.valueOf( start.minusDays( 1 ).toLocalDate() );
+                    SQL.setParameters( ps,
+                                       crs, ssd, from, to,
+                                       crs, ssd, from, to );
+                    System.out.println( ps );
+                    stream = Stream.concat( SQL.stream( ps, SQL.STRING_LOOKUP ), stream );
+                }
+
+                // Now translate into Train objects
+                return stream.
+                        sorted().
+                        distinct().
                         map( Train::new ).
                         map( t -> SQLBiFunction.guard( getSchedule ).apply( con, t ) ).
-                        filter( Train::isSchedulePresent ).
+                        filter( Train::isValid ).
                         sorted().
                         collect( Collectors.toList() );
             }
         }
     }
+
 }

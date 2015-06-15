@@ -142,14 +142,26 @@
                     <th colspan="2"></th>
                         <c:choose>
                             <c:when test="${showLength}">
-                            <th colspan="4" class="sep">Observed</th>
+                            <th colspan="5" class="sep">&nbsp;</th>
                             </c:when>
                             <c:otherwise>
-                            <th colspan="3" class="sep">Observed</th>
+                            <th colspan="4" class="sep">&nbsp;</th>
                             </c:otherwise>
                         </c:choose>
-                    <th colspan="2" class="sep">GBTT</th>
-                    <th colspan="3" class="sep">WTT</th>
+                    <th colspan="5" class="sep">Timetable</th>
+                </tr>
+                <tr class="headtop">
+                    <th colspan="2"></th>
+                        <c:choose>
+                            <c:when test="${showLength}">
+                            <th colspan="5" class="sep">Observed</th>
+                            </c:when>
+                            <c:otherwise>
+                            <th colspan="4" class="sep">Observed</th>
+                            </c:otherwise>
+                        </c:choose>
+                    <th colspan="2" class="sep">Public</th>
+                    <th colspan="3" class="sep">Working</th>
                 </tr>
                 <tr class="head">
                     <th>&nbsp;</th>

@@ -49,13 +49,16 @@ public class Train
     public LocalDateTime getLastUpdate()
     {
         Timestamp t = null;
-        if( forecast != null ) {
+        if( forecast != null )
+        {
             t = forecast.getTs();
         }
-        else if( schedule != null ) {
+        else if( schedule != null )
+        {
             t = schedule.getTs();
         }
-        if( t == null ) {
+        if( t == null )
+        {
             return LocalDateTime.now();
         }
 
@@ -75,6 +78,11 @@ public class Train
     public String getRid()
     {
         return rid;
+    }
+
+    public boolean isValid()
+    {
+        return isSchedulePresent() && isForecastPresent();
     }
 
     public boolean isSchedulePresent()
@@ -150,7 +158,8 @@ public class Train
     public void setForecastEntries( List<ForecastEntry> forecastEntries )
     {
         this.forecastEntries = forecastEntries;
-        if( forecastEntries != null && !forecastEntries.isEmpty() ) {
+        if( forecastEntries != null && !forecastEntries.isEmpty() )
+        {
             // Find last arr/dep/pass
             lastReport = forecastEntries.stream().
                     filter( e -> e.getArr() != null || e.getDep() != null || e.getPass() != null ).
@@ -158,7 +167,8 @@ public class Train
                     findAny().
                     orElse( null );
         }
-        else {
+        else
+        {
             lastReport = null;
         }
 
