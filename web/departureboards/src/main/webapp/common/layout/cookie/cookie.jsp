@@ -14,4 +14,14 @@
         [<a href="//uktra.in/Cookies">More Info</a>]
         <div class="clear"></div>
     </div>
+    <script>
+        $(document).ready(function () {
+            $('#eu_cookie_notice').click(function (){
+                $('#eu_cookie_notice').hide(200);
+            });
+            setTimeout(function() {
+                $('#eu_cookie_notice').hide(1000);
+            }, 5000);
+        });
+    </script>
 </c:if>

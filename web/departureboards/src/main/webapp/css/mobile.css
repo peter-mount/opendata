@@ -78,7 +78,8 @@ p {
 
 #eu_cookie_notice {
     position: absolute;
-    bottom: 3em;
+    //bottom: 3em;
+    top: 0;
     background: #ccc;
     color: #000;
     padding: 0.25em;
