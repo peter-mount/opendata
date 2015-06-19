@@ -4,7 +4,70 @@ var UI = (function () {
         UI.messageSpan = $('<div></div>');
         UI.message = $('#message').empty().append(UI.messageSpan);
         UI.loader = $('#loading');
+
+        UI.settings = $('#settings');
+        if (UI.settings.length > 0) {
+            UI.settings.click(showSettings);
+            UI.settingsPanel = $('#settingsPanel');
+            $('#settingsCancel').click(hideSettings);
+            $('#settingsSave').click(saveSettings);
+            UI.defaultSettings();
+        }
     }
+
+    var set = function (v, d) {
+        if ((typeof v === 'undefined' || v === null) && typeof d !== 'undefined')
+            v = d;
+        return v === 't';
+    };
+
+    UI.enabled = function (n) {
+        return $.cookie(n) === 't';
+    }
+
+    UI.show = function (c, n, t, f) {
+        c.css({display: $.cookie(n) === 't' ? t : f});
+    };
+
+    var showSettings = function () {
+        var cookies = $.cookie();
+        $.each(UI.settingsPanel.find('input'), function (i, c) {
+            c = $(c);
+            c.prop('checked', set(cookies[$(c).attr('name')], $(c).attr('default')));
+        });
+        UI.settingsPanel.css({display: 'block'});
+    };
+
+    var hideSettings = function () {
+        UI.settingsPanel.css({display: 'none'});
+    };
+
+    UI.opts = {
+        expires: 365,
+        path: '/'
+    };
+
+    UI.defaultSettings = function () {
+        if (typeof UI.settingsPanel !== 'undefined') {
+            var cookies = $.cookie();
+            $.each(UI.settingsPanel.find('input'), function (i, c) {
+                c = $(c);
+                var n = $(c).attr('name');
+                if (typeof cookies[n] === 'undefined')
+                    $.cookie(n, $(c).attr('default'), UI.opts);
+            });
+        }
+    };
+
+    var saveSettings = function () {
+        $.each(UI.settingsPanel.find('input'), function (i, c) {
+            c = $(c);
+            $.cookie($(c).attr('name'), $(c).is(':checked') ? 't' : 'f', UI.opts);
+        });
+        if (typeof UI.settingsSaved !== 'undefined')
+            UI.settingsSaved();
+        hideSettings();
+    };
 
     var showLoaderImpl = function () {
         UI.loader.css({display: 'block'});
@@ -74,6 +137,7 @@ var LDB = (function () {
     function LDB(crs, small) {
         LDB.url = (small ? '/sldb/' : '/vldb/') + crs;
         LDB.board = $('#board');
+        UI.settingsSaved = LDB.applySettings;
         reload();
     }
 
@@ -88,6 +152,29 @@ var LDB = (function () {
         UI.hideLoader();
         reloadIn(60000);
         LDB.board.empty().append(v);
+        LDB.applySettings();
+    };
+
+    LDB.applySettings = function () {
+        UI.show($('.trainTerminated'), 'ldbTerm', 'block', 'none');
+        UI.show($('.callList'), 'ldbCall', 'inline-block', 'none');
+        UI.show($('.callListTerminated'), 'ldbTermCall', 'inline-block', 'none');
+        UI.show($('.callListCancelled'), 'ldbCanCall', 'inline-block', 'none');
+
+        var r = 0;
+        $.each($('.row'), function (i, c) {
+            c = $(c);
+            if (r % 2 === 0)
+                c.addClass('altrow');
+            else
+                c.removeClass('altrow');
+            if (!((c.hasClass('trainTerminated') && !UI.enabled('ldbTerm'))
+                    || (c.hasClass('callList') && !UI.enabled('ldbCall'))
+                    || (c.hasClass('callListTerminated') && !UI.enabled('ldbTermCall'))
+                    || (c.hasClass('callListCancelled') && !UI.enabled('ldbCanCall'))
+                    ))
+                r++;
+        });
     };
 
     var notModified = function (v) {

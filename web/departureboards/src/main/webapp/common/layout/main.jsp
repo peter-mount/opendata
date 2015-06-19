@@ -25,6 +25,7 @@
             <div id="outer-banner">
                 <div id="inner-banner">
                     <tiles:insertAttribute name="banner"/>
+                    <tiles:insertAttribute name="header"/>
                 </div>
             </div>
             <div id="outer-body">

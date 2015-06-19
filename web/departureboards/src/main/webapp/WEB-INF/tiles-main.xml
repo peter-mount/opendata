@@ -11,6 +11,7 @@
         <put-attribute name="javascript" value="/common/ldb/mobilejavascript.jsp" />
         <put-attribute name="cookie" value="layout.cookie" />
         <put-attribute name="banner" value="layout.banner" />
+        <put-attribute name="header" value="/common/layout/blank.jsp" />
         <put-attribute name="footer" value="layout.footer" />
     </definition>
     

@@ -3,8 +3,8 @@
 .ldbLoc {
     font-family: Arial;
     font-size: 24pt;
-    padding: 3pt;
     text-align: center;
+    color: #fff;
 }
 .ldbUpdated {
     color:#fff;
@@ -20,6 +20,9 @@
     table-layout: fixed;
     background: #000;
     color: #fff;
+}
+
+#inner-body .ldbTable {
     border-bottom: 2px solid #ffffff;
 }
 
@@ -33,13 +36,12 @@
 .altrow {
     background: #121d34;
 }
-
 .ldbHead {
     border-collapse: collapse;
     color: #ffff00;
     margin: 0px;
     padding: 6px 10px;
-    font-size: 80%;
+    font-size: 130%;
     text-align: left;
     font-weight: bold;
 }
@@ -163,6 +165,10 @@ td.ldb-fsct-stat {
 
 /* iPhone 3GS */
 @media all and ( max-width: 320px ) {
+    #settings {
+        width:24px;
+        height: 24px;
+    }
     .ldbLoc {
         font-size: 15pt;
         padding-top: 11pt;
@@ -170,7 +176,7 @@ td.ldb-fsct-stat {
     .ldbUpdated { font-size: 70%; }
     .ldbTable { font-size: 130%; }
     .ldbHead {
-        font-size: 60%;
+        font-size: 110%;
         padding: 6px 4px;
     }
     .ldb-enttop, .ldb-entmid { font-size: 70%; }
@@ -195,6 +201,10 @@ td.ldb-fsct-stat {
 
 /* Samsung Note 3 Portrait */
 @media all and (min-width: 321px) and ( max-width: 443px ) {
+    #settings {
+        width:24px;
+        height: 24px;
+    }
     .ldbLoc { 
         font-size: 12pt;
         padding-top: 5pt;
@@ -202,7 +212,7 @@ td.ldb-fsct-stat {
     .ldbUpdated { font-size: 70%; }
     .ldbTable { font-size: 110%; }
     .ldbHead {
-        font-size: 70%;
+        font-size: 120%;
         padding: 6px 4px;
     }
     .ldb-enttop, .ldb-entmid { font-size: 90%; }
@@ -220,13 +230,17 @@ td.ldb-fsct-stat {
     }
 }
 
-/* Samsung Note 3 Portrait */
+/* Samsung Note 3 Landscape */
 @media all and (min-width: 444px) and ( max-width: 640px ) {
+    #settings {
+        width:24px;
+        height: 24px;
+    }
     .ldbLoc { font-size: 15pt; }
     .ldbUpdated { font-size: 70%; }
-    .ldbTable { font-size: 130%; }
+    .ldbTable { font-size: 110%; }
     .ldbHead {
-        font-size: 70%;
+        font-size: 100%;
         padding: 6px 4px;
     }
     .ldb-enttop, .ldb-entmid { font-size: 90%; }
@@ -246,14 +260,18 @@ td.ldb-fsct-stat {
 
 /* Samsung Tab 7.7+ */
 @media all and (min-width: 641px ) and (max-width: 1023px) {
+    #settings {
+        width:24px;
+        height: 24px;
+    }
     .ldbLoc {
-        font-size: 25pt;
+        font-size: 20pt;
         padding-top: 10pt;
     }
     .ldbUpdated { font-size: 70%; }
     .ldbTable { font-size: 130%; }
     .ldbHead {
-        font-size: 70%;
+        font-size: 120%;
         padding: 6px 4px;
     }
     .ldb-enttop, .ldb-entmid { font-size: 90%; }
@@ -277,6 +295,11 @@ td.ldb-fsct-stat {
 /* iPad 3/4 */
 @media all and (min-width: 1024px ) and (max-width: 1599px) {
     h1 { font-size: 100%; }
+    #settings {
+        width:32px;
+        height: 32px;
+    }
+
     .ldbLoc {
         font-size: 25pt;
         padding-top: 10pt;
@@ -284,7 +307,7 @@ td.ldb-fsct-stat {
     .ldbUpdated { font-size: 70%; }
     .ldbTable { font-size: 130%; }
     .ldbHead {
-        font-size: 70%;
+        font-size: 120%;
         padding: 6px 4px;
     }
     .ldb-enttop, .ldb-entmid { font-size: 90%; }
@@ -307,6 +330,10 @@ td.ldb-fsct-stat {
 
 /* Kindle Fire HDX - Massive resolution 2560x1600 */
 @media all and (min-width: 1600px ) {
+    #settings {
+        width:64px;
+        height: 64px;
+    }
     .ldbLoc {
         font-size: 35pt;
         padding-top: 10pt;
@@ -314,7 +341,7 @@ td.ldb-fsct-stat {
     .ldbUpdated { font-size: 200%; }
     .ldbTable { font-size: 350%; }
     .ldbHead {
-        font-size: 70%;
+        font-size: 120%;
         padding: 6px 4px;
     }
     .ldb-enttop, .ldb-entmid { font-size: 90%; }

@@ -84,11 +84,57 @@ p {
     color: #000;
     padding: 0.25em;
 }
+#eu_cookie_notice { display: hidden; }
 #eu_cookie_notice img { float: left; }
 #eu_cookie_notice a { color: #00f;}
 #eu_cookie_notice a:visited { color: #00f;}
 #eu_cookie_notice a:hover { color: #00f;}
 
+#settings {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+}
+
+#settingsPanel {
+    display: none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: 5% auto;
+    z-index: 100;
+}
+
+#settingsPanel .settingsInner {
+    background: #fff;
+    opacity: 1.0;
+    color: #000;
+    border: 2px solid black;
+    -webkit-border-radius: 30pt;
+    padding: 12pt;
+    width: auto;
+}
+
+#settingsPanel h2 {
+    margin: 0;
+    padding: 0;
+}
+.settingsInner table {
+    width: 100%;
+}
+.settingsInner table th.center {
+    text-align: center;
+    font-size: 120%;
+    border-bottom: 1px solid black;
+}
+.settingsInner table th {text-align: right;}
+.settingsInner table input {width: 1em;}
+
+#settingsSave {
+    float: right;
+}
 .messageHidden {
     display: none;
 }

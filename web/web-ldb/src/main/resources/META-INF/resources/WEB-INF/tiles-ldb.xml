@@ -25,6 +25,8 @@
     <definition name="ldb.mobile" extends="layout.main">
         <put-attribute name="title" value="Live Departure Boards" />
         <put-attribute name="javascript" value="/common/ldb/mobilejavascript.jsp" />
+        <put-attribute name="banner" value="/common/ldb/depbanner.jsp" />
+        <put-attribute name="header" value="/common/ldb/depheader.jsp" />
         <put-attribute name="body" value=".ldb.mobile" />
     </definition>
     <definition name=".ldb.mobile" extends="layout.1col">

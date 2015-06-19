@@ -6,19 +6,14 @@
 package uk.trainwatch.web.rtt;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
-import uk.trainwatch.util.JsonUtils;
 import uk.trainwatch.util.Streams;
 import uk.trainwatch.web.ldb.LDBUtils;
 import uk.trainwatch.web.ldb.model.Train;
