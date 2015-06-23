@@ -18,6 +18,7 @@
         <module>ogl</module>
         <module>osgb</module>
         <module>web</module>
+        <module>tflod</module>
     </modules>
     
     <properties>
