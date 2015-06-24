@@ -192,6 +192,24 @@
             <version>2.9</version>
         </dependency>
 
+        <!-- CDI Compile time -->
+        <!--
+        <dependency>
+            <groupId>javax.enterprise</groupId>
+            <artifactId>cdi-api</artifactId>
+            <version>1.2</version>
+            <scope>provided</scope>
+        </dependency>
+        -->
+
+        <!-- JBoss/Weld Refrence Implementation for CDI on a Servlet Container -->
+        <dependency>
+            <groupId>org.jboss.weld.servlet</groupId>
+            <artifactId>weld-servlet</artifactId>
+            <version>2.2.6.Final</version>
+            <scope>runtime</scope>
+        </dependency>
+        
     </dependencies>
 
     <build>

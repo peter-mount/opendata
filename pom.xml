@@ -19,7 +19,9 @@
         <module>osgb</module>
         <module>web</module>
         <module>tflod</module>
+        <!--
         <module>opendata-kernel</module>
+        -->
     </modules>
     
     <properties>
@@ -28,4 +30,43 @@
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
+    <!-- Global dependencies -->
+    <dependencies>
+        
+        <!-- CDI -->
+        <dependency>
+            <groupId>javax.enterprise</groupId>
+            <artifactId>cdi-api</artifactId>
+            <version>1.2</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <!-- JSR353 Java API for JSON processing - not yet in the JDK -->
+        <dependency>
+            <groupId>javax.json</groupId>
+            <artifactId>javax.json-api</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
+            <version>1.0.4</version>
+        </dependency>
+                
+        <!-- Servlet api -->
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-web-api</artifactId>
+            <version>7.0</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.10</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
 </project>
