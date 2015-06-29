@@ -5,7 +5,6 @@
  */
 package uk.trainwatch.web.timetable;
 
-import uk.trainwatch.web.servlet.ApplicationRequest;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Month;
@@ -16,8 +15,8 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
-import uk.trainwatch.nrod.location.TrainLocationFactory;
 import uk.trainwatch.util.TimeUtils;
+import uk.trainwatch.web.servlet.ApplicationRequest;
 
 /**
  * Shows a schedule for a station either for todays date or a specified date
@@ -107,7 +106,7 @@ public class StationScheduleServlet
         Map<String, Object> req = request.getRequestScope();
 
         req.put( "pageTitle", "UK Time Table" );
-        req.put( "stations", TrainLocationFactory.INSTANCE.getStations() );
+        req.put( "stations", trainLocationFactory.getStations() );
 
         request.renderTile( "timetable.home" );
     }

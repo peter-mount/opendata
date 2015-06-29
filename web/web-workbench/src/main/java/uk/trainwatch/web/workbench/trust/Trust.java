@@ -8,8 +8,6 @@ package uk.trainwatch.web.workbench.trust;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Consumer;
-import uk.trainwatch.nrod.location.TrainLocation;
-import uk.trainwatch.nrod.location.TrainLocationFactory;
 import uk.trainwatch.nrod.timetable.model.Schedule;
 import uk.trainwatch.nrod.trust.model.ChangeOfIdentity;
 import uk.trainwatch.nrod.trust.model.ChangeOfOrigin;
@@ -29,7 +27,7 @@ public class Trust
         implements Consumer< TrustMovement>
 {
 
-    private TrainLocation location;
+    private long location;
     private TrainActivation activation;
     private TrainMovement movement;
     private TrainCancellation cancellation;
@@ -82,11 +80,6 @@ public class Trust
         return status;
     }
 
-    public synchronized TrainLocation getLocation()
-    {
-        return location;
-    }
-
     public synchronized Schedule getSchedule()
     {
         return schedule;
@@ -112,37 +105,52 @@ public class Trust
     private void touch( long t, long s )
     {
         touch( t );
-        location = TrainLocationFactory.INSTANCE.getTrainLocationByStanox( s );
+        location = s;
+    }
+
+    /**
+     * The stanox of the last report
+     * @return 
+     */
+    public long getLocation()
+    {
+        return location;
     }
 
     @Override
     public synchronized void accept( TrustMovement t )
     {
-        if( t instanceof TrainMovement ) {
+        if( t instanceof TrainMovement )
+        {
             movement = (TrainMovement) t;
             movements.add( movement );
             status = TrainStatus.getByDelay( movement.getDelay() );
             touch( movement.getActual_timestamp(), movement.getLoc_stanox() );
         }
-        else if( t instanceof TrainActivation ) {
+        else if( t instanceof TrainActivation )
+        {
             activation = (TrainActivation) t;
             status = TrainStatus.ACTIVATED;
             touch( activation.getCreation_timestamp(), activation.getSched_origin_stanox() );
         }
-        else if( t instanceof TrainCancellation ) {
+        else if( t instanceof TrainCancellation )
+        {
             cancellation = (TrainCancellation) t;
             status = TrainStatus.CANCELLED;
             touch( cancellation.getCanx_timestamp(), cancellation.getLoc_stanox() );
         }
-        else if( t instanceof ChangeOfOrigin ) {
+        else if( t instanceof ChangeOfOrigin )
+        {
             changeOfOrigin = (ChangeOfOrigin) t;
             touch( changeOfOrigin.getCoo_timestamp(), changeOfOrigin.getLoc_stanox() );
         }
-        else if( t instanceof ChangeOfIdentity ) {
+        else if( t instanceof ChangeOfIdentity )
+        {
             changeOfIdentity = (ChangeOfIdentity) t;
             touch( changeOfIdentity.getEvent_timestamp() );
         }
-        else if( t instanceof TrainReinstatement ) {
+        else if( t instanceof TrainReinstatement )
+        {
             reinstatement = (TrainReinstatement) t;
             touch( reinstatement.getReinstatement_timestamp(), reinstatement.getLoc_stanox() );
         }
@@ -156,8 +164,7 @@ public class Trust
     /**
      * Has a train got an activation record?
      *
-     * @param t
-     *          <p>
+     * @param t <p>
      * @return
      */
     public static boolean isActivated( Trust t )
@@ -178,8 +185,7 @@ public class Trust
     /**
      * Has a train got a movement record?
      *
-     * @param t
-     *          <p>
+     * @param t <p>
      * @return
      */
     public static boolean isMovement( Trust t )
@@ -190,8 +196,7 @@ public class Trust
     /**
      * Has a train got a cancellation record?
      *
-     * @param t
-     *          <p>
+     * @param t <p>
      * @return
      */
     public static boolean isCancelled( Trust t )
@@ -204,13 +209,13 @@ public class Trust
      *
      * Note: Delayed here is >=5m but we put an upper limit as delay can appear to be 45 years for when they are off route
      *
-     * @param t
-     *          <p>
+     * @param t <p>
      * @return
      */
     public static boolean isDelayed( Trust t )
     {
-        if( !isMovement( t ) ) {
+        if( !isMovement( t ) )
+        {
             return false;
         }
         long delay = t.getDelay();
@@ -219,7 +224,8 @@ public class Trust
 
     public static boolean isOffRoute( Trust t )
     {
-        if( !isMovement( t ) ) {
+        if( !isMovement( t ) )
+        {
             return false;
         }
         TrainMovement m = t.getMovement();
@@ -228,7 +234,8 @@ public class Trust
 
     public static boolean isTerminated( Trust t )
     {
-        if( !isMovement( t ) ) {
+        if( !isMovement( t ) )
+        {
             return false;
         }
         TrainMovement m = t.getMovement();

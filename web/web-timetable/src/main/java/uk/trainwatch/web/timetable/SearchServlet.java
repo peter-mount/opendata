@@ -5,14 +5,13 @@
  */
 package uk.trainwatch.web.timetable;
 
-import uk.trainwatch.web.servlet.ApplicationRequest;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import uk.trainwatch.nrod.location.TrainLocationFactory;
+import uk.trainwatch.web.servlet.ApplicationRequest;
 
 /**
  * Search for a schedule
@@ -60,7 +59,7 @@ public class SearchServlet
         Map<String, Object> req = request.getRequestScope();
 
         req.put( "pageTitle", "UK Time Table" );
-        req.put( "stations", TrainLocationFactory.INSTANCE.getStations() );
+        req.put( "stations", trainLocationFactory.getStations() );
 
         request.renderTile( "timetable.home" );
     }

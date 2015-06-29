@@ -6,6 +6,7 @@
 package uk.trainwatch.web.train.tags;
 
 import java.io.IOException;
+import javax.inject.Inject;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.BodyTagSupport;
@@ -19,13 +20,13 @@ import uk.trainwatch.nrod.location.TrainLocationFactory;
 public abstract class AbstractLocationTag
         extends BodyTagSupport
 {
-    
+
     private static final String DEFAULT_PREFIX = "/station/";
     private String value;
     private boolean link = true;
     private String prefix = DEFAULT_PREFIX;
     private boolean nowrap = false;
-    
+
     @Override
     public void release()
     {
@@ -34,18 +35,21 @@ public abstract class AbstractLocationTag
         prefix = DEFAULT_PREFIX;
         nowrap = false;
     }
-    
+
+    @Inject
+    protected TrainLocationFactory trainLocationFactory;
+
     protected abstract TrainLocation getLocationRef( String value );
-    
+
     @Override
     public int doStartTag()
             throws JspException
     {
         if( value != null )
         {
-            
+
             String name = null;
-            
+
             TrainLocation ref = getLocationRef( value );
             if( ref != null && ref.isSetLocation() )
             {
@@ -53,27 +57,29 @@ public abstract class AbstractLocationTag
             }
 
             // Try our own, has depot's etc in there
-            if( name == null || name.equals( value ) ) {
-                TrainLocation loc = TrainLocationFactory.INSTANCE.resolveTrainLocation( value );
-                if( loc != null ) {
+            if( name == null || name.equals( value ) )
+            {
+                TrainLocation loc = trainLocationFactory.resolveTrainLocation( value );
+                if( loc != null )
+                {
                     name = loc.getLocation();
                 }
             }
-            
+
             if( name == null )
             {
                 name = value;
             }
-            
+
             if( nowrap )
             {
                 name = name.replace( " ", "&nbsp;" );
             }
-            
+
             try
             {
                 JspWriter w = pageContext.getOut();
-                
+
                 if( link && ref != null && ref.isSetCrs() )
                 {
                     w.write( "<a href=\"" );
@@ -91,28 +97,28 @@ public abstract class AbstractLocationTag
                 throw new JspException( ex );
             }
         }
-        
+
         return SKIP_BODY;
     }
-    
+
     public void setValue( String value )
     {
         this.value = value;
     }
-    
+
     public void setLink( boolean link )
     {
         this.link = link;
     }
-    
+
     public void setPrefix( String prefix )
     {
         this.prefix = prefix;
     }
-    
+
     public void setNowrap( boolean nowrap )
     {
         this.nowrap = nowrap;
     }
-    
+
 }

@@ -4,8 +4,6 @@
  */
 package uk.trainwatch.nrod.location;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -18,19 +16,21 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import javax.enterprise.context.ApplicationScoped;
 import javax.json.JsonObjectBuilder;
 import javax.sql.DataSource;
-import uk.trainwatch.io.format.PsvReader;
 import uk.trainwatch.util.sql.SQL;
+import uk.trainwatch.util.sql.UncheckedSQLException;
 
 /**
  *
  * @author peter
  */
-public enum TrainLocationFactory
+@ApplicationScoped
+public class TrainLocationFactory
 {
-
-    INSTANCE;
 
     private static final Logger LOG = Logger.getLogger( TrainLocationFactory.class.getName() );
 
@@ -38,57 +38,73 @@ public enum TrainLocationFactory
     private List<String> stationIndex;
     private Map<String, List<TrainLocation>> stations;
 
-    private TrainLocationFactory()
+    @Resource( name = "jdbc/rail" )
+    private DataSource dataSource;
+
+    @PostConstruct
+    void start()
     {
-        // By default use our old data
-        try {
-            PsvReader.load( getClass().
-                    getResourceAsStream( "location.psv" ),
-                            s -> s.length < 12 ? null : new TrainLocation(
-                                            s[0].isEmpty() ? 0 : Long.parseLong( s[0] ),
-                                            s[1],
-                                            s[2],
-                                            s[3],
-                                            s[4],
-                                            s[5].isEmpty() ? 0 : Long.parseLong( s[5] ),
-                                            s[9]
-                                    )
-            ).
-                    forEach( loc -> {
-                        map.put( new TrainLocationID( loc.getId() ), loc );
-                        map.put( new CRS( loc.getCrs() ), loc );
-                        map.put( new NLC( loc.getNlc() ), loc );
-                        map.put( new Stanox( loc.getStanox() ), loc );
-                        map.put( new Tiploc( loc.getTiploc() ), loc );
-                    }
-                    );
+        try
+        {
+            reload();
+        } catch( SQLException ex )
+        {
+            LOG.log( Level.SEVERE, "Unable to load initial locations", ex );
+            throw new UncheckedSQLException( ex );
         }
-        catch( IOException ex ) {
-            throw new UncheckedIOException( ex );
-        }
+//        // By default use our old data
+//        try
+//        {
+//            PsvReader.load( getClass().
+//                    getResourceAsStream( "location.psv" ),
+//                            s -> s.length < 12 ? null : new TrainLocation(
+//                                            s[0].isEmpty() ? 0 : Long.parseLong( s[0] ),
+//                                            s[1],
+//                                            s[2],
+//                                            s[3],
+//                                            s[4],
+//                                            s[5].isEmpty() ? 0 : Long.parseLong( s[5] ),
+//                                            s[9]
+//                                    )
+//            ).
+//                    forEach( loc ->
+//                            {
+//                                map.put( new TrainLocationID( loc.getId() ), loc );
+//                                map.put( new CRS( loc.getCrs() ), loc );
+//                                map.put( new NLC( loc.getNlc() ), loc );
+//                                map.put( new Stanox( loc.getStanox() ), loc );
+//                                map.put( new Tiploc( loc.getTiploc() ), loc );
+//                    }
+//                    );
+//        } catch( IOException ex )
+//        {
+//            throw new UncheckedIOException( ex );
+//        }
     }
 
     /**
      * Allows us to reload from the timetable
      * <p>
-     * @param dataSource
-     *                   <p>
+     * @param dataSource <p>
      * @throws SQLException
      */
-    void reload( DataSource dataSource )
+    void reload()
             throws SQLException
     {
         LOG.log( Level.INFO, "Reloading TrainLocations" );
-        try( Connection con = dataSource.getConnection() ) {
-            try( Statement s = con.createStatement() ) {
+        try( Connection con = dataSource.getConnection() )
+        {
+            try( Statement s = con.createStatement() )
+            {
                 Map<LocationKey, TrainLocation> newMap = new ConcurrentHashMap<>();
                 SQL.stream( s.executeQuery( "SELECT * FROM timetable.tiploc" ), TrainLocation.fromSQL ).
-                        forEach( loc -> {
-                            newMap.put( new TrainLocationID( loc.getId() ), loc );
-                            newMap.put( new CRS( loc.getCrs() ), loc );
-                            newMap.put( new NLC( loc.getNlc() ), loc );
-                            newMap.put( new Stanox( loc.getStanox() ), loc );
-                            newMap.put( new Tiploc( loc.getTiploc() ), loc );
+                        forEach( loc ->
+                                {
+                                    newMap.put( new TrainLocationID( loc.getId() ), loc );
+                                    newMap.put( new CRS( loc.getCrs() ), loc );
+                                    newMap.put( new NLC( loc.getNlc() ), loc );
+                                    newMap.put( new Stanox( loc.getStanox() ), loc );
+                                    newMap.put( new Tiploc( loc.getTiploc() ), loc );
                         } );
                 map = newMap;
 
@@ -111,29 +127,33 @@ public enum TrainLocationFactory
     /**
      * Resolve the train location by crs, tiploc, nlc then stanox in that order.
      * <p>
-     * @param name
-     *             <p>
+     * @param name <p>
      * @return
      */
     public TrainLocation resolveTrainLocation( String name )
     {
-        if( name == null || name.isEmpty() ) {
+        if( name == null || name.isEmpty() )
+        {
             return null;
         }
 
         TrainLocation loc = getTrainLocationByCrs( name );
-        if( loc == null ) {
+        if( loc == null )
+        {
             loc = getTrainLocationByTiploc( name );
         }
-        if( loc == null ) {
+        if( loc == null )
+        {
             loc = getTrainLocationByNlc( name );
         }
-        if( loc == null ) {
-            try {
+        if( loc == null )
+        {
+            try
+            {
                 loc = getTrainLocationByStanox( Long.parseLong( name ) );
-            }
-            catch( NumberFormatException |
-                   NullPointerException ex ) {
+            } catch( NumberFormatException |
+                     NullPointerException ex )
+            {
                 loc = null;
             }
         }
@@ -236,21 +256,21 @@ public enum TrainLocationFactory
                 sorted( TrainLocation.COMPARATOR );
     }
 
-    public static JsonObjectBuilder getJsonByStanox( long stanox )
+    public JsonObjectBuilder getJsonByStanox( long stanox )
     {
-        TrainLocation l = INSTANCE.getTrainLocationByStanox( stanox );
+        TrainLocation l = getTrainLocationByStanox( stanox );
         return l == null ? null : l.toJson();
     }
 
-    public static JsonObjectBuilder getJsonByTiploc( String tiploc )
+    public JsonObjectBuilder getJsonByTiploc( String tiploc )
     {
-        TrainLocation l = INSTANCE.getTrainLocationByTiploc( tiploc );
+        TrainLocation l = getTrainLocationByTiploc( tiploc );
         return l == null ? null : l.toJson();
     }
 
-    public static String getTiplocByStanox( long stanox )
+    public String getTiplocByStanox( long stanox )
     {
-        TrainLocation l = INSTANCE.getTrainLocationByStanox( stanox );
+        TrainLocation l = getTrainLocationByStanox( stanox );
         return l == null ? Long.toString( stanox ) : l.getTiploc();
     }
 }

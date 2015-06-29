@@ -5,13 +5,12 @@
  */
 package uk.trainwatch.web.station;
 
-import uk.trainwatch.web.servlet.AbstractServlet;
-import uk.trainwatch.web.servlet.ApplicationRequest;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
@@ -20,6 +19,8 @@ import uk.trainwatch.gis.StationPositionManager;
 import uk.trainwatch.nre.darwin.stationmsg.StationMessageManager;
 import uk.trainwatch.nrod.location.TrainLocation;
 import uk.trainwatch.nrod.location.TrainLocationFactory;
+import uk.trainwatch.web.servlet.AbstractServlet;
+import uk.trainwatch.web.servlet.ApplicationRequest;
 
 /**
  * Performance Home
@@ -31,6 +32,9 @@ public class StationServlet
         extends AbstractServlet
 {
 
+    @Inject
+    protected TrainLocationFactory trainLocationFactory;
+    
     @Override
     protected void doGet( ApplicationRequest request )
             throws ServletException,
@@ -38,10 +42,10 @@ public class StationServlet
     {
         String crs = request.getPathInfo().substring( 1 ).toUpperCase();
 
-        TrainLocation loc = TrainLocationFactory.INSTANCE.getTrainLocationByCrs( crs );
+        TrainLocation loc = trainLocationFactory.getTrainLocationByCrs( crs );
         if( loc == null ) {
             // See if they have used an alternate code
-            loc = TrainLocationFactory.INSTANCE.resolveTrainLocation( crs );
+            loc = trainLocationFactory.resolveTrainLocation( crs );
 
             if( loc == null ) {
                 request.sendError( HttpServletResponse.SC_NOT_FOUND );

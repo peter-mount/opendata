@@ -5,15 +5,16 @@
  */
 package uk.trainwatch.web.timetable;
 
-import uk.trainwatch.web.servlet.AbstractServlet;
-import uk.trainwatch.web.servlet.ApplicationRequest;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Map;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
 import uk.trainwatch.nrod.location.TrainLocation;
 import uk.trainwatch.nrod.location.TrainLocationFactory;
+import uk.trainwatch.web.servlet.AbstractServlet;
+import uk.trainwatch.web.servlet.ApplicationRequest;
 
 /**
  * TimeTable home
@@ -24,6 +25,9 @@ public abstract class AbstractSearchServlet
         extends AbstractServlet
 {
 
+    @Inject
+    protected TrainLocationFactory trainLocationFactory;
+    
     @Override
     protected void doGet( ApplicationRequest request )
             throws ServletException,
@@ -49,7 +53,7 @@ public abstract class AbstractSearchServlet
                    IOException
     {
 
-        TrainLocation loc = TrainLocationFactory.INSTANCE.resolveTrainLocation( station );
+        TrainLocation loc = trainLocationFactory.resolveTrainLocation( station );
         if( loc == null )
         {
             request.getRequestScope().

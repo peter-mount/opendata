@@ -16,8 +16,7 @@
 package uk.trainwatch.web.rest;
 
 import javax.ws.rs.ApplicationPath;
-import org.glassfish.jersey.jackson.JacksonFeature;
-import org.glassfish.jersey.server.ResourceConfig;
+import javax.ws.rs.core.Application;
 
 /**
  *
@@ -25,16 +24,8 @@ import org.glassfish.jersey.server.ResourceConfig;
  */
 @ApplicationPath( "api" )
 public class ApplicationConfig
-        extends ResourceConfig
+        extends Application
 {
-
-    public ApplicationConfig()
-    {
-        // Enable Jackso for JSON support. See JsonMessageBodyWriter on why we use Jackson
-        register( new JacksonFeature());
-        
-        // Base packages containing rest applications
-        packages( "uk.trainwatch.web" );
-    }
-
+    // Don't put anything in here otherwise we cannot use CDI
+    // TODO check that JacksonFeature is used? Does it get detected automatically?
 }

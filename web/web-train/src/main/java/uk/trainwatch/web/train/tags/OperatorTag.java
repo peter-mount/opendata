@@ -11,8 +11,6 @@ import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import uk.trainwatch.nre.darwin.model.ctt.referenceschema.TocRef;
 import uk.trainwatch.nre.darwin.reference.DarwinReferenceManager;
-import uk.trainwatch.nrod.location.TrainLocation;
-import uk.trainwatch.nrod.location.TrainLocationFactory;
 
 /**
  *

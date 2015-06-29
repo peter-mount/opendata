@@ -5,13 +5,14 @@
  */
 package uk.trainwatch.web.station;
 
-import uk.trainwatch.web.servlet.AbstractServlet;
-import uk.trainwatch.web.servlet.ApplicationRequest;
 import java.io.IOException;
 import java.util.Map;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import uk.trainwatch.nrod.location.TrainLocationFactory;
+import uk.trainwatch.web.servlet.AbstractServlet;
+import uk.trainwatch.web.servlet.ApplicationRequest;
 
 /**
  * Performance Home
@@ -23,6 +24,9 @@ public class HomeServlet
         extends AbstractServlet
 {
 
+    @Inject
+    protected TrainLocationFactory trainLocationFactory;
+    
     @Override
     protected void doGet( ApplicationRequest request )
             throws ServletException,
@@ -35,8 +39,8 @@ public class HomeServlet
 
         Map<String, Object> req = request.getRequestScope();
         req.put( "selected", index );
-        req.put( "index", TrainLocationFactory.INSTANCE.getStationIndex() );
-        req.put( "stations", TrainLocationFactory.INSTANCE.getStationIndex( index ) );
+        req.put( "index", trainLocationFactory.getStationIndex() );
+        req.put( "stations", trainLocationFactory.getStationIndex( index ) );
 
         request.renderTile( "station.home" );
     }

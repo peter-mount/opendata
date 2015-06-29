@@ -8,6 +8,8 @@ package uk.trainwatch.web.station;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.stream.Collectors;
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.ws.rs.GET;
@@ -27,76 +29,80 @@ import uk.trainwatch.web.rest.Rest;
  *
  * @author peter
  */
-@Path("/rail/1/station")
+@Path( "/rail/1/station" )
+@RequestScoped
 public class StationRest
 {
 
-    @Path("all")
+    @Inject
+    protected TrainLocationFactory trainLocationFactory;
+
+    @Path( "all" )
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Cache(maxAge = 2, unit = ChronoUnit.HOURS)
+    @Produces( MediaType.APPLICATION_JSON )
+    @Cache( maxAge = 2, unit = ChronoUnit.HOURS )
     public Response all()
     {
-        return Response.ok( TrainLocationFactory.INSTANCE.getStationStream().
+        return Response.ok( trainLocationFactory.getStationStream().
                 map( StationKeyValue::new ).
                 collect( Collectors.toList() ) ).
                 build();
     }
 
-    @Path("full")
+    @Path( "full" )
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Cache(maxAge = 2, unit = ChronoUnit.HOURS)
+    @Produces( MediaType.APPLICATION_JSON )
+    @Cache( maxAge = 2, unit = ChronoUnit.HOURS )
     public Response full()
     {
-        return Response.ok( TrainLocationFactory.INSTANCE.getStationStream().
+        return Response.ok( trainLocationFactory.getStationStream().
                 collect( Collectors.toList() ) ).
                 build();
     }
 
-    @Path("3alpha/{crs}")
+    @Path( "3alpha/{crs}" )
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Cache(maxAge = 2, unit = ChronoUnit.HOURS)
-    public Response talpha( @PathParam("crs") String crs )
+    @Produces( MediaType.APPLICATION_JSON )
+    @Cache( maxAge = 2, unit = ChronoUnit.HOURS )
+    public Response talpha( @PathParam( "crs" ) String crs )
     {
-        return respond( TrainLocationFactory.INSTANCE.getTrainLocationByCrs( crs ) );
+        return respond( trainLocationFactory.getTrainLocationByCrs( crs ) );
     }
 
-    @Path("crs/{crs}")
+    @Path( "crs/{crs}" )
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Cache(maxAge = 2, unit = ChronoUnit.HOURS)
-    public Response crs( @PathParam("crs") String crs )
+    @Produces( MediaType.APPLICATION_JSON )
+    @Cache( maxAge = 2, unit = ChronoUnit.HOURS )
+    public Response crs( @PathParam( "crs" ) String crs )
     {
-        return respond( TrainLocationFactory.INSTANCE.getTrainLocationByCrs( crs ) );
+        return respond( trainLocationFactory.getTrainLocationByCrs( crs ) );
     }
 
-    @Path("nlc/{nlc}")
+    @Path( "nlc/{nlc}" )
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Cache(maxAge = 2, unit = ChronoUnit.HOURS)
-    public Response nlc( @PathParam("nlc") String nlc )
+    @Produces( MediaType.APPLICATION_JSON )
+    @Cache( maxAge = 2, unit = ChronoUnit.HOURS )
+    public Response nlc( @PathParam( "nlc" ) String nlc )
     {
-        return respond( TrainLocationFactory.INSTANCE.getTrainLocationByNlc( nlc ) );
+        return respond( trainLocationFactory.getTrainLocationByNlc( nlc ) );
     }
 
-    @Path("stanox/{stanox}")
+    @Path( "stanox/{stanox}" )
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Cache(maxAge = 2, unit = ChronoUnit.HOURS)
-    public Response stanox( @PathParam("stanox") int stanox )
+    @Produces( MediaType.APPLICATION_JSON )
+    @Cache( maxAge = 2, unit = ChronoUnit.HOURS )
+    public Response stanox( @PathParam( "stanox" ) int stanox )
     {
-        return respond( TrainLocationFactory.INSTANCE.getTrainLocationByStanox( stanox ) );
+        return respond( trainLocationFactory.getTrainLocationByStanox( stanox ) );
     }
 
-    @Path("tiploc/{tiploc}")
+    @Path( "tiploc/{tiploc}" )
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Cache(maxAge = 2, unit = ChronoUnit.HOURS)
-    public Response tiploc( @PathParam("tiploc") String tiploc )
+    @Produces( MediaType.APPLICATION_JSON )
+    @Cache( maxAge = 2, unit = ChronoUnit.HOURS )
+    public Response tiploc( @PathParam( "tiploc" ) String tiploc )
     {
-        return respond( TrainLocationFactory.INSTANCE.getTrainLocationByTiploc( tiploc ) );
+        return respond( trainLocationFactory.getTrainLocationByTiploc( tiploc ) );
     }
 
     private Response respond( TrainLocation l )
@@ -116,11 +122,11 @@ public class StationRest
      * <p>
      * @since 2015-06-06
      */
-    @Path("search")
+    @Path( "search" )
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Cache(maxAge = 2, unit = ChronoUnit.HOURS)
-    public Response search( @QueryParam("term") String term )
+    @Produces( MediaType.APPLICATION_JSON )
+    @Cache( maxAge = 2, unit = ChronoUnit.HOURS )
+    public Response search( @QueryParam( "term" ) String term )
     {
         return Rest.invoke( response -> response.entity(
                 DarwinReferenceManager.INSTANCE.
