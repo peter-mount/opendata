@@ -11,6 +11,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -26,35 +28,44 @@ import uk.trainwatch.web.rest.Cache;
  *
  * @author peter
  */
-@Path("/rail/1/performance/rtppm")
+@Path( "/rail/1/performance/rtppm" )
+@RequestScoped
 public class RTPPMRest
 {
 
-    @Path("/operators")
+    @Inject
+    private OperatorManager operatorManager;
+
+    @Inject
+    private PerformanceManager performanceManager;
+
+    @Path( "/operators" )
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces( MediaType.APPLICATION_JSON )
     public Response operators()
     {
-        return Response.ok( OperatorManager.INSTANCE.getOperators() ).
+        return Response.ok( operatorManager.getOperators() ).
                 build();
     }
 
-    @Path("/live/{operatorId}")
+    @Path( "/live/{operatorId}" )
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Cache(maxAge = 1, unit = ChronoUnit.MINUTES)
-    public Response live( @PathParam("operatorId") int id )
+    @Produces( MediaType.APPLICATION_JSON )
+    @Cache( maxAge = 1, unit = ChronoUnit.MINUTES )
+    public Response live( @PathParam( "operatorId" ) int id )
     {
-        try {
-            Optional<OperatorDailyPerformance> ppm = PerformanceManager.INSTANCE.getOperatorPerformance( id, LocalDate.now() );
-            if( ppm.isPresent() ) {
+        try
+        {
+            Optional<OperatorDailyPerformance> ppm = performanceManager.getOperatorPerformance( id, LocalDate.now() );
+            if( ppm.isPresent() )
+            {
                 return Response.ok( ppm.get() ).
                         build();
             }
             return Response.status( Response.Status.NOT_FOUND ).
                     build();
-        }
-        catch( SQLException ex ) {
+        } catch( SQLException ex )
+        {
             Logger.getLogger( RTPPMRest.class.getName() ).
                     log( Level.SEVERE, null, ex );
             return Response.serverError().

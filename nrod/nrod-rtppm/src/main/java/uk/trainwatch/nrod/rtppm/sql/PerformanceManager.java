@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.annotation.Resource;
+import javax.enterprise.context.ApplicationScoped;
 import javax.sql.DataSource;
 import uk.trainwatch.util.TimeUtils;
 import uk.trainwatch.util.sql.SQL;
@@ -37,17 +39,12 @@ import uk.trainwatch.util.sql.SQL;
  *
  * @author peter
  */
-public enum PerformanceManager
+@ApplicationScoped
+public class PerformanceManager
 {
 
-    INSTANCE;
-
+    @Resource( name = "jdbc/rail" )
     private DataSource dataSource;
-
-    public void setDataSource( DataSource dataSource )
-    {
-        this.dataSource = dataSource;
-    }
 
     /**
      * Get's the daily performance for an Operator for a month
