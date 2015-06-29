@@ -15,12 +15,18 @@ public class SmartBerthMovement
     private final long areaId;
     private final long fromBerthId;
     private final long toBerthId;
+    private final String area;
+    private final String from;
+    private final String to;
 
-    public SmartBerthMovement( long areaId, long fromBerthId, long toBerthId )
+    public SmartBerthMovement( long areaId, long fromBerthId, long toBerthId, String area, String from, String to )
     {
         this.areaId = areaId;
         this.fromBerthId = fromBerthId;
         this.toBerthId = toBerthId;
+        this.area = area;
+        this.from = from;
+        this.to = to;
     }
 
     public long getAreaId()
@@ -40,18 +46,17 @@ public class SmartBerthMovement
 
     public String getArea()
     {
-        SmartArea area = SmartManager.INSTANCE.getArea( areaId );
-        return area == null ? null : area.getArea();
+        return area;
     }
 
     public String getFromBerth()
     {
-        return SmartManager.INSTANCE.getBerth( fromBerthId );
+        return from;
     }
 
     public String getToBerth()
     {
-        return SmartManager.INSTANCE.getBerth( toBerthId );
+        return to;
     }
 
     @Override

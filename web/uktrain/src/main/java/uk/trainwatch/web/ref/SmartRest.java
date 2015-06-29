@@ -5,6 +5,8 @@
  */
 package uk.trainwatch.web.ref;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -19,39 +21,42 @@ import uk.trainwatch.nrod.smart.SmartManager;
  *
  * @author peter
  */
-@Path("/rail/1/smart")
+@Path( "/rail/1/smart" )
+@RequestScoped
 public class SmartRest
 {
+
+    @Inject
+    private SmartManager smartManager;
 
     /**
      * Generates an index of all signalling areas defined in SMART
      * <p>
      * @return
      */
-    @Path("/areas")
+    @Path( "/areas" )
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces( MediaType.APPLICATION_JSON )
     public Response areas()
     {
         return Response.
-                accepted( SmartManager.INSTANCE.getAreas() ).
+                accepted( smartManager.getAreas() ).
                 build();
     }
 
     /**
      * Returns a JSON array of berths within a signalling area that exist within SMART.
      * <p>
-     * @param area
-     *             <p>
+     * @param area <p>
      * @return
      */
-    @Path("/berths/{area}")
+    @Path( "/berths/{area}" )
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response berths( @PathParam("area") String area )
+    @Produces( MediaType.APPLICATION_JSON )
+    public Response berths( @PathParam( "area" ) String area )
     {
         return Response.
-                accepted( SmartManager.INSTANCE.getBerths( area ) ).
+                accepted( smartManager.getBerths( area ) ).
                 build();
     }
 
@@ -60,23 +65,24 @@ public class SmartRest
      * <p>
      * @param area
      * @param from
-     * @param to
-     * <p>
+     * @param to <p>
      * @return
      */
-    @Path("/movement/{area}/{from}/{to}")
+    @Path( "/movement/{area}/{from}/{to}" )
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response area( @PathParam("area") String area,
-                          @PathParam("from") String from,
-                          @PathParam("to") String to )
+    @Produces( MediaType.APPLICATION_JSON )
+    public Response area( @PathParam( "area" ) String area,
+                          @PathParam( "from" ) String from,
+                          @PathParam( "to" ) String to )
     {
         Smart smart = null;
-        SmartBerthMovement mvt = SmartManager.INSTANCE.getSmartBerthMovement( area, from, to );
-        if( mvt != null ) {
-            smart = SmartManager.INSTANCE.getSmart( mvt );
+        SmartBerthMovement mvt = smartManager.getSmartBerthMovement( area, from, to );
+        if( mvt != null )
+        {
+            smart = smartManager.getSmart( mvt );
         }
-        if( smart == null ) {
+        if( smart == null )
+        {
             return Response.status( Response.Status.NOT_FOUND ).
                     build();
         }

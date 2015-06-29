@@ -15,11 +15,20 @@ public class SmartBerth
 
     private final long areaId;
     private final long berthId;
+    private final String area;
+    private final String berth;
 
-    public SmartBerth( long areaId, long berthId )
+    public static SmartBerth create( SmartManager smartManager, long areaId, long berthId )
+    {
+        return new SmartBerth( areaId, berthId, smartManager.getArea( areaId ), smartManager.getBerth( berthId ) );
+    }
+
+    public SmartBerth( long areaId, long berthId, SmartArea smartArea, String smartBerth )
     {
         this.areaId = areaId;
         this.berthId = berthId;
+        this.area = smartArea == null ? null : smartArea.getArea();
+        this.berth = smartBerth;
     }
 
     public long getAreaId()
@@ -34,13 +43,12 @@ public class SmartBerth
 
     public String getArea()
     {
-        SmartArea area = SmartManager.INSTANCE.getArea( areaId );
-        return area == null ? null : area.getArea();
+        return area;
     }
 
     public String getBerth()
     {
-        return SmartManager.INSTANCE.getBerth( berthId );
+        return berth;
     }
 
     public boolean isValid()

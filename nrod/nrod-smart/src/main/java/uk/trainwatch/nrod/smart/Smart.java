@@ -13,26 +13,29 @@ import uk.trainwatch.util.sql.SQLResultSetHandler;
  *
  * @author peter
  */
-@XmlRootElement(name = "smart")
+@XmlRootElement( name = "smart" )
 public class Smart
 {
 
-    public static final SQLResultSetHandler<Smart> fromSQL = rs -> new Smart(
-            rs.getLong( 1 ),
-            SmartManager.INSTANCE.getArea( rs.getLong( 2 ) ),
-            SmartManager.INSTANCE.getBerth( rs.getLong( 3 ) ),
-            SmartManager.INSTANCE.getBerth( rs.getLong( 4 ) ),
-            SmartManager.INSTANCE.getLine( rs.getLong( 5 ) ),
-            SmartManager.INSTANCE.getLine( rs.getLong( 6 ) ),
-            rs.getInt( 7 ),
-            rs.getString( 8 ),
-            SmartEvent.getId( rs.getInt( 9 ) ),
-            rs.getString( 10 ),
-            rs.getInt( 11 ),
-            rs.getString( 12 ),
-            StepType.getId( rs.getInt( 13 ) ),
-            rs.getString( 14 )
-    );
+    public static final SQLResultSetHandler<Smart> fromSQL( SmartManager smartManager )
+    {
+        return rs -> new Smart(
+                rs.getLong( 1 ),
+                smartManager.getArea( rs.getLong( 2 ) ),
+                smartManager.getBerth( rs.getLong( 3 ) ),
+                smartManager.getBerth( rs.getLong( 4 ) ),
+                smartManager.getLine( rs.getLong( 5 ) ),
+                smartManager.getLine( rs.getLong( 6 ) ),
+                rs.getInt( 7 ),
+                rs.getString( 8 ),
+                SmartEvent.getId( rs.getInt( 9 ) ),
+                rs.getString( 10 ),
+                rs.getInt( 11 ),
+                rs.getString( 12 ),
+                StepType.getId( rs.getInt( 13 ) ),
+                rs.getString( 14 )
+        );
+    }
 
     private final long id;
     private final SmartArea area;
@@ -49,7 +52,8 @@ public class Smart
     private final StepType stepType;
     private final String comment;
 
-    public Smart( long id, SmartArea area, String fromBerth, String toBerth, String fromLine, String toLine, int berthOffset, String platform, SmartEvent event,
+    public Smart( long id, SmartArea area, String fromBerth, String toBerth, String fromLine, String toLine, int berthOffset,
+                  String platform, SmartEvent event,
                   String route, int stanox, String stanme, StepType stepType, String comment )
     {
         this.id = id;
@@ -162,24 +166,25 @@ public class Smart
     @Override
     public boolean equals( Object obj )
     {
-        if( obj == null || getClass() != obj.getClass() ) {
+        if( obj == null || getClass() != obj.getClass() )
+        {
             return false;
         }
         final Smart other = (Smart) obj;
         return this.id == other.id
-               && Objects.equals( this.area, other.area )
-               && Objects.equals( this.fromBerth, other.fromBerth )
-               && Objects.equals( this.toBerth, other.toBerth )
-               && Objects.equals( this.fromLine, other.fromLine )
-               && Objects.equals( this.toLine, other.toLine )
-               && this.berthOffset == other.berthOffset
-               && Objects.equals( this.platform, other.platform )
-               && this.event == other.event
-               && Objects.equals( this.route, other.route )
-               && this.stanox == other.stanox
-               && Objects.equals( this.stanme, other.stanme )
-               && this.stepType == other.stepType
-               && Objects.equals( this.comment, other.comment );
+                && Objects.equals( this.area, other.area )
+                && Objects.equals( this.fromBerth, other.fromBerth )
+                && Objects.equals( this.toBerth, other.toBerth )
+                && Objects.equals( this.fromLine, other.fromLine )
+                && Objects.equals( this.toLine, other.toLine )
+                && this.berthOffset == other.berthOffset
+                && Objects.equals( this.platform, other.platform )
+                && this.event == other.event
+                && Objects.equals( this.route, other.route )
+                && this.stanox == other.stanox
+                && Objects.equals( this.stanme, other.stanme )
+                && this.stepType == other.stepType
+                && Objects.equals( this.comment, other.comment );
     }
 
     @Override

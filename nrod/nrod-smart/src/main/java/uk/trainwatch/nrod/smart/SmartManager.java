@@ -21,6 +21,9 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import javax.enterprise.context.ApplicationScoped;
 import javax.sql.DataSource;
 import uk.trainwatch.util.CollectionUtils;
 import uk.trainwatch.util.cache.Cache;
@@ -32,11 +35,13 @@ import uk.trainwatch.util.sql.UncheckedSQLException;
  *
  * @author peter
  */
-public enum SmartManager
+@ApplicationScoped
+public class SmartManager
 {
 
-    INSTANCE;
     private static final Logger LOG = Logger.getLogger( SmartManager.class.getName() );
+
+    @Resource( name = "jdbc/rail" )
     private DataSource dataSource;
 
     private final Map<Long, SmartArea> areas = new ConcurrentHashMap<>();
@@ -46,18 +51,24 @@ public enum SmartManager
     private final Map<Long, String> lines = new ConcurrentHashMap<>();
     private final Cache<SmartBerthMovement, Smart> cache = new Cache<>();
 
-    void setDataSource( DataSource dataSource )
-            throws SQLException
+    @PostConstruct
+    void start()
     {
-        this.dataSource = dataSource;
-        reload();
+        try
+        {
+            reload();
+        } catch( SQLException ex )
+        {
+            throw new UncheckedSQLException( ex );
+        }
     }
 
     public void reload()
             throws SQLException
     {
         try( Connection con = dataSource.getConnection();
-             Statement s = con.createStatement() ) {
+                Statement s = con.createStatement() )
+        {
             LOG.log( Level.INFO, "Loading Smart Train Describer Areas" );
             CollectionUtils.replace( areas,
                                      SQL.stream( s.executeQuery( "SELECT * FROM reference.smart_area" ), SmartArea.fromSQL ).
@@ -104,19 +115,22 @@ public enum SmartManager
         Long areaId = areaIndex.get( area );
         Long fromBerthId = berthIndex.get( from );
         Long toBerthId = berthIndex.get( to );
-        if( areaId == null || fromBerthId == null || toBerthId == null ) {
+        if( areaId == null || fromBerthId == null || toBerthId == null )
+        {
             return null;
         }
-        return new SmartBerthMovement( areaId, fromBerthId, toBerthId );
+        return new SmartBerthMovement( areaId, fromBerthId, toBerthId, area, from, to );
     }
 
     public Smart getSmart( SmartBerthMovement movement )
     {
-        if( movement != null ) {
-            try {
+        if( movement != null )
+        {
+            try
+            {
                 return cache.computeIfAbsent( movement, this::lookup );
-            }
-            catch( UncheckedSQLException ex ) {
+            } catch( UncheckedSQLException ex )
+            {
                 LOG.log( Level.SEVERE, ex, () -> "Failed to lookup " + movement );
             }
         }
@@ -126,53 +140,58 @@ public enum SmartManager
 
     public void perform( SmartBerthMovement movement, Consumer<Smart> c )
     {
-        try {
+        try
+        {
             cache.compute( movement, this::lookup, c );
-        }
-        catch( UncheckedSQLException ex ) {
+        } catch( UncheckedSQLException ex )
+        {
             LOG.log( Level.SEVERE, ex, () -> "Failed to lookup " + movement );
         }
     }
 
     public void perform( SmartBerthMovement movement, BiConsumer<SmartBerthMovement, Smart> c )
     {
-        try {
+        try
+        {
             cache.compute( movement, this::lookup, c );
-        }
-        catch( UncheckedSQLException ex ) {
+        } catch( UncheckedSQLException ex )
+        {
             LOG.log( Level.SEVERE, ex, () -> "Failed to lookup " + movement );
         }
     }
 
-    public static Consumer<SmartBerthMovement> consume( Consumer<Smart> c )
+    public Consumer<SmartBerthMovement> consume( Consumer<Smart> c )
     {
-        return t -> INSTANCE.perform( t, c );
+        return t -> perform( t, c );
     }
 
-    public static Consumer<SmartBerthMovement> consume( BiConsumer<SmartBerthMovement, Smart> c )
+    public Consumer<SmartBerthMovement> consume( BiConsumer<SmartBerthMovement, Smart> c )
     {
-        return t -> INSTANCE.perform( t, c );
+        return t -> perform( t, c );
     }
 
     private Smart lookup( SmartBerthMovement movement )
     {
         LOG.log( Level.INFO, () -> "Lookup " + movement );
-        if( movement == null ) {
+        if( movement == null )
+        {
             return null;
         }
-        try( Connection con = dataSource.getConnection() ) {
+        try( Connection con = dataSource.getConnection() )
+        {
             try( PreparedStatement ps = SQL.prepare( con,
                                                      "SELECT * FROM reference.smart WHERE area=? AND fromBerth=? AND toBerth=?",
                                                      movement.getAreaId(),
                                                      movement.getFromBerthId(),
                                                      movement.getToBerthId()
-            ) ) {
-                return SQL.stream( ps, Smart.fromSQL ).
+            ) )
+            {
+                return SQL.stream( ps, Smart.fromSQL( this ) ).
                         findFirst().
                         orElse( null );
             }
-        }
-        catch( SQLException ex ) {
+        } catch( SQLException ex )
+        {
             throw new UncheckedSQLException( ex );
         }
     }
@@ -184,25 +203,28 @@ public enum SmartManager
 
     public Collection<String> getBerths( Long areaId )
     {
-        if( areaId == null ) {
+        if( areaId == null )
+        {
             return Collections.emptyList();
         }
 
-        try( Connection con = dataSource.getConnection() ) {
+        try( Connection con = dataSource.getConnection() )
+        {
             try( PreparedStatement ps = SQL.prepare( con,
                                                      "SELECT b.berth FROM reference.smart s INNER JOIN reference.smart_berth b ON s.fromBerth=b.id WHERE area=?"
                                                      + " UNION "
                                                      + "SELECT b.berth FROM reference.smart s INNER JOIN reference.smart_berth b ON s.toBerth=b.id WHERE area=?",
                                                      areaId,
                                                      areaId
-            ) ) {
+            ) )
+            {
                 return SQL.stream( ps, SQL.STRING_LOOKUP ).
                         sorted().
                         distinct().
                         collect( Collectors.toList() );
             }
-        }
-        catch( SQLException ex ) {
+        } catch( SQLException ex )
+        {
             throw new UncheckedSQLException( ex );
         }
     }
@@ -210,16 +232,19 @@ public enum SmartManager
     public Collection<Smart> getSmart( String area )
     {
         LOG.log( Level.INFO, () -> "Lookup " + area );
-        if( area == null || !areaIndex.containsKey( area ) ) {
+        if( area == null || !areaIndex.containsKey( area ) )
+        {
             return null;
         }
-        try( Connection con = dataSource.getConnection() ) {
-            try( PreparedStatement ps = SQL.prepare( con, "SELECT * FROM reference.smart WHERE area=?", area ) ) {
-                return SQL.stream( ps, Smart.fromSQL ).
+        try( Connection con = dataSource.getConnection() )
+        {
+            try( PreparedStatement ps = SQL.prepare( con, "SELECT * FROM reference.smart WHERE area=?", area ) )
+            {
+                return SQL.stream( ps, Smart.fromSQL( this ) ).
                         collect( Collectors.toList() );
             }
-        }
-        catch( SQLException ex ) {
+        } catch( SQLException ex )
+        {
             throw new UncheckedSQLException( ex );
         }
     }
