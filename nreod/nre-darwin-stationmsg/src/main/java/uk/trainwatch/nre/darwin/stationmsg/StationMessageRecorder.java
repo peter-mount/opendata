@@ -13,6 +13,9 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.annotation.Resource;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.sql.DataSource;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
 import uk.trainwatch.nre.darwin.model.ppt.stationmessages.StationMessage;
@@ -24,13 +27,18 @@ import uk.trainwatch.util.sql.SQL;
  * <p>
  * @author peter
  */
+@ApplicationScoped
 public class StationMessageRecorder
         implements Consumer<Pport>
 {
 
     private static final Logger log = Logger.getLogger( StationMessageRecorder.class.getName() );
 
+    @Resource( name = "jdbc/rail" )
     private final DataSource dataSource;
+
+    @Inject
+    private DarwinJaxbContext darwinJaxbContext;
 
     public StationMessageRecorder( DataSource dataSource )
     {
@@ -40,7 +48,8 @@ public class StationMessageRecorder
     @Override
     public void accept( Pport t )
     {
-        if( t != null ) {
+        if( t != null )
+        {
             t.getUR().getOW().forEach( m -> accept( t, m ) );
         }
     }
@@ -49,15 +58,18 @@ public class StationMessageRecorder
     {
         int id = m.getId();
 
-        try( Connection con = dataSource.getConnection() ) {
-            if( m.isSetStation() ) {
+        try( Connection con = dataSource.getConnection() )
+        {
+            if( m.isSetStation() )
+            {
                 updateMessage( con, id, t, m );
             }
-            else {
+            else
+            {
                 removeMessage( con, id );
             }
-        }
-        catch( SQLException ex ) {
+        } catch( SQLException ex )
+        {
             log.log( Level.SEVERE, null, ex );
         }
     }
@@ -85,13 +97,14 @@ public class StationMessageRecorder
         String crs = m.getStation().stream().map( StationMessage.Station::getCrs ).collect( Collectors.joining( "," ) );
 
         // Update the message
-        try( PreparedStatement ps = SQL.prepare( con, "SELECT darwin.message(?,?,?,?,?,?)" ) ) {
+        try( PreparedStatement ps = SQL.prepare( con, "SELECT darwin.message(?,?,?,?,?,?)" ) )
+        {
             SQL.executeQuery( ps,
                               id,
                               Objects.toString( m.getCat(), "" ),
                               Objects.toString( m.getSev(), "" ),
                               m.getSuppress(),
-                              DarwinJaxbContext.toXML.apply( dbPport ),
+                              darwinJaxbContext.toXML().apply( dbPport ),
                               crs
             );
         }
@@ -110,7 +123,8 @@ public class StationMessageRecorder
     {
         log.log( Level.INFO, () -> "Removing station message " + id );
 
-        try( PreparedStatement ps = SQL.prepare( con, "DELETE FROM darwin.message_station WHERE msgid=?" ) ) {
+        try( PreparedStatement ps = SQL.prepare( con, "DELETE FROM darwin.message_station WHERE msgid=?" ) )
+        {
             SQL.executeUpdate( ps, id );
         }
 

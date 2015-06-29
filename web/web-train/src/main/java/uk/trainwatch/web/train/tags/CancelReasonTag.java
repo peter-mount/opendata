@@ -6,6 +6,7 @@
 package uk.trainwatch.web.train.tags;
 
 import java.io.IOException;
+import javax.inject.Inject;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import uk.trainwatch.nre.darwin.model.ctt.referenceschema.Reason;
@@ -19,6 +20,9 @@ public class CancelReasonTag
         extends BodyTagSupport
 {
 
+    @Inject
+    private DarwinReferenceManager darwinReferenceManager;
+    
     private Integer value;
 
     @Override
@@ -37,7 +41,7 @@ public class CancelReasonTag
             throws JspException
     {
         if( value != null ) {
-            Reason reason = DarwinReferenceManager.INSTANCE.getCancelReason( value );
+            Reason reason = darwinReferenceManager.getCancelReason( value );
             if( reason != null ) {
                 try {
                     pageContext.getOut().print( reason.getReasontext() );

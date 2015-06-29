@@ -19,6 +19,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Resource;
+import javax.enterprise.context.ApplicationScoped;
 import javax.sql.DataSource;
 import uk.trainwatch.nre.darwin.model.ctt.referenceschema.CISSource;
 import uk.trainwatch.nre.darwin.model.ctt.referenceschema.LocationRef;
@@ -33,13 +35,15 @@ import uk.trainwatch.util.sql.SQL;
  * <p>
  * @author peter
  */
-public enum DarwinReferenceManager
+@ApplicationScoped
+public class DarwinReferenceManager
 {
 
-    INSTANCE;
+    private static final Logger LOG = Logger.getLogger( DarwinReferenceManager.class.getName() );
 
-    private final Logger LOG = Logger.getLogger( getClass().getName() );
+    @Resource( name = "jdbc/rail" )
     private DataSource dataSource;
+
     /**
      * Cache LocationRef as used often
      */
@@ -54,11 +58,6 @@ public enum DarwinReferenceManager
      * When the cache was last used
      */
     private volatile LocalDateTime locationCacheUpdated = LocalDateTime.MIN;
-
-    public void setDataSource( DataSource dataSource )
-    {
-        this.dataSource = dataSource;
-    }
 
     private boolean refreshRequired()
     {

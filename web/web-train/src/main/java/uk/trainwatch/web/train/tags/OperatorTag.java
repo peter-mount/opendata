@@ -6,6 +6,7 @@
 package uk.trainwatch.web.train.tags;
 
 import java.io.IOException;
+import javax.inject.Inject;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.BodyTagSupport;
@@ -19,6 +20,9 @@ import uk.trainwatch.nre.darwin.reference.DarwinReferenceManager;
 public class OperatorTag
         extends BodyTagSupport
 {
+
+    @Inject
+    private DarwinReferenceManager darwinReferenceManager;
 
     private String value;
     private boolean link = false;
@@ -34,33 +38,39 @@ public class OperatorTag
     public int doStartTag()
             throws JspException
     {
-        if( value != null ) {
+        if( value != null )
+        {
 
             String name = null;
 
-            TocRef ref = DarwinReferenceManager.INSTANCE.getTocRef( value );
-            if( ref != null && ref.isSetTocname() ) {
+            TocRef ref = darwinReferenceManager.getTocRef( value );
+            if( ref != null && ref.isSetTocname() )
+            {
                 name = ref.getTocname();
             }
 
-            if( name == null ) {
+            if( name == null )
+            {
                 name = value;
             }
 
-            try {
+            try
+            {
                 JspWriter w = pageContext.getOut();
 
-                if( link && ref != null && ref.isSetUrl() ) {
+                if( link && ref != null && ref.isSetUrl() )
+                {
                     w.write( "<a href=\"" );
                     w.write( ref.getUrl() );
                     w.write( "\" target=\"_blank\">" );
                 }
                 w.write( name );
-                if( link && ref != null && ref.isSetUrl() ) {
+                if( link && ref != null && ref.isSetUrl() )
+                {
                     w.write( "</a>" );
                 }
-            }
-            catch( IOException ex ) {
+            } catch( IOException ex )
+            {
                 throw new JspException( ex );
             }
         }

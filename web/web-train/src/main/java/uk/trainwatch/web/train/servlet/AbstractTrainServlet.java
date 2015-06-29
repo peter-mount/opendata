@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import uk.trainwatch.nre.darwin.forecast.ForecastManager;
@@ -41,6 +42,12 @@ import uk.trainwatch.web.util.CacheControl;
 public abstract class AbstractTrainServlet
         extends AbstractServlet
 {
+
+    @Inject
+    protected ForecastManager forecastManager;
+
+    @Inject
+    private DarwinReferenceManager darwinReferenceManager;
 
     @Override
     protected final void doGet( ApplicationRequest request )
@@ -112,7 +119,7 @@ public abstract class AbstractTrainServlet
                    IOException
     {
         String rid = request.getPathInfo().substring( 1 );
-        Pport pport = ForecastManager.INSTANCE.get( rid );
+        Pport pport = forecastManager.get( rid );
         Train train = Train.create( pport );
         if( train == null )
         {
@@ -143,13 +150,13 @@ public abstract class AbstractTrainServlet
     {
         // Get the origin location as seen by darwin
         TplLocation originLoc = train.getOrigin();
-        TrainLocation origin = originLoc == null ? null : DarwinReferenceManager.INSTANCE.getLocationRefFromTiploc( originLoc.getTpl() );
+        TrainLocation origin = originLoc == null ? null : darwinReferenceManager.getLocationRefFromTiploc( originLoc.getTpl() );
         TrainMovement originMvt = originLoc == null ? null : train.getMovement( originLoc.getTpl() );
         String originName = Objects.toString( origin.getLocation(), originLoc.getTpl() );
 
         // Get the destination location as seen by darwin
         TplLocation destLoc = train.getDestination();
-        TrainLocation dest = destLoc == null ? null : DarwinReferenceManager.INSTANCE.getLocationRefFromTiploc( destLoc.getTpl() );
+        TrainLocation dest = destLoc == null ? null : darwinReferenceManager.getLocationRefFromTiploc( destLoc.getTpl() );
         TrainMovement destMvt = destLoc == null ? null : train.getMovement( destLoc.getTpl() );
         String destName = Objects.toString( dest.getLocation(), destLoc.getTpl() );
 
@@ -159,7 +166,7 @@ public abstract class AbstractTrainServlet
         {
             List<String> locs = train.getMovement().stream().map( TplLocation::getTpl ).collect( Collectors.toList() );
 
-            via = DarwinReferenceManager.INSTANCE.getVia( origin.getCrs(), dest.getTiploc(), locs );
+            via = darwinReferenceManager.getVia( origin.getCrs(), dest.getTiploc(), locs );
         }
 
         // Train name
@@ -213,7 +220,7 @@ public abstract class AbstractTrainServlet
         Reason lateReason = null;
         if( train.isTsPresent() && train.getTs().isSetLateReason() )
         {
-            lateReason = DarwinReferenceManager.INSTANCE.getLateReason( train.getTs().getLateReason().getValue() );
+            lateReason = darwinReferenceManager.getLateReason( train.getTs().getLateReason().getValue() );
         }
         req.put( "lateReason", lateReason );
 
@@ -221,7 +228,7 @@ public abstract class AbstractTrainServlet
         Reason cancReason = null;
         if( train.isSchedulePresent() && train.getSchedule().isSetCancelReason() )
         {
-            cancReason = DarwinReferenceManager.INSTANCE.getLateReason( train.getSchedule().getCancelReason().getValue() );
+            cancReason = darwinReferenceManager.getLateReason( train.getSchedule().getCancelReason().getValue() );
         }
         req.put( "cancReason", cancReason );
 

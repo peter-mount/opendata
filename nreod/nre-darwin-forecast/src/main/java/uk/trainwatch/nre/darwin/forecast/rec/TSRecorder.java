@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.sql.DataSource;
+import javax.enterprise.context.ApplicationScoped;
 import uk.trainwatch.nre.darwin.forecast.TSLocationComparator;
 import uk.trainwatch.nre.darwin.model.ppt.forecasts.TS;
 import uk.trainwatch.nre.darwin.model.ppt.forecasts.TSLocation;
@@ -21,14 +21,10 @@ import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
  *
  * @author peter
  */
+@ApplicationScoped
 public class TSRecorder
         extends AbstractRecorder<TS>
 {
-
-    public TSRecorder( DataSource dataSource )
-    {
-        super( dataSource );
-    }
 
     @Override
     public void accept( Pport t )

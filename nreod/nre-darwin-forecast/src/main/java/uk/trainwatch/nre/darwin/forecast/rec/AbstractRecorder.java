@@ -14,14 +14,12 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import javax.annotation.Resource;
+import javax.inject.Inject;
 import javax.sql.DataSource;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
 import uk.trainwatch.nre.darwin.model.util.ScheduleID;
-import uk.trainwatch.nre.darwin.model.util.TplLocation;
 import uk.trainwatch.nre.darwin.parser.DarwinJaxbContext;
-import uk.trainwatch.util.Streams;
 import uk.trainwatch.util.sql.SQL;
 
 /**
@@ -36,29 +34,32 @@ public abstract class AbstractRecorder<S>
 
     protected static final Logger LOG = Logger.getLogger( AbstractRecorder.class.getName() );
 
-    private final DataSource dataSource;
+    @Resource( name = "jdbc/rail" )
+    private DataSource dataSource;
 
-    public AbstractRecorder( DataSource dataSource )
-    {
-        this.dataSource = dataSource;
-    }
+    @Inject
+    private DarwinJaxbContext darwinJaxbContext;
 
     protected final void accept( Pport t, Collection<S> s )
     {
-        if( t != null ) {
-            s.forEach( ts -> {
-                try( Connection con = dataSource.getConnection() ) {
-                    try {
+        if( t != null )
+        {
+            s.forEach( ts ->
+            {
+                try( Connection con = dataSource.getConnection() )
+                {
+                    try
+                    {
                         con.setAutoCommit( false );
                         apply( t, ts, con );
                         con.commit();
-                    }
-                    catch( SQLException ex ) {
+                    } catch( SQLException ex )
+                    {
                         LOG.log( Level.SEVERE, null, ex );
                         con.rollback();
                     }
-                }
-                catch( SQLException ex ) {
+                } catch( SQLException ex )
+                {
                     LOG.log( Level.SEVERE, null, ex );
                 }
             }
@@ -72,9 +73,10 @@ public abstract class AbstractRecorder<S>
     protected final Pport getForecast( Connection con, String rid )
             throws SQLException
     {
-        try( PreparedStatement ps = SQL.prepare( con, "SELECT xml FROM darwin.forecast WHERE rid=?", rid ) ) {
+        try( PreparedStatement ps = SQL.prepare( con, "SELECT xml FROM darwin.forecast WHERE rid=?", rid ) )
+        {
             return SQL.stream( ps, SQL.STRING_LOOKUP ).
-                    map( DarwinJaxbContext.fromXML ).
+                    map( darwinJaxbContext.fromXML() ).
                     filter( Objects::nonNull ).
                     findAny().
                     orElse( null );
@@ -90,14 +92,16 @@ public abstract class AbstractRecorder<S>
     protected final void recordForecast( Connection con, Pport p, ScheduleID schedule )
             throws SQLException
     {
-        if( p == null || schedule == null ) {
+        if( p == null || schedule == null )
+        {
             return;
         }
 
-        try( PreparedStatement ps = SQL.prepare( con, "SELECT darwin.forecast(?,?::xml)" ) ) {
+        try( PreparedStatement ps = SQL.prepare( con, "SELECT darwin.forecast(?,?::xml)" ) )
+        {
             SQL.executeQuery( ps,
                               schedule.getRid(),
-                              DarwinJaxbContext.toXML.apply( p )
+                              darwinJaxbContext.toXML().apply( p )
             );
         }
     }

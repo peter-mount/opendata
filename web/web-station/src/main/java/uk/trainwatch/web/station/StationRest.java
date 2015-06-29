@@ -37,6 +37,9 @@ public class StationRest
     @Inject
     protected TrainLocationFactory trainLocationFactory;
 
+    @Inject
+    private DarwinReferenceManager darwinReferenceManager;
+
     @Path( "all" )
     @GET
     @Produces( MediaType.APPLICATION_JSON )
@@ -129,7 +132,7 @@ public class StationRest
     public Response search( @QueryParam( "term" ) String term )
     {
         return Rest.invoke( response -> response.entity(
-                DarwinReferenceManager.INSTANCE.
+                darwinReferenceManager.
                 searchLocations( term ).
                 map( l -> Json.createObjectBuilder().
                         add( "label", l.getLocation() + " [" + l.getCrs() + "]" ).

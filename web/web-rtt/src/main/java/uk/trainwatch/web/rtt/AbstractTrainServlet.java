@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import uk.trainwatch.util.Streams;
@@ -28,17 +29,20 @@ public abstract class AbstractTrainServlet
         extends AbstractServlet
 {
 
+    @Inject
+    protected LDBUtils lDBUtils;
+
     protected abstract String getTile();
 
     private Train getTrain( String rid )
             throws SQLException
     {
         // Unlike mobile we retrieve the entire train here & show in one go.
-        Train train = LDBUtils.getTrain( rid );
+        Train train = lDBUtils.getTrain( rid );
 
         // Also we lookup from the archive as necessary
         if( !train.isSchedulePresent() && !train.isForecastPresent() ) {
-            train = LDBUtils.getArchivedTrain( rid );
+            train = lDBUtils.getArchivedTrain( rid );
         }
         return train;
     }

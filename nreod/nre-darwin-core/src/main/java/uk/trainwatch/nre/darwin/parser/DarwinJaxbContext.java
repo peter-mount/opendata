@@ -13,7 +13,7 @@ import java.io.Writer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
+import javax.enterprise.context.ApplicationScoped;
 import javax.xml.bind.JAXBException;
 import uk.trainwatch.nre.darwin.model.ctt.referenceschema.PportTimetableRef;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
@@ -23,58 +23,65 @@ import uk.trainwatch.util.xml.JAXBSupport;
  *
  * @author peter
  */
-public enum DarwinJaxbContext
+@ApplicationScoped
+public class DarwinJaxbContext
 {
-
-    INSTANCE;
 
     /**
      * Mapping function to parse XML into JAXB instances
      */
-    public static final Function<String, Pport> fromXML = s -> {
-        if( s == null || s.isEmpty() ) {
-            return null;
-        }
-        try {
-            return INSTANCE.unmarshall( s );
-        }
-        catch( ClassCastException |
-               NullPointerException |
-               JAXBException ex ) {
-            return null;
-        }
-    };
+    public final Function<String, Pport> fromXML()
+    {
+        return s ->
+        {
+            if( s == null || s.isEmpty() )
+            {
+                return null;
+            }
+            try
+            {
+                return unmarshall( s );
+            } catch( ClassCastException |
+                     NullPointerException |
+                     JAXBException ex )
+            {
+                return null;
+            }
+        };
+    }
 
-    public static final Function<Pport, String> toXML = p -> {
-        if( p == null ) {
-            return null;
-        }
-        try {
-            return INSTANCE.marshall( p );
-        }
-        catch( ClassCastException |
-               NullPointerException |
-               JAXBException ex ) {
-            return null;
-        }
-    };
+    public final Function<Pport, String> toXML()
+    {
+        return p ->
+        {
+            if( p == null )
+            {
+                return null;
+            }
+            try
+            {
+                return marshall( p );
+            } catch( ClassCastException |
+                     NullPointerException |
+                     JAXBException ex )
+            {
+                return null;
+            }
+        };
+    }
 
-    /**
-     * A common instance of {@link DarwinUrSplitter}
-     */
-    public static final Function<Pport, Stream<Pport>> messageSplitter = new DarwinUrSplitter();
-
-    private final Logger log = Logger.getLogger( DarwinJaxbContext.class.getName() );
+    private static final Logger log = Logger.getLogger( DarwinJaxbContext.class.getName() );
 
     private final JAXBSupport jaxb;
 
     private DarwinJaxbContext()
     {
-        try {
+        try
+        {
             log.log( Level.INFO, "Initialising Darwin JAXB" );
             jaxb = new JAXBSupport( 50, Pport.class, PportTimetableRef.class );
-        }
-        catch( JAXBException ex ) {
+        } catch( JAXBException ex )
+        {
             Logger.getLogger( DarwinJaxbContext.class.getName() ).log( Level.SEVERE, null, ex );
             throw new IllegalStateException( "Failed to create JAXBContect for Darwin", ex );
         }
@@ -130,10 +137,8 @@ public enum DarwinJaxbContext
 
     /**
      * @see Pport#cloneMeta()
-     * @param orig
-     *             <p>
-     * @return
-     *         <p>
+     * @param orig <p>
+     * @return <p>
      * @deprecated now done inside the model
      */
     @Deprecated
@@ -144,7 +149,8 @@ public enum DarwinJaxbContext
         p.setVersion( orig.getVersion() );
 
         Pport.UR ur0 = orig.getUR();
-        if( ur0 != null ) {
+        if( ur0 != null )
+        {
             Pport.UR ur1 = new Pport.UR();
             ur1.setRequestID( ur0.getRequestID() );
             ur1.setRequestSource( ur0.getRequestSource() );

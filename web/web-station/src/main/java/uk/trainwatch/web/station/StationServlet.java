@@ -27,14 +27,17 @@ import uk.trainwatch.web.servlet.ApplicationRequest;
  * <p>
  * @author Peter T Mount
  */
-@WebServlet(name = "StationServlet", urlPatterns = "/station/*")
+@WebServlet( name = "StationServlet", urlPatterns = "/station/*" )
 public class StationServlet
         extends AbstractServlet
 {
 
     @Inject
     protected TrainLocationFactory trainLocationFactory;
-    
+
+    @Inject
+    private StationMessageManager stationMessageManager;
+
     @Override
     protected void doGet( ApplicationRequest request )
             throws ServletException,
@@ -43,20 +46,24 @@ public class StationServlet
         String crs = request.getPathInfo().substring( 1 ).toUpperCase();
 
         TrainLocation loc = trainLocationFactory.getTrainLocationByCrs( crs );
-        if( loc == null ) {
+        if( loc == null )
+        {
             // See if they have used an alternate code
             loc = trainLocationFactory.resolveTrainLocation( crs );
 
-            if( loc == null ) {
+            if( loc == null )
+            {
                 request.sendError( HttpServletResponse.SC_NOT_FOUND );
             }
-            else {
+            else
+            {
                 // Redirect to the correct page
                 request.getResponse().
                         sendRedirect( "/station/" + loc.getCrs() );
             }
         }
-        else {
+        else
+        {
             show( request, loc );
         }
     }
@@ -68,13 +75,14 @@ public class StationServlet
         Map<String, Object> req = request.getRequestScope();
         req.put( "location", loc );
         req.put( "pageTitle", loc.getLocation() );
-        try {
+        try
+        {
             getMessages( req, loc );
             showMap( req, loc );
 
             request.renderTile( "station.info" );
-        }
-        catch( SQLException ex ) {
+        } catch( SQLException ex )
+        {
             log( "show " + loc, ex );
             request.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
         }
@@ -84,16 +92,14 @@ public class StationServlet
      * Station Messages
      * <p>
      * @param req
-     * @param loc
-     *            <p>
+     * @param loc <p>
      * @throws SQLException
      */
     private void getMessages( Map<String, Object> req, TrainLocation loc )
             throws SQLException
     {
         req.put( "stationMessages",
-                 StationMessageManager.INSTANCE.
-                 getMessages( loc.getCrs() ).
+                 stationMessageManager.getMessages( loc.getCrs() ).
                  collect( Collectors.toList() ) );
     }
 
@@ -101,8 +107,7 @@ public class StationServlet
      * is it possible to display a map? Not everywhere is in the db (some with wrong names)
      * <p>
      * @param req
-     * @param loc
-     *            <p>
+     * @param loc <p>
      * @throws ServletException
      * @throws IOException
      */
@@ -111,7 +116,8 @@ public class StationServlet
     {
 
         List<StationPosition> stationPosition = StationPositionManager.INSTANCE.findCrs( loc.getCrs() );
-        if( !stationPosition.isEmpty() ) {
+        if( !stationPosition.isEmpty() )
+        {
             StationPosition station = stationPosition.get( 0 );
             req.put( "stationPosition", station );
             req.put( "nearBy", StationPositionManager.INSTANCE.nearby( station, 3 ) );

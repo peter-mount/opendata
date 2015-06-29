@@ -7,7 +7,7 @@ package uk.trainwatch.nre.darwin.forecast.rec;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import javax.sql.DataSource;
+import javax.enterprise.context.ApplicationScoped;
 import uk.trainwatch.nre.darwin.model.ppt.schedules.DeactivatedSchedule;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
 
@@ -15,14 +15,10 @@ import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
  *
  * @author peter
  */
+@ApplicationScoped
 public class DeactivationRecorder
         extends AbstractRecorder<DeactivatedSchedule>
 {
-
-    public DeactivationRecorder( DataSource dataSource )
-    {
-        super( dataSource );
-    }
 
     @Override
     public void accept( Pport t )

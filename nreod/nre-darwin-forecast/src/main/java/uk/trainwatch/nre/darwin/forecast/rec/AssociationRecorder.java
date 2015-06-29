@@ -7,7 +7,7 @@ package uk.trainwatch.nre.darwin.forecast.rec;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import javax.sql.DataSource;
+import javax.enterprise.context.ApplicationScoped;
 import uk.trainwatch.nre.darwin.model.ppt.schedules.AssocService;
 import uk.trainwatch.nre.darwin.model.ppt.schedules.Association;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
@@ -16,14 +16,10 @@ import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
  *
  * @author peter
  */
+@ApplicationScoped
 public class AssociationRecorder
         extends AbstractRecorder<Association>
 {
-
-    public AssociationRecorder( DataSource dataSource )
-    {
-        super( dataSource );
-    }
 
     @Override
     public void accept( Pport t )

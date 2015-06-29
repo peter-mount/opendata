@@ -13,6 +13,7 @@ import java.time.Instant;
 import java.time.LocalTime;
 import java.util.Date;
 import java.util.Map;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import uk.trainwatch.nrod.location.TrainLocation;
@@ -27,11 +28,14 @@ public abstract class AbstractLDBServlet
         extends AbstractServlet
 {
 
+    @Inject
+    protected LDBUtils lDBUtils;
+
     protected abstract String getRenderTile();
 
     protected void show( ApplicationRequest request, TrainLocation loc )
             throws ServletException,
-            IOException
+                   IOException
     {
         Map<String, Object> req = request.getRequestScope();
         req.put( "location", loc );
@@ -46,7 +50,7 @@ public abstract class AbstractLDBServlet
             }
 
             // Get the departures and the Instant the last entry was last updated
-            Instant lastUpdate = LDBUtils.getDepartures( req, loc, time );
+            Instant lastUpdate = lDBUtils.getDepartures( req, loc, time );
 
             // Force 1 minute cache setting
             long now = System.currentTimeMillis();

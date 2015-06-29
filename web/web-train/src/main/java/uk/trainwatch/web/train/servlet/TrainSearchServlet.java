@@ -20,8 +20,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.annotation.Resource;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
+import javax.sql.DataSource;
 import uk.trainwatch.nre.darwin.model.ppt.schedules.OPOR;
 import uk.trainwatch.nre.darwin.model.ppt.schedules.OR;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
@@ -43,6 +46,15 @@ import uk.trainwatch.web.train.TrainMovement;
 public class TrainSearchServlet
         extends AbstractSearchServlet
 {
+
+    @Inject
+    private DarwinJaxbContext darwinJaxbContext;
+
+    @Inject
+    private DarwinReferenceManager darwinReferenceManager;
+
+    @Resource( name = "jdbc/rail" )
+    private DataSource dataSource;
 
     @Override
     protected void doGet( ApplicationRequest request )
@@ -148,7 +160,7 @@ public class TrainSearchServlet
         Collection<TrainLocation> locs = null;
         if( crs != null && !crs.isEmpty() )
         {
-            locs = DarwinReferenceManager.INSTANCE.getLocationRefsFromCrs( crs );
+            locs = darwinReferenceManager.getLocationRefsFromCrs( crs );
         }
 
         if( locs != null && !locs.isEmpty() )
@@ -170,13 +182,13 @@ public class TrainSearchServlet
             args.add( dt.toLocalDate().toString() );
 
             LocalTime time = dt.toLocalTime();
-            try( Connection con = TrainContextListener.getDataSource().getConnection() )
+            try( Connection con = dataSource.getConnection() )
             {
                 try( PreparedStatement ps = SQL.prepare( con, sql, args.toArray() ) )
                 {
                     log( ps.toString() );
                     return SQL.stream( ps, SQL.STRING_LOOKUP ).
-                            map( DarwinJaxbContext.fromXML ).
+                            map( darwinJaxbContext.fromXML() ).
                             filter( Pport::isSetUR ).
                             filter( p ->
                                     {

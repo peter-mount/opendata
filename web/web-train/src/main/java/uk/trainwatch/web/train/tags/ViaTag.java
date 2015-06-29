@@ -6,6 +6,7 @@
 package uk.trainwatch.web.train.tags;
 
 import java.io.IOException;
+import javax.inject.Inject;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import uk.trainwatch.nre.darwin.reference.DarwinReferenceManager;
@@ -17,6 +18,9 @@ import uk.trainwatch.nre.darwin.reference.DarwinReferenceManager;
 public class ViaTag
         extends BodyTagSupport
 {
+
+    @Inject
+    private DarwinReferenceManager darwinReferenceManager;
 
     private Integer value;
 
@@ -35,13 +39,16 @@ public class ViaTag
     public int doStartTag()
             throws JspException
     {
-        if( value != null ) {
-            String text = DarwinReferenceManager.INSTANCE.getViaText( value );
-            if( text != null ) {
-                try {
+        if( value != null )
+        {
+            String text = darwinReferenceManager.getViaText( value );
+            if( text != null )
+            {
+                try
+                {
                     pageContext.getOut().print( text );
-                }
-                catch( IOException ex ) {
+                } catch( IOException ex )
+                {
                     throw new JspException( ex );
                 }
             }

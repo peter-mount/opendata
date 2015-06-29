@@ -14,6 +14,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Resource;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.sql.DataSource;
 import uk.trainwatch.nre.darwin.model.ppt.stationmessages.StationMessage;
 import uk.trainwatch.nre.darwin.parser.DarwinJaxbContext;
@@ -23,35 +26,35 @@ import uk.trainwatch.util.sql.SQL;
  *
  * @author peter
  */
-public enum StationMessageManager
+@ApplicationScoped
+public class StationMessageManager
 {
 
-    INSTANCE;
+    private static final Logger log = Logger.getLogger( StationMessageManager.class.getName() );
 
-    private final Logger log = Logger.getLogger( StationMessageManager.class.getName() );
-
+    @Resource( name = "jdbc/rail" )
     private DataSource dataSource;
 
-    public void setDataSource( DataSource dataSource )
-    {
-        this.dataSource = dataSource;
-    }
+    @Inject
+    private DarwinJaxbContext darwinJaxbContext;
 
     public Collection<StationMessage> getMessages()
     {
-        try( Connection con = dataSource.getConnection() ) {
+        try( Connection con = dataSource.getConnection() )
+        {
             try( PreparedStatement ps = SQL.prepare( con,
                                                      "SELECT xml FROM darwin.message"
                                                      + " WHERE dt between now()-'6 hours'::interval AND now()"
-                                                     + " ORDER BY dt DESC" ) ) {
+                                                     + " ORDER BY dt DESC" ) )
+            {
                 return SQL.stream( ps, SQL.STRING_LOOKUP ).
-                        map( DarwinJaxbContext.fromXML ).
+                        map( darwinJaxbContext.fromXML() ).
                         filter( Objects::nonNull ).
                         flatMap( p -> p.getUR().getOW().stream() ).
                         collect( Collectors.toList() );
             }
-        }
-        catch( SQLException ex ) {
+        } catch( SQLException ex )
+        {
             log.log( Level.SEVERE, ex, () -> "Retrieving messages" );
         }
         return null;
@@ -66,32 +69,35 @@ public enum StationMessageManager
      */
     public Stream<StationMessage> getMessages( String crs )
     {
-        if( crs != null && !crs.isEmpty() ) {
+        if( crs != null && !crs.isEmpty() )
+        {
             String talpha = crs.toUpperCase();
 
-            try( Connection con = dataSource.getConnection() ) {
+            try( Connection con = dataSource.getConnection() )
+            {
                 try( PreparedStatement ps = SQL.prepare( con,
                                                          "SELECT m.xml FROM darwin.message m"
                                                          + " INNER JOIN darwin.message_station ms ON m.id=ms.msgid"
                                                          + " INNER JOIN darwin.crs s ON ms.crsid=s.id"
                                                          + " WHERE s.crs=?"
                                                          + " ORDER BY m.id DESC",
-                                                         talpha ) ) {
+                                                         talpha ) )
+                {
                     return SQL.stream( ps, SQL.STRING_LOOKUP ).
                             map( xml -> "<Pport xmlns=\"http://www.thalesgroup.com/rtti/PushPort/v12\">"
-                                        + "<uR>"
-                                        + "<OW xmlns:mg=\"http://www.thalesgroup.com/rtti/PushPort/StationMessages/v1\">" + xml + "</OW>"
-                                        + "</uR>"
-                                        + "</Pport>" ).
-                            map( DarwinJaxbContext.fromXML ).
+                                    + "<uR>"
+                                    + "<OW xmlns:mg=\"http://www.thalesgroup.com/rtti/PushPort/StationMessages/v1\">" + xml + "</OW>"
+                                    + "</uR>"
+                                    + "</Pport>" ).
+                            map( darwinJaxbContext.fromXML() ).
                             filter( Objects::nonNull ).
                             flatMap( p -> p.getUR().getOW().stream() ).
                             //filter( ow -> ow.getStation().stream().filter( s -> s.getCrs().equals( talpha ) ).findAny().isPresent() ).
                             collect( Collectors.toList() ).
                             stream();
                 }
-            }
-            catch( SQLException ex ) {
+            } catch( SQLException ex )
+            {
                 log.log( Level.SEVERE, ex, () -> "Retrieving messages for " + talpha );
             }
         }
@@ -100,18 +106,20 @@ public enum StationMessageManager
 
     public StationMessage getMessage( int id )
     {
-        try( Connection con = dataSource.getConnection() ) {
-            try( PreparedStatement ps = SQL.prepare( con, "SELECT xml FROM darwin.message WHERE id=?", id ) ) {
+        try( Connection con = dataSource.getConnection() )
+        {
+            try( PreparedStatement ps = SQL.prepare( con, "SELECT xml FROM darwin.message WHERE id=?", id ) )
+            {
                 return SQL.stream( ps, SQL.STRING_LOOKUP ).
-                        map( DarwinJaxbContext.fromXML ).
+                        map( darwinJaxbContext.fromXML() ).
                         filter( Objects::nonNull ).
                         flatMap( p -> p.getUR().getOW().stream() ).
                         filter( s -> s.getId() == id ).
                         findAny().
                         orElse( null );
             }
-        }
-        catch( SQLException ex ) {
+        } catch( SQLException ex )
+        {
             log.log( Level.SEVERE, ex, () -> "Retrieving message id " + id );
         }
         return null;

@@ -31,6 +31,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.xml.bind.JAXBException;
 import org.apache.commons.cli.CommandLine;
 import org.kohsuke.MetaInfServices;
@@ -52,6 +54,7 @@ import uk.trainwatch.util.sql.SQLConsumer;
  * @author peter
  */
 @MetaInfServices( Utility.class )
+@ApplicationScoped
 public class DarwinReference
         extends DBUtility
 {
@@ -59,6 +62,9 @@ public class DarwinReference
     protected static final Logger LOG = Logger.getLogger( DarwinReference.class.getName() );
     private static final String SCHEMA = "darwin";
     private List<Path> cifFiles;
+
+    @Inject
+    private DarwinJaxbContext darwinJaxbContext;
 
     public DarwinReference()
     {
@@ -91,7 +97,7 @@ public class DarwinReference
         {
             try( Reader r = new InputStreamReader( is ) )
             {
-                PportTimetableRef t = DarwinJaxbContext.INSTANCE.unmarshall( r );
+                PportTimetableRef t = darwinJaxbContext.unmarshall( r );
 
                 Map<String, Integer> tocs = parseTocRef( con, t.getTocRef() );
                 parseLocation( con, t.getLocationRef(), tocs );
@@ -133,15 +139,15 @@ public class DarwinReference
 
         LOG.log( Level.INFO, () -> "Importing location" );
         try( PreparedStatement ps = SQL.prepare( con,
-                "INSERT INTO " + SCHEMA + ".location"
-                + " (tpl,crs,toc,name)"
-                + " VALUES (darwin.tiploc(?),darwin.crs(?),?,?)" ) )
+                                                 "INSERT INTO " + SCHEMA + ".location"
+                                                 + " (tpl,crs,toc,name)"
+                                                 + " VALUES (darwin.tiploc(?),darwin.crs(?),?,?)" ) )
         {
             locs.forEach( SQLConsumer.guard( l -> SQL.executeUpdate( ps,
-                    l.getTpl(),
-                    l.getCrs(),
-                    tocs.get( l.getToc() ),
-                    l.getLocname()
+                                                                     l.getTpl(),
+                                                                     l.getCrs(),
+                                                                     tocs.get( l.getToc() ),
+                                                                     l.getLocname()
             ) ) );
         }
         LOG.log( Level.INFO, () -> "Imported " + locs.size() + " locations" );
@@ -174,11 +180,11 @@ public class DarwinReference
         try( PreparedStatement ps = SQL.prepare( con, "SELECT id,code FROM " + SCHEMA + ".toc" ) )
         {
             return SQL.stream( ps,
-                    rs -> new Object()
-                    {
-                        Integer id = rs.getInt( "id" );
-                        String code = rs.getString( "code" );
-                    }
+                               rs -> new Object()
+                               {
+                                   Integer id = rs.getInt( "id" );
+                                   String code = rs.getString( "code" );
+                               }
             ).collect( Collectors.toMap( o -> o.code, o -> o.id ) );
         }
     }
@@ -190,16 +196,16 @@ public class DarwinReference
 
         LOG.log( Level.INFO, () -> "Importing via" );
         try( PreparedStatement ps = SQL.prepare( con,
-                "INSERT INTO " + SCHEMA + ".via"
-                + " (at,dest,loc1,loc2,text)"
-                + " VALUES (darwin.crs(?),darwin.tiploc(?),darwin.tiploc(?),darwin.tiploc(?),?)" ) )
+                                                 "INSERT INTO " + SCHEMA + ".via"
+                                                 + " (at,dest,loc1,loc2,text)"
+                                                 + " VALUES (darwin.crs(?),darwin.tiploc(?),darwin.tiploc(?),darwin.tiploc(?),?)" ) )
         {
             vias.forEach( SQLConsumer.guard( l -> SQL.executeUpdate( ps,
-                    l.getAt(),
-                    l.getDest(),
-                    l.getLoc1(),
-                    l.getLoc2(),
-                    l.getViatext()
+                                                                     l.getAt(),
+                                                                     l.getDest(),
+                                                                     l.getLoc1(),
+                                                                     l.getLoc2(),
+                                                                     l.getViatext()
             ) ) );
         }
         LOG.log( Level.INFO, () -> "Imported " + vias.size() + " vias" );

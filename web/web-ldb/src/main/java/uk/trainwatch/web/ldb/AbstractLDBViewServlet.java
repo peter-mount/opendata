@@ -8,6 +8,7 @@ package uk.trainwatch.web.ldb;
 import uk.trainwatch.web.servlet.ApplicationRequest;
 import java.io.IOException;
 import java.util.Map;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
 import uk.trainwatch.nre.darwin.stationmsg.StationMessageManager;
 import uk.trainwatch.nrod.location.TrainLocation;
@@ -23,6 +24,9 @@ public abstract class AbstractLDBViewServlet
 
     protected abstract String getServletPrefix();
 
+    @Inject
+    private StationMessageManager stationMessageManager;
+    
     @Override
     protected void doGet( ApplicationRequest request )
             throws ServletException,
@@ -30,12 +34,12 @@ public abstract class AbstractLDBViewServlet
     {
         String crs = request.getPathInfo().substring( 1 ).toUpperCase();
 
-        TrainLocation loc = LDBUtils.resolveLocation( request, getServletPrefix() );
+        TrainLocation loc = lDBUtils.resolveLocation( request, getServletPrefix() );
         if( loc != null ) {
             Map<String, Object> req = request.getRequestScope();
             req.put( "location", loc );
             req.put( "pageTitle", loc.getLocation() );
-            req.put( "stationMessages", StationMessageManager.INSTANCE.getMessages( crs ) );
+            req.put( "stationMessages", stationMessageManager.getMessages( crs ) );
             show( request, loc );
         }
     }

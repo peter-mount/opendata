@@ -7,8 +7,7 @@ package uk.trainwatch.nre.darwin.forecast.rec;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
-import javax.sql.DataSource;
+import javax.enterprise.context.ApplicationScoped;
 import uk.trainwatch.nre.darwin.model.ppt.schedules.Schedule;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
 
@@ -16,14 +15,10 @@ import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
  *
  * @author peter
  */
+@ApplicationScoped
 public class ScheduleRecorder
         extends AbstractRecorder<Schedule>
 {
-
-    public ScheduleRecorder( DataSource dataSource )
-    {
-        super( dataSource );
-    }
 
     @Override
     public void accept( Pport t )

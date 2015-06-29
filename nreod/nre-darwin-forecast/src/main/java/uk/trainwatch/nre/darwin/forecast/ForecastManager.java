@@ -13,9 +13,10 @@ import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import javax.annotation.Resource;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.sql.DataSource;
-import uk.trainwatch.nre.darwin.model.ppt.forecasts.TS;
 import uk.trainwatch.nre.darwin.model.ppt.schema.Pport;
 import uk.trainwatch.nre.darwin.parser.DarwinJaxbContext;
 import uk.trainwatch.util.sql.SQL;
@@ -24,14 +25,17 @@ import uk.trainwatch.util.sql.SQL;
  *
  * @author peter
  */
-public enum ForecastManager
+@ApplicationScoped
+public class ForecastManager
 {
-
-    INSTANCE;
 
     private final Logger log = Logger.getLogger( ForecastManager.class.getName() );
 
+    @Resource( name = "jdbc/rail" )
     private DataSource dataSource;
+
+    @Inject
+    private DarwinJaxbContext darwinJaxbContext;
 
     public void setDataSource( DataSource dataSource )
     {
@@ -41,23 +45,25 @@ public enum ForecastManager
     /**
      * Returns a copy of the rid's at a specific location
      * <p>
-     * @param tpl
-     *            <p>
+     * @param tpl <p>
      * @return
      */
     public Collection<String> getRids( String tpl )
     {
-        if( tpl != null && !tpl.isEmpty() ) {
-            try( Connection con = dataSource.getConnection() ) {
+        if( tpl != null && !tpl.isEmpty() )
+        {
+            try( Connection con = dataSource.getConnection() )
+            {
                 try( PreparedStatement ps = SQL.prepare( con, "SELECT f.rid FROM darwin.forecast f"
-                                                              + " INNER JOIN darwin.forecast_entry fe ON f.id=fe.fid"
-                                                              + " INNER JOIN darwin.tiploc t ON fe.tpl=t.id"
-                                                              + " WHERE t.tpl=?",
-                                                         tpl.toUpperCase() ) ) {
+                                                         + " INNER JOIN darwin.forecast_entry fe ON f.id=fe.fid"
+                                                         + " INNER JOIN darwin.tiploc t ON fe.tpl=t.id"
+                                                         + " WHERE t.tpl=?",
+                                                         tpl.toUpperCase() ) )
+                {
                     return SQL.stream( ps, SQL.STRING_LOOKUP ).collect( Collectors.toList() );
                 }
-            }
-            catch( SQLException ex ) {
+            } catch( SQLException ex )
+            {
                 log.log( Level.SEVERE, ex, () -> "getLocation " + tpl );
             }
         }
@@ -88,7 +94,6 @@ public enum ForecastManager
 //        }
 //        return Stream.empty();
 //    }
-
     /**
      * Return the TS for a rid
      * <p>
@@ -98,16 +103,19 @@ public enum ForecastManager
      */
     public Pport get( String rid )
     {
-        if( rid != null && !rid.isEmpty() ) {
-            try( Connection con = dataSource.getConnection() ) {
-                try( PreparedStatement ps = SQL.prepare( con, "SELECT xml FROM darwin.forecast WHERE rid=?", rid ) ) {
+        if( rid != null && !rid.isEmpty() )
+        {
+            try( Connection con = dataSource.getConnection() )
+            {
+                try( PreparedStatement ps = SQL.prepare( con, "SELECT xml FROM darwin.forecast WHERE rid=?", rid ) )
+                {
                     return SQL.stream( ps, SQL.STRING_LOOKUP ).
-                            map( DarwinJaxbContext.fromXML ).
+                            map( darwinJaxbContext.fromXML() ).
                             findAny().
                             orElse( null );
                 }
-            }
-            catch( SQLException ex ) {
+            } catch( SQLException ex )
+            {
                 log.log( Level.SEVERE, ex, () -> "getLocation " + rid );
             }
         }

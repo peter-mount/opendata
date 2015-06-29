@@ -20,12 +20,20 @@ import uk.trainwatch.util.sql.SQLFunction;
 public class CallingPoint
 {
 
-    public static final SQLFunction<ResultSet, CallingPoint> fromSQL = rs -> new CallingPoint(
-            rs.getString( "tpl" ),
-            TimeUtils.getLocalTime( rs, "time" ),
-            rs.getBoolean( "report" ),
-            rs.getBoolean( "can" )
-    );
+    public static final SQLFunction<ResultSet, CallingPoint> fromSQL( DarwinReferenceManager darwinReferenceManager )
+    {
+        return rs ->
+        {
+            String tpl = rs.getString( "tpl" );
+            return new CallingPoint(
+                    tpl,
+                    TimeUtils.getLocalTime( rs, "time" ),
+                    rs.getBoolean( "report" ),
+                    rs.getBoolean( "can" ),
+                    darwinReferenceManager.getLocationRefFromTiploc( tpl )
+            );
+        };
+    }
 
     private final String tpl;
     private final LocalTime time;
@@ -34,14 +42,12 @@ public class CallingPoint
     private final String crs;
     private final String location;
 
-    private CallingPoint( String tpl, LocalTime time, boolean report, boolean canc )
+    private CallingPoint( String tpl, LocalTime time, boolean report, boolean canc, TrainLocation loc )
     {
         this.tpl = tpl;
         this.time = time;
         this.report = report;
         this.canc = canc;
-
-        TrainLocation loc = DarwinReferenceManager.INSTANCE.getLocationRefFromTiploc( tpl );
         this.crs = loc == null ? null : loc.getCrs();
         this.location = Objects.toString( loc == null ? null : loc.getLocation(), tpl );
     }
