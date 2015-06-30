@@ -13,6 +13,7 @@ import java.io.Writer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.xml.bind.JAXBException;
 import uk.trainwatch.nre.darwin.model.ctt.referenceschema.PportTimetableRef;
@@ -30,7 +31,7 @@ public class DarwinJaxbContext
     /**
      * Mapping function to parse XML into JAXB instances
      */
-    public final Function<String, Pport> fromXML()
+    public Function<String, Pport> fromXML()
     {
         return s ->
         {
@@ -50,7 +51,7 @@ public class DarwinJaxbContext
         };
     }
 
-    public final Function<Pport, String> toXML()
+    public Function<Pport, String> toXML()
     {
         return p ->
         {
@@ -72,9 +73,10 @@ public class DarwinJaxbContext
 
     private static final Logger log = Logger.getLogger( DarwinJaxbContext.class.getName() );
 
-    private final JAXBSupport jaxb;
+    private JAXBSupport jaxb;
 
-    private DarwinJaxbContext()
+    @PostConstruct
+    void start()
     {
         try
         {

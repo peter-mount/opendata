@@ -50,7 +50,7 @@ public class TrackerNetJaxbContext
         };
     }
 
-    public final Function<Root, String> toXML()
+    public Function<Root, String> toXML()
     {
         return p ->
         {
