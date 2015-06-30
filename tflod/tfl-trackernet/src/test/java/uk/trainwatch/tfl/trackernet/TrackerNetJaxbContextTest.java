@@ -32,6 +32,7 @@ public class TrackerNetJaxbContextTest
     public static void beforeClass()
     {
         trackerNetJaxbContext = new TrackerNetJaxbContext();
+        trackerNetJaxbContext.start();
     }
 
     @Test
