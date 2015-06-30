@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.BeforeClass;
 import uk.trainwatch.tfl.trackernet.model.Root;
 import uk.trainwatch.tfl.trackernet.model.Station;
 
@@ -24,6 +25,14 @@ public class TrackerNetJaxbContextTest
         "Prediction-C.xml",
         "Prediction-H.xml"
     };
+    
+    private static TrackerNetJaxbContext trackerNetJaxbContext;
+    
+    @BeforeClass
+    public static void beforeClass()
+    {
+        trackerNetJaxbContext = new TrackerNetJaxbContext();
+    }
 
     @Test
     public void testUnmarshal()
@@ -33,7 +42,7 @@ public class TrackerNetJaxbContextTest
         {
             try( InputStream is = getClass().getResourceAsStream( srcFile ) )
             {
-                Root root = TrackerNetJaxbContext.INSTANCE.unmarshall( is );
+                Root root = trackerNetJaxbContext.unmarshall( is );
                 assertNotNull( "no root from unmarshall", root );
 
                 assertNotNull( root.getTime() );

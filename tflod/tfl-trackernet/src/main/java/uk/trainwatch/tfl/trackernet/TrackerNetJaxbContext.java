@@ -13,6 +13,8 @@ import java.io.Writer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
 import javax.xml.bind.JAXBException;
 import uk.trainwatch.tfl.trackernet.model.Root;
 import uk.trainwatch.util.xml.JAXBSupport;
@@ -21,57 +23,63 @@ import uk.trainwatch.util.xml.JAXBSupport;
  *
  * @author peter
  */
-public enum TrackerNetJaxbContext
+@ApplicationScoped
+public class TrackerNetJaxbContext
 {
-
-    INSTANCE;
 
     /**
      * Mapping function to parse XML into JAXB instances
      */
-    public static final Function<String, Root> fromXML = s ->
+    public Function<String, Root> fromXML()
     {
-        if( s == null || s.isEmpty() )
+        return s ->
         {
-            return null;
-        }
+            if( s == null || s.isEmpty() )
+            {
+                return null;
+            }
+            try
+            {
+                return unmarshall( s );
+            } catch( ClassCastException |
+                     NullPointerException |
+                     JAXBException ex )
+            {
+                return null;
+            }
+        };
+    }
+
+    public final Function<Root, String> toXML()
+    {
+        return p ->
+        {
+            if( p == null )
+            {
+                return null;
+            }
+            try
+            {
+                return marshall( p );
+            } catch( ClassCastException |
+                     NullPointerException |
+                     JAXBException ex )
+            {
+                return null;
+            }
+        };
+    }
+
+    private static final Logger LOG = Logger.getLogger( TrackerNetJaxbContext.class.getName() );
+
+    private JAXBSupport jaxb;
+
+    @PostConstruct
+    void start()
+    {
         try
         {
-            return INSTANCE.unmarshall( s );
-        } catch( ClassCastException |
-                 NullPointerException |
-                 JAXBException ex )
-        {
-            return null;
-        }
-    };
-
-    public static final Function<Root, String> toXML = p ->
-    {
-        if( p == null )
-        {
-            return null;
-        }
-        try
-        {
-            return INSTANCE.marshall( p );
-        } catch( ClassCastException |
-                 NullPointerException |
-                 JAXBException ex )
-        {
-            return null;
-        }
-    };
-
-    private final Logger log = Logger.getLogger( TrackerNetJaxbContext.class.getName() );
-
-    private final JAXBSupport jaxb;
-
-    private TrackerNetJaxbContext()
-    {
-        try
-        {
-            log.log( Level.INFO, "Initialising TFL TrackerNet JAXB" );
+            LOG.log( Level.INFO, "Initialising TFL TrackerNet JAXB" );
             jaxb = new JAXBSupport( 50, Root.class );
         } catch( JAXBException ex )
         {
