@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.inject.Inject;
 import javax.json.JsonObject;
 import uk.trainwatch.util.JsonUtils;
 import uk.trainwatch.util.TimeUtils;
@@ -25,6 +26,9 @@ public class TimetableResolver
 
     private static final Logger LOG = Logger.getLogger( TimetableResolver.class.getName() );
 
+    @Inject
+    private TrustCache trustCache;
+
     @Override
     public void accept( JsonObject t )
     {
@@ -35,7 +39,7 @@ public class TimetableResolver
         try {
             String trainUid = t.getString( "train_uid" );
             LocalDate date = TimeUtils.getLocalDate( JsonUtils.getLong( t, "time" ) );
-            Trust trust = TrustCache.INSTANCE.getTrustIfPresent( t.getInt( "toc_id" ), t.getString( "train_id" ) );
+            Trust trust = trustCache.getTrustIfPresent( t.getInt( "toc_id" ), t.getString( "train_id" ) );
 
             // use ifPresent so if queue has old data we do nothing with it. Also no point if we have already resolved it
             if( trust == null || Trust.isScheduled( trust ) || trust.isScheduleFail() ) {

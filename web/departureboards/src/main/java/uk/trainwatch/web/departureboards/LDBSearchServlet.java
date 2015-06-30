@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonWriter;
@@ -27,6 +28,9 @@ public class LDBSearchServlet
         extends AbstractServlet
 {
 
+    @Inject
+    private DarwinReferenceManager darwinReferenceManager;
+
     @Override
     protected void doGet( ApplicationRequest request )
             throws ServletException,
@@ -39,7 +43,7 @@ public class LDBSearchServlet
         if( term != null && !term.isEmpty() ) {
             log( "Searching: " + term );
 
-            DarwinReferenceManager.INSTANCE.searchLocations( term ).
+            darwinReferenceManager.searchLocations( term ).
                     peek( l -> log( l.getLocation() ) ).
                     forEach( l -> ary.add( Json.createObjectBuilder().
                                     add( "label", l.getLocation() + " [" + l.getCrs() + "]" ).

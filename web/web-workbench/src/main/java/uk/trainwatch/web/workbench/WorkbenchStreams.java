@@ -8,6 +8,8 @@ package uk.trainwatch.web.workbench;
 import uk.trainwatch.web.workbench.trust.Trust;
 import uk.trainwatch.web.workbench.trust.TrustCache;
 import java.util.stream.Stream;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import uk.trainwatch.util.Streams;
 
 /**
@@ -15,12 +17,16 @@ import uk.trainwatch.util.Streams;
  *
  * @author peter
  */
+@ApplicationScoped
 public class WorkbenchStreams
 {
 
-    public static Stream<Trust> details( int toc, String id )
+    @Inject
+    private TrustCache trustCache;
+
+    public Stream<Trust> details( int toc, String id )
     {
-        return Streams.ofNullable( TrustCache.INSTANCE.getTrust( toc, id ) );
+        return Streams.ofNullable( trustCache.getTrust( toc, id ) );
     }
 
     /**
@@ -30,9 +36,9 @@ public class WorkbenchStreams
      * <p>
      * @return Stream
      */
-    public static Stream<Trust> activations( int toc )
+    public Stream<Trust> activations( int toc )
     {
-        return TrustCache.INSTANCE.getStream( toc ).
+        return trustCache.getStream( toc ).
                 filter( Trust::isActivated );
     }
 
@@ -43,9 +49,9 @@ public class WorkbenchStreams
      * <p>
      * @return Stream
      */
-    public static Stream<Trust> movements( int toc )
+    public Stream<Trust> movements( int toc )
     {
-        return TrustCache.INSTANCE.getStream( toc ).
+        return trustCache.getStream( toc ).
                 filter( Trust::isMovement );
     }
 
@@ -56,9 +62,9 @@ public class WorkbenchStreams
      * <p>
      * @return Stream
      */
-    public static Stream<Trust> cancellations( int toc )
+    public Stream<Trust> cancellations( int toc )
     {
-        return TrustCache.INSTANCE.getStream( toc ).
+        return trustCache.getStream( toc ).
                 filter( Trust::isCancelled );
     }
 
@@ -69,27 +75,27 @@ public class WorkbenchStreams
      * <p>
      * @return Stream
      */
-    public static Stream<Trust> delays( int toc )
+    public Stream<Trust> delays( int toc )
     {
-        return TrustCache.INSTANCE.getStream( toc ).
+        return trustCache.getStream( toc ).
                 filter( Trust::isDelayed );
     }
 
-    public static Stream<Trust> offroute( int toc )
+    public Stream<Trust> offroute( int toc )
     {
-        return TrustCache.INSTANCE.getStream( toc ).
+        return trustCache.getStream( toc ).
                 filter( Trust::isOffRoute );
     }
 
-    public static Stream<Trust> terminated( int toc )
+    public Stream<Trust> terminated( int toc )
     {
-        return TrustCache.INSTANCE.getStream( toc ).
+        return trustCache.getStream( toc ).
                 filter( Trust::isTerminated );
     }
 
-    public static Stream<Trust> issues( int toc )
+    public Stream<Trust> issues( int toc )
     {
-        return TrustCache.INSTANCE.getStream( toc ).
+        return trustCache.getStream( toc ).
                 filter( t -> Trust.isCancelled( t )
                              || Trust.isDelayed( t )
                              || Trust.isOffRoute( t )

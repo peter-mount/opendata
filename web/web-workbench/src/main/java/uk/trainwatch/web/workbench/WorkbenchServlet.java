@@ -8,8 +8,8 @@ package uk.trainwatch.web.workbench;
 import uk.trainwatch.web.workbench.trust.TrustCache;
 import java.io.IOException;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import uk.trainwatch.web.servlet.AbstractServlet;
@@ -21,23 +21,26 @@ import uk.trainwatch.web.servlet.ApplicationRequest;
  * @author peter
  */
 @WebServlet( name = "WorkbenchServlet", urlPatterns =
-{
-    "/workbench", "/workbench/"
+     {
+         "/workbench", "/workbench/"
 } )
 public class WorkbenchServlet
         extends AbstractServlet
 {
 
-    private static final Logger LOG = Logger.getLogger(WorkbenchServlet.class.getName() );
+    private static final Logger LOG = Logger.getLogger( WorkbenchServlet.class.getName() );
+
+    @Inject
+    private TrustCache trustCache;
 
     @Override
     protected void doGet( ApplicationRequest request )
             throws ServletException,
-            IOException
+                   IOException
     {
         // TODO add login here, redirect to registration if not
         Map<String, Object> req = request.getRequestScope();
-        req.put( "tocs", TrustCache.INSTANCE.getTocs() );
+        req.put( "tocs", trustCache.getTocs() );
         request.renderTile( "workbench" );
     }
 }

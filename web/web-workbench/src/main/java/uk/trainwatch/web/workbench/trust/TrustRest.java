@@ -52,6 +52,9 @@ public class TrustRest
     private static final Logger LOG = Logger.getLogger( TrustRest.class.getName() );
 
     @Inject
+    private WorkbenchStreams workbenchStreams;
+
+    @Inject
     protected TrainLocationFactory trainLocationFactory;
 
     @Path( "/details/{toc}/{id}" )
@@ -59,7 +62,7 @@ public class TrustRest
     @Produces( MediaType.APPLICATION_JSON )
     public Response details( @PathParam( "toc" ) int toc, @PathParam( "id" ) String id )
     {
-        return getResponse( WorkbenchStreams.details( toc, id ), true );
+        return getResponse( workbenchStreams.details( toc, id ), true );
     }
 
     @Path( "/activations/{toc}" )
@@ -67,7 +70,7 @@ public class TrustRest
     @Produces( MediaType.APPLICATION_JSON )
     public Response activations( @PathParam( "toc" ) int toc )
     {
-        return getResponse( WorkbenchStreams.activations( toc ) );
+        return getResponse( workbenchStreams.activations( toc ) );
     }
 
     @Path( "/movements/{toc}" )
@@ -75,7 +78,7 @@ public class TrustRest
     @Produces( MediaType.APPLICATION_JSON )
     public Response running( @PathParam( "toc" ) int toc )
     {
-        return getResponse( WorkbenchStreams.movements( toc ) );
+        return getResponse( workbenchStreams.movements( toc ) );
     }
 
     @Path( "/cancellations/{toc}" )
@@ -83,7 +86,7 @@ public class TrustRest
     @Produces( MediaType.APPLICATION_JSON )
     public Response cancellations( @PathParam( "toc" ) int toc )
     {
-        return getResponse( WorkbenchStreams.cancellations( toc ) );
+        return getResponse( workbenchStreams.cancellations( toc ) );
     }
 
     @Path( "/delays/{toc}" )
@@ -91,7 +94,7 @@ public class TrustRest
     @Produces( MediaType.APPLICATION_JSON )
     public Response delays( @PathParam( "toc" ) int toc )
     {
-        return getResponse( WorkbenchStreams.delays( toc ) );
+        return getResponse( workbenchStreams.delays( toc ) );
     }
 
     @Path( "/offroute/{toc}" )
@@ -99,7 +102,7 @@ public class TrustRest
     @Produces( MediaType.APPLICATION_JSON )
     public Response offroute( @PathParam( "toc" ) int toc )
     {
-        return getResponse( WorkbenchStreams.offroute( toc ) );
+        return getResponse( workbenchStreams.offroute( toc ) );
     }
 
     @Path( "/terminated/{toc}" )
@@ -107,7 +110,7 @@ public class TrustRest
     @Produces( MediaType.APPLICATION_JSON )
     public Response terminated( @PathParam( "toc" ) int toc )
     {
-        return getResponse( WorkbenchStreams.terminated( toc ) );
+        return getResponse( workbenchStreams.terminated( toc ) );
     }
 
     @Path( "/issues/{toc}" )
@@ -115,7 +118,7 @@ public class TrustRest
     @Produces( MediaType.APPLICATION_JSON )
     public Response issues( @PathParam( "toc" ) int toc )
     {
-        return getResponse( WorkbenchStreams.issues( toc ) );
+        return getResponse( workbenchStreams.issues( toc ) );
     }
 
     private Response getResponse( Stream<Trust> trains )

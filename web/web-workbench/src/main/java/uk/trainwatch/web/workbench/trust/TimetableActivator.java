@@ -6,6 +6,8 @@
 package uk.trainwatch.web.workbench.trust;
 
 import java.util.function.Consumer;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.json.Json;
 import uk.trainwatch.nrod.trust.model.TrainActivation;
 import uk.trainwatch.nrod.trust.model.TrainMovement;
@@ -16,9 +18,13 @@ import uk.trainwatch.rabbitmq.RabbitMQ;
  *
  * @author peter
  */
+@ApplicationScoped
 public class TimetableActivator
         implements Consumer<TrustMovement>
 {
+
+    @Inject
+    private TrustCache trustCache;
 
     private final Consumer<byte[]> ttResolverPublisher;
 
@@ -51,7 +57,7 @@ public class TimetableActivator
 
     private void activateMovement( TrainMovement m )
     {
-        Trust trust = TrustCache.INSTANCE.getTrustIfPresent( m.getToc_id(), m.getTrain_id() );
+        Trust trust = trustCache.getTrustIfPresent( m.getToc_id(), m.getTrain_id() );
         if( trust != null && !Trust.isScheduled( trust ) && !trust.isScheduleFail() ) {
             ttResolverPublisher.accept( RabbitMQ.jsonToBytes.apply(
                     Json.createObjectBuilder().
