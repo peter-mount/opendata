@@ -14,6 +14,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.enterprise.context.RequestScoped;
 import javax.json.JsonArrayBuilder;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
@@ -36,6 +37,7 @@ import uk.trainwatch.util.xml.XMLSaxWriter;
  * @author peter
  */
 @Path("/gis/1/stationPosition")
+@RequestScoped
 public class StationPositionRest
 {
 

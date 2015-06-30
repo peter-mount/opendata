@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.enterprise.context.RequestScoped;
 import javax.imageio.ImageIO;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -28,6 +29,7 @@ import uk.trainwatch.util.JsonUtils;
  * @author peter
  */
 @Path("/1/gis/heatmap")
+@RequestScoped
 public class HeatMapServer
 {
 

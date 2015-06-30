@@ -10,6 +10,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.enterprise.context.RequestScoped;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -26,6 +27,7 @@ import uk.trainwatch.web.rest.Rest;
  * @author peter
  */
 @Path("/rail/1/signal")
+@RequestScoped
 public class SignalRest
 {
 
