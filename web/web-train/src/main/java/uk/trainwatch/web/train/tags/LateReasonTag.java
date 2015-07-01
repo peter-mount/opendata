@@ -11,6 +11,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import uk.trainwatch.nre.darwin.model.ctt.referenceschema.Reason;
 import uk.trainwatch.nre.darwin.reference.DarwinReferenceManager;
+import uk.trainwatch.util.CDIUtils;
 
 /**
  *
@@ -24,6 +25,12 @@ public class LateReasonTag
     private DarwinReferenceManager darwinReferenceManager;
 
     private Integer value;
+
+    @SuppressWarnings("LeakingThisInConstructor")
+    public LateReasonTag()
+    {
+        CDIUtils.inject( this );
+    }
 
     @Override
     public void release()
@@ -40,16 +47,13 @@ public class LateReasonTag
     public int doStartTag()
             throws JspException
     {
-        if( value != null )
-        {
+        if( value != null ) {
             Reason reason = darwinReferenceManager.getLateReason( value );
-            if( reason != null )
-            {
-                try
-                {
+            if( reason != null ) {
+                try {
                     pageContext.getOut().print( reason.getReasontext() );
-                } catch( IOException ex )
-                {
+                }
+                catch( IOException ex ) {
                     throw new JspException( ex );
                 }
             }

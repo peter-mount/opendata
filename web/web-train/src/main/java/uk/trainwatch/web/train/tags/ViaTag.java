@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import uk.trainwatch.nre.darwin.reference.DarwinReferenceManager;
+import uk.trainwatch.util.CDIUtils;
 
 /**
  *
@@ -23,6 +24,12 @@ public class ViaTag
     private DarwinReferenceManager darwinReferenceManager;
 
     private Integer value;
+
+    @SuppressWarnings("LeakingThisInConstructor")
+    public ViaTag()
+    {
+        CDIUtils.inject( this );
+    }
 
     @Override
     public void release()
@@ -39,16 +46,13 @@ public class ViaTag
     public int doStartTag()
             throws JspException
     {
-        if( value != null )
-        {
+        if( value != null ) {
             String text = darwinReferenceManager.getViaText( value );
-            if( text != null )
-            {
-                try
-                {
+            if( text != null ) {
+                try {
                     pageContext.getOut().print( text );
-                } catch( IOException ex )
-                {
+                }
+                catch( IOException ex ) {
                     throw new JspException( ex );
                 }
             }

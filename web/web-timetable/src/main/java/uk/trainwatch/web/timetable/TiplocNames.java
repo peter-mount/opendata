@@ -8,15 +8,15 @@ package uk.trainwatch.web.timetable;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Map;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.enterprise.context.ApplicationScoped;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
 import javax.sql.DataSource;
 import uk.trainwatch.util.sql.KeyValue;
 import uk.trainwatch.util.sql.SQL;
@@ -25,20 +25,19 @@ import uk.trainwatch.util.sql.SQL;
  *
  * @author Peter T Mount
  */
-@WebListener
+@ApplicationScoped
 public class TiplocNames
-        implements ServletContextListener
 {
 
-    private static volatile Map<String, String> names = null;
-    private static volatile LocalDateTime lastUpdate = LocalDateTime.MIN;
+    private Map<String, String> names = null;
+    private LocalDateTime lastUpdate = LocalDateTime.MIN;
 
-    private static boolean reloadRequired()
+    private boolean reloadRequired()
     {
         return lastUpdate.isBefore( LocalDateTime.now().minusHours( 1 ) );
     }
 
-    public static String getName( String tiploc )
+    public String getName( String tiploc )
     {
         if( names == null || reloadRequired() ) {
             reload();
@@ -47,7 +46,8 @@ public class TiplocNames
         return names == null ? null : names.get( tiploc );
     }
 
-    private static synchronized void reload()
+    @PostConstruct
+    void reload()
     {
         if( names == null || reloadRequired() ) {
             try {
@@ -80,14 +80,8 @@ public class TiplocNames
         }
     }
 
-    @Override
-    public void contextInitialized( ServletContextEvent sce )
-    {
-        reload();
-    }
-
-    @Override
-    public void contextDestroyed( ServletContextEvent sce )
+    @PreDestroy
+    void stop( ServletContextEvent sce )
     {
         names = null;
     }

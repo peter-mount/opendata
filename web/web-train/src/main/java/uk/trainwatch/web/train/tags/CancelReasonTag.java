@@ -11,6 +11,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import uk.trainwatch.nre.darwin.model.ctt.referenceschema.Reason;
 import uk.trainwatch.nre.darwin.reference.DarwinReferenceManager;
+import uk.trainwatch.util.CDIUtils;
 
 /**
  *
@@ -22,8 +23,14 @@ public class CancelReasonTag
 
     @Inject
     private DarwinReferenceManager darwinReferenceManager;
-    
+
     private Integer value;
+
+    @SuppressWarnings("LeakingThisInConstructor")
+    public CancelReasonTag()
+    {
+        CDIUtils.inject( this );
+    }
 
     @Override
     public void release()

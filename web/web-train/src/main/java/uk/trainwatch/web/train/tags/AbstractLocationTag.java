@@ -12,6 +12,7 @@ import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import uk.trainwatch.nrod.location.TrainLocation;
 import uk.trainwatch.nrod.location.TrainLocationFactory;
+import uk.trainwatch.util.CDIUtils;
 
 /**
  *
@@ -26,6 +27,12 @@ public abstract class AbstractLocationTag
     private boolean link = true;
     private String prefix = DEFAULT_PREFIX;
     private boolean nowrap = false;
+
+    @SuppressWarnings("LeakingThisInConstructor")
+    public AbstractLocationTag()
+    {
+        CDIUtils.inject( this );
+    }
 
     @Override
     public void release()
@@ -45,55 +52,46 @@ public abstract class AbstractLocationTag
     public int doStartTag()
             throws JspException
     {
-        if( value != null )
-        {
+        if( value != null ) {
 
             String name = null;
 
             TrainLocation ref = getLocationRef( value );
-            if( ref != null && ref.isSetLocation() )
-            {
+            if( ref != null && ref.isSetLocation() ) {
                 name = ref.getLocation();
             }
 
             // Try our own, has depot's etc in there
-            if( name == null || name.equals( value ) )
-            {
+            if( name == null || name.equals( value ) ) {
                 TrainLocation loc = trainLocationFactory.resolveTrainLocation( value );
-                if( loc != null )
-                {
+                if( loc != null ) {
                     name = loc.getLocation();
                 }
             }
 
-            if( name == null )
-            {
+            if( name == null ) {
                 name = value;
             }
 
-            if( nowrap )
-            {
+            if( nowrap ) {
                 name = name.replace( " ", "&nbsp;" );
             }
 
-            try
-            {
+            try {
                 JspWriter w = pageContext.getOut();
 
-                if( link && ref != null && ref.isSetCrs() )
-                {
+                if( link && ref != null && ref.isSetCrs() ) {
                     w.write( "<a href=\"" );
                     w.write( prefix );
                     w.write( ref.getCrs() );
                     w.write( "\">" );
                 }
                 w.write( name );
-                if( link && ref != null && ref.isSetCrs() )
-                {
+                if( link && ref != null && ref.isSetCrs() ) {
                     w.write( "</a>" );
                 }
-            } catch( IOException ex )
-            {
+            }
+            catch( IOException ex ) {
                 throw new JspException( ex );
             }
         }

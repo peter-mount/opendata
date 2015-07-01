@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.web.train.tags;
 
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import uk.trainwatch.nre.darwin.reference.DarwinReferenceManager;
 import uk.trainwatch.nrod.location.TrainLocation;
@@ -13,6 +14,7 @@ import uk.trainwatch.nrod.location.TrainLocation;
  *
  * @author Peter T Mount
  */
+@RequestScoped
 public class TiplocTag
         extends AbstractLocationTag
 {

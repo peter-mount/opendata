@@ -12,6 +12,7 @@ import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import uk.trainwatch.nre.darwin.model.ctt.referenceschema.TocRef;
 import uk.trainwatch.nre.darwin.reference.DarwinReferenceManager;
+import uk.trainwatch.util.CDIUtils;
 
 /**
  *
@@ -27,6 +28,12 @@ public class OperatorTag
     private String value;
     private boolean link = false;
 
+    @SuppressWarnings("LeakingThisInConstructor")
+    public OperatorTag()
+    {
+        CDIUtils.inject( this );
+    }
+
     @Override
     public void release()
     {
@@ -38,39 +45,33 @@ public class OperatorTag
     public int doStartTag()
             throws JspException
     {
-        if( value != null )
-        {
+        if( value != null ) {
 
             String name = null;
 
             TocRef ref = darwinReferenceManager.getTocRef( value );
-            if( ref != null && ref.isSetTocname() )
-            {
+            if( ref != null && ref.isSetTocname() ) {
                 name = ref.getTocname();
             }
 
-            if( name == null )
-            {
+            if( name == null ) {
                 name = value;
             }
 
-            try
-            {
+            try {
                 JspWriter w = pageContext.getOut();
 
-                if( link && ref != null && ref.isSetUrl() )
-                {
+                if( link && ref != null && ref.isSetUrl() ) {
                     w.write( "<a href=\"" );
                     w.write( ref.getUrl() );
                     w.write( "\" target=\"_blank\">" );
                 }
                 w.write( name );
-                if( link && ref != null && ref.isSetUrl() )
-                {
+                if( link && ref != null && ref.isSetUrl() ) {
                     w.write( "</a>" );
                 }
-            } catch( IOException ex )
-            {
+            }
+            catch( IOException ex ) {
                 throw new JspException( ex );
             }
         }
