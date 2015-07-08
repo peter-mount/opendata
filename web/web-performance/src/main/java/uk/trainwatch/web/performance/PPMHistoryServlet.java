@@ -19,7 +19,6 @@ import java.time.ZoneOffset;
 import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -32,7 +31,6 @@ import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
-import uk.trainwatch.nrod.rtppm.sql.OperatorDailyPerformance;
 import uk.trainwatch.nrod.rtppm.sql.OperatorManager;
 import uk.trainwatch.nrod.rtppm.sql.PerformanceManager;
 import uk.trainwatch.util.MinMaxStatistics;
@@ -43,11 +41,10 @@ import uk.trainwatch.util.TimeUtils;
  * <p>
  * @author Peter T Mount
  */
-@WebServlet( name = "PPMCurrentServlet", urlPatterns =
-     {
-         "/performance/ppm", "/performance/ppm/*"
-} )
-public class PPMCurrentServlet
+@WebServlet(name = "PPMHistoryServlet", urlPatterns = {
+    "/performance/ppm", "/performance/ppm/*"
+})
+public class PPMHistoryServlet
         extends AbstractServlet
 {
 
@@ -66,25 +63,16 @@ public class PPMCurrentServlet
     {
         String path = request.getPathInfo();
 
-        if( path == null )
-        {
-            // Autorefresh enabled
-            request.getRequestScope().put( "refresh", true );
-
-            // Convert now to rail date - so 01:59 will show the previous day
-            show( request, TimeUtils.getLocalDateTime().
-                  minusHours( 2 ).
-                  toLocalDate() );
+        if( path == null || path.trim().isEmpty() ) {
+            show( request, LocalDate.now(), true );
         }
-        else
-        {
+        else {
             // Autorefresh disabled
             request.getRequestScope().put( "refresh", false );
 
             // This will always be >1 as it leads with a /
             String comp[] = path.split( "/" );
-            switch( comp.length )
-            {
+            switch( comp.length ) {
                 case 0:
                     showYears( request );
                     break;
@@ -108,15 +96,14 @@ public class PPMCurrentServlet
             throws ServletException,
                    IOException
     {
-        try
-        {
+        try {
             Map<String, Object> req = request.getRequestScope();
             req.put( "years", performanceManager.getYears() );
             request.renderTile( "performance.ppm.years" );
-        } catch( NoSuchElementException |
-                 SQLException ex )
-        {
-            Logger.getLogger( PPMCurrentServlet.class.getName() ).
+        }
+        catch( NoSuchElementException |
+               SQLException ex ) {
+            Logger.getLogger( PPMHistoryServlet.class.getName() ).
                     log( Level.SEVERE, null, ex );
             request.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage() );
         }
@@ -126,24 +113,21 @@ public class PPMCurrentServlet
             throws ServletException,
                    IOException
     {
-        try
-        {
+        try {
             MinMaxStatistics stat = performanceManager.getMonths( year );
-            if( stat.getMin() == 0 && stat.getMax() == 0 )
-            {
+            if( stat.getMin() == 0 && stat.getMax() == 0 ) {
                 request.sendError( HttpServletResponse.SC_NOT_FOUND );
             }
-            else
-            {
+            else {
                 Map<String, Object> req = request.getRequestScope();
                 req.put( "year", year );
                 req.put( "months", stat );
                 request.renderTile( "performance.ppm.months" );
             }
-        } catch( NoSuchElementException |
-                 SQLException ex )
-        {
-            Logger.getLogger( PPMCurrentServlet.class.getName() ).
+        }
+        catch( NoSuchElementException |
+               SQLException ex ) {
+            Logger.getLogger( PPMHistoryServlet.class.getName() ).
                     log( Level.SEVERE, null, ex );
             request.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage() );
         }
@@ -169,8 +153,7 @@ public class PPMCurrentServlet
         int end = dateEnd.getDayOfMonth();
 
         List<LocalDate> days = new ArrayList<>();
-        for( int i = 1; i <= end; i++ )
-        {
+        for( int i = 1; i <= end; i++ ) {
             days.add( LocalDate.of( startDate.getYear(), startDate.getMonth(), i ) );
         }
         req.put( "calendar", days );
@@ -184,8 +167,7 @@ public class PPMCurrentServlet
             throws ServletException,
                    IOException
     {
-        try
-        {
+        try {
             // Unlike other pages we'll allow date of 0 as we'll show just the calendar
             MinMaxStatistics stat = performanceManager.getDays( year, month );
 
@@ -194,8 +176,7 @@ public class PPMCurrentServlet
             LocalDate dateEnd = addCalendar( req, startDate, stat );
 
             // Needed for the graphs - only valid if we have data
-            if( stat.getMin() != 0 && stat.getMax() != 0 )
-            {
+            if( stat.getMin() != 0 && stat.getMax() != 0 ) {
                 req.put( "operators", operatorManager.getOperators() );
                 req.put( "monthppm", performanceManager.getMonthsDailyPPM( year, month ) );
                 req.put( "startDate", TimeUtils.getLocalDateTime( startDate ).
@@ -207,10 +188,10 @@ public class PPMCurrentServlet
             }
 
             request.renderTile( "performance.ppm.days" );
-        } catch( NoSuchElementException |
-                 SQLException ex )
-        {
-            Logger.getLogger( PPMCurrentServlet.class.getName() ).
+        }
+        catch( NoSuchElementException |
+               SQLException ex ) {
+            Logger.getLogger( PPMHistoryServlet.class.getName() ).
                     log( Level.SEVERE, null, ex );
             request.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage() );
         }
@@ -220,15 +201,14 @@ public class PPMCurrentServlet
             throws ServletException,
                    IOException
     {
-        show( request, LocalDate.of( year, month, day ) );
+        show( request, LocalDate.of( year, month, day ), false );
     }
 
-    private void show( ApplicationRequest request, LocalDate date )
+    private void show( ApplicationRequest request, LocalDate date, boolean refresh )
             throws ServletException,
                    IOException
     {
-        try
-        {
+        try {
             Map<String, Object> req = request.getRequestScope();
 
             addCalendar( req, date, performanceManager.getDays( date.getYear(), date.getMonthValue() ) );
@@ -237,21 +217,19 @@ public class PPMCurrentServlet
 
             req.put( "operators", operatorManager.getOperatorMap() );
 
-            Collection<OperatorDailyPerformance> performance = performanceManager.getPerformance( date );
-            req.put( "performance", performance );
             req.put( "perfdate", LocalDate.now( ZoneId.of( "Europe/London" ) ) );
 
             // Ensure we have the correct cache headers
-            boolean refresh = (boolean) req.getOrDefault( "refresh", false );
-            if( refresh )
-            {
+            req.put( "refresh", refresh );
+            if( refresh ) {
+                req.put( "performance", performanceManager.getCurrentPerformance() );
                 // Cache for only 1 minute
                 request.expiresIn( 1, ChronoUnit.MINUTES );
                 request.lastModified( Instant.now() );
                 request.maxAge( 1, ChronoUnit.MINUTES );
             }
-            else
-            {
+            else {
+                req.put( "performance", performanceManager.getPerformance( date ) );
                 // Cache for a day
                 request.expiresIn( 1, ChronoUnit.DAYS );
                 request.maxAge( 1, ChronoUnit.DAYS );
@@ -261,10 +239,10 @@ public class PPMCurrentServlet
             }
 
             request.renderTile( "performance.ppm.view" );
-        } catch( NoSuchElementException |
-                 SQLException ex )
-        {
-            Logger.getLogger( PPMCurrentServlet.class.getName() ).
+        }
+        catch( NoSuchElementException |
+               SQLException ex ) {
+            Logger.getLogger( PPMHistoryServlet.class.getName() ).
                     log( Level.SEVERE, null, ex );
             request.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage() );
         }

@@ -17,7 +17,6 @@ package uk.trainwatch.nrod.rtppm.sql;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +28,7 @@ import uk.trainwatch.nrod.rtppm.sql.cache.MonthDailyPPMCache;
 import uk.trainwatch.nrod.rtppm.sql.cache.OperatorDailyPerformanceCache;
 import uk.trainwatch.nrod.rtppm.sql.cache.OperatorLocalDate;
 import uk.trainwatch.util.MinMaxStatistics;
+import uk.trainwatch.util.TimeUtils;
 
 /**
  *
@@ -52,7 +52,7 @@ public class PerformanceManager
      * <p>
      * @param operator
      * @param date
-     *             <p>
+     *                 <p>
      * @return
      *         <p>
      * @throws SQLException
@@ -68,7 +68,7 @@ public class PerformanceManager
      * <p>
      * @param operatorId
      * @param date
-     *             <p>
+     *                   <p>
      * @return
      *         <p>
      * @throws SQLException
@@ -82,8 +82,11 @@ public class PerformanceManager
     public Collection<OperatorDailyPerformance> getCurrentPerformance()
             throws SQLException
     {
+        // Convert now to rail date - so 01:59 will show the previous day
+        LocalDate now = TimeUtils.getLocalDateTime().minusHours( 2 ).toLocalDate();
+
         // Currently this is not cached
-        return operatorDailyPerformanceCache.getPerformanceNoCache( new OperatorLocalDate( LocalDate.now() ) );
+        return operatorDailyPerformanceCache.getPerformanceNoCache( new OperatorLocalDate( now ) );
     }
 
     public Collection<OperatorDailyPerformance> getPerformance( LocalDate date )
