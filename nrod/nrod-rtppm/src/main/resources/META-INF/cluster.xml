@@ -1,0 +1,27 @@
+<hazelcast>
+
+    <cache name="OperatorDailyPerformanceCache">
+        <statistics-enabled>true</statistics-enabled>
+        <management-enabled>false</management-enabled>
+        
+        <expiry-policy-factory class-name="uk.trainwatch.util.cache.HourExpiryPolicyFactory"/>
+        
+    </cache>
+    
+    <cache name="MonthDailyPPMCache">
+        <statistics-enabled>true</statistics-enabled>
+        <management-enabled>false</management-enabled>
+        
+        <expiry-policy-factory class-name="uk.trainwatch.util.cache.HourExpiryPolicyFactory"/>
+        
+    </cache>
+    
+    <cache name="CalendarDayPPMCache">
+        <statistics-enabled>true</statistics-enabled>
+        <management-enabled>false</management-enabled>
+        
+        <expiry-policy-factory class-name="uk.trainwatch.util.cache.HourExpiryPolicyFactory"/>
+        
+    </cache>
+    
+</hazelcast>

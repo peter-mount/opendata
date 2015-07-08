@@ -15,25 +15,20 @@
  */
 package uk.trainwatch.nrod.rtppm.sql;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
-import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
-import javax.sql.DataSource;
-import uk.trainwatch.util.TimeUtils;
-import uk.trainwatch.util.sql.SQL;
+import javax.inject.Inject;
+import uk.trainwatch.nrod.rtppm.sql.cache.CalendarDayPPMCache;
+import uk.trainwatch.nrod.rtppm.sql.cache.MonthDailyPPMCache;
+import uk.trainwatch.nrod.rtppm.sql.cache.OperatorDailyPerformanceCache;
+import uk.trainwatch.nrod.rtppm.sql.cache.OperatorLocalDate;
+import uk.trainwatch.util.MinMaxStatistics;
 
 /**
  *
@@ -43,12 +38,19 @@ import uk.trainwatch.util.sql.SQL;
 public class PerformanceManager
 {
 
-    @Resource( name = "jdbc/rail" )
-    private DataSource dataSource;
+    @Inject
+    private OperatorDailyPerformanceCache operatorDailyPerformanceCache;
+
+    @Inject
+    private MonthDailyPPMCache monthDailyPPMCache;
+
+    @Inject
+    private CalendarDayPPMCache calendarDayPPMCache;
 
     /**
      * Get's the daily performance for an Operator for a month
      * <p>
+     * @param operator
      * @param date
      *             <p>
      * @return
@@ -62,60 +64,63 @@ public class PerformanceManager
     }
 
     /**
+     * Get's the daily performance for an Operator for a month
+     * <p>
+     * @param operatorId
+     * @param date
+     *             <p>
+     * @return
+     *         <p>
+     * @throws SQLException
+     */
+    public Collection<OperatorDailyPerformance> getMonthPerformance( int operatorId, LocalDate date )
+            throws SQLException
+    {
+        return operatorDailyPerformanceCache.getMonthPerformance( new OperatorLocalDate( operatorId, date.withDayOfMonth( 1 ) ) );
+    }
+
+    public Collection<OperatorDailyPerformance> getCurrentPerformance()
+            throws SQLException
+    {
+        // Currently this is not cached
+        return operatorDailyPerformanceCache.getPerformanceNoCache( new OperatorLocalDate( LocalDate.now() ) );
+    }
+
+    public Collection<OperatorDailyPerformance> getPerformance( LocalDate date )
+            throws SQLException
+    {
+        return operatorDailyPerformanceCache.getPerformance( new OperatorLocalDate( date ) );
+    }
+
+    public Optional<OperatorDailyPerformance> getOperatorPerformance( int id, LocalDate date )
+            throws SQLException
+    {
+        return operatorDailyPerformanceCache.getOperatorPerformance( new OperatorLocalDate( id, date ) );
+    }
+
+    /**
      * The current years
      * <p>
      * @return
      *         <p>
      * @throws SQLException
      */
-    public IntSummaryStatistics getYears()
+    public MinMaxStatistics getYears()
             throws SQLException
     {
-        try( Connection con = dataSource.getConnection();
-             Statement s = con.createStatement() ) {
-            IntSummaryStatistics stat = new IntSummaryStatistics();
-            ResultSet rs = s.executeQuery( "SELECT min(d.year),max(d.year) FROM datetime.dim_date d INNER JOIN rtppm.daily r ON d.dt_id=r.dt" );
-            if( rs.next() ) {
-                stat.accept( rs.getInt( 1 ) );
-                stat.accept( rs.getInt( 2 ) );
-            }
-            return stat;
-        }
+        return calendarDayPPMCache.getYears( Integer.MIN_VALUE );
     }
 
-    public IntSummaryStatistics getMonths( int year )
+    public MinMaxStatistics getMonths( int year )
             throws SQLException
     {
-        try( Connection con = dataSource.getConnection();
-             PreparedStatement s = con.prepareStatement(
-                     "SELECT min(d.month),max(d.month) FROM datetime.dim_date d INNER JOIN rtppm.daily r ON d.dt_id=r.dt WHERE d.year=?" ) ) {
-            s.setInt( 1, year );
-            IntSummaryStatistics stat = new IntSummaryStatistics();
-            ResultSet rs = s.executeQuery();
-            if( rs.next() ) {
-                stat.accept( rs.getInt( 1 ) );
-                stat.accept( rs.getInt( 2 ) );
-            }
-            return stat;
-        }
+        return calendarDayPPMCache.getMonths( -year );
     }
 
-    public IntSummaryStatistics getDays( int year, int month )
+    public MinMaxStatistics getDays( int year, int month )
             throws SQLException
     {
-        try( Connection con = dataSource.getConnection();
-             PreparedStatement s = con.prepareStatement(
-                     "SELECT min(d.day),max(d.day) FROM datetime.dim_date d INNER JOIN rtppm.daily r ON d.dt_id=r.dt WHERE d.year=? AND d.month=?" ) ) {
-            s.setInt( 1, year );
-            s.setInt( 2, month );
-            IntSummaryStatistics stat = new IntSummaryStatistics();
-            ResultSet rs = s.executeQuery();
-            if( rs.next() ) {
-                stat.accept( rs.getInt( 1 ) );
-                stat.accept( rs.getInt( 2 ) );
-            }
-            return stat;
-        }
+        return calendarDayPPMCache.getDays( month + (year * 100) );
     }
 
     /**
@@ -131,72 +136,7 @@ public class PerformanceManager
     public Map<Integer, List<DailyPPM>> getMonthsDailyPPM( int year, int month )
             throws SQLException
     {
-        try( Connection con = dataSource.getConnection();
-             PreparedStatement s = con.prepareStatement(
-                     "SELECT d.dt, p.operator,p.ppm FROM rtppm.daily p INNER JOIN datetime.dim_date d ON d.dt_id=p.dt WHERE d.year=? AND d.month=? ORDER BY p.dt" ) ) {
-            s.setInt( 1, year );
-            s.setInt( 2, month );
-            return SQL.stream( s, rs -> new DailyPPM( rs.getDate( 1 ), rs.getInt( 2 ), rs.getInt( 3 ) ) ).
-                    collect( Collectors.groupingBy( DailyPPM::getId ) );
-        }
-    }
-
-    public Collection<OperatorDailyPerformance> getCurrentPerformance()
-            throws SQLException
-    {
-        return getPerformance( LocalDate.now() );
-    }
-
-    public Collection<OperatorDailyPerformance> getPerformance( LocalDate date )
-            throws SQLException
-    {
-        try( Connection con = dataSource.getConnection();
-             PreparedStatement s = con.prepareStatement(
-                     "SELECT p.* FROM rtppm.daily p INNER JOIN rtppm.operator o ON p.operator=o.id WHERE dt=? ORDER BY o.display" ) ) {
-            s.setLong( 1, TimeUtils.toDBDate.apply( date ) );
-            return SQL.stream( s, OperatorDailyPerformance.fromSQL ).
-                    collect( Collectors.toList() );
-        }
-    }
-
-    public Optional<OperatorDailyPerformance> getOperatorPerformance( int id, LocalDate date )
-            throws SQLException
-    {
-        try( Connection con = dataSource.getConnection();
-             PreparedStatement s = SQL.prepare( con,
-                                                "SELECT p.* FROM rtppm.daily p INNER JOIN rtppm.operator o ON p.operator=o.id WHERE dt=? and o.id=?",
-                                                TimeUtils.toDBDate.apply( date ),
-                                                id
-             ) ) {
-            return SQL.stream( s, OperatorDailyPerformance.fromSQL ).
-                    findAny();
-        }
-    }
-
-    /**
-     * Get's the daily performance for an Operator for a month
-     * <p>
-     * @param date
-     *             <p>
-     * @return
-     *         <p>
-     * @throws SQLException
-     */
-    public Collection<OperatorDailyPerformance> getMonthPerformance( int operatorId, LocalDate date )
-            throws SQLException
-    {
-        try( Connection con = dataSource.getConnection();
-             PreparedStatement s = con.prepareStatement( "SELECT * FROM rtppm.daily WHERE dt BETWEEN ? AND ? AND operator=? ORDER BY dt_id" ) ) {
-            // The start of the month
-            LocalDate startDate = TimeUtils.getLocalDate( Instant.from( date ).
-                    truncatedTo( ChronoUnit.MONTHS ) );
-            s.setLong( 1, TimeUtils.toDBDate.apply( startDate ) );
-            s.setLong( 2, TimeUtils.toDBDate.apply( startDate.plusMonths( 1L ) ) );
-            s.setInt( 3, operatorId );
-
-            return SQL.stream( s, OperatorDailyPerformance.fromSQL ).
-                    collect( Collectors.toList() );
-        }
+        return monthDailyPPMCache.get( (year * 100) + month );
     }
 
 }

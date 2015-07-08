@@ -30,6 +30,8 @@ public class OperatorDailyPerformance
         implements Comparable<OperatorDailyPerformance>
 {
 
+    private static final long serialVersionUID  = 1L;
+
     public static final SQLFunction<ResultSet, OperatorDailyPerformance> fromSQL = rs -> new OperatorDailyPerformance(
             rs.getLong( 1 ),
             rs.getLong( 2 ),

@@ -15,13 +15,18 @@
  */
 package uk.trainwatch.nrod.rtppm.sql;
 
+import java.io.Serializable;
+
 /**
  * The Operator performance as stored in the database
  *
  * @author peter
  */
 public abstract class AbstractOperatorPerformance
+        implements Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     private long id;
     private long date;

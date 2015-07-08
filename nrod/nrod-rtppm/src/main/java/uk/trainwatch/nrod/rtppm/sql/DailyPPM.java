@@ -15,6 +15,7 @@
  */
 package uk.trainwatch.nrod.rtppm.sql;
 
+import java.io.Serializable;
 import java.sql.Date;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -24,8 +25,11 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name = "ppm")
 public class DailyPPM
-        implements Comparable<DailyPPM>
+        implements Comparable<DailyPPM>,
+                   Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     private long timestamp;
     private int id;
@@ -90,25 +94,20 @@ public class DailyPPM
     @Override
     public boolean equals( Object obj )
     {
-        if( obj == null )
-        {
+        if( obj == null ) {
             return false;
         }
-        if( getClass() != obj.getClass() )
-        {
+        if( getClass() != obj.getClass() ) {
             return false;
         }
         final DailyPPM other = (DailyPPM) obj;
-        if( this.timestamp != other.timestamp )
-        {
+        if( this.timestamp != other.timestamp ) {
             return false;
         }
-        if( this.id != other.id )
-        {
+        if( this.id != other.id ) {
             return false;
         }
-        if( this.value != other.value )
-        {
+        if( this.value != other.value ) {
             return false;
         }
         return true;
@@ -118,8 +117,7 @@ public class DailyPPM
     public int compareTo( DailyPPM o )
     {
         int r = Integer.compare( id, o.id );
-        if( r == 0 )
-        {
+        if( r == 0 ) {
             r = Long.compare( timestamp, o.timestamp );
         }
         return r;

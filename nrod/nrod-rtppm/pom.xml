@@ -30,6 +30,12 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>javax.cache</groupId>
+            <artifactId>cache-api</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+                
         <!-- JSR353 Java API for JSON processing - not yet in the JDK -->
         <dependency>
             <groupId>javax.json</groupId>

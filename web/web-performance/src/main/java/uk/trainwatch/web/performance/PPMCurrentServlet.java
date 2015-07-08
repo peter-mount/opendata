@@ -20,7 +20,6 @@ import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -36,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 import uk.trainwatch.nrod.rtppm.sql.OperatorDailyPerformance;
 import uk.trainwatch.nrod.rtppm.sql.OperatorManager;
 import uk.trainwatch.nrod.rtppm.sql.PerformanceManager;
+import uk.trainwatch.util.MinMaxStatistics;
 import uk.trainwatch.util.TimeUtils;
 
 /**
@@ -128,7 +128,7 @@ public class PPMCurrentServlet
     {
         try
         {
-            IntSummaryStatistics stat = performanceManager.getMonths( year );
+            MinMaxStatistics stat = performanceManager.getMonths( year );
             if( stat.getMin() == 0 && stat.getMax() == 0 )
             {
                 request.sendError( HttpServletResponse.SC_NOT_FOUND );
@@ -149,7 +149,7 @@ public class PPMCurrentServlet
         }
     }
 
-    private LocalDate addCalendar( Map<String, Object> req, LocalDate date, IntSummaryStatistics stat )
+    private LocalDate addCalendar( Map<String, Object> req, LocalDate date, MinMaxStatistics stat )
     {
         LocalDate startDate = date.withDayOfMonth( 1 );
         setDate( req, startDate );
@@ -187,7 +187,7 @@ public class PPMCurrentServlet
         try
         {
             // Unlike other pages we'll allow date of 0 as we'll show just the calendar
-            IntSummaryStatistics stat = performanceManager.getDays( year, month );
+            MinMaxStatistics stat = performanceManager.getDays( year, month );
 
             Map<String, Object> req = request.getRequestScope();
             LocalDate startDate = LocalDate.of( year, month, 1 );

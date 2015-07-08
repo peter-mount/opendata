@@ -29,6 +29,8 @@ public class OperatorRealtimePerformance
         implements Comparable<OperatorRealtimePerformance>
 {
 
+    private static final long serialVersionUID  = 1L;
+
     public static final SQLFunction<ResultSet, OperatorRealtimePerformance> fromSQL = rs -> new OperatorRealtimePerformance(
             rs.getLong( 1 ),
             rs.getLong( 2 ),
