@@ -14,8 +14,12 @@
         text-align: right;
     }
     .ui-widget input {
-        width: 10em;
+        width: 15em;
         display: inline-block;
+    }
+    #loading {
+        z-index: 100;
+        display: none;
     }
 </style>
 
@@ -58,7 +62,7 @@
 </div>
 <div class="ui-widget">
     <label></label>
-    <input id="submit" name="submit" type="submit" value="Search"/>
+    <input id="searchSubmit" name="submit" type="submit" value="Search"/>
 </div>
 
 <c:if test="${not empty msg}">
@@ -76,10 +80,14 @@
     <input id="station" type="hidden" name="station"/>
 </div>
 
-<div id="loading" style="display: none;"></div>
+<div id="loading"></div>
+<div id="message"></div>
 
+<script src="/js/ldb/mobile.js"></script>
 <script>
     $(document).ready(function () {
+        new UI();
+
         function keypress(c, f) {
             c.keypress(function (e) {
                 if (e.which === 13)
@@ -131,16 +139,26 @@
 
         var search = function () {
             var dt = $('#searchDate').val(), hr = $('#searchTime').val();
-            if (crs !== null && dt !== null && typeof dt !== 'undefined' && hr !== null && hr !== 'undefined')
+            if (crs !== null && dt !== null && typeof dt !== 'undefined' && hr !== null && hr !== 'undefined') {
+                UI.showLoader();
                 document.location = '/rtt/trains/' + crs + '/' + dt + '/' + hr;
+            }
         };
         keypress($('#searchTime'), search);
 
         $('#searchSubmit').click(search);
-        keypress($('#railid'), function (c) {
-            UI.loader.css({display: 'block'});
-            document.location = "/rtt/train/" + c.val();
-        });
+
+        // RID search
+        var rid = $('#railid');
+        var ridSearch = function (c) {
+            if (rid.val() !== '') {
+                UI.showLoader();
+                document.location = "/rtt/train/" + rid.val();
+            }
+        };
+        keypress(rid, ridSearch);
+        $('#submitRailId').click(ridSearch);
+
         // Clear the form. Handles case of someone using back button
         var clearcomps = [
             '#station', '#stationCrs', '#searchTime',
