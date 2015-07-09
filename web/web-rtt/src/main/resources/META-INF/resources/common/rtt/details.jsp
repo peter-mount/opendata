@@ -5,11 +5,11 @@
 <%@ taglib prefix="d" uri="http://uktra.in/tld/darwin" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 
-<div class="center">
-    <img class="logo-nre" src="/images/NRE_Powered_logo.jpg"/>
-</div>
-
 <div class="ldbWrapper">
+
+    <div class="center">
+        <img class="logo-nre" src="/images/NRE_Powered_logo.jpg"/>
+    </div>
 
     <div id="trainTop">
         <c:if test="${train.originForecastPresent}">

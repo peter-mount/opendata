@@ -21,6 +21,10 @@
     <p>
         By clicking the destination name on those boards you will be able to view the current progress of that service.
     </p>
+    
+    <p>
+        <strong>Coming soon:</strong> London Tube Departure Boards &amp; Status
+    </p>
 
 </div>
 <script>
