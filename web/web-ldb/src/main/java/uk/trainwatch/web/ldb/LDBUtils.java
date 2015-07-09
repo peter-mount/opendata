@@ -39,6 +39,9 @@ import uk.trainwatch.util.sql.SQL;
 import uk.trainwatch.util.sql.SQLBiConsumer;
 import uk.trainwatch.util.sql.SQLBiFunction;
 import uk.trainwatch.util.sql.SQLConsumer;
+import uk.trainwatch.web.ldb.cache.LDBCallingPointCache;
+import uk.trainwatch.web.ldb.cache.LDBDepartureCache;
+import uk.trainwatch.web.ldb.cache.LocationTimeKey;
 import uk.trainwatch.web.ldb.model.Forecast;
 import uk.trainwatch.web.ldb.model.ForecastEntry;
 import uk.trainwatch.web.ldb.model.Schedule;
@@ -55,8 +58,14 @@ import uk.trainwatch.web.servlet.ApplicationRequest;
 public class LDBUtils
 {
 
-    @Resource( name = "jdbc/rail" )
+    @Resource(name = "jdbc/rail")
     private DataSource dataSource;
+
+    @Inject
+    private LDBCallingPointCache callingPointCache;
+
+    @Inject
+    private LDBDepartureCache departureCache;
 
     @Inject
     private DarwinReferenceManager darwinReferenceManager;
@@ -81,17 +90,14 @@ public class LDBUtils
         String crs = request.getPathInfo().substring( 1 ).toUpperCase();
 
         TrainLocation loc = darwinReferenceManager.getLocationRefFromCrs( crs );
-        if( loc == null )
-        {
+        if( loc == null ) {
             // See if they have used an alternate code
             loc = darwinReferenceManager.getLocationRefFromTiploc( crs );
 
-            if( loc == null )
-            {
+            if( loc == null ) {
                 request.sendError( HttpServletResponse.SC_NOT_FOUND );
             }
-            else
-            {
+            else {
                 // Redirect to the correct page
                 request.getResponse().
                         sendRedirect( prefix + loc.getCrs() );
@@ -122,97 +128,37 @@ public class LDBUtils
         boolean midnight = timeBefore.isBefore( timeAfter );
         req.put( "midnight", midnight );
 
-        // Filter a LocalTime to fit between the required times, accounting for midnight
-        Predicate<LocalTime> filter = midnight
-                ? t -> t.isAfter( timeAfter ) || t.isBefore( timeBefore )
-                : t -> t.isAfter( timeAfter ) && t.isBefore( timeBefore );
-
         final String crs = loc.getCrs();
 
-        try( Connection con = dataSource.getConnection() )
-        {
-            // must have a working departure
-            // order by first of actual departure, estimated then working departure
-            List<LDB> departures;
-            try( PreparedStatement ps = SQL.prepare( con,
-                                                     "SELECT *,"
-                                                     + "   s.toc AS toc,"
-                                                     + "   o.name AS origin,"
-                                                     + "   d.name AS destination,"
-                                                     + "   f.ts AS ts"
-                                                     + " FROM darwin.forecast f"
-                                                     + " INNER JOIN darwin.schedule s ON f.schedule=s.id"
-                                                     + " INNER JOIN darwin.location d ON s.dest=d.tpl"
-                                                     + " INNER JOIN darwin.location o ON s.origin=o.tpl"
-                                                     + " INNER JOIN darwin.forecast_entry fe ON f.id=fe.fid"
-                                                     + " INNER JOIN darwin.location l ON fe.tpl=l.tpl"
-                                                     + " INNER JOIN darwin.crs c ON l.crs=c.id"
-                                                     // Only for this station
-                                                     + " WHERE c.crs=?"
-                                                     // Flagged for display
-                                                     + " AND fe.ldb=TRUE"
-                                                     // all non-passes required so we can use Terminates/Starts here etc
-                                                     + " AND fe.wtp IS NULL",
-                                                     loc.getCrs() ) )
-            {
-                departures = SQL.stream( ps, LDB.fromSQL ).
-                        // Filter only public entries
-                        filter( LDB::isPublic ).
-                        // Filter those that have departed
-                        filter( l -> !l.isDeparted() ).
-                        // Filter out those out of range, accounting for midnight
-                        filter( l -> filter.test( l.getTime() ) ).
-                        // Sort to Darwin rules, accounts for midnight
-                        sorted( ( a, b ) -> TimeUtils.compareLocalTimeDarwin.compare( a.getTime(), b.getTime() ) ).
-                        collect( Collectors.toList() );
-            }
+        Collection<LDB> departures = departureCache.getDepartures( new LocationTimeKey( crs, time ) );
 
-            try( PreparedStatement ps = SQL.prepare( con,
-                                                     "SELECT t.tpl,"
-                                                     + " COALESCE(e.dep, e.etdep, e.arr, e.etarr) AS time,"
-                                                     + " (e.dep IS NOT NULL OR e.arr IS NOT NULL) AS report,"
-                                                     + " s.can"
-                                                     + " FROM darwin.schedule_entry s"
-                                                     + " INNER JOIN darwin.forecast f ON s.schedule=f.schedule"
-                                                     + " INNER JOIN darwin.forecast_entry e ON f.id = e.fid AND s.tpl=e.tpl AND e.ldb=true"
-                                                     + " INNER JOIN darwin.tiploc t on e.tpl=t.id"
-                                                     + " WHERE f.id=?"
-                                                     + " ORDER BY s.id"
-            ) )
-            {
-                departures.forEach( SQLConsumer.guard( dep ->
-                {
-                    ps.setLong( 1, dep.getId() );
+        // get calling points for each departure and flag it if its been canceled
+        departures.forEach( SQLConsumer.guard( dep -> {
+            Collection<CallingPoint> points = callingPointCache.getCallingPoints( dep.getId() );
+            dep.setPoints( points );
+            points.forEach( c -> {
+                if( darwinReferenceManager.isCrs( crs, c.getTpl() ) ) {
+                    dep.setCanc( c.isCanc() );
+                }
+            } );
+        } ) );
 
-                    dep.setPoints( SQL.stream( ps, CallingPoint.fromSQL( darwinReferenceManager ) ).
-                            peek( c ->
-                                    {
-                                        if( darwinReferenceManager.isCrs( crs, c.getTpl() ) )
-                                        {
-                                            dep.setCanc( c.isCanc() );
-                                        }
-                            } ).
-                            collect( Collectors.toList() ) );
-                } ) );
-            }
+        req.put( "departures", departures );
 
-            req.put( "departures", departures );
+        req.put( "stationMessages",
+                 stationMessageManager.getMessages( loc.getCrs() ).
+                 collect( Collectors.toList() ) );
 
-            req.put( "stationMessages",
-                     stationMessageManager.getMessages( loc.getCrs() ).
-                     collect( Collectors.toList() ) );
+        // Return the last update time
+        Timestamp ts = departures.stream().
+                map( LDB::getTs ).
+                sorted( ( a, b ) -> b.compareTo( a ) ).
+                findAny().
+                orElse( new Timestamp( System.currentTimeMillis() ) );
 
-            // Return the last update time
-            Timestamp ts = departures.stream().
-                    map( LDB::getTs ).
-                    sorted( ( a, b ) -> b.compareTo( a ) ).
-                    findAny().
-                    orElse( new Timestamp( System.currentTimeMillis() ) );
-
-            LocalDateTime dt = ts.toLocalDateTime().truncatedTo( ChronoUnit.MINUTES );
-            req.put( "lastUpdated", dt );
-            return ZonedDateTime.of( dt, TimeUtils.LONDON ).toInstant();
-        }
+        LocalDateTime dt = ts.toLocalDateTime().truncatedTo( ChronoUnit.MINUTES );
+        req.put( "lastUpdated", dt );
+        return ZonedDateTime.of( dt, TimeUtils.LONDON ).toInstant();
     }
 
     public SQLBiConsumer<Connection, Train> getForecastFilter()
@@ -220,12 +166,9 @@ public class LDBUtils
         return forecastFilter;
     }
 
-    private final SQLBiConsumer<Connection, Train> forecastFilter = ( con, train ) ->
-    {
-        if( train.isForecastPresent() && train.isSchedulePresent() )
-        {
-            train.getForecastEntries().forEach( f ->
-            {
+    private final SQLBiConsumer<Connection, Train> forecastFilter = ( con, train ) -> {
+        if( train.isForecastPresent() && train.isSchedulePresent() ) {
+            train.getForecastEntries().forEach( f -> {
                 train.getScheduleEntries().
                         stream().
                         filter( s -> s.getTpl().equals( f.getTpl() ) ).
@@ -243,50 +186,39 @@ public class LDBUtils
     private static final SQLBiConsumer<Connection, Train> schedulesArc = Schedule.populateArc.
             andThen( ScheduleEntry.populateArc );
 
-    private static final SQLBiFunction<Connection, Train, Train> getSearchEntry = ( c, t ) ->
-    {
+    private static final SQLBiFunction<Connection, Train, Train> getSearchEntry = ( c, t ) -> {
         // Archive flag may be set if we already know we are searching in the past
-        if( !t.isSchedulePresent() && !t.isArchived() )
-        {
+        if( !t.isSchedulePresent() && !t.isArchived() ) {
             Schedule.populate.accept( c, t );
         }
-        if( !t.isSchedulePresent() )
-        {
+        if( !t.isSchedulePresent() ) {
             Schedule.populateArc.accept( c, t );
         }
 
         // Only get entries if we have a schedule
-        if( t.isSchedulePresent() )
-        {
-            if( t.isArchived() )
-            {
+        if( t.isSchedulePresent() ) {
+            if( t.isArchived() ) {
                 ScheduleEntry.populateArc.accept( c, t );
             }
-            else
-            {
+            else {
                 ScheduleEntry.populate.accept( c, t );
             }
         }
 
         // No need to search live table if archived
-        if( !t.isArchived() )
-        {
+        if( !t.isArchived() ) {
             Forecast.populate.accept( c, t );
         }
-        if( !t.isForecastPresent() )
-        {
+        if( !t.isForecastPresent() ) {
             Forecast.populateArc.accept( c, t );
         }
 
         // Only get entries if we have a forecast
-        if( t.isForecastPresent() )
-        {
-            if( t.isArchived() )
-            {
+        if( t.isForecastPresent() ) {
+            if( t.isArchived() ) {
                 ForecastEntry.populateArc.accept( c, t );
             }
-            else
-            {
+            else {
                 ForecastEntry.populate.accept( c, t );
             }
         }
@@ -333,8 +265,7 @@ public class LDBUtils
     {
         Train train = new Train( rid );
 
-        try( Connection con = dataSource.getConnection() )
-        {
+        try( Connection con = dataSource.getConnection() ) {
             c.accept( con, train );
         }
 
@@ -376,8 +307,7 @@ public class LDBUtils
         // Searching in the past?
         boolean archiveOnly = startDate.isBefore( LocalDate.now() );
 
-        try( Connection con = dataSource.getConnection() )
-        {
+        try( Connection con = dataSource.getConnection() ) {
 
             // Form a filter from all tiplocs for the crs
             Predicate<Integer> filter;
@@ -387,16 +317,14 @@ public class LDBUtils
                                                      + " INNER JOIN darwin.crs c ON l.crs=c.id"
                                                      + " WHERE c.crs=?",
                                                      crs
-            ) )
-            {
+            ) ) {
                 filter = SQL.stream( ps, SQL.INT_LOOKUP ).
                         filter( Objects::nonNull ).
                         map( tpl -> (Predicate<Integer>) id -> tpl.equals( id ) ).
                         reduce( null, Predicates::and, Predicates::and );
             }
             // Special case, no filter means no tiplocs for a crs
-            if( filter == null )
-            {
+            if( filter == null ) {
                 return Collections.emptyList();
             }
 
@@ -422,14 +350,12 @@ public class LDBUtils
                                                      + " AND COALESCE(e.wtd,e.wta,e.wtp) BETWEEN ? AND ?",
                                                      crs, ssd, from, to,
                                                      crs, ssd, from, to
-            ) )
-            {
+            ) ) {
                 System.out.println( ps );
                 Stream<String> stream = SQL.stream( ps, SQL.STRING_LOOKUP );
 
                 // Check across previous midnight?
-                if( midnight )
-                {
+                if( midnight ) {
                     ssd = java.sql.Date.valueOf( start.minusDays( 1 ).toLocalDate() );
                     SQL.setParameters( ps,
                                        crs, ssd, from, to,

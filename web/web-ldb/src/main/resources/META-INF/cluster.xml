@@ -1,0 +1,23 @@
+<hazelcast>
+
+    <!-- Holds departures at a location for a specific time -->
+    <cache name="LDBDepartureCache">
+        <statistics-enabled>true</statistics-enabled>
+        <management-enabled>false</management-enabled>
+        
+        <!-- 1 minute as per licence with NRE -->
+        <expiry-policy-factory class-name="uk.trainwatch.util.cache.MinuteExpiryPolicyFactory"/>
+        
+    </cache>
+    
+    <!-- Holds the calling points for a specific train -->
+    <cache name="LDBCallingPointCache">
+        <statistics-enabled>true</statistics-enabled>
+        <management-enabled>false</management-enabled>
+        
+        <!-- 1 minute as per licence with NRE -->
+        <expiry-policy-factory class-name="uk.trainwatch.util.cache.MinuteExpiryPolicyFactory"/>
+        
+    </cache>
+        
+</hazelcast>

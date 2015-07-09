@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.web.ldb;
 
+import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -18,7 +19,10 @@ import uk.trainwatch.util.sql.SQLFunction;
  * @author peter
  */
 public class LDB
+        implements Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     public static final SQLFunction<ResultSet, LDB> fromSQL = rs -> new LDB(
             TimeUtils.getLocalTime( rs, "tm" ),
@@ -151,10 +155,8 @@ public class LDB
     public void setPoints( Collection<CallingPoint> points )
     {
         this.points = points;
-        points.forEach( pt ->
-        {
-            if( pt.isReport() )
-            {
+        points.forEach( pt -> {
+            if( pt.isReport() ) {
                 lastReport = pt;
             }
         } );
@@ -230,8 +232,7 @@ public class LDB
     public boolean isOnPlatform()
     {
         // Cancelled, terminated or not timetabled then no
-        if( isCanc() || isTerminated() || !isTimetabled() )
-        {
+        if( isCanc() || isTerminated() || !isTimetabled() ) {
             return false;
         }
 

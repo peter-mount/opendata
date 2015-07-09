@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.web.ldb;
 
+import java.io.Serializable;
 import java.sql.ResultSet;
 import java.time.LocalTime;
 import java.util.Objects;
@@ -18,12 +19,14 @@ import uk.trainwatch.util.sql.SQLFunction;
  * @author peter
  */
 public class CallingPoint
+        implements Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     public static final SQLFunction<ResultSet, CallingPoint> fromSQL( DarwinReferenceManager darwinReferenceManager )
     {
-        return rs ->
-        {
+        return rs -> {
             String tpl = rs.getString( "tpl" );
             return new CallingPoint(
                     tpl,
