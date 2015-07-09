@@ -79,12 +79,11 @@ public class HazelcastExtension
                 Streams.concat( finder.findAll( "cluster.xml" ),
                                 Collections.singletonList( baseURL ) ).
                         forEach( url -> {
-                            log.log( Level.INFO, () -> "Found " + url );
+                            log.log( Level.FINE, () -> "Found " + url );
 
                             try( BufferedReader r = new BufferedReader( new InputStreamReader( url.openStream() ) ) ) {
                                 r.lines().
                                 filter( l -> !l.contains( HAZELCAST_START ) && !l.contains( HAZELCAST_END ) ).
-                                peek( l -> log.log( Level.INFO, l ) ).
                                 forEach( pw::println );
                             }
                             catch( IOException ex ) {
