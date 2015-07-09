@@ -26,10 +26,10 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
@@ -101,18 +101,21 @@ public class HazelcastExtension
             log.log( Level.SEVERE, null, ex );
             throw new IllegalArgumentException( ex );
         }
+    }
 
-//        log.log( Level.INFO, "Getting CachingProvider" );
-//        provider = Caching.getCachingProvider();
-//
-//        // Obtain the CacheManager - this will force Hazelcast to start up.
-//        // We'll report the available cache names anyhow
-//        log.log( Level.INFO, "Getting CacheManager" );
-//        provider.getCacheManager().
-//                getCacheNames().
-//                forEach( cacheName -> log.log( Level.INFO, () -> "Found cache: " + cacheName ) );
+    public void afterBeanDiscovery( @Observes AfterBeanDiscovery type )
+    {
+        log.log( Level.INFO, "Getting CachingProvider" );
+        provider = Caching.getCachingProvider();
 
-//        log.log( Level.INFO, "Started" );
+        // Obtain the CacheManager - this will force Hazelcast to start up.
+        // We'll report the available cache names anyhow
+        log.log( Level.INFO, "Getting CacheManager" );
+        provider.getCacheManager().
+                getCacheNames().
+                forEach( cacheName -> log.log( Level.INFO, () -> "Found cache: " + cacheName ) );
+
+        log.log( Level.INFO, "Hazelcast & JCache started" );
     }
 
     public void beforeShutdown( @Observes BeforeShutdown type )
