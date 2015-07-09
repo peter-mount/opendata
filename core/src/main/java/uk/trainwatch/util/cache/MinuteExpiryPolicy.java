@@ -32,7 +32,7 @@ public class MinuteExpiryPolicy
     @Override
     public Duration getExpiryForCreation()
     {
-        return Duration.ONE_HOUR;
+        return Duration.ONE_MINUTE;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class MinuteExpiryPolicy
     @Override
     public Duration getExpiryForUpdate()
     {
-        return Duration.ONE_HOUR;
+        return Duration.ONE_MINUTE;
     }
 
 }
