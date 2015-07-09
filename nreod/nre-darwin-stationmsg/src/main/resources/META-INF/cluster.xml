@@ -1,0 +1,13 @@
+<hazelcast>
+
+    <!-- Holds departures at a location for a specific time -->
+    <cache name="DarwinStationMessagesCache">
+        <statistics-enabled>true</statistics-enabled>
+        <management-enabled>false</management-enabled>
+        
+        <!-- 1 minute as per licence with NRE -->
+        <expiry-policy-factory class-name="uk.trainwatch.util.cache.MinuteExpiryPolicyFactory"/>
+        
+    </cache>
+        
+</hazelcast>

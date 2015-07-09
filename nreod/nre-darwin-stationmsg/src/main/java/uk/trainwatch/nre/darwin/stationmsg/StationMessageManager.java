@@ -32,29 +32,30 @@ public class StationMessageManager
 
     private static final Logger log = Logger.getLogger( StationMessageManager.class.getName() );
 
-    @Resource( name = "jdbc/rail" )
+    @Resource(name = "jdbc/rail")
     private DataSource dataSource;
 
     @Inject
     private DarwinJaxbContext darwinJaxbContext;
 
+    @Inject
+    private StationMessageCache stationMessageCache;
+
     public Collection<StationMessage> getMessages()
     {
-        try( Connection con = dataSource.getConnection() )
-        {
+        try( Connection con = dataSource.getConnection() ) {
             try( PreparedStatement ps = SQL.prepare( con,
                                                      "SELECT xml FROM darwin.message"
                                                      + " WHERE dt between now()-'6 hours'::interval AND now()"
-                                                     + " ORDER BY dt DESC" ) )
-            {
+                                                     + " ORDER BY dt DESC" ) ) {
                 return SQL.stream( ps, SQL.STRING_LOOKUP ).
                         map( darwinJaxbContext.fromXML() ).
                         filter( Objects::nonNull ).
                         flatMap( p -> p.getUR().getOW().stream() ).
                         collect( Collectors.toList() );
             }
-        } catch( SQLException ex )
-        {
+        }
+        catch( SQLException ex ) {
             log.log( Level.SEVERE, ex, () -> "Retrieving messages" );
         }
         return null;
@@ -69,60 +70,12 @@ public class StationMessageManager
      */
     public Stream<StationMessage> getMessages( String crs )
     {
-        if( crs != null && !crs.isEmpty() )
-        {
-            String talpha = crs.toUpperCase();
-
-            try( Connection con = dataSource.getConnection() )
-            {
-                try( PreparedStatement ps = SQL.prepare( con,
-                                                         "SELECT m.xml FROM darwin.message m"
-                                                         + " INNER JOIN darwin.message_station ms ON m.id=ms.msgid"
-                                                         + " INNER JOIN darwin.crs s ON ms.crsid=s.id"
-                                                         + " WHERE s.crs=?"
-                                                         + " ORDER BY m.id DESC",
-                                                         talpha ) )
-                {
-                    return SQL.stream( ps, SQL.STRING_LOOKUP ).
-                            map( xml -> "<Pport xmlns=\"http://www.thalesgroup.com/rtti/PushPort/v12\">"
-                                    + "<uR>"
-                                    + "<OW xmlns:mg=\"http://www.thalesgroup.com/rtti/PushPort/StationMessages/v1\">" + xml + "</OW>"
-                                    + "</uR>"
-                                    + "</Pport>" ).
-                            map( darwinJaxbContext.fromXML() ).
-                            filter( Objects::nonNull ).
-                            flatMap( p -> p.getUR().getOW().stream() ).
-                            //filter( ow -> ow.getStation().stream().filter( s -> s.getCrs().equals( talpha ) ).findAny().isPresent() ).
-                            collect( Collectors.toList() ).
-                            stream();
-                }
-            } catch( SQLException ex )
-            {
-                log.log( Level.SEVERE, ex, () -> "Retrieving messages for " + talpha );
-            }
-        }
-        return Stream.empty();
+        return stationMessageCache.getMessages( crs ).stream();
     }
 
     public StationMessage getMessage( int id )
     {
-        try( Connection con = dataSource.getConnection() )
-        {
-            try( PreparedStatement ps = SQL.prepare( con, "SELECT xml FROM darwin.message WHERE id=?", id ) )
-            {
-                return SQL.stream( ps, SQL.STRING_LOOKUP ).
-                        map( darwinJaxbContext.fromXML() ).
-                        filter( Objects::nonNull ).
-                        flatMap( p -> p.getUR().getOW().stream() ).
-                        filter( s -> s.getId() == id ).
-                        findAny().
-                        orElse( null );
-            }
-        } catch( SQLException ex )
-        {
-            log.log( Level.SEVERE, ex, () -> "Retrieving message id " + id );
-        }
-        return null;
+        return stationMessageCache.getMessage( id );
     }
 
 }
