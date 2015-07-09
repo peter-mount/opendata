@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.web.ldb.model;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -19,7 +20,10 @@ import uk.trainwatch.util.TimeUtils;
  * @author peter
  */
 public class Train
+        implements Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     private final String rid;
     private Schedule schedule;

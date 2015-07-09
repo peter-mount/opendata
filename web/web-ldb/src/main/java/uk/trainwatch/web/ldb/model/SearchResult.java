@@ -5,17 +5,19 @@
  */
 package uk.trainwatch.web.ldb.model;
 
-import java.time.LocalTime;
+import java.io.Serializable;
 import java.util.function.Predicate;
-import uk.trainwatch.util.TimeUtils;
 
 /**
  *
  * @author peter
  */
 public class SearchResult
-        implements Comparable<SearchResult>
+        implements Comparable<SearchResult>,
+                   Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     private final Train train;
     private final TimetableEntry time;

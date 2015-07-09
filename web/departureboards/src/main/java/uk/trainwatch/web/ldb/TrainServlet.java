@@ -14,6 +14,7 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
 import uk.trainwatch.nre.darwin.reference.DarwinReferenceManager;
+import uk.trainwatch.web.ldb.cache.TrainCache;
 import uk.trainwatch.web.ldb.model.Train;
 import uk.trainwatch.web.servlet.AbstractServlet;
 import uk.trainwatch.web.servlet.ApplicationRequest;
@@ -22,16 +23,16 @@ import uk.trainwatch.web.servlet.ApplicationRequest;
  *
  * @author peter
  */
-@WebServlet( name = "TrainServlet", urlPatterns = "/train/*" )
+@WebServlet(name = "TrainServlet", urlPatterns = "/train/*")
 public class TrainServlet
         extends AbstractServlet
 {
 
     @Inject
-    private LDBUtils lDBUtils;
+    private DarwinReferenceManager darwinReferenceManager;
 
     @Inject
-    private DarwinReferenceManager darwinReferenceManager;
+    private TrainCache trainCache;
 
     @Override
     protected void doGet( ApplicationRequest request )
@@ -43,16 +44,14 @@ public class TrainServlet
 
         log( "Retrieving train " + rid );
 
-        try
-        {
-            Train train = lDBUtils.getSchedule( rid );
+        try {
+            Train train = trainCache.get( rid );
 
             Map<String, Object> req = request.getRequestScope();
             req.put( "train", train );
             req.put( "pageTitle", rid );
 
-            if( args.length > 1 )
-            {
+            if( args.length > 1 ) {
                 req.put( "backTo", darwinReferenceManager.getLocationRefFromTiploc( args[1] ) );
             }
 
@@ -62,8 +61,8 @@ public class TrainServlet
             request.maxAge( 1, ChronoUnit.MINUTES );
 
             request.renderTile( "ldb.train" );
-        } catch( SQLException ex )
-        {
+        }
+        catch( SQLException ex ) {
             log( "Failed rid " + rid, ex );
             request.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
         }

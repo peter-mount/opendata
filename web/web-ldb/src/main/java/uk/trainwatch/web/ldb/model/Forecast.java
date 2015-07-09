@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.web.ldb.model;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,7 +19,10 @@ import uk.trainwatch.util.sql.SQLFunction;
  * @author peter
  */
 public class Forecast
+        implements Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     private static final String SELECT_PATTERN = "SELECT * FROM darwin.%s WHERE rid=? ORDER BY id DESC";
 

@@ -20,4 +20,32 @@
         
     </cache>
         
+    <!-- Caches Train details -->
+    <cache name="LDBTrainCache">
+        <statistics-enabled>true</statistics-enabled>
+        <management-enabled>false</management-enabled>
+        
+        <!-- 1 minute as per licence with NRE -->
+        <expiry-policy-factory class-name="uk.trainwatch.util.cache.MinuteExpiryPolicyFactory"/>
+        
+    </cache>
+        
+    <!-- Holds tiplocs to crs -->
+    <cache name="CrsTiplocCache">
+        <statistics-enabled>true</statistics-enabled>
+        <management-enabled>false</management-enabled>
+        
+        <expiry-policy-factory class-name="uk.trainwatch.util.cache.HourExpiryPolicyFactory"/>
+        
+    </cache>
+        
+    <!-- Holds departure search results-->
+    <cache name="SearchDeparturesCache">
+        <statistics-enabled>true</statistics-enabled>
+        <management-enabled>false</management-enabled>
+        
+        <expiry-policy-factory class-name="uk.trainwatch.util.cache.HourExpiryPolicyFactory"/>
+        
+    </cache>
+        
 </hazelcast>

@@ -22,20 +22,25 @@ import uk.trainwatch.nre.darwin.reference.DarwinReferenceManager;
 import uk.trainwatch.nrod.location.TrainLocation;
 import uk.trainwatch.util.TimeUtils;
 import uk.trainwatch.web.ldb.LDBUtils;
+import uk.trainwatch.web.ldb.cache.SearchDepartureKey;
+import uk.trainwatch.web.ldb.cache.SearchDeparturesCache;
 import uk.trainwatch.web.servlet.ApplicationRequest;
 
 /**
  *
  * @author peter
  */
-@WebServlet( name = "RTTDateSearchServlet", urlPatterns = "/rtt/trains/*" )
+@WebServlet(name = "RTTDateSearchServlet", urlPatterns = "/rtt/trains/*")
 public class RTTDateSearchServlet
         extends RTTHomeServlet
 {
 
     @Inject
     private DarwinReferenceManager darwinReferenceManager;
-    
+
+    @Inject
+    private SearchDeparturesCache searchDeparturesCache;
+
     @Inject
     protected LDBUtils lDBUtils;
 
@@ -47,12 +52,10 @@ public class RTTDateSearchServlet
                    IOException
     {
         Matcher m = PATTERN.matcher( request.getPathInfo() );
-        if( m.matches() )
-        {
+        if( m.matches() ) {
             doSearch( request, m.group( 1 ), m.group( 2 ), m.group( 3 ) );
         }
-        else
-        {
+        else {
             request.sendError( HttpServletResponse.SC_NOT_FOUND );
         }
     }
@@ -65,12 +68,10 @@ public class RTTDateSearchServlet
         LocalTime time = LocalTime.of( Integer.parseInt( sHour ), 0 );
         TrainLocation loc = darwinReferenceManager.getLocationRefFromCrs( crs );
 
-        if( loc == null || !loc.isSetCrs() || date == null || time == null )
-        {
+        if( loc == null || !loc.isSetCrs() || date == null || time == null ) {
             request.sendError( HttpServletResponse.SC_NOT_FOUND );
         }
-        else
-        {
+        else {
             search( request, loc, date, time );
         }
     }
@@ -81,16 +82,13 @@ public class RTTDateSearchServlet
     {
         LocalDateTime start = LocalDateTime.of( date, time ).truncatedTo( ChronoUnit.HOURS );
         LocalDateTime now = LocalDateTime.now( TimeUtils.LONDON );
-        if( start.isBefore( now.minusDays( 7 ) ) )
-        {
+        if( start.isBefore( now.minusDays( 7 ) ) ) {
             request.sendError( HttpServletResponse.SC_GONE, "Requested date/time is too far in the past" );
         }
-        else if( now.truncatedTo( ChronoUnit.DAYS ).plusDays( 1 ).isBefore( start ) )
-        {
+        else if( now.truncatedTo( ChronoUnit.DAYS ).plusDays( 1 ).isBefore( start ) ) {
             request.sendError( HttpServletResponse.SC_NOT_FOUND, "Requested date/time is in the future" );
         }
-        else
-        {
+        else {
             search( request, loc, start, now );
         }
     }
@@ -99,10 +97,9 @@ public class RTTDateSearchServlet
             throws ServletException,
                    IOException
     {
-        try
-        {
+        try {
             Map<String, Object> req = request.getRequestScope();
-            req.put( "trains", lDBUtils.search( start, loc.getCrs() ) );
+            req.put( "trains", searchDeparturesCache.search( new SearchDepartureKey( loc.getCrs(), start ) ) );
 
             // Cache control, expire in 1m if today otherwise in 1 hour
             boolean today = now.toLocalDate().equals( start.toLocalDate() );
@@ -118,21 +115,19 @@ public class RTTDateSearchServlet
             req.put( "start", start );
 
             LocalDateTime back = start.minusHours( 1 );
-            if( back.isAfter( now.minusDays( 7 ) ) )
-            {
+            if( back.isAfter( now.minusDays( 7 ) ) ) {
                 req.put( "back", back );
             }
 
             // Allow up to 2am tomorrow
             LocalDateTime next = start.plusHours( 1 );
-            if( next.isBefore( now.truncatedTo( ChronoUnit.DAYS ).plusDays( 1 ).plusHours( 2 ).minusSeconds( 1 ) ) )
-            {
+            if( next.isBefore( now.truncatedTo( ChronoUnit.DAYS ).plusDays( 1 ).plusHours( 2 ).minusSeconds( 1 ) ) ) {
                 req.put( "next", start.plusHours( 1 ) );
             }
 
             request.renderTile( "rtt.search" );
-        } catch( SQLException ex )
-        {
+        }
+        catch( SQLException ex ) {
             log( "Failed to search \"" + loc.getCrs() + "\" for " + start, ex );
             request.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage() );
         }

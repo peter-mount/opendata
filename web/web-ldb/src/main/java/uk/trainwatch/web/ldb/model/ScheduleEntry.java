@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.web.ldb.model;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,8 +21,11 @@ import uk.trainwatch.util.sql.SQLFunction;
  * @author peter
  */
 public class ScheduleEntry
-        implements TimetableEntry
+        implements TimetableEntry,
+                   Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     private static final String SELECT_PATTERN = "SELECT s.id, s.schedule, s.type, t.tpl as tpl, s.pta, s.ptd, s.wta, s.wtd, s.wtp, s.act, s.can,"
                                                  + " s.tpl as tplid"

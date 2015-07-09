@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.web.ldb.model;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,8 +23,11 @@ import uk.trainwatch.util.sql.SQLFunction;
  */
 public class ForecastEntry
         implements TimetableEntry,
-                   Comparable<ForecastEntry>
+                   Comparable<ForecastEntry>,
+                   Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     private static final String SELECT_PATTERN = "SELECT f.fid,"
                                                  + " t.tpl, f.tpl as tplid,"

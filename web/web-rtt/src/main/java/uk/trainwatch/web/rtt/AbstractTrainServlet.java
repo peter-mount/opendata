@@ -17,6 +17,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import uk.trainwatch.util.Streams;
 import uk.trainwatch.web.ldb.LDBUtils;
+import uk.trainwatch.web.ldb.cache.TrainCache;
 import uk.trainwatch.web.ldb.model.Train;
 import uk.trainwatch.web.servlet.AbstractServlet;
 import uk.trainwatch.web.servlet.ApplicationRequest;
@@ -30,22 +31,12 @@ public abstract class AbstractTrainServlet
 {
 
     @Inject
+    private TrainCache trainCache;
+
+    @Inject
     protected LDBUtils lDBUtils;
 
     protected abstract String getTile();
-
-    private Train getTrain( String rid )
-            throws SQLException
-    {
-        // Unlike mobile we retrieve the entire train here & show in one go.
-        Train train = lDBUtils.getTrain( rid );
-
-        // Also we lookup from the archive as necessary
-        if( !train.isSchedulePresent() && !train.isForecastPresent() ) {
-            train = lDBUtils.getArchivedTrain( rid );
-        }
-        return train;
-    }
 
     @Override
     protected void doGet( ApplicationRequest request )
@@ -58,7 +49,7 @@ public abstract class AbstractTrainServlet
         log( "Retrieving train " + rid );
 
         try {
-            Train train = getTrain( rid );
+            Train train = trainCache.get( rid );
 
             // Still nothing then we didn't find it
             if( !train.isSchedulePresent() && !train.isForecastPresent() ) {
