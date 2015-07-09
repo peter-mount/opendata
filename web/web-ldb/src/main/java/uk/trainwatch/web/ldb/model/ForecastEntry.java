@@ -287,6 +287,11 @@ public class ForecastEntry
         this.scheduleEntry = scheduleEntry;
     }
 
+    public boolean isScheduleEntryPresent()
+    {
+        return scheduleEntry != null;
+    }
+
     @Override
     public int compareTo( ForecastEntry o )
     {

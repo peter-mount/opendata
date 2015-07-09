@@ -12,19 +12,8 @@
 <div class="ldbWrapper">
 
     <div id="trainTop">
-        <c:if test="${train.schedulePresent}">
-            <c:forEach var="entry" varStatus="status" items="${train.scheduleEntries}">
-                <c:if test="${status.first}">
-                    <c:choose>
-                        <c:when test="${not empty entry.ptd}">
-                            <t:time value="${entry.ptd}"/>
-                        </c:when>
-                        <c:otherwise>
-                            <t:time value="${entry.wtd}"/>
-                        </c:otherwise>
-                    </c:choose>
-                </c:if>
-            </c:forEach>
+        <c:if test="${train.originForecastPresent}">
+            <t:time value="${train.originForecast.getPTT()}"/>
         </c:if>
         <d:tiploc value="${train.schedule.origin}" link="false"/>
         <span class="ldbVia">
@@ -37,6 +26,17 @@
             </div>
         </c:if>
     </div>
+
+    <c:if test="${train.startsFromSet}">
+        <p class="center ldbSearchCancelled">
+            This train was cancelled at
+            <d:tiploc value="${train.schedule.origin}" link="false"/>
+            and was started from
+            <d:tiploc value="${train.startsFrom.tpl}" link="false"/>
+            at
+            <t:time value="${train.startsFrom.getPTT()}"/>
+        </p>
+    </c:if>
 
     <c:if test="${train.isSchedulePresent()}">
         <div class="ldb-row">
@@ -56,11 +56,47 @@
         </div>
     </c:if>
 
+    <c:if test="${train.originForecastPresent}">
+        <div class="ldb-row">
+            <div class="ldb-label">
+                <c:if test="${train.startsFromSet}">
+                    Original
+                </c:if>
+                Origin
+            </div>
+            <div class="ldb-value">
+                <d:tiploc value="${train.originForecast.tpl}" prefix="/station/"/> at <t:time value="${train.originForecast.tm}"/>
+                <t:delay value="${train.originForecast.delay}" ontime="true" absolute="true" early="true"/>
+            </div>
+        </div>
+    </c:if>
+
+    <c:if test="${train.startsFromSet}">
+        <div class="ldb-row">
+            <div class="ldb-label">Actual Origin</div>
+            <div class="ldb-value">
+                <d:tiploc value="${train.startsFrom.tpl}" prefix="/station/"/> at <t:time value="${train.startsFrom.tm}"/>
+                <t:delay value="${train.startsFrom.delay}" ontime="true" absolute="true" early="true"/>
+            </div>
+        </div>
+    </c:if>
+
+    <c:if test="${train.destinationForecastPresent}">
+        <div class="ldb-row">
+            <div class="ldb-label">Destination</div>
+            <div class="ldb-value">
+                <d:tiploc value="${train.destinationForecast.tpl}" prefix="/station/"/> at <t:time value="${train.destinationForecast.tm}"/>
+                <t:delay value="${train.destinationForecast.delay}" ontime="true" absolute="true" early="true"/>
+            </div>
+        </div>
+    </c:if>
+
     <c:if test="${not empty train.lastReport}">
         <div class="ldb-row">
             <div class="ldb-label">Last Report</div>
             <div class="ldb-value">
                 <d:tiploc value="${train.lastReport.tpl}" prefix="/station/"/> at <t:time value="${train.lastReport.tm}"/>
+                <t:delay value="${train.lastReport.delay}" ontime="true" absolute="true" early="true"/>
             </div>
         </div>
     </c:if>

@@ -39,6 +39,15 @@
         
     </cache>
         
+    <!-- Holds tiplocs -->
+    <cache name="TiplocCache">
+        <statistics-enabled>true</statistics-enabled>
+        <management-enabled>false</management-enabled>
+        
+        <expiry-policy-factory class-name="uk.trainwatch.util.cache.HourExpiryPolicyFactory"/>
+        
+    </cache>
+        
     <!-- Holds departure search results-->
     <cache name="SearchDeparturesCache">
         <statistics-enabled>true</statistics-enabled>

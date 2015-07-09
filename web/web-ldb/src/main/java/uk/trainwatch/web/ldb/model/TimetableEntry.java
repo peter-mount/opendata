@@ -53,6 +53,26 @@ public interface TimetableEntry
 
     LocalTime getWtp();
 
+    default LocalTime getPTT()
+    {
+        if( getPtd() != null ) {
+            return getPtd();
+        }
+        if( getPta() != null ) {
+            return getPta();
+        }
+        if( getWtd() != null ) {
+            return getWtd();
+        }
+        if( getWta() != null ) {
+            return getWta();
+        }
+        if( getWtp() != null ) {
+            return getWtp();
+        }
+        return null;
+    }
+
     static LocalTime getTime( TimetableEntry e )
     {
         if( e.getWtd() != null ) {

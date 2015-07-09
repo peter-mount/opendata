@@ -40,6 +40,8 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+        
+        <!--
         <plugins>
             <plugin>
                 <groupId>org.jvnet.jaxb2.maven2</groupId>
@@ -79,6 +81,7 @@
                 </configuration>
             </plugin>
         </plugins>
+        -->
         
     </build>
 

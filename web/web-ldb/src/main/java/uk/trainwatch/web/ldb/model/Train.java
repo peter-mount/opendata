@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import uk.trainwatch.util.Streams;
@@ -32,7 +33,7 @@ public class Train
     private List<ForecastEntry> forecastEntries = Collections.emptyList();
     private boolean archived;
 
-    private ForecastEntry lastReport;
+    private ForecastEntry lastReport, startsFrom, originForecast, destinationForecast;
 
     public Train( String rid )
     {
@@ -171,6 +172,58 @@ public class Train
             lastReport = null;
         }
 
+    }
+
+    /**
+     * If not null, where the train starts from.
+     * <p>
+     * This is usually caused by the train being cancelled at it's origin.
+     * <p>
+     * @return
+     */
+    public ForecastEntry getStartsFrom()
+    {
+        return startsFrom;
+    }
+
+    public boolean isStartsFromSet()
+    {
+        return startsFrom != null;
+    }
+
+    public void setStartsFrom( ForecastEntry startsFrom )
+    {
+        this.startsFrom = startsFrom;
+    }
+
+    public boolean isOriginForecastPresent()
+    {
+        return originForecast != null;
+    }
+
+    public ForecastEntry getOriginForecast()
+    {
+        return originForecast;
+    }
+
+    public void setOriginForecast( ForecastEntry originForecast )
+    {
+        this.originForecast = originForecast;
+    }
+
+    public boolean isDestinationForecastPresent()
+    {
+        return destinationForecast != null;
+    }
+
+    public ForecastEntry getDestinationForecast()
+    {
+        return destinationForecast;
+    }
+
+    public void setDestinationForecast( ForecastEntry destinationForecast )
+    {
+        this.destinationForecast = destinationForecast;
     }
 
     public TimetableEntry findTime( Predicate<Integer> tplFilter )
