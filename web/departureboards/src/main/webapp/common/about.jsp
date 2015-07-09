@@ -4,21 +4,33 @@
 <div id="home">
 
     <p>
-        This application provides real time departure board information for every railway station in England, Scotland and Wales.
+        This application provides real time departure board information for every railway station in England, Scotland and Wales as well as every station on
+        the London Underground.
         When you navigate through the site, you will be shown the trains for up to the next hour.
     </p>
 
+    <h3>National Rail Enquiries</h3>
+
+    <div class="logo-container">
+        <img class="logo-nre" src="/images/NRE_Powered_logo.jpg"/>
+    </div>
+    
     <p>
-        The application is a view on the new real time feed from National Rail Enquiries thats now available to
-        <a href="//uktra.in/">uktra.in</a>.
+        For the mainline stations, the application is a view on the Darwin Push Port real time feed from National Rail Enquiries.
+    </p>
+
+    <p>
         This feed provides both timetabled times for services but also actual as well as the predicted arrival &amp; departure times for services,
         so when a service is delayed then we will show the same predicted times as National Rail Enquiries have access to.
     </p>
 
+    <h3>Transport for London</h3>
+
     <p>
-        Note: Unlike some other sites which use a webservice at NRE to present the boards, this is not. What you see here is what we've received from
-        the feed so it's an example of the data which we now have available for other purposes.
+        For the London underground, we are using feeds from Transport for London which provide similar information for underground services.
     </p>
+
+    <h3>Open Data</h3>
 
     <p>
         For more information on the open data:
