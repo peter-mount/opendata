@@ -7,6 +7,7 @@ package uk.trainwatch.web.ldb.cache;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Resource;
@@ -15,6 +16,7 @@ import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheResult;
 import javax.enterprise.context.ApplicationScoped;
 import javax.sql.DataSource;
+import uk.trainwatch.util.sql.SQLBiConsumer;
 import uk.trainwatch.web.ldb.model.Forecast;
 import uk.trainwatch.web.ldb.model.ForecastEntry;
 import uk.trainwatch.web.ldb.model.Schedule;
@@ -79,6 +81,19 @@ public class TrainCache
                 else {
                     ForecastEntry.populate.accept( con, train );
                 }
+            }
+
+            // Now link forecast & schedule entries - otherwise we'll have no idea of cancelled stops
+            if( train.isForecastPresent() && train.isSchedulePresent() ) {
+                train.getForecastEntries().forEach( f -> {
+                    train.getScheduleEntries().
+                            stream().
+                            filter( s -> s.getTpl().equals( f.getTpl() ) ).
+                            filter( s -> Objects.equals( s.getPta(), f.getPta() ) ).
+                            filter( s -> Objects.equals( s.getPtd(), f.getPtd() ) ).
+                            findAny().
+                            ifPresent( f::setScheduleEntry );
+                } );
             }
 
             return train;
