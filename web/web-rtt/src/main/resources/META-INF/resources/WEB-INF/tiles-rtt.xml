@@ -17,6 +17,7 @@
     <definition name="rtt.search" extends="layout.main">
         <put-attribute name="title" value="Real Time Tracking" />
         <put-attribute name="body" value=".rtt.search" />
+        <put-attribute name="javascript" value="/common/rtt/javascript.jsp" />
     </definition>
     <definition name=".rtt.search" extends="layout.2col-left">
         <put-attribute name="left" value=".left" />

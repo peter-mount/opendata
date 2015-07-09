@@ -406,3 +406,47 @@ table.wikitable td.netprevlast {
 .ui-helper-hidden-accessible {
     display:none;
 }
+
+.logo-nre {
+    width: 80%;
+    max-width: 300px;
+    height: auto;
+}
+
+#loading {
+    display: none;
+    background-image: url(//ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/images/ajax-loader.gif);
+    background-position: center;
+    background-repeat: no-repeat;
+    position: absolute;
+    top:0;
+    bottom:0;
+    left:0;
+    right:0;
+    z-index: -1;
+    opacity: 0.3;
+}
+
+.rttTable {
+    border-collapse: collapse;
+}
+
+.rttTable th, .rttTable td {
+    padding-left: 0.25em;
+    padding-right: 0.25em;
+}
+.rttTableHeader th {
+    border-bottom: 1px solid black;
+}
+
+tr.rttTableResult {
+    border-bottom: 1px solid #bbb;
+}
+
+.rttTableBase td {
+    border-top: 1px solid black;
+    padding-top: 0.5em;
+}
+th.rttTableSep, td.rttTableSep {
+    border-left: 1px solid #bbb;
+}

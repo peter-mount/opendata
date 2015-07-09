@@ -113,6 +113,7 @@ public class RTTDateSearchServlet
 
             req.put( "location", loc );
             req.put( "start", start );
+            req.put( "startDate", TimeUtils.toDate( start.toLocalDate() ) );
 
             LocalDateTime back = start.minusHours( 1 );
             if( back.isAfter( now.minusDays( 7 ) ) ) {

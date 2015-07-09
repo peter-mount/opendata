@@ -5,19 +5,27 @@
 <%@ taglib prefix="d" uri="http://uktra.in/tld/darwin" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 
+<div class="center">
+    <img class="logo-nre" src="/images/NRE_Powered_logo.jpg"/>
+</div>
+
 <div class="ldbWrapper">
 
     <div id="trainTop">
-        <%-- FIXME add origin departure time
-            <c:choose>
-                <c:when test="${not empty train.schedule.origin.ptd}">
-                    <t:time value="${train.schedule.origin.ptd}"/>ͣͣ
-                </c:when>
-                <c:otherwise>
-                    <t:time value="${train.schedule.origin.wtd}"/>ͣͣ
-                </c:otherwise>
-            </c:choose>
-        --%>
+        <c:if test="${train.schedulePresent}">
+            <c:forEach var="entry" varStatus="status" items="${train.scheduleEntries}">
+                <c:if test="${status.first}">
+                    <c:choose>
+                        <c:when test="${not empty entry.ptd}">
+                            <t:time value="${entry.ptd}"/>
+                        </c:when>
+                        <c:otherwise>
+                            <t:time value="${entry.wtd}"/>
+                        </c:otherwise>
+                    </c:choose>
+                </c:if>
+            </c:forEach>
+        </c:if>
         <d:tiploc value="${train.schedule.origin}" link="false"/>
         <span class="ldbVia">
             to
@@ -139,33 +147,23 @@
         <div class="ldb-row">
             <table>
                 <tr class="headtop">
-                    <th></th>
+                    <th rowspan="3" valign="bottom" class="headtop">Location</th>
                         <c:choose>
                             <c:when test="${showLength}">
-                            <th colspan="5" class="sep">&nbsp;</th>
+                            <th colspan="5" rowspan="2" valign="bottom" class="sep">Observed</th>
                             </c:when>
                             <c:otherwise>
-                            <th colspan="4" class="sep">&nbsp;</th>
+                            <th colspan="4" rowspan="2" valign="bottom" class="sep">Observed</th>
                             </c:otherwise>
                         </c:choose>
                     <th class="track" rowspan="3">&nbsp;</th>
                     <th colspan="5" class="sep">Timetable</th>
                 </tr>
                 <tr class="headtop">
-                    <th></th>
-                        <c:choose>
-                            <c:when test="${showLength}">
-                            <th colspan="5" class="sep">Observed</th>
-                            </c:when>
-                            <c:otherwise>
-                            <th colspan="4" class="sep">Observed</th>
-                            </c:otherwise>
-                        </c:choose>
                     <th colspan="2" class="sep">Public</th>
                     <th colspan="3" class="sep">Working</th>
                 </tr>
                 <tr class="head">
-                    <th>Location</th>
                     <th class="sep">Plat</th>
                     <th>Arr</th>
                     <th>Dep</th>

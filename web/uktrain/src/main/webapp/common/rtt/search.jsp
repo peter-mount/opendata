@@ -6,18 +6,21 @@
 
 <f:formatNumber var="startHr" value="${start.toLocalTime().getHour()}" pattern="00"/>
 <f:formatNumber var="endHr" value="${start.plusHours(1).toLocalTime().getHour()}" pattern="00"/>
-<h2>${location.location} for ${start.toLocalDate()} ${startHr} to ${endHr}</h2>
 
-<table>
+<table class="rttTable">
     <tr>
-        <td colspan="2" align="left">
+        <td align="left" valign="bottom">
             <c:if test="${not empty back}">
                 <f:formatNumber var="h" value="${back.toLocalTime().getHour()}" pattern="00"/>
                 <a href="/rtt/trains/${location.crs}/${back.toLocalDate()}/${h}">-1 hour</a>
             </c:if>
         </td>
-        <td colspan="4"></td>
-        <td colspan="2" align="right">
+        <td colspan="5" class="center">
+            <img class="logo-nre" src="/images/NRE_Powered_logo.jpg"/>
+            <h2>${location.location}</h2>
+            For <f:formatDate value="${startDate}" dateStyle="long"/> between ${startHr}:00 and ${endHr}:00
+        </td>
+        <td colspan="2" align="right" valign="bottom">
             <c:if test="${not empty next}">
                 <f:formatNumber var="h" value="${next.toLocalTime().getHour()}" pattern="00"/>
                 <a href="/rtt/trains/${location.crs}/${next.toLocalDate()}/${h}">+1 hour</a>
@@ -33,7 +36,7 @@
         <th colspan="2">Public</th>
         <th colspan="3">Working</th>
     </tr>
-    <tr>
+    <tr class="rttTableHeader">
         <th>RID</th>
         <th>Destination</th>
         <th>Plat</th>
@@ -44,7 +47,13 @@
         <th>Pass</th>
     </tr>
     <c:forEach var="result" items="${trains}">
-        <tr>
+        <c:set var="canc" value="false"/>
+        <c:set var="style" value=""/>
+        <c:if test="${not empty result.time.scheduleEntry and result.time.scheduleEntry.can}">
+            <c:set var="canc" value="true"/>
+            <c:set var="style" value="ldbSearchCancelled"/>
+        </c:if>
+        <tr class="rttTableResult">
             <td valign="top">
                 <a href="/rtt/train/${result.train.rid}">
                     <c:choose>
@@ -58,19 +67,19 @@
                     </c:choose>
                 </a>
             </td>
-            <td valign="top">
+            <td valign="top" class="${style}">
                 <c:if test="${result.train.schedulePresent}">
                     <d:tiploc value="${result.train.schedule.dest}" link="false"/>
                     <c:if test="${result.train.schedule.via>0}">
-                        <div>
+                        <div class="ldbVia">
                             <d:via value="${result.train.schedule.via}"/>
                         </div>
                     </c:if>
                 </c:if>
             </td>
-            <td valign="top">
+            <td valign="top" class="rttTableSep center ${style}">
                 <c:choose>
-                    <c:when test="${not empty result.time.scheduleEntry and result.time.scheduleEntry.can}">
+                    <c:when test="${canc}">
                         Cancelled
                     </c:when>
                     <c:when test="${result.time.platsup or not result.time.cisplatsup}">
@@ -80,13 +89,13 @@
                     </c:otherwise>
                 </c:choose>
             </td>
-            <td valign="top">
+            <td valign="top" class="rttTableSep">
                 <t:time value="${result.time.pta}"/>
             </td>
             <td valign="top">
                 <t:time value="${result.time.ptd}"/>
             </td>
-            <td valign="top">
+            <td valign="top" class="rttTableSep">
                 <t:time value="${result.time.wta}" working="true"/>
             </td>
             <td valign="top">
@@ -97,7 +106,7 @@
             </td>
         </tr>
     </c:forEach>
-    <tr>
+    <tr class="rttTableBase">
         <td colspan="2" align="left">
             <c:if test="${not empty back}">
                 <f:formatNumber var="h" value="${back.toLocalTime().getHour()}" pattern="00"/>

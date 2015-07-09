@@ -39,6 +39,7 @@
 .ldb-fsct-len-expt,
 .ldb-fsct-expected { font-style: italic; }
 
+.ldbSearchCancelled,
 .ldb-fsct-len-can,
 .ldb-fsct-loc-can,
 .ldb-fsct-plat-can,
@@ -80,7 +81,8 @@ th, td {
     font-size: 100%;
 }
 
-.ldb-row table tr.head th {
+.ldb-row table tr.head th,
+.ldb-row table tr.headtop th.headtop {
     border-collapse: collapse;
     border-bottom: 1px solid black;
 }
@@ -108,7 +110,6 @@ th, td {
     border-collapse: collapse;
     border: 1px solid #ccc;
 }
-
 
 .track-stop-canc,
 .track-line-canc {

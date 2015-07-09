@@ -19,19 +19,23 @@
     }
 </style>
 
-<h2>Live train monitoring</h2>
-<p>
-    From this page you can search for any train that's due to run from any station and monitor it's progress.
-    You can even go back a few days as well to see how earlier trains performed.
-</p>
+<div class="center">
+    <h1>Live train monitoring</h1>
 
-<h2>Search</h2>
+    <p>
+        From this page you can search for any train that's due to run from any station and monitor it's progress.
+    </p>
 
-<c:if test="${not empty msg}">
-    <div class="error"><c:out value="${msg}" escapeXml="true"/></div>
-</c:if>
+    <p>
+        You can even go back a few days as well to see how earlier trains performed.
+    </p>
+</div>
 
-<h2>Search by station and date</h2>
+<h2 class="center">Search by Mainline Station and Date</h2>
+
+<div class="center">
+    <img class="logo-nre" src="/images/NRE_Powered_logo.jpg"/>
+</div>
 
 <div>
     <div class="ui-widget">
@@ -57,15 +61,22 @@
     <input id="submit" name="submit" type="submit" value="Search"/>
 </div>
 
-<h3>Alternative searches</h3>
+<c:if test="${not empty msg}">
+    <div class="error"><c:out value="${msg}" escapeXml="true"/></div>
+</c:if>
+
+<h3 class="center">Alternative searches</h3>
 
 <div>
     <div class="ui-widget">
-        <label id="railidlabel" for="railid">Rail ID:</label>
+        <label id="railidlabel" for="railid">Darwin Rail ID:</label>
         <input id="railid"/>
+        <input id="submitRailId" name="submitRailId" type="submit" value="Search"/>
     </div>
     <input id="station" type="hidden" name="station"/>
 </div>
+
+<div id="loading" style="display: none;"></div>
 
 <script>
     $(document).ready(function () {
@@ -127,8 +138,8 @@
 
         $('#searchSubmit').click(search);
         keypress($('#railid'), function (c) {
-            // TODO add validation here
-            document.location = "/rtt/train/" + c.val()
+            UI.loader.css({display: 'block'});
+            document.location = "/rtt/train/" + c.val();
         });
         // Clear the form. Handles case of someone using back button
         var clearcomps = [
