@@ -110,8 +110,9 @@ public class SearchDeparturesCache
             // Form a filter from all tiplocs for the crs
             Predicate<Integer> filter = crsTiplocCache.get( crs ).
                     stream().
+                    peek( tpl -> LOG.log( Level.INFO, () -> "crs " + crs + " tpl " + tpl + ":" ) ).
                     map( tpl -> (Predicate<Integer>) id -> tpl.equals( id ) ).
-                    reduce( null, Predicates::and, Predicates::and );
+                    reduce( null, Predicates::or, Predicates::or );
 
             // Special case, no filter means no tiplocs for a crs
             if( filter == null ) {
