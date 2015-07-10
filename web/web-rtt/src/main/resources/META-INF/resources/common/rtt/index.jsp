@@ -125,7 +125,7 @@
             for (var i = 0; i <= mh; i++) {
                 var o = $('<option></option>').
                         appendTo(c).
-                        attr({value: i}).
+                        attr({value: i<10 ? ('0'+i):i}).
                         text(f(i) + '-' + f(i === 23 ? 0 : i + 1));
                 if (i === h)
                     o.attr({selected: 'selected'});
