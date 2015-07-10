@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.tfl.trackernet.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -17,7 +18,10 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement( name = "ROOT" )
 public class Root
+        implements Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     private Time time;
 

@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.tfl.trackernet.model;
 
+import java.io.Serializable;
 import java.util.Objects;
 import javax.xml.bind.annotation.XmlAttribute;
 
@@ -13,8 +14,10 @@ import javax.xml.bind.annotation.XmlAttribute;
  * @author peter
  */
 public class Time
+        implements Serializable
 {
 
+    private static final long serialVersionUID = 1L;
     private String timeStamp;
 
     @XmlAttribute( name = "TimeStamp" )

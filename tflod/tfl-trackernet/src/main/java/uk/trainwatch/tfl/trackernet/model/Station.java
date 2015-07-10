@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.tfl.trackernet.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -16,8 +17,10 @@ import javax.xml.bind.annotation.XmlElement;
  * @author peter
  */
 public class Station
+        implements Serializable
 {
 
+    private static final long serialVersionUID = 1L;
     private String code;
 
     private String name;
