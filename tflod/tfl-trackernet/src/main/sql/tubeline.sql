@@ -32,7 +32,7 @@ INSERT INTO line (code,line) VALUES ('P','Piccadilly');
 INSERT INTO line (code,line) VALUES ('V','Victoria');
 INSERT INTO line (code,line) VALUES ('W','Waterloo & City');
 
-CREATE OR REPLACE FUNCTION tfl.line (pline CHAR)
+CREATE OR REPLACE FUNCTION tfl.line (pline TEXT)
 RETURNS INTEGER AS $$
 DECLARE
     rec     RECORD;
