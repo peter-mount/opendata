@@ -6,6 +6,7 @@
 --CREATE SCHEMA tfl;
 SET search_path = tfl;
 
+DROP TABLE boards;
 DROP TABLE platform;
 DROP TABLE station;
 DROP TABLE crs;
@@ -154,3 +155,35 @@ BEGIN
     END LOOP;
 END;
 $$ LANGUAGE plpgsql;
+
+-- ----------------------------------------------------------------------
+-- Current boards for each station
+-- ----------------------------------------------------------------------
+
+CREATE TABLE boards (
+    crsid       INTEGER NOT NULL REFERENCES tfl.crs(id),
+    platid      INTEGER NOT NULL REFERENCES tfl.platform(id),
+    -- Time the xml for this entry was received
+    -- used to hide old data due to licensing restrictions
+    tm          TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    -- Details about the train
+    trainset    TEXT NOT NULL,
+    tripno      INTEGER NOT NULL,
+    -- When the train is due:
+    -- +ve integer  Time in seconds
+    -- -1           "due"
+    -- -2           On platform
+    -- -98          Unknown, parse returned null
+    -- -99          Unknown, failed to parse field
+    due         INTEGER NOT NULL,
+    -- Where the train is located
+    location    TEXT NOT NULL DEFAULT 'Unknown',
+    dest        INTEGER NOT NULL DEFAULT 0,
+    destination TEXT NOT NULL DEFAULT 'Unknown'
+);
+
+CREATE INDEX boards_cp ON boards(crsid,platid);
+CREATE INDEX boards_cps ON boards(crsid,platid,trainset);
+CREATE INDEX boards_c ON boards(crsid);
+CREATE INDEX boards_p ON boards(platid);
+CREATE INDEX boards_t ON boards(tm);
