@@ -29,6 +29,8 @@ CREATE UNIQUE INDEX crs_c2 ON crs(code);
 CREATE INDEX crs_cc ON crs(crs,code);
 CREATE INDEX crs_n ON crs(name);
 
+GRANT ALL ON crs to rail;
+
 CREATE OR REPLACE FUNCTION tfl.crs (pcrs TEXT)
 RETURNS INTEGER AS $$
 DECLARE
@@ -82,6 +84,8 @@ CREATE TABLE platform (
 CREATE INDEX platform_c ON platform(crsid);
 CREATE UNIQUE INDEX platform_cn ON platform(crsid,name);
 
+GRANT ALL ON platform to rail;
+
 -- Function to retrieve and insert as necessary
 CREATE OR REPLACE FUNCTION tfl.platform (pcrsid INTEGER, pname TEXT, pcode INTEGER)
 RETURNS INTEGER AS $$
@@ -127,6 +131,8 @@ CREATE TABLE station (
 );
 CREATE INDEX station_l ON station(lineid);
 CREATE INDEX station_c ON station(crsid);
+
+GRANT ALL ON station to rail;
 
 -- Returns station(id) for a station on a specific line
 CREATE OR REPLACE FUNCTION tfl.station (pline TEXT, pcode TEXT, pname TEXT)
@@ -187,3 +193,7 @@ CREATE INDEX boards_cps ON boards(crsid,platid,trainset);
 CREATE INDEX boards_c ON boards(crsid);
 CREATE INDEX boards_p ON boards(platid);
 CREATE INDEX boards_t ON boards(tm);
+
+GRANT ALL ON boards
+
+ to rail;

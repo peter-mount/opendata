@@ -1,3 +1,4 @@
+
 -- ----------------------------------------------------------------------
 -- TrackerNet
 --
@@ -20,6 +21,8 @@ CREATE TABLE line (
 );
 CREATE UNIQUE INDEX line_c ON line(code);
 CREATE INDEX line_l ON line(line);
+
+GRANT ALL ON line to rail;
 
 INSERT INTO line (code,line) VALUES ('B','Bakerloo');
 INSERT INTO line (code,line) VALUES ('C','Central');
