@@ -21,12 +21,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class JsonToXmlTransformer
 {
 
-    private static final int WRITE_BUFFER_SIZE = 1024;
-    private char writeBuffer[];
-
     private final Reader in;
     private final Writer out;
-    private final boolean elementMode;
+    private final boolean attributeMode;
 
     /**
      * Constructor with element mode true
@@ -48,13 +45,13 @@ public class JsonToXmlTransformer
      *
      * @param in          Reader
      * @param out         Writer
-     * @param elementMode true for attributes, false for elements
+     * @param attributeMode true for attributes, false for elements
      */
-    public JsonToXmlTransformer( Reader in, Writer out, boolean elementMode )
+    public JsonToXmlTransformer( Reader in, Writer out, boolean attributeMode )
     {
         this.in = in;
         this.out = out;
-        this.elementMode = elementMode;
+        this.attributeMode = attributeMode;
     }
 
     public void run()
@@ -114,7 +111,7 @@ public class JsonToXmlTransformer
             throws IOException
     {
         // Add as attribute? First non-attr means rest as elements
-        AtomicBoolean attrs = new AtomicBoolean( elementMode );
+        AtomicBoolean attrs = new AtomicBoolean( attributeMode );
 
         out.write( '<' );
         out.write( n );
