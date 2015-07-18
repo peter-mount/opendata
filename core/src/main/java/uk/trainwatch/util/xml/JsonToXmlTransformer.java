@@ -12,13 +12,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A simple Json to XML transformer which can handle any size JSON files into XML.
- * 
- * It's usually used when a source feed is in JSON and we need to import it natively
- * in the database - as databases usually handle xml better than JSON.
+ *
+ * It's usually used when a source feed is in JSON and we need to import it natively in the database - as databases usually
+ * handle xml better than JSON.
+ *
  * @author peter
  */
 public class JsonToXmlTransformer
 {
+
+    private static final int WRITE_BUFFER_SIZE = 1024;
+    private char writeBuffer[];
 
     private final Reader in;
     private final Writer out;
@@ -27,8 +31,8 @@ public class JsonToXmlTransformer
     /**
      * Constructor with element mode true
      *
-     * @param in          Reader
-     * @param out         Writer
+     * @param in  Reader
+     * @param out Writer
      */
     public JsonToXmlTransformer( Reader in, Writer out )
     {
@@ -157,6 +161,7 @@ public class JsonToXmlTransformer
                 if( n.startsWith( "$" ) )
                 {
                     // They are always strings?
+                    // This strips out about 100K from the Tfl Feeds
                     run( c1 -> c1 != '"' );
                     run( c1 -> c1 != '"' );
                 }
@@ -238,21 +243,7 @@ public class JsonToXmlTransformer
                     return true;
 
                 case '"':
-                    attr( attrs, n, c1 ->
-                  {
-                      switch( c1 )
-                      {
-                          case '\\':
-                              escape();
-                              break;
-                          case '"':
-                              return false;
-                          default:
-                              out.write( c1 );
-                      }
-
-                      return true;
-                    } );
+                    attr( attrs, n, c1 -> escape(c1) || (c1 != '"' && write( c1 )) );
                     return false;
 
                 // List as the value
@@ -267,57 +258,80 @@ public class JsonToXmlTransformer
                     object( n );
                     return false;
 
+                // Non quoted value, i.e. number, true, false or null
                 default:
-                    attr( attrs, n, c1 ->
-                  {
-                      switch( c1 )
-                      {
-                          case ',':
-                          case ' ':
-                          case '}':
-                              return false;
-                          default:
-                              out.write( c1 );
-                              return true;
-                      }
-                    } );
+                    attr( attrs, n, c1 -> escape( c1 ) || (!(c1 == ',' || c1 == ' ' || c1 == '}') && write( c1 )) );
                     return false;
             }
         } );
     }
 
-    private void escape()
+    /**
+     * Escape the next character if \ is found
+     *
+     * In lambdas, use {@code (c == '\\' && escape())} as a clause.
+     *
+     * @param c character to test for escape
+     * @return false if not an escape or true if an escape and the end of stream has NOT been reached
+     * @throws IOException
+     */
+    private boolean escape( int c )
             throws IOException
     {
-        run( c ->
+        if( c == '\\' )
         {
-            switch( c )
-            {
-                case '"':
-                    out.write( "&quot;" );
-                    return false;
-                case '\'':
-                    out.write( "&apos;" );
-                    return false;
-                // Handle \n \r etc here?
-                default:
-                    out.write( c );
-            }
+            int c1 = in.read();
+            return c > -1 && write( c );
+        }
+        else
+        {
             return false;
-        } );
+        }
+    }
+
+    /**
+     * Wrapper for the {@link Writer#write(int)} method to use when writing values. This method will handle xml escaping of
+     * protected characters.
+     *
+     * @param c
+     * @return always true
+     * @throws IOException
+     */
+    private boolean write( int c )
+            throws IOException
+    {
+        switch( c )
+        {
+            case '&':
+                out.write( "&amp;" );
+                break;
+            case '<':
+                out.write( "&lt;" );
+                break;
+            case '>':
+                out.write( "&gt;" );
+                break;
+            case '"':
+                out.write( "&quot;" );
+                break;
+            case '\'':
+                out.write( "&apos;" );
+                break;
+            default:
+                out.write( c );
+                break;
+        }
+        return true;
     }
 
     private void run( Task t )
             throws IOException
     {
         int c;
-        while( (c = in.read()) > -1 )
+        do
         {
-            if( !t.parse( c ) )
-            {
-                return;
-            }
-        }
+            c = in.read();
+        } while( c > -1 && t.parse( c ) );
     }
 
     @FunctionalInterface
