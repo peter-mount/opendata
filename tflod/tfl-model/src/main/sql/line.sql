@@ -7,9 +7,13 @@
 SET search_path = tfl;
 
 DROP TABLE boards;
+
+DROP TABLE station_platform;
 DROP TABLE platform;
+
 DROP TABLE station_line;
 DROP TABLE station;
+
 DROP TABLE line;
 
 -- ----------------------------------------------------------------------
@@ -123,17 +127,24 @@ $$ LANGUAGE plpgsql;
 -- ----------------------------------------------------------------------
 CREATE TABLE platform (
     id          SERIAL NOT NULL,
-    stationid   INTEGER NOT NULL REFERENCES tfl.station(id),
     plat        INTEGER NOT NULL DEFAULT 0,
     name        NAME NOT NULL,
     fullname    NAME NOT NULL,
     PRIMARY KEY(id)
 );
-CREATE INDEX platform_sp ON platform(stationid,plat);
-CREATE INDEX platform_sn ON platform(stationid,name);
-CREATE UNIQUE INDEX platform_sf ON platform(stationid,fullname);
+CREATE INDEX platform_p ON platform(plat);
+CREATE INDEX platform_n ON platform(name);
+CREATE UNIQUE INDEX platform_f ON platform(fullname);
 
-CREATE OR REPLACE FUNCTION tfl.platform (pstationid INTEGER, pplat TEXT)
+CREATE TABLE station_platform (
+    id          SERIAL NOT NULL,
+    stationid   INTEGER NOT NULL REFERENCES tfl.station(id),
+    platid      INTEGER NOT NULL REFERENCES tfl.platform(id),
+    PRIMARY KEY (id)
+);
+CREATE UNIQUE INDEX station_platform_sp ON station_platform(stationid,platid);
+
+CREATE OR REPLACE FUNCTION tfl.platform (pplat TEXT)
 RETURNS INTEGER AS $$
 DECLARE
     rec     RECORD;
@@ -143,7 +154,7 @@ DECLARE
 BEGIN
     tplat=trim(pplat);
     LOOP
-        SELECT * INTO rec FROM tfl.platform WHERE stationid=pstationid AND fullname=tplat;
+        SELECT * INTO rec FROM tfl.platform WHERE fullname=tplat;
         IF FOUND THEN
             RETURN rec.id;
         END IF;
@@ -166,8 +177,32 @@ BEGIN
         IF aplat IS NULL THEN aplat = 0; END IF;
 
         BEGIN
-            INSERT INTO tfl.platform (stationid,plat,name,fullname) VALUES (pstationid,aplat,aname,tplat);
+            INSERT INTO tfl.platform (plat,name,fullname) VALUES (aplat,aname,tplat);
             RETURN currval('tfl.platform_id_seq');
+        EXCEPTION WHEN unique_violation THEN
+            -- Do nothing, loop & try again
+        END;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION tfl.platform (pstationid INTEGER, pplat TEXT)
+RETURNS INTEGER AS $$
+DECLARE
+    rec     RECORD;
+    aplatid INTEGER;
+BEGIN
+    aplatid = tfl.platform(pplat);
+
+    LOOP
+        SELECT * INTO rec FROM tfl.station_platform WHERE stationid=pstationid AND platid=aplatid;
+        IF FOUND THEN
+            RETURN rec.id;
+        END IF;
+
+        BEGIN
+            INSERT INTO tfl.station_platform (stationid,platid) VALUES (pstationid,aplatid);
+            RETURN currval('tfl.station_platform_id_seq');
         EXCEPTION WHEN unique_violation THEN
             -- Do nothing, loop & try again
         END;
