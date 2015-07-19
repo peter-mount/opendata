@@ -215,18 +215,18 @@ $$ LANGUAGE plpgsql;
 -- ----------------------------------------------------------------------
 CREATE TABLE boards (
     id          SERIAL NOT NULL,
-    stationid   INTEGER NOT NULL REFERENCES tfl.station(id),
-    platid      INTEGER NOT NULL REFERENCES tfl.platform(id),
-    dest        INTEGER NOT NULL REFERENCES tfl.station(id),
+    platid      INTEGER NOT NULL REFERENCES tfl.station_platform(id),
+    dest        INTEGER REFERENCES tfl.station(id),
     due         INTEGER NOT NULL DEFAULT -99,
     ts          TIMESTAMP WITH TIME ZONE,
     expt        TIMESTAMP WITH TIME ZONE,
-    dir         NAME NOT NULL,
-    curloc      INTEGER REFERENCES tfl.station(id),
+    dir         NAME ,
+    curloc      TEXT,
+    towards     TEXT,
     optype      NAME,
     vehicleid   NAME,
     mode        NAME,
     PRIMARY KEY (id)
 );
-CREATE INDEX boards_sp ON boards(stationid,platid);
-CREATE INDEX boards_spd ON boards(stationid,platid,due);
+CREATE INDEX boards_p ON boards(platid);
+CREATE INDEX boards_pd ON boards(platid,due);
