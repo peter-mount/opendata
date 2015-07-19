@@ -126,30 +126,38 @@ CREATE TABLE platform (
     stationid   INTEGER NOT NULL REFERENCES tfl.station(id),
     plat        INTEGER NOT NULL DEFAULT 0,
     name        NAME NOT NULL,
+    fullname    NAME NOT NULL,
     PRIMARY KEY(id)
 );
-CREATE UNIQUE INDEX platform_sp ON platform(stationid,name);
+CREATE INDEX platform_sp ON platform(stationid,plat);
+CREATE INDEX platform_sn ON platform(stationid,name);
+CREATE UNIQUE INDEX platform_sf ON platform(stationid,fullname);
 
 CREATE OR REPLACE FUNCTION tfl.platform (pstationid INTEGER, pplat TEXT)
 RETURNS INTEGER AS $$
 DECLARE
     rec     RECORD;
+    tplat   NAME;
     aplat   INTEGER;
+    aname   NAME;
 BEGIN
+    tplat=trim(pplat);
     LOOP
-        SELECT * INTO rec FROM tfl.platform WHERE stationid=pstationid AND name=pplat;
+        SELECT * INTO rec FROM tfl.platform WHERE stationid=pstationid AND fullname=tplat;
         IF FOUND THEN
             RETURN rec.id;
         END IF;
 
         -- Try to extract the platform number at the station.
-        -- TfL seems to put it at the end of the platform name
+        aname = substring(tplat FROM '[0-9a-zA-Z]+$');
         aplat = 0;
         BEGIN
-            aplat = pplat::INTEGER;
+            -- Some platforms are just integer
+            aplat = substring(aname FROM '^[0-9]+')::INTEGER;
         EXCEPTION WHEN invalid_text_representation THEN
+            -- TfL seems to put it at the end of the platform name
             BEGIN
-                aplat = substring(pplat FROM '.{2}$')::INTEGER;
+                aplat = substring(tplat FROM '.{2}$')::INTEGER;
             EXCEPTION WHEN invalid_text_representation THEN
                 -- Invalid so set to 0
                 aplat = 0;
@@ -158,7 +166,7 @@ BEGIN
         IF aplat IS NULL THEN aplat = 0; END IF;
 
         BEGIN
-            INSERT INTO tfl.platform (stationid,plat,name) VALUES (pstationid,aplat,pplat);
+            INSERT INTO tfl.platform (stationid,plat,name,fullname) VALUES (pstationid,aplat,aname,tplat);
             RETURN currval('tfl.platform_id_seq');
         EXCEPTION WHEN unique_violation THEN
             -- Do nothing, loop & try again
