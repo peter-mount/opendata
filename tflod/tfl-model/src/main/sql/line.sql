@@ -16,6 +16,46 @@ DROP TABLE station;
 
 DROP TABLE line;
 
+DROP TABLE direction;
+
+-- ----------------------------------------------------------------------
+-- Direction, usually '', inbound or outbound
+-- ----------------------------------------------------------------------
+CREATE TABLE direction (
+    id      SERIAL NOT NULL,
+    dir     NAME,
+    PRIMARY KEY (id)
+);
+CREATE UNIQUE INDEX direction_d ON direction(dir);
+
+GRANT ALL ON direction TO rail;
+
+CREATE OR REPLACE FUNCTION tfl.direction (pdir TEXT)
+RETURNS INTEGER AS $$
+DECLARE
+    rec     RECORD;
+    adir    NAME;
+BEGIN
+    IF pdir IS NULL THEN
+        adir = '';
+    ELSE
+        adir = trim(pdir);
+    END IF;
+    LOOP
+        SELECT * INTO rec FROM tfl.direction WHERE dir=adir;
+        IF FOUND THEN
+            RETURN rec.id;
+        END IF;
+        BEGIN
+            INSERT INTO tfl.direction (dir) VALUES (adir);
+            RETURN currval('tfl.direction_id_seq');
+        EXCEPTION WHEN unique_violation THEN
+            -- Do nothing, loop & try again
+        END;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
 -- ----------------------------------------------------------------------
 -- Lines
 -- ----------------------------------------------------------------------
@@ -136,6 +176,8 @@ CREATE INDEX platform_p ON platform(plat);
 CREATE INDEX platform_n ON platform(name);
 CREATE UNIQUE INDEX platform_f ON platform(fullname);
 
+GRANT ALL ON platform TO rail;
+
 CREATE TABLE station_platform (
     id          SERIAL NOT NULL,
     stationid   INTEGER NOT NULL REFERENCES tfl.station(id),
@@ -143,6 +185,8 @@ CREATE TABLE station_platform (
     PRIMARY KEY (id)
 );
 CREATE UNIQUE INDEX station_platform_sp ON station_platform(stationid,platid);
+
+GRANT ALL ON station_platform TO rail;
 
 CREATE OR REPLACE FUNCTION tfl.platform (pplat TEXT)
 RETURNS INTEGER AS $$
@@ -220,7 +264,7 @@ CREATE TABLE boards (
     due         INTEGER NOT NULL DEFAULT -99,
     ts          TIMESTAMP WITH TIME ZONE,
     expt        TIMESTAMP WITH TIME ZONE,
-    dir         NAME ,
+    dir         INTEGER NOT NULL REFERENCES tfl.direction(id),
     curloc      TEXT,
     towards     TEXT,
     optype      NAME,
@@ -230,3 +274,6 @@ CREATE TABLE boards (
 );
 CREATE INDEX boards_p ON boards(platid);
 CREATE INDEX boards_pd ON boards(platid,due);
+CREATE INDEX boards_pd ON boards(platid,expt);
+
+GRANT ALL ON boards TO rail;

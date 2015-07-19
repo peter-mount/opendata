@@ -15,6 +15,7 @@ DECLARE
     astationid  INTEGER;
     aplatid     INTEGER;
     adestid     INTEGER;
+    adir        INTEGER;
     adue        INTEGER;
 BEGIN
     -- Remove all existing predictions
@@ -37,6 +38,8 @@ BEGIN
                 (xpath('//O/@destinationName',stxml))[1]::TEXT as destname,
                 (xpath('//O/@currentLocation',stxml))[1]::TEXT as curloc,
                 (xpath('//O/@timeToStation',stxml))[1]::TEXT as due,
+                (xpath('//O/@timestamp',stxml))[1]::TEXT::TIMESTAMP WITH TIME ZONE as ts,
+                (xpath('//O/@timeToLive',stxml))[1]::TEXT::TIMESTAMP WITH TIME ZONE as ttl,
                 (xpath('//O/@expectedArrival',stxml))[1]::TEXT::TIMESTAMP WITH TIME ZONE as expt
             INTO srec LIMIT 1;
 
@@ -62,7 +65,10 @@ BEGIN
             END;
         END IF;
 
+        adir = tfl.direction(srec.dir);
+
         INSERT INTO tfl.boards (
+                ts,
                 platid,
                 vehicleid,
                 dir,
@@ -70,9 +76,10 @@ BEGIN
                 due, expt,
                 optype, mode
             ) VALUES (
+                srec.ts,
                 aplatid,
                 srec.vid,
-                srec.dir,
+                adir,
                 adestid,
                 srec.curloc,
                 srec.towards,
