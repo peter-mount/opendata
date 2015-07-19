@@ -43,8 +43,8 @@ public class JsonToXmlTransformer
      *
      * If no values are objects or lists then it's 100% safe to use true.
      *
-     * @param in          Reader
-     * @param out         Writer
+     * @param in            Reader
+     * @param out           Writer
      * @param attributeMode true for attributes, false for elements
      */
     public JsonToXmlTransformer( Reader in, Writer out, boolean attributeMode )
@@ -65,6 +65,7 @@ public class JsonToXmlTransformer
                     list();
                     break;
                 case '{':
+                    object();
                     break;
                 default:
                     break;
@@ -115,6 +116,10 @@ public class JsonToXmlTransformer
 
         out.write( '<' );
         out.write( n );
+        if( !attributeMode )
+        {
+            out.write( '>' );
+        }
 
         run( c ->
         {
@@ -240,7 +245,7 @@ public class JsonToXmlTransformer
                     return true;
 
                 case '"':
-                    attr( attrs, n, c1 -> escape(c1) || (c1 != '"' && write( c1 )) );
+                    attr( attrs, n, c1 -> escape( c1 ) || (c1 != '"' && write( c1 )) );
                     return false;
 
                 // List as the value
