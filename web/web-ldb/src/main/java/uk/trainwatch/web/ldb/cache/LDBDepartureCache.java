@@ -59,7 +59,7 @@ public class LDBDepartureCache
                                              + "   b.expt as tm,"
                                              + "   b.ts as ts,"
                                              // FIXME fix db so tfl line is the toc
-                                             + "   '??' as toc,"
+                                             + "   l.name as toc,"
                                              + "   '' as origin,"
                                              + "   b.towards as destination,"
                                              // Not supported for TfL
@@ -87,6 +87,7 @@ public class LDBDepartureCache
                                              + "   b.curloc AS curloc,"
                                              + "   sd.name AS altdest"
                                              + " FROM tfl.boards b"
+                                             + " INNER JOIN tfl.line l ON b.lineid=l.id"
                                              + " INNER JOIN tfl.station_platform sp ON b.platid=sp.id"
                                              + " INNER JOIN tfl.platform p ON sp.platid=p.id"
                                              + " INNER JOIN tfl.station s ON sp.stationid=s.id"

@@ -34,7 +34,7 @@ CREATE TABLE station_crs (
 );
 CREATE INDEX station_crs_s ON station_crs(stationid);
 CREATE INDEX station_crs_c ON station_crs(crs);
-GRANT ALL ON station_crs TO rail;
+ALTER TABLE station_crs OWNER TO rail;
 
 CREATE OR REPLACE FUNCTION tfl.linkcrs( pstation INTEGER, pcrs TEXT )
 RETURNS INTEGER AS $$

@@ -27,8 +27,7 @@ CREATE TABLE direction (
     PRIMARY KEY (id)
 );
 CREATE UNIQUE INDEX direction_d ON direction(dir);
-
-GRANT ALL ON direction TO rail;
+ALTER TABLE direction OWNER TO rail;
 
 CREATE OR REPLACE FUNCTION tfl.direction (pdir TEXT)
 RETURNS INTEGER AS $$
@@ -68,8 +67,7 @@ CREATE TABLE line (
 );
 CREATE UNIQUE INDEX line_c ON line(code);
 CREATE INDEX line_n ON line(name);
-
-GRANT ALL ON line to rail;
+ALTER TABLE line OWNER TO rail;
 
 CREATE OR REPLACE FUNCTION tfl.line (plineid TEXT, pline TEXT)
 RETURNS INTEGER AS $$
@@ -103,7 +101,7 @@ CREATE TABLE station (
 CREATE UNIQUE INDEX station_n1 ON station(naptan);
 CREATE INDEX station_n2 ON station(name);
 
-GRANT ALL ON station to rail;
+ALTER TABLE station OWNER TO rail;
 
 -- General function to insert a station/destination
 CREATE OR REPLACE FUNCTION tfl.station (pnaptan TEXT, pname TEXT)
@@ -135,6 +133,8 @@ CREATE TABLE station_line (
     stationid   INTEGER NOT NULL REFERENCES tfl.station(id),
     PRIMARY KEY (lineid,stationid)
 );
+
+ALTER TABLE station_line OWNER TO rail;
 
 -- Utility function to insert a primary station
 CREATE OR REPLACE FUNCTION tfl.station (plineid TEXT,pline TEXT,pnaptan TEXT, pname TEXT)
@@ -203,7 +203,7 @@ CREATE INDEX platform_p ON platform(plat);
 CREATE INDEX platform_n ON platform(name);
 CREATE UNIQUE INDEX platform_f ON platform(fullname);
 
-GRANT ALL ON platform TO rail;
+ALTER TABLE platform OWNER TO rail;
 
 CREATE TABLE station_platform (
     id          SERIAL NOT NULL,
@@ -213,7 +213,7 @@ CREATE TABLE station_platform (
 );
 CREATE UNIQUE INDEX station_platform_sp ON station_platform(stationid,platid);
 
-GRANT ALL ON station_platform TO rail;
+ALTER TABLE station_platform OWNER TO rail;
 
 CREATE OR REPLACE FUNCTION tfl.platform (pplat TEXT)
 RETURNS INTEGER AS $$
@@ -287,6 +287,7 @@ $$ LANGUAGE plpgsql;
 CREATE TABLE boards (
     id          SERIAL NOT NULL,
     platid      INTEGER NOT NULL REFERENCES tfl.station_platform(id),
+    lineid      INTEGER NOT NULL REFERENCES tfl.line(id),
     dest        INTEGER REFERENCES tfl.station(id),
     due         INTEGER NOT NULL DEFAULT -99,
     ts          TIMESTAMP WITH TIME ZONE,
@@ -303,4 +304,4 @@ CREATE INDEX boards_p ON boards(platid);
 CREATE INDEX boards_pd ON boards(platid,due);
 CREATE INDEX boards_pe ON boards(platid,expt);
 
-GRANT ALL ON boards TO rail;
+ALTER TABLE boards OWNER TO rail;

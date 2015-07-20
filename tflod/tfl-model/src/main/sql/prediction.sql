@@ -70,6 +70,7 @@ BEGIN
         INSERT INTO tfl.boards (
                 ts,
                 platid,
+                lineid,
                 vehicleid,
                 dir,
                 dest, curloc, towards,
@@ -78,6 +79,7 @@ BEGIN
             ) VALUES (
                 srec.ts,
                 aplatid,
+                tfl.line(srec.lineid,srec.linename),
                 srec.vid,
                 adir,
                 adestid,
