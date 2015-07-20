@@ -163,6 +163,33 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- ----------------------------------------------------------------------
+-- Prepopulate station from NAPTAN
+CREATE OR REPLACE FUNCTION tfl.populate()
+RETURNS INTEGER AS $$
+DECLARE
+    rec     RECORD;
+    cnt     INTEGER;
+BEGIN
+    cnt = 0;
+
+    FOR rec IN SELECT * FROM reference.naptan_stopareas
+        WHERE stopareatype = 'GTMU'
+            AND (name LIKE '%Underground Station' OR name LIKE '%DLR Station')
+        ORDER BY name
+    LOOP
+        PERFORM tfl.station(rec.code,rec.name);
+        cnt=cnt+1;
+    END LOOP;
+
+    RETURN cnt;
+END;
+$$ LANGUAGE plpgsql;
+SELECT tfl.populate();
+DROP FUNCTION tfl.populate();
+
+-- ----------------------------------------------------------------------
+
+-- ----------------------------------------------------------------------
 -- Platforms
 -- ----------------------------------------------------------------------
 CREATE TABLE platform (
