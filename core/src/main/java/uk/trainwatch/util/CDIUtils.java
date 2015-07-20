@@ -23,34 +23,37 @@ import javax.enterprise.inject.spi.InjectionTarget;
 
 /**
  * Some utility methods to support CDI
- * 
+ * <p>
  * @author peter
  */
 public class CDIUtils
 {
+
     /**
      * Get the current BeanManager instance
-     * 
-     * @return 
+     * <p>
+     * @return
      */
-    public static BeanManager getBeanManager() {
+    public static BeanManager getBeanManager()
+    {
         return CDI.current().getBeanManager();
     }
-    
+
     /**
      * Perform injection into a non-CDI managed bean.
-     * 
+     * <p>
      * An example of this is a JSP Tag
-     * 
+     * <p>
      * @param <T>
-     * @param bean 
+     * @param bean
      */
-    public static <T> void inject( T bean )
+    public static <T> T inject( T bean )
     {
-            BeanManager beanManager = getBeanManager();
-            AnnotatedType<T> annotatedType = beanManager.<T>createAnnotatedType( (Class<T>) bean.getClass() );
-            InjectionTarget<T> injectionTarget = beanManager.createInjectionTarget( annotatedType );
-            CreationalContext ctx = beanManager.createCreationalContext( null );
-            injectionTarget.inject( bean, ctx );
+        BeanManager beanManager = getBeanManager();
+        AnnotatedType<T> annotatedType = beanManager.<T>createAnnotatedType( (Class<T>) bean.getClass() );
+        InjectionTarget<T> injectionTarget = beanManager.createInjectionTarget( annotatedType );
+        CreationalContext ctx = beanManager.createCreationalContext( null );
+        injectionTarget.inject( bean, ctx );
+        return bean;
     }
 }
