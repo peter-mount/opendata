@@ -25,47 +25,50 @@ public class LDB
 
     private static final long serialVersionUID = 1L;
 
-    public static final SQLFunction<ResultSet, LDB> fromSQL = rs -> new LDB(
-            Type.valueOf( rs.getString( "type" ) ),
-            TimeUtils.getLocalTime( rs, "tm" ),
-            TimeUtils.getLocalDateTime( rs, "ts" ),
-            rs.getTimestamp( "ts" ),
-            rs.getString( "toc" ),
-            rs.getString( "origin" ),
-            rs.getString( "destination" ),
-            rs.getInt( "via" ),
-            rs.getInt( "cancreason" ),
-            rs.getInt( "latereason" ),
-            // Identity
-            rs.getLong( "id" ),
-            rs.getString( "rid" ),
-            rs.getString( "uid" ),
-            rs.getInt( "schedule" ),
-            // actual arrive/depart
-            TimeUtils.getLocalTime( rs, "arr" ),
-            TimeUtils.getLocalTime( rs, "dep" ),
-            // estimated arrive/depart
-            TimeUtils.getLocalTime( rs, "etarr" ),
-            TimeUtils.getLocalTime( rs, "etdep" ),
-            // timetabled arrive/depart
-            TimeUtils.getLocalTime( rs, "pta" ),
-            TimeUtils.getLocalTime( rs, "ptd" ),
-            // Platform
-            rs.getString( "plat" ),
-            // Data suppression
-            rs.getBoolean( "supp" ),
-            rs.getBoolean( "platsup" ),
-            rs.getBoolean( "cisplatsup" ),
-            // Delay tbi
-            TimeUtils.getDuration( rs, "delay" ),
-            // Terminated/terminates here
-            rs.getBoolean( "term" ),
-            // Is the delay unknown
-            rs.getBoolean( "ldbdel" ),
-            // Train length, 0 for unknown
-            rs.getInt( "length" ),
-            rs.getString( "curloc" )
-    );
+    public static final SQLFunction<ResultSet, LDB> fromSQL = rs -> {
+        String altdest = rs.getString( "altdest" );
+        return new LDB(
+                Type.valueOf( rs.getString( "type" ) ),
+                TimeUtils.getLocalTime( rs, "tm" ),
+                TimeUtils.getLocalDateTime( rs, "ts" ),
+                rs.getTimestamp( "ts" ),
+                rs.getString( "toc" ),
+                rs.getString( "origin" ),
+                altdest == null || altdest.isEmpty() ? rs.getString( "destination" ) : altdest,
+                rs.getInt( "via" ),
+                rs.getInt( "cancreason" ),
+                rs.getInt( "latereason" ),
+                // Identity
+                rs.getLong( "id" ),
+                rs.getString( "rid" ),
+                rs.getString( "uid" ),
+                rs.getInt( "schedule" ),
+                // actual arrive/depart
+                TimeUtils.getLocalTime( rs, "arr" ),
+                TimeUtils.getLocalTime( rs, "dep" ),
+                // estimated arrive/depart
+                TimeUtils.getLocalTime( rs, "etarr" ),
+                TimeUtils.getLocalTime( rs, "etdep" ),
+                // timetabled arrive/depart
+                TimeUtils.getLocalTime( rs, "pta" ),
+                TimeUtils.getLocalTime( rs, "ptd" ),
+                // Platform
+                rs.getString( "plat" ),
+                // Data suppression
+                rs.getBoolean( "supp" ),
+                rs.getBoolean( "platsup" ),
+                rs.getBoolean( "cisplatsup" ),
+                // Delay tbi
+                TimeUtils.getDuration( rs, "delay" ),
+                // Terminated/terminates here
+                rs.getBoolean( "term" ),
+                // Is the delay unknown
+                rs.getBoolean( "ldbdel" ),
+                // Train length, 0 for unknown
+                rs.getInt( "length" ),
+                rs.getString( "curloc" )
+        );
+    };
 
     private final Type type;
     private final LocalTime time;

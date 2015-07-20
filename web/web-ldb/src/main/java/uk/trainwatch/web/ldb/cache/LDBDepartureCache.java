@@ -38,7 +38,8 @@ public class LDBDepartureCache
                                                 + "   o.name AS origin,"
                                                 + "   d.name AS destination,"
                                                 + "   f.ts AS ts,"
-                                                + "   '' as curloc"
+                                                + "   '' AS curloc,"
+                                                + "   NULL AS altdest"
                                                 + " FROM darwin.forecast f"
                                                 + " INNER JOIN darwin.schedule s ON f.schedule=s.id"
                                                 + " INNER JOIN darwin.location d ON s.dest=d.tpl"
@@ -83,11 +84,13 @@ public class LDBDepartureCache
                                              + "   false as term,"
                                              + "   true as ldbdel,"
                                              + "   0 as length,"
-                                             + "   b.curloc AS curloc"
+                                             + "   b.curloc AS curloc,"
+                                             + "   sd.name AS altdest"
                                              + " FROM tfl.boards b"
                                              + " INNER JOIN tfl.station_platform sp ON b.platid=sp.id"
                                              + " INNER JOIN tfl.platform p ON sp.platid=p.id"
                                              + " INNER JOIN tfl.station s ON sp.stationid=s.id"
+                                             + " LEFT OUTER JOIN tfl.station sd ON b.dest = sd.id"
                                              + " WHERE s.naptan LIKE ?";
     @Resource(name = "jdbc/rail")
     private DataSource dataSource;
