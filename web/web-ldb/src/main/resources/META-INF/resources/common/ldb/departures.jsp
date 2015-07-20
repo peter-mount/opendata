@@ -19,7 +19,7 @@
         <c:forEach var="msg" items="${stationMessages}">
             <c:if test="${not empty msg.suppress}">
                 <div class="ldb-enttop ldb-message row">
-                        Update:
+                    Update:
                     <c:forEach var="m1" items="${msg.msg.content}">
                         <c:set var="c" value="${m1.getClass().getName()}"/>
                         <c:choose>
@@ -189,8 +189,10 @@
                                 --%>
                             </c:when>
                             <c:otherwise>
-                                <span class="ldbHeader">Current location:</span>
-                                <span class="ldbDest ${callList}">${dep.curloc}</span>
+                                <c:if test="${not empty dep.curloc}">
+                                    <span class="ldbHeader">Current location:</span>
+                                    <span class="ldbDest ${callList}">${dep.curloc}</span>
+                                </c:if>
                                 <c:if test="${not empty dep.toc}">
                                     <span>
                                         <d:operator value="${dep.toc}"/>&nbsp;service.
