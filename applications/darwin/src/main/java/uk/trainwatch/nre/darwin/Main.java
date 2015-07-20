@@ -16,15 +16,22 @@
 package uk.trainwatch.nre.darwin;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.postgresql.ds.PGPoolingDataSource;
 import uk.trainwatch.rabbitmq.RabbitConnection;
+import uk.trainwatch.rabbitmq.RabbitMQ;
+import uk.trainwatch.tfl.model.feed.TflFeed;
+import uk.trainwatch.tfl.model.feed.TflJsonRetriever;
+import uk.trainwatch.tfl.model.feed.TflPredictionImport;
 import uk.trainwatch.util.app.Application;
 import uk.trainwatch.util.counter.RateMonitor;
 import uk.trainwatch.util.sql.SQLConsumer;
@@ -47,7 +54,10 @@ public class Main
     protected Properties darwinProperties;
 
     private RabbitConnection rabbitmq;
-    private Consumer<String> consumer;
+    private Consumer<String> darwinImport;
+
+    protected Properties tflProperties;
+    private TflFeed tflPredictionFeed;
 
     @Override
     protected void setupBrokers()
@@ -60,23 +70,54 @@ public class Main
         );
     }
 
+    /**
+     * TfL Tube, DLR & Air lines
+     */
+    private static final String LINES[] = {
+        "bakerloo",
+        "central",
+        "circle",
+        "district",
+        "dlr",
+        "emirates-air-line",
+        "hammersmith-city",
+        "jubilee",
+        "metropolitan",
+        "northern",
+        "piccadilly",
+        "victoria",
+        "waterloo-city"
+    };
+
     @Override
     protected void setupApplication()
             throws IOException
     {
-        darwinProperties = Application.loadProperties( "darwin.properties" );
-        dataSource = new PGPoolingDataSource();
-        dataSource.setDataSourceName( "Darwin" );
-        dataSource.setServerName( darwinProperties.getProperty( "url" ) );
-        dataSource.setDatabaseName( "rail" );
-        dataSource.setUser( darwinProperties.getProperty( "username" ) );
-        dataSource.setPassword( darwinProperties.getProperty( "password" ) );
-        dataSource.setMaxConnections( 10 );
+        try {
+            darwinProperties = Application.loadProperties( "darwin.properties" );
+            dataSource = new PGPoolingDataSource();
+            dataSource.setDataSourceName( "Darwin" );
+            dataSource.setServerName( darwinProperties.getProperty( "url" ) );
+            dataSource.setDatabaseName( "rail" );
+            dataSource.setUser( darwinProperties.getProperty( "username" ) );
+            dataSource.setPassword( darwinProperties.getProperty( "password" ) );
+            dataSource.setMaxConnections( 10 );
 
-        LOG.log( Level.INFO, () -> "Initialising " + QUEUE );
+            LOG.log( Level.INFO, () -> "Initialising " + QUEUE );
 
-        consumer = SQLConsumer.guard( new DarwinImport( dataSource ) ).
-                andThen( RateMonitor.<String>log( LOG, QUEUE ) );
+            darwinImport = SQLConsumer.guard( new DarwinImport( dataSource ) ).
+                    andThen( RateMonitor.<String>log( LOG, QUEUE ) );
+
+            tflProperties = Application.loadProperties( "tfl.properties" );
+            
+            tflPredictionFeed = new TflFeed(
+                    new TflJsonRetriever( Stream.of( LINES ).collect( Collectors.joining( ",", "/line/", "/Arrivals" ) ), tflProperties ),
+                    SQLConsumer.guard( new TflPredictionImport( dataSource ) ).andThen( RateMonitor.<String>log( LOG, "tfl.prediction" ) ),
+                    1, TimeUnit.MINUTES );
+        }
+        catch( URISyntaxException ex ) {
+            throw new IOException( ex );
+        }
     }
 
     @Override
@@ -84,32 +125,20 @@ public class Main
     {
         super.start();
 
-//        RabbitMQ.queueDurableStream( rabbitmq,
-//                                     QUEUE, ROUTING_KEY,
-//                                     s -> s.map( RabbitMQ.toString ).
-//                                     forEach( consumer )
-//        );
-    }
-
-    @Override
-    protected void mainLoop()
-            throws Exception
-    {
-        for( int i = 6; i < 9; i++ )
-        {
-            Path p = Paths.get( "/home/peter/11", String.valueOf( i ) );
-            System.out.println( "Parsing " + p );
-            try( Stream<String> s = Files.lines( p ) )
-            {
-                s.forEach( consumer );
-            }
-        }
+        RabbitMQ.queueDurableStream( rabbitmq,
+                                     QUEUE, ROUTING_KEY,
+                                     s -> s.map( RabbitMQ.toString ).
+                                     forEach( darwinImport )
+        );
+        
+        tflPredictionFeed.start();
     }
 
     @Override
     protected void stop()
     {
         super.stop();
+        tflPredictionFeed.stop();
         rabbitmq.close();
     }
 
