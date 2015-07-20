@@ -2,7 +2,7 @@
 -- NaPTAN
 -- ======================================================================
 
-CREATE SCHEMA reference;
+--CREATE SCHEMA reference;
 SET search_path = reference;
 
 -- Rail References
@@ -32,12 +32,12 @@ ALTER TABLE naptan_rail OWNER TO rail;
 
 DROP TABLE naptan_air;
 CREATE TABLE naptan_air (
-    id          SERIAL NOT NULL,
-    AtcoCode    VARCHAR(16),
-    IataCode    VARCHAR(16),
-    Name        NAME,
-    NameLang    NAME,
-    CreationDT  TIMESTAMP WITHOUT TIME ZONE,
+    id              SERIAL NOT NULL,
+    AtcoCode        VARCHAR(16),
+    IataCode        VARCHAR(16),
+    Name            NAME,
+    NameLang        NAME,
+    CreationDT      TIMESTAMP WITHOUT TIME ZONE,
     ModificationDT  TIMESTAMP WITHOUT TIME ZONE,
     RevisionNumber  INTEGER,
     Modification    VARCHAR(64),
@@ -47,3 +47,25 @@ CREATE INDEX naptan_air_a ON naptan_air(AtcoCode);
 CREATE INDEX naptan_air_i ON naptan_air(IataCode);
 CREATE INDEX naptan_air_n ON naptan_air(Name);
 ALTER TABLE naptan_air OWNER TO rail;
+
+DROP TABLE naptan_stopareas;
+CREATE TABLE naptan_stopareas (
+    id              SERIAL NOT NULL,
+    code            VARCHAR(16) NOT NULL,
+    name            NAME NOT NULL,
+    namelang        NAME,
+    adminareacode   NAME,
+    stopareatype    NAME,
+    gridType         CHAR(1),
+    easting          INTEGER,
+    northing         INTEGER,
+    creationDT       TIMESTAMP WITHOUT TIME ZONE,
+    modificationDT   TIMESTAMP WITHOUT TIME ZONE,
+    revisionNumber   INTEGER,
+    modification     VARCHAR(64),
+    status           VARCHAR(3),
+    PRIMARY KEY (id)
+);
+CREATE UNIQUE INDEX naptan_stopareas_c ON naptan_stopareas(code);
+CREATE INDEX naptan_stopareas_n ON naptan_stopareas(name);
+ALTER TABLE naptan_stopareas OWNER TO rail;

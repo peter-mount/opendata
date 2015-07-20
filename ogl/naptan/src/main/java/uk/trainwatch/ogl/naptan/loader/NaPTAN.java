@@ -84,6 +84,8 @@ public class NaPTAN
                 return new AirReferences( path );
             case "RailReferences.csv":
                 return new RailReferences( path );
+            case "StopAreas.csv":
+                return new StopAreas(path );
             default:
                 LOG.log( Level.FINE, () -> "Ignoring unsupported file " + p );
                 return null;
