@@ -94,3 +94,18 @@ CREATE UNIQUE INDEX naptan_stopinarea_sa ON naptan_stopinarea(stop,atco);
 CREATE INDEX naptan_stopinarea_s ON naptan_stopinarea(stop);
 CREATE INDEX naptan_stopinarea_a ON naptan_stopinarea(atco);
 ALTER TABLE naptan_stopinarea OWNER TO RAIL;
+
+-- ======================================================================
+-- AreaHierarchy
+-- ======================================================================
+DROP TABLE naptan_areahierarchy;
+CREATE TABLE naptan_areahierarchy (
+    id      SERIAL NOT NULL,
+    parent  VARCHAR(16) NOT NULL,
+    child   VARCHAR(16) NOT NULL,
+    PRIMARY KEY(id)
+);
+CREATE UNIQUE INDEX naptan_areahierarchy_pc ON naptan_areahierarchy(parent,child);
+CREATE INDEX naptan_areahierarchy_p ON naptan_areahierarchy(parent);
+CREATE INDEX naptan_areahierarchy_c ON naptan_areahierarchy(child);
+ALTER TABLE naptan_areahierarchy OWNER TO RAIL;

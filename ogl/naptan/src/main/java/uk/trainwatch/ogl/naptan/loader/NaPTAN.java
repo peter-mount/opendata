@@ -89,6 +89,8 @@ public class NaPTAN
                 return new StopAreaImporter( path );
             case "StopsInArea.csv":
                 return new StopsInAreaImporter( path );
+            case "AreaHierarchy.csv":
+                return new AreaHierarchyLoader( path );
             default:
                 LOG.log( Level.FINE, () -> "Ignoring unsupported file " + p );
                 return null;
