@@ -274,6 +274,6 @@ CREATE TABLE boards (
 );
 CREATE INDEX boards_p ON boards(platid);
 CREATE INDEX boards_pd ON boards(platid,due);
-CREATE INDEX boards_pd ON boards(platid,expt);
+CREATE INDEX boards_pe ON boards(platid,expt);
 
 GRANT ALL ON boards TO rail;

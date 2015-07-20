@@ -1,0 +1,27 @@
+<hazelcast>
+
+    <cache name="TflLineCache">
+        <statistics-enabled>true</statistics-enabled>
+        <management-enabled>false</management-enabled>
+        <expiry-policy-factory class-name="uk.trainwatch.util.cache.DailyExpiryPolicyFactory"/>
+    </cache>
+
+    <cache name="TflStationCache">
+        <statistics-enabled>true</statistics-enabled>
+        <management-enabled>false</management-enabled>
+        <expiry-policy-factory class-name="uk.trainwatch.util.cache.DailyExpiryPolicyFactory"/>
+    </cache>
+
+    <cache name="TflPlatformCache">
+        <statistics-enabled>true</statistics-enabled>
+        <management-enabled>false</management-enabled>
+        <expiry-policy-factory class-name="uk.trainwatch.util.cache.DailyExpiryPolicyFactory"/>
+    </cache>
+
+    <cache name="TflBoardCache">
+        <statistics-enabled>true</statistics-enabled>
+        <management-enabled>false</management-enabled>
+        <expiry-policy-factory class-name="uk.trainwatch.util.cache.MinuteExpiryPolicyFactory"/>
+    </cache>
+        
+</hazelcast>
