@@ -26,7 +26,7 @@ import uk.trainwatch.util.sql.SQLConsumer;
  * @author peter
  */
 @XmlRootElement
-public class StopAreas
+public class StopAreaImporter
         extends BaseImporter<StopAreaReference>
 {
 
@@ -46,7 +46,7 @@ public class StopAreas
                                   + "?,?,"
                                   + "?,?)";
 
-    public StopAreas( Path path )
+    public StopAreaImporter( Path path )
     {
         super( path );
     }

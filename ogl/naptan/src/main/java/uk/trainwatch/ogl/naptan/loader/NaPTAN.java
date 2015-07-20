@@ -26,7 +26,7 @@ import uk.trainwatch.util.sql.SQLConsumer;
  *
  * @author peter
  */
-@MetaInfServices( Utility.class )
+@MetaInfServices(Utility.class)
 public class NaPTAN
         extends DBUtility
 {
@@ -64,13 +64,14 @@ public class NaPTAN
     public void runUtility()
             throws Exception
     {
-        importFiles( files, (c, p) -> {
+        importFiles( files, ( c, p ) -> {
             try {
                 Importer i = importers.get( p );
                 if( i != null ) {
                     i.importFile( c );
                 }
-            } catch( IOException ex ) {
+            }
+            catch( IOException ex ) {
                 throw new UncheckedIOException( ex );
             };
         } );
@@ -85,7 +86,9 @@ public class NaPTAN
             case "RailReferences.csv":
                 return new RailReferences( path );
             case "StopAreas.csv":
-                return new StopAreas(path );
+                return new StopAreaImporter( path );
+            case "StopsInArea.csv":
+                return new StopsInAreaImporter( path );
             default:
                 LOG.log( Level.FINE, () -> "Ignoring unsupported file " + p );
                 return null;
