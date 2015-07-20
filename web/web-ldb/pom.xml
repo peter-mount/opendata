@@ -51,6 +51,12 @@
         </dependency>
 
         <dependency>
+            <groupId>uk.trainwatch.tfl</groupId>
+            <artifactId>tfl-model</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        
+        <dependency>
             <groupId>uk.trainwatch.web</groupId>
             <artifactId>web-train</artifactId>
             <version>1.0-SNAPSHOT</version>

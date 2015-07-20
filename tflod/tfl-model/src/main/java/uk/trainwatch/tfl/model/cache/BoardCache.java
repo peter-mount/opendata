@@ -32,7 +32,7 @@ public class BoardCache
 
     private static final SQLResultSetHandler<BoardEntry> FROM_SQL = rs -> new BoardEntry();
 
-    @Resource(name = "jdbc/Rail")
+    @Resource(name = "jdbc/rail")
     private DataSource dataSource;
 
     @Inject

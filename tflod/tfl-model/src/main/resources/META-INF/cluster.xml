@@ -24,4 +24,10 @@
         <expiry-policy-factory class-name="uk.trainwatch.util.cache.MinuteExpiryPolicyFactory"/>
     </cache>
         
+    <cache name="TflLocationCache">
+        <statistics-enabled>true</statistics-enabled>
+        <management-enabled>false</management-enabled>
+        <expiry-policy-factory class-name="uk.trainwatch.util.cache.HourExpiryPolicyFactory"/>
+    </cache>
+        
 </hazelcast>

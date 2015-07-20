@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collection;
 import uk.trainwatch.util.TimeUtils;
@@ -25,7 +26,9 @@ public class LDB
     private static final long serialVersionUID = 1L;
 
     public static final SQLFunction<ResultSet, LDB> fromSQL = rs -> new LDB(
+            Type.valueOf( rs.getString( "type" ) ),
             TimeUtils.getLocalTime( rs, "tm" ),
+            TimeUtils.getLocalDateTime( rs, "ts" ),
             rs.getTimestamp( "ts" ),
             rs.getString( "toc" ),
             rs.getString( "origin" ),
@@ -60,10 +63,13 @@ public class LDB
             // Is the delay unknown
             rs.getBoolean( "ldbdel" ),
             // Train length, 0 for unknown
-            rs.getInt( "length" )
+            rs.getInt( "length" ),
+            rs.getString( "curloc" )
     );
 
+    private final Type type;
     private final LocalTime time;
+    private final LocalDateTime tsDT;
     private final Timestamp ts;
     private final boolean terminated;
     private final boolean delayUnknown;
@@ -92,10 +98,12 @@ public class LDB
     private final int length;
     private Collection<CallingPoint> points;
     private CallingPoint lastReport;
+    private final String curloc;
 
     private LDB(
+            Type type,
             LocalTime time,
-            Timestamp ts,
+            LocalDateTime tsDT, Timestamp ts,
             String toc,
             String origin,
             String dest, int via,
@@ -110,10 +118,15 @@ public class LDB
             Duration delay,
             boolean terminated,
             boolean delayUnknown,
-            int length )
+            int length,
+            String curloc )
     {
+        this.type = type;
         this.time = time;
+
+        this.tsDT = tsDT;
         this.ts = ts;
+
         this.toc = toc;
         this.origin = origin;
         this.dest = dest;
@@ -140,11 +153,28 @@ public class LDB
         this.terminated = terminated;
         this.delayUnknown = delayUnknown;
         this.length = length;
+
+        this.curloc = curloc;
+    }
+
+    /**
+     * The type of entry
+     * <p>
+     * @return
+     */
+    public Type getType()
+    {
+        return type;
     }
 
     public Timestamp getTs()
     {
         return ts;
+    }
+
+    public LocalDateTime getTsDT()
+    {
+        return tsDT;
     }
 
     public Collection<CallingPoint> getPoints()
@@ -451,5 +481,48 @@ public class LDB
     public int getLength()
     {
         return length;
+    }
+
+    public String getCurloc()
+    {
+        return curloc;
+    }
+
+    /**
+     * Duration from now until the expected time. If the expected time has passed
+     * then this returns 0
+     * <p>
+     * @return Duration, never negative
+     */
+    public Duration getTimeUntil()
+    {
+        LocalDateTime now = getTsDT();
+        LocalDateTime time = now.toLocalDate().atTime( getTime() );
+
+        if( time == null ) {
+            return Duration.ZERO;
+        }
+
+        if( time.isBefore( now ) && Math.abs( time.getHour() - now.getHour() ) > 18 ) {
+            time = time.plusDays( 1 );
+        }
+
+        return Duration.between( now, time );
+    }
+
+    /**
+     * The type of this LDB entry
+     */
+    public static enum Type
+    {
+
+        /**
+         * Darwin entry, covers mainline
+         */
+        DARWIN,
+        /**
+         * TfL entry, covers tube, dlr etc
+         */
+        TFL
     }
 }

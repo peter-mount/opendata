@@ -13,7 +13,10 @@
     <name>TFL Parent</name>
     
     <modules>
+        <module>tfl-model</module>
+        <!-- Unused trackernet
         <module>tfl-trackernet</module>
+        -->
     </modules>
     
 </project>

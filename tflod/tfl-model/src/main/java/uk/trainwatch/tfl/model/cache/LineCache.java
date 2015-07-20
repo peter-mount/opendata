@@ -32,7 +32,7 @@ public class LineCache
             rs.getString( "name" )
     );
 
-    @Resource(name = "jdbc/Rail")
+    @Resource(name = "jdbc/rail")
     private DataSource dataSource;
 
     private Line get( String field, Object key )

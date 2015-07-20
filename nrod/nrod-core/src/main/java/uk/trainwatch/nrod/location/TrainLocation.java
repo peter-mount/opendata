@@ -4,6 +4,7 @@
  */
 package uk.trainwatch.nrod.location;
 
+import java.io.Serializable;
 import java.sql.ResultSet;
 import java.util.Comparator;
 import java.util.Objects;
@@ -18,8 +19,11 @@ import uk.trainwatch.util.sql.SQLFunction;
  */
 @XmlRootElement
 public class TrainLocation
-        implements Comparable<TrainLocation>
+        implements Comparable<TrainLocation>,
+                   Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     public static final SQLFunction<ResultSet, TrainLocation> fromSQL = rs -> new TrainLocation(
             rs.getLong( 1 ),
@@ -41,6 +45,7 @@ public class TrainLocation
     private String tiploc;
     private long stanox;
     private String notes;
+    private boolean tfl;
 
     public TrainLocation()
     {
@@ -150,6 +155,16 @@ public class TrainLocation
         return stanox;
     }
 
+    public boolean isTfl()
+    {
+        return tfl;
+    }
+
+    public void setTfl( boolean tfl )
+    {
+        this.tfl = tfl;
+    }
+
     @Override
     public int hashCode()
     {
@@ -161,12 +176,10 @@ public class TrainLocation
     @Override
     public boolean equals( Object obj )
     {
-        if( obj == null )
-        {
+        if( obj == null ) {
             return false;
         }
-        if( getClass() != obj.getClass() )
-        {
+        if( getClass() != obj.getClass() ) {
             return false;
         }
         final TrainLocation other = (TrainLocation) obj;
@@ -189,12 +202,10 @@ public class TrainLocation
         JsonObjectBuilder o = Json.createObjectBuilder().
                 add( "location", (location == null || location.isEmpty()) ? "" : location ).
                 add( "stanox", stanox );
-        if( crs != null && !crs.isEmpty() )
-        {
+        if( crs != null && !crs.isEmpty() ) {
             o.add( "crs", crs );
         }
-        if( tiploc != null && !tiploc.isEmpty() )
-        {
+        if( tiploc != null && !tiploc.isEmpty() ) {
             o.add( "tiploc", tiploc );
         }
         return o;

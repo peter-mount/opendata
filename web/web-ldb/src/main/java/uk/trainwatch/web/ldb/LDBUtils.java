@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import uk.trainwatch.nre.darwin.reference.DarwinReferenceManager;
 import uk.trainwatch.nre.darwin.stationmsg.StationMessageManager;
 import uk.trainwatch.nrod.location.TrainLocation;
+import uk.trainwatch.tfl.model.cache.TflLocationCache;
 import uk.trainwatch.util.TimeUtils;
 import uk.trainwatch.util.sql.SQLConsumer;
 import uk.trainwatch.web.ldb.cache.LDBCallingPointCache;
@@ -50,6 +51,9 @@ public class LDBUtils
     @Inject
     private StationMessageManager stationMessageManager;
 
+    @Inject
+    protected TflLocationCache tflLocationCache;
+
     /**
      * Resolves a CRS, issuing a not found or redirect to the correct one as needed
      *
@@ -67,6 +71,12 @@ public class LDBUtils
         String crs = request.getPathInfo().substring( 1 ).toUpperCase();
 
         TrainLocation loc = darwinReferenceManager.getLocationRefFromCrs( crs );
+
+        // No CRS then check for tfl, this will be LU### or DL###
+        if( loc == null && crs.length() == 5 ) {
+            loc = tflLocationCache.get( crs );
+        }
+
         if( loc == null ) {
             // See if they have used an alternate code
             loc = darwinReferenceManager.getLocationRefFromTiploc( crs );

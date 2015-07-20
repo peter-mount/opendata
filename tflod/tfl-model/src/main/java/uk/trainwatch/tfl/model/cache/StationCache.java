@@ -35,11 +35,11 @@ public class StationCache
 
     private static final SQLResultSetHandler<Station> FROM_SQL = rs -> new Station(
             rs.getInt( "id" ),
-            rs.getString( "code" ),
+            rs.getString( "naptan" ),
             rs.getString( "name" )
     );
 
-    @Resource(name = "jdbc/Rail")
+    @Resource(name = "jdbc/rail")
     private DataSource dataSource;
 
     @Inject
@@ -48,57 +48,77 @@ public class StationCache
     @Inject
     private PlatformCache platformCache;
 
-    private Station get( String field, Object key )
+    private Station get( String field, Object key, boolean like )
             throws SQLException
     {
+        String op = like ? " LIKE ?" : "=?";
+
         try( Connection con = dataSource.getConnection() ) {
             Optional<Station> station;
-            try( PreparedStatement s = SQL.prepare( con, "SELECT * FROM tfl.station WHERE " + field + "=?", key ) ) {
+            try( PreparedStatement s = SQL.prepare( con,
+                                                    "SELECT * FROM tfl.station WHERE " + field + (like ? " LIKE ?" : "=?"),
+                                                    like ? ("%" + key) : key
+            ) ) {
                 station = SQL.stream( s, FROM_SQL ).
                         findAny();
             }
 
             if( station.isPresent() ) {
-                // Lines for this station
-                List<Line> lines = station.get().getLines();
-                try( PreparedStatement s = SQL.prepare( con, "SELECT lineid FROM tfl.station_line WHERE stationid=?", key ) ) {
-                    SQL.stream( s, SQL.INT_LOOKUP ).
-                            map( SQLFunction.guard( lineCache::get ) ).
-                            forEach( lines::add );
-                }
-
-                // Platforms
-                List<Platform> platforms = station.get().getPlatforms();
-                try( PreparedStatement s = SQL.prepare( con, "SELECT platid FROM tfl.station_platform WHERE stationid=?", key ) ) {
-                    SQL.stream( s, SQL.INT_LOOKUP ).
-                            map( SQLFunction.guard( platformCache::get ) ).
-                            forEach( platforms::add );
-                }
+                return populate( con, station.get() );
             }
-
-            return station.orElse( null );
+            else {
+                return null;
+            }
         }
+    }
+
+    private Station populate( Connection con, Station station )
+            throws SQLException
+    {
+        // Lines for this station
+        List<Line> lines = station.getLines();
+        try( PreparedStatement s = SQL.prepare( con, "SELECT lineid FROM tfl.station_line WHERE stationid=?", station.getId() ) ) {
+            SQL.stream( s, SQL.INT_LOOKUP ).
+                    map( SQLFunction.guard( lineCache::get ) ).
+                    forEach( lines::add );
+        }
+
+        // Platforms
+        List<Platform> platforms = station.getPlatforms();
+        try( PreparedStatement s = SQL.prepare( con, "SELECT platid FROM tfl.station_platform WHERE stationid=?", station.getId() ) ) {
+            SQL.stream( s, SQL.INT_LOOKUP ).
+                    map( SQLFunction.guard( platformCache::get ) ).
+                    forEach( platforms::add );
+        }
+        return station;
     }
 
     @CacheResult
     public Station get( @CacheKey int id )
             throws SQLException
     {
-        return get( "id", id );
+        return get( "id", id, false );
     }
 
     @CacheResult
     public Station getNaptan( @CacheKey String key )
             throws SQLException
     {
-        return get( "naptan", key );
+        return get( "naptan", key, false );
     }
 
     @CacheResult
     public Station getName( @CacheKey String name )
             throws SQLException
     {
-        return get( "name", name );
+        return get( "name", name, false );
+    }
+
+    @CacheResult
+    public Station getLuCrs( @CacheKey String name )
+            throws SQLException
+    {
+        return get( "naptan", name, true );
     }
 
 }

@@ -40,12 +40,10 @@ public abstract class AbstractLDBServlet
         Map<String, Object> req = request.getRequestScope();
         req.put( "location", loc );
         req.put( "pageTitle", loc.getLocation() );
-        try
-        {
+        try {
             LocalTime time = TimeUtils.getLondonDateTime().toLocalTime();
             String otherTime = request.getParam().get( "t" );
-            if( otherTime != null )
-            {
+            if( otherTime != null ) {
                 time = LocalTime.parse( otherTime );
             }
 
@@ -60,8 +58,8 @@ public abstract class AbstractLDBServlet
             response.addDateHeader( "last-modified", Date.from( lastUpdate ).getTime() );
 
             request.renderTile( getRenderTile() );
-        } catch( SQLException ex )
-        {
+        }
+        catch( SQLException ex ) {
             log( "show " + loc, ex );
             request.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
         }

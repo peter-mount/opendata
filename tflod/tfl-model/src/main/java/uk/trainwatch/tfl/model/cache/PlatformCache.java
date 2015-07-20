@@ -34,7 +34,7 @@ public class PlatformCache
             rs.getString( "fullname" )
     );
 
-    @Resource(name = "jdbc/Rail")
+    @Resource(name = "jdbc/rail")
     private DataSource dataSource;
 
     private Platform get( String field, Object key )

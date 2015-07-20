@@ -60,6 +60,11 @@
                     <c:set var="shown" value="true"/>
                     <div class="ldb-enttop">
                         <c:choose>
+                            <c:when test="${dep.type=='TFL'}">
+                                <div class="ldbCol ldbForecast ldbOntime">
+                                    <t:delay value="${dep.timeUntil}" absolute="true"/>
+                                </div>
+                            </c:when>
                             <c:when test="${dep.canc}">
                                 <div class="ldbCol ldbForecast ldbCancelled">Cancelled</div>
                             </c:when>
@@ -138,7 +143,7 @@
                                     to <d:tiploc value="${dep.dest}" link="false"/>
                                 </span>
                             </c:when>
-                            <c:otherwise>
+                            <c:when test="${dep.type=='DARWIN'}">
                                 <span class="ldbHeader ${callList}">
                                     <c:choose>
                                         <c:when test="${dep.canc}">This was the train calling at:</c:when>
@@ -182,6 +187,15 @@
                                     </p>
                                 </c:if>
                                 --%>
+                            </c:when>
+                            <c:otherwise>
+                                <span class="ldbHeader">Current location:</span>
+                                <span class="ldbDest ${callList}">${dep.curloc}</span>
+                                <c:if test="${not empty dep.toc}">
+                                    <span>
+                                        <d:operator value="${dep.toc}"/>&nbsp;service.
+                                    </span>
+                                </c:if>
                             </c:otherwise>
                         </c:choose>
                     </div>

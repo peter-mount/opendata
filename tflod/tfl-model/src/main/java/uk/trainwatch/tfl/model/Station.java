@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.tfl.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -14,6 +15,7 @@ import java.util.Objects;
  * @author peter
  */
 public class Station
+        implements Serializable
 {
 
     private static final long serialVersionUID = 1L;
