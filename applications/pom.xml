@@ -24,8 +24,9 @@
         <module>nationalrail</module> 
         <module>networkrail</module>
         <module>signalanalyser</module>
-        <module>utilities</module>
         <module>signalmapeditor</module>
+        <module>tfl</module>
+        <module>utilities</module>
     </modules>
     
 </project>

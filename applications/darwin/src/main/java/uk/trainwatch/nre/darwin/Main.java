@@ -16,22 +16,12 @@
 package uk.trainwatch.nre.darwin;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.postgresql.ds.PGPoolingDataSource;
 import uk.trainwatch.rabbitmq.RabbitConnection;
 import uk.trainwatch.rabbitmq.RabbitMQ;
-import uk.trainwatch.tfl.model.feed.TflFeed;
-import uk.trainwatch.tfl.model.feed.TflJsonRetriever;
-import uk.trainwatch.tfl.model.feed.TflPredictionImport;
 import uk.trainwatch.util.app.Application;
 import uk.trainwatch.util.counter.RateMonitor;
 import uk.trainwatch.util.sql.SQLConsumer;
@@ -56,9 +46,6 @@ public class Main
     private RabbitConnection rabbitmq;
     private Consumer<String> darwinImport;
 
-    protected Properties tflProperties;
-    private TflFeed tflPredictionFeed;
-
     @Override
     protected void setupBrokers()
             throws IOException
@@ -70,54 +57,23 @@ public class Main
         );
     }
 
-    /**
-     * TfL Tube, DLR & Air lines
-     */
-    private static final String LINES[] = {
-        "bakerloo",
-        "central",
-        "circle",
-        "district",
-        "dlr",
-        "emirates-air-line",
-        "hammersmith-city",
-        "jubilee",
-        "metropolitan",
-        "northern",
-        "piccadilly",
-        "victoria",
-        "waterloo-city"
-    };
-
     @Override
     protected void setupApplication()
             throws IOException
     {
-        try {
-            darwinProperties = Application.loadProperties( "darwin.properties" );
-            dataSource = new PGPoolingDataSource();
-            dataSource.setDataSourceName( "Darwin" );
-            dataSource.setServerName( darwinProperties.getProperty( "url" ) );
-            dataSource.setDatabaseName( "rail" );
-            dataSource.setUser( darwinProperties.getProperty( "username" ) );
-            dataSource.setPassword( darwinProperties.getProperty( "password" ) );
-            dataSource.setMaxConnections( 10 );
+        darwinProperties = Application.loadProperties( "darwin.properties" );
+        dataSource = new PGPoolingDataSource();
+        dataSource.setDataSourceName( "Darwin" );
+        dataSource.setServerName( darwinProperties.getProperty( "url" ) );
+        dataSource.setDatabaseName( "rail" );
+        dataSource.setUser( darwinProperties.getProperty( "username" ) );
+        dataSource.setPassword( darwinProperties.getProperty( "password" ) );
+        dataSource.setMaxConnections( 10 );
 
-            LOG.log( Level.INFO, () -> "Initialising " + QUEUE );
+        LOG.log( Level.INFO, () -> "Initialising " + QUEUE );
 
-            darwinImport = SQLConsumer.guard( new DarwinImport( dataSource ) ).
-                    andThen( RateMonitor.<String>log( LOG, QUEUE ) );
-
-            tflProperties = Application.loadProperties( "tfl.properties" );
-            
-            tflPredictionFeed = new TflFeed(
-                    new TflJsonRetriever( Stream.of( LINES ).collect( Collectors.joining( ",", "/line/", "/Arrivals" ) ), tflProperties ),
-                    SQLConsumer.guard( new TflPredictionImport( dataSource ) ).andThen( RateMonitor.<String>log( LOG, "tfl.prediction" ) ),
-                    1, TimeUnit.MINUTES );
-        }
-        catch( URISyntaxException ex ) {
-            throw new IOException( ex );
-        }
+        darwinImport = SQLConsumer.guard( new DarwinImport( dataSource ) ).
+                andThen( RateMonitor.<String>log( LOG, QUEUE ) );
     }
 
     @Override
@@ -130,15 +86,12 @@ public class Main
                                      s -> s.map( RabbitMQ.toString ).
                                      forEach( darwinImport )
         );
-        
-        tflPredictionFeed.start();
     }
 
     @Override
     protected void stop()
     {
         super.stop();
-        tflPredictionFeed.stop();
         rabbitmq.close();
     }
 

@@ -7,18 +7,13 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <groupId>uk.trainwatch.apps</groupId>
-    <artifactId>darwin</artifactId>
+    <artifactId>tfl</artifactId>
     <packaging>jar</packaging>
     
-    <name>Applications Darwin Analyser</name>
+    <name>Applications TfL Feeds</name>
     
     <description>
-        Standalone application to process the NRE Push Port feed.
-        
-        Originally I had this code within tomcat however this caused some
-        memory issues at busy times so splitting this out into a separate
-        application makes sense as it allows for the database to be
-        populated without affecting tomcat.
+        Standalone application to process the TfL Feeds.
     </description>
     
     <properties>
@@ -37,26 +32,8 @@
         </dependency>
         
         <dependency>
-            <groupId>uk.trainwatch.nre</groupId>
-            <artifactId>nre-darwin-forecast</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>uk.trainwatch.nre</groupId>
-            <artifactId>nre-darwin-stationmsg</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>uk.trainwatch.brokers</groupId>
-            <artifactId>brokers-apachemq</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-    
-        <dependency>
-            <groupId>uk.trainwatch.brokers</groupId>
-            <artifactId>brokers-rabbitmq</artifactId>
+            <groupId>uk.trainwatch.tfl</groupId>
+            <artifactId>tfl-model</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     
@@ -80,7 +57,7 @@
                         <index>true</index>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>uk.trainwatch.nre.darwin.Main</mainClass>
+                            <mainClass>uk.trainwatch.tfl.feeds.Main</mainClass>
                         </manifest>
                         <manifestEntries>
                             <mode>development</mode>
