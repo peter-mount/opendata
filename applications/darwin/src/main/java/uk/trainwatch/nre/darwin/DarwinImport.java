@@ -19,6 +19,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.sql.DataSource;
 import uk.trainwatch.util.sql.SQL;
 import uk.trainwatch.util.sql.SQLConsumer;
@@ -30,6 +32,8 @@ import uk.trainwatch.util.sql.SQLConsumer;
 public class DarwinImport
         implements SQLConsumer<String>
 {
+
+    private static final Logger LOG = Logger.getLogger( DarwinImport.class.getName() );
 
     private static final String IMPORT_SQL = "SELECT darwin.darwinimport(?::xml)";
 
@@ -45,13 +49,19 @@ public class DarwinImport
             throws SQLException
     {
         try( Connection con = dataSource.getConnection();
-             PreparedStatement ps = SQL.prepare( con, IMPORT_SQL ) ) {
+                PreparedStatement ps = SQL.prepare( con, IMPORT_SQL ) )
+        {
             {
                 ps.setString( 1, xml );
-                try( ResultSet rs = ps.executeQuery() ) {
+                try( ResultSet rs = ps.executeQuery() )
+                {
 
                 }
             }
+        } catch( Throwable t )
+        {
+            // Catch everything that fails, log it so we can verify again later
+            LOG.log( Level.SEVERE, t, () -> "Failed to import:\n" + xml );
         }
     }
 
