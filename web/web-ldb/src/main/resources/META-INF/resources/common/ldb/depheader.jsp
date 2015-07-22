@@ -13,7 +13,16 @@
     --%>
     <div class="ldbTable">
         <div class="ldbLoc">
-            <div class="ldbCont">${location.location}</div>
+            <div class="ldbCont">
+                ${location.location}
+                <c:if test="${location.tfl}">
+                    <c:choose>
+                        <c:when test="${location.underground}">Tube</c:when>
+                        <c:when test="${location.dlr}">Tube</c:when>
+                        <c:otherwise></c:otherwise>
+                    </c:choose>
+                </c:if>
+            </div>
         </div>
         <div class="ldbHead">
             <div class="ldbCol ldbForecast">Expected</div>

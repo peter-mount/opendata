@@ -10,9 +10,8 @@
 <%@ taglib prefix="d" uri="http://uktra.in/tld/darwin" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <div class="ldbWrapper">
-    <%--
-    <div class="ldbLoc">${location.location}</div>
-    --%>
+    <!-- Allow the javascript to adjust to the page refresh rate -->
+    <div id="maxAge" style="display: none" maxAge="${maxAge}"/>
     <div class="ldbTable">
 
         <%-- Station messages --%>

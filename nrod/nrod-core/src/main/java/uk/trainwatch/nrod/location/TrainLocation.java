@@ -165,6 +165,21 @@ public class TrainLocation
         this.tfl = tfl;
     }
 
+    public boolean isUnderground()
+    {
+        return isTfl() && crs != null && crs.startsWith( "LU" );
+    }
+
+    public boolean isDlr()
+    {
+        return isTfl() && crs != null && crs.startsWith( "LU" );
+    }
+
+    public boolean isMainline()
+    {
+        return !isTfl();
+    }
+
     @Override
     public int hashCode()
     {
@@ -176,10 +191,12 @@ public class TrainLocation
     @Override
     public boolean equals( Object obj )
     {
-        if( obj == null ) {
+        if( obj == null )
+        {
             return false;
         }
-        if( getClass() != obj.getClass() ) {
+        if( getClass() != obj.getClass() )
+        {
             return false;
         }
         final TrainLocation other = (TrainLocation) obj;
@@ -202,10 +219,12 @@ public class TrainLocation
         JsonObjectBuilder o = Json.createObjectBuilder().
                 add( "location", (location == null || location.isEmpty()) ? "" : location ).
                 add( "stanox", stanox );
-        if( crs != null && !crs.isEmpty() ) {
+        if( crs != null && !crs.isEmpty() )
+        {
             o.add( "crs", crs );
         }
-        if( tiploc != null && !tiploc.isEmpty() ) {
+        if( tiploc != null && !tiploc.isEmpty() )
+        {
             o.add( "tiploc", tiploc );
         }
         return o;

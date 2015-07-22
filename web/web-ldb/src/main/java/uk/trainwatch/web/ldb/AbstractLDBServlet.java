@@ -40,26 +40,32 @@ public abstract class AbstractLDBServlet
         Map<String, Object> req = request.getRequestScope();
         req.put( "location", loc );
         req.put( "pageTitle", loc.getLocation() );
-        try {
+        try
+        {
             LocalTime time = TimeUtils.getLondonDateTime().toLocalTime();
             String otherTime = request.getParam().get( "t" );
-            if( otherTime != null ) {
+            if( otherTime != null )
+            {
                 time = LocalTime.parse( otherTime );
             }
 
             // Get the departures and the Instant the last entry was last updated
             Instant lastUpdate = lDBUtils.getDepartures( req, loc, time );
 
+            // TfL requires 30s whilst NRE/Darwin 60s
+            int maxAge = loc.isTfl() ? 30 : 60;
+            req.put( "maxAge", maxAge );
+
             // Force 1 minute cache setting
             long now = System.currentTimeMillis();
             HttpServletResponse response = request.getResponse();
-            response.addHeader( "Cache-Control", "public, max-age=60, s-maxage=60, no-transform" );
-            response.addDateHeader( "Expires", now + 60000L );
+            response.addHeader( "Cache-Control", String.format( "public, max-age=%1$d, s-maxage=%<d, no-transform", maxAge ) );
+            response.addDateHeader( "Expires", now + (maxAge * 1000L) );
             response.addDateHeader( "last-modified", Date.from( lastUpdate ).getTime() );
 
             request.renderTile( getRenderTile() );
-        }
-        catch( SQLException ex ) {
+        } catch( SQLException ex )
+        {
             log( "show " + loc, ex );
             request.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
         }
