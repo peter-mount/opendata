@@ -820,7 +820,7 @@
             <xs:attribute name="gpdatatypeid" type="xs:int" use="required"/>
             <xs:attribute name="gpdatasize" type="xs:int" use="required"/>
             <xs:attribute name="enabled" type="xs:boolean" use="required"/>
-            <xs:attribute name="freeform" type="xs:int" use="required"/>
+            <xs:attribute name="freeform" type="xs:boolean" use="required"/>
             <xs:attribute name="minchangeheader" type="xs:int" use="required"/>
             <xs:attribute name="maxchangeheader" type="xs:int" use="required"/>
             <xs:attribute name="maxchangeenroute" type="xs:int" use="required"/>
@@ -1519,6 +1519,8 @@
                 <xs:element ref="nrsplatform" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="nrstimingload" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="nrstiploc" minOccurs="0" maxOccurs="unbounded"/>
+                <!-- not in original -->
+                <xs:element ref="signalZone" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -1955,6 +1957,7 @@
         <xs:complexType>
             <xs:attribute name="id" type="xs:int" use="required"/>
             <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="vanillatext" type="xs:string" use="optional" default=""/>
             <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
         </xs:complexType>
     </xs:element>
@@ -2246,6 +2249,15 @@
         <xs:complexType>
             <xs:attribute name="seq" type="xs:int" use="required"/>
             <xs:attribute name="link" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <!-- completely missing from DTD -->
+    <xs:element name="signalZone">
+        <xs:complexType>
+            <xs:sequence>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
 </xs:schema>
