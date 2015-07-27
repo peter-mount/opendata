@@ -6,6 +6,7 @@
 package uk.trainwatch.util.xml;
 
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.function.Consumer;
 import org.w3c.dom.DOMImplementation;
@@ -146,4 +147,16 @@ public class XMLDomWriter
         serializer.write( t, output );
     }
 
+    public static String toXml( Node t )
+    {
+        try
+        {
+            StringWriter w = new StringWriter();
+            new XMLDomWriter( w ).accept( t );
+            return w.toString();
+        } catch( ClassNotFoundException | InstantiationException | IllegalAccessException ex )
+        {
+            return null;
+        }
+    }
 }

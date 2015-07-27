@@ -37,6 +37,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import org.w3c.dom.Node;
 
 /**
  *
@@ -97,7 +98,8 @@ public class JAXBSupport
         marshallerQueue = new ArrayDeque<>( capacity );
         this.context = context;
 
-        for( int i = 0; i < capacity; i++ ) {
+        for( int i = 0; i < capacity; i++ )
+        {
             unmarshallerQueue.offer( context.createUnmarshaller() );
             marshallerQueue.offer( context.createMarshaller() );
         }
@@ -106,19 +108,22 @@ public class JAXBSupport
     private <T> T poll( Queue<T> queue )
     {
         lock.lock();
-        try {
+        try
+        {
             T u = queue.poll();
-            for( int i = 0; u == null && i < 10; i++ ) {
+            for( int i = 0; u == null && i < 10; i++ )
+            {
                 condition.await( 1, TimeUnit.SECONDS );
                 u = queue.poll();
             }
             return u;
-        }
-        catch( InterruptedException ex ) {
+        } catch( InterruptedException ex )
+        {
             LOG.log( Level.SEVERE, null, ex );
             return null;
         }
-        finally {
+        finally
+        {
             lock.unlock();
         }
     }
@@ -126,13 +131,16 @@ public class JAXBSupport
     private <T> void offer( Queue<T> queue, T u )
     {
         lock.lock();
-        try {
-            if( queue.size() < capacity ) {
+        try
+        {
+            if( queue.size() < capacity )
+            {
                 queue.offer( u );
                 condition.signalAll();
             }
         }
-        finally {
+        finally
+        {
             lock.unlock();
         }
     }
@@ -149,11 +157,13 @@ public class JAXBSupport
             throws JAXBException
     {
         lock.lock();
-        try {
+        try
+        {
             LOG.log( Level.INFO, "Creating marshaller" );
             return f.apply( context );
         }
-        finally {
+        finally
+        {
             lock.unlock();
         }
     }
@@ -162,7 +172,8 @@ public class JAXBSupport
             throws JAXBException
     {
         Unmarshaller u = poll( unmarshallerQueue );
-        if( u == null ) {
+        if( u == null )
+        {
             u = create( JAXBContext::createUnmarshaller );
         }
         return u;
@@ -177,7 +188,8 @@ public class JAXBSupport
             throws JAXBException
     {
         Marshaller u = poll( marshallerQueue );
-        if( u == null ) {
+        if( u == null )
+        {
             u = create( JAXBContext::createMarshaller );
         }
         return u;
@@ -191,26 +203,37 @@ public class JAXBSupport
     public <T> T unmarshall( JAXBUnmarshaller f )
             throws JAXBException
     {
-        try {
+        try
+        {
             final Unmarshaller unmarshaller = getUnmarshaller();
-            try {
+            try
+            {
                 return (T) f.apply( unmarshaller );
             }
-            finally {
+            finally
+            {
                 returnUnmarshaller( unmarshaller );
             }
-        }
-        catch( IOException |
-               InterruptedException ex ) {
+        } catch( IOException |
+                 InterruptedException ex )
+        {
             throw new JAXBException( ex );
         }
+    }
+
+    public <T> T unmarshall( Node n )
+            throws JAXBException
+    {
+        return unmarshall( m -> m.unmarshal( n ) );
     }
 
     public <T> T unmarshall( String s )
             throws JAXBException
     {
-        return unmarshall( m -> {
-            try( Reader r = new StringReader( s ) ) {
+        return unmarshall( m ->
+        {
+            try( Reader r = new StringReader( s ) )
+            {
                 return m.unmarshal( r );
             }
         } );
@@ -237,17 +260,20 @@ public class JAXBSupport
     public void marshall( JAXBMarshaller f )
             throws JAXBException
     {
-        try {
+        try
+        {
             final Marshaller m = getMarshaller();
-            try {
+            try
+            {
                 f.accept( m );
             }
-            finally {
+            finally
+            {
                 returnMarshaller( m );
             }
-        }
-        catch( IOException |
-               InterruptedException ex ) {
+        } catch( IOException |
+                 InterruptedException ex )
+        {
             throw new JAXBException( ex );
         }
     }
@@ -255,13 +281,20 @@ public class JAXBSupport
     public <T> String marshallToString( T v )
             throws JAXBException
     {
-        try( StringWriter s = new StringWriter() ) {
+        try( StringWriter s = new StringWriter() )
+        {
             marshall( v, s );
             return s.toString();
-        }
-        catch( IOException ex ) {
+        } catch( IOException ex )
+        {
             throw new JAXBException( ex );
         }
+    }
+
+    public void marshall( Object v, Node n )
+            throws JAXBException
+    {
+        marshall( m -> m.marshal( v, n ) );
     }
 
     public void marshall( Object v, File f )

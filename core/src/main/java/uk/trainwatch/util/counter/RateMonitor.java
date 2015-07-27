@@ -22,11 +22,11 @@ import uk.trainwatch.util.DaemonThreadFactory;
  * Normal use you need to create a single instance of RateMonitor and then from within a stream by using
  * {@code peek( rateMonitor ).}
  * <p>
- * An alternate use when being used with another consumer is:
- * {@code something.forEach( rateMonitor.andThen( consumer ) )} where consumer is another consumer or lambda expression.
+ * An alternate use when being used with another consumer is: {@code something.forEach( rateMonitor.andThen( consumer ) )} where
+ * consumer is another consumer or lambda expression.
  * <p>
- * Do not place the RateMonitor.log() call within a stream. Doing that will cause a new instance to be created for every
- * time you use the stream.
+ * Do not place the RateMonitor.log() call within a stream. Doing that will cause a new instance to be created for every time
+ * you use the stream.
  * <p>
  * @param <T> <p>
  * @author Peter T Mount
@@ -38,6 +38,11 @@ public class RateMonitor<T>
     private static final Logger LOG = Logger.getLogger( RateMonitor.class.getName() );
     private final AtomicInteger counter = new AtomicInteger();
     private final ScheduledFuture<?> scheduledFuture;
+    private final Logger log;
+    private final Level level;
+    private final String label;
+    private int lastCount;
+    private long total;
 
     public static <T> RateMonitor<T> log( String label )
     {
@@ -61,18 +66,28 @@ public class RateMonitor<T>
 
     public RateMonitor( Logger log, Level level, String label )
     {
+        this.log = log;
+        this.level = level;
+        this.label = label;
         scheduledFuture = DaemonThreadFactory.INSTANCE.scheduleAtFixedRate( () ->
         {
             // Read & reset the count. Don't put it in the logger as we use a supplier & won't be invoked if the logger
             // isn't showing the required level
-            int count = counter.getAndSet( 0 );
-            
+            lastCount = counter.getAndSet( 0 );
+            total += lastCount;
+
             // Reduce logspam by only logging when we've done something
-            if( count > 0 )
+            if( lastCount > 0 )
             {
-                log.log( level, () -> label + ' ' + count );
+                log.log( level, () -> label + ' ' + lastCount );
             }
         }, 1L, 1L, TimeUnit.MINUTES );
+    }
+
+    @Override
+    public String toString()
+    {
+        return label + ' ' + lastCount + "/" + (total + counter.get());
     }
 
     public static <T> RateMonitor<T> log( String log, String label )
