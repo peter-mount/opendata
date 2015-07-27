@@ -1,0 +1,2251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- created by HaCon Ingenieurgesellschaft mbH, 2003 (http://www.hacon.de) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:element name="version">
+        <xs:complexType>
+            <xs:attribute name="main" type="xs:int" use="required"/>
+            <xs:attribute name="sub" type="xs:int" use="required"/>
+            <xs:attribute name="patch" type="xs:int" use="required"/>
+            <xs:attribute name="rc" type="xs:int" use="required"/>
+            <xs:attribute name="build" type="xs:int" use="required"/>
+            <xs:attribute name="date" type="xs:date" use="required"/>
+            <xs:attribute name="time" type="xs:time" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="projecttype">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="schedversiontype">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="infrainfo">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="desc" type="xs:string" use="required"/>
+            <xs:attribute name="creation" type="xs:date" use="required"/>
+            <xs:attribute name="creationuser" type="xs:int" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:date" use="required"/>
+            <xs:attribute name="lastmodifieduser" type="xs:int" use="required"/>
+            <xs:attribute name="label" type="xs:string" use="required"/>
+            <xs:attribute name="infraregionid" type="xs:int" use="optional"/>
+            <xs:attribute name="infraperiodid" type="xs:int" use="optional"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="schedinfo">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="desc" type="xs:string" use="required"/>
+            <xs:attribute name="label" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="supplinfo">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="desc" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="projectinfo">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="infrainfo" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="schedinfo" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="supplinfo" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="desc" type="xs:string" use="required"/>
+            <xs:attribute name="begin" type="xs:date" use="required"/>
+            <xs:attribute name="end" type="xs:date" use="required"/>
+            <xs:attribute name="creation" type="xs:date" use="required"/>
+            <xs:attribute name="creationuser" type="xs:int" use="required"/>
+            <xs:attribute name="lastmodifieduser" type="xs:int" use="required"/>
+            <xs:attribute name="tpsversion" type="xs:string" use="required"/>
+            <xs:attribute name="plannedflag" type="xs:int" use="required"/>
+            <xs:attribute name="realizedflag" type="xs:int" use="required"/>
+            <xs:attribute name="timelinestatusdatetime" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+            <xs:attribute name="filtersettingfiltertype" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="filtersettingparameterid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+            <xs:attribute name="laststaticcachecreation" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="block">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="way" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
+            <xs:attribute name="blockid" type="xs:int" use="required"/>
+            <xs:attribute name="lineid" type="xs:int" use="required"/>
+            <xs:attribute name="presignaldistance" type="xs:int" use="required"/>
+            <xs:attribute name="priority" type="xs:int" use="required"/>
+            <xs:attribute name="sightdistance" type="xs:int" use="required"/>
+            <xs:attribute name="atclength" type="xs:int" use="required"/>
+            <xs:attribute name="atcflag" type="xs:boolean" use="required"/>
+            <xs:attribute name="movingblock" type="xs:boolean" use="required"/>
+            <xs:attribute name="useshunting" type="xs:boolean" use="optional" default="false"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="route">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="way" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
+            <xs:attribute name="routeid" type="xs:int" use="required"/>
+            <xs:attribute name="lineid" type="xs:int" use="required"/>
+            <xs:attribute name="stationid" type="xs:string" use="required"/>
+            <xs:attribute name="areacode" type="xs:int" use="required"/>
+            <xs:attribute name="roplinecodeid" type="xs:int" use="required"/>
+            <xs:attribute name="salinecodeid" type="xs:int" use="required"/>
+            <xs:attribute name="prelocation" type="xs:boolean" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="signalzone">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="optional"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="basesignaltypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="brakingmodedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="sectionattributetypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="sectiontypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="section">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="type" type="xs:int" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="restrictionimpacttypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="restrictionopconddesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="restrictionreqchangedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="restrictionworkflowstatedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="restrictiontypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="restrictionstatedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="kmregionmasterdesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="shortdescription" type="xs:string" use="optional"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="stationboundarytypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="stationlayoutcode">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="stationsettype">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="geogislinecodedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="roplinecodedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="salinecodedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="traingrouptypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="coach">
+        <xs:annotation>
+            <xs:documentation>Attribute versionno is optional since it is obsolete.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="desc" type="xs:string" use="required"/>
+            <xs:attribute name="coachtype" type="xs:int" use="required"/>
+            <xs:attribute name="braketype" type="xs:string" use="required"/>
+            <xs:attribute name="weight" type="xs:decimal" use="required"/>
+            <xs:attribute name="length" type="xs:decimal" use="required"/>
+            <xs:attribute name="seatsfirstclass" type="xs:int" use="required"/>
+            <xs:attribute name="seatssecondclass" type="xs:int" use="required"/>
+            <xs:attribute name="axledist" type="xs:decimal" use="required"/>
+            <xs:attribute name="maxspeed" type="xs:int" use="required"/>
+            <xs:attribute name="crosssectionarea" type="xs:decimal" use="required"/>
+            <xs:attribute name="rollingresistance" type="xs:decimal" use="required"/>
+            <xs:attribute name="flangeresistance" type="xs:decimal" use="required"/>
+            <xs:attribute name="bearingresistance" type="xs:decimal" use="required"/>
+            <xs:attribute name="airresistance" type="xs:decimal" use="required"/>
+            <xs:attribute name="inertiafactor" type="xs:decimal" use="required"/>
+            <xs:attribute name="brakingratio_r" type="xs:decimal" use="required"/>
+            <xs:attribute name="brakingratio_p" type="xs:decimal" use="required"/>
+            <xs:attribute name="typeofformula" type="xs:int" use="required"/>
+            <xs:attribute name="coeffA" type="xs:decimal" use="required"/>
+            <xs:attribute name="coeffB" type="xs:decimal" use="required"/>
+            <xs:attribute name="coeffC" type="xs:decimal" use="required"/>
+            <xs:attribute name="defaultRetardation" type="xs:decimal" use="optional" default="0.0"/>
+            <xs:attribute name="atcDefaultRetardation" type="xs:decimal" use="optional" default="0.0"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="powerreductionvalue">
+        <xs:complexType>
+            <xs:attribute name="electricprofilenameid" type="xs:int" use="required"/>
+            <xs:attribute name="reductionpercoachweight" type="xs:decimal" use="required"/>
+            <xs:attribute name="speedthreshold" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="coachimpliedpowerreduction">
+        <xs:annotation>
+            <xs:documentation>Attributes reductionpercoachweight and speedthreshold are optional because they have been moved to table powerreductionvalue.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="powerreductionvalue" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="shortdescription" type="xs:string" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="contract">
+        <xs:complexType>
+            <xs:attribute name="contractid" type="xs:int" use="required"/>
+            <xs:attribute name="operatorid" type="xs:int" use="required"/>
+            <xs:attribute name="advertoperatorid" type="xs:int" use="optional"/>
+            <xs:attribute name="validfrom" type="xs:date" use="required"/>
+            <xs:attribute name="validto" type="xs:date" use="required"/>
+            <xs:attribute name="state" type="xs:int" use="required"/>
+            <xs:attribute name="code" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="contractstatedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="delayfunction">
+        <xs:complexType>
+            <xs:choice>
+                <xs:element ref="empentry" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="exponential" minOccurs="0"/>
+            </xs:choice>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="comment" type="xs:string" use="required"/>
+            <xs:attribute name="delaythreshold" type="xs:time" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="directed">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="start"/>
+                <xs:element ref="end"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="direction">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="route" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="incldirection" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="resspeedrunfactor" type="xs:decimal" use="required"/>
+            <xs:attribute name="operationalfactor" type="xs:decimal" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="dispoedge">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="directed"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="disporule">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="directed"/>
+                <xs:element ref="dispoedge" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="traincontrolling" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="traincontrolled" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="desc" type="xs:string" use="required"/>
+            <xs:attribute name="maxoccedge" type="xs:int" use="required"/>
+            <xs:attribute name="delaythreshold" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="edge">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="directed"/>
+                <xs:element ref="velocityprofile" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="length" type="xs:int" use="required"/>
+            <xs:attribute name="gradient" type="xs:decimal" use="required"/>
+            <xs:attribute name="vmax" type="xs:int" use="required"/>
+            <xs:attribute name="tunnelsquarearea" type="xs:decimal" use="required"/>
+            <xs:attribute name="tunnelfactor" type="xs:decimal" use="required"/>
+            <xs:attribute name="electrified" type="xs:boolean" use="required"/>
+            <xs:attribute name="partialrelease" type="xs:boolean" use="required"/>
+            <xs:attribute name="approachsignal" type="xs:boolean" use="required"/>
+            <xs:attribute name="erratickmdist" type="xs:int" use="required"/>
+            <xs:attribute name="heightdifference" type="xs:int" use="required"/>
+            <xs:attribute name="radius" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="geogislinecode" type="xs:int" use="optional" default="0"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="empentry">
+        <xs:complexType>
+            <xs:attribute name="from" type="xs:time" use="required"/>
+            <xs:attribute name="to" type="xs:time" use="required"/>
+            <xs:attribute name="delayedtrains" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="end">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="point"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="exponential">
+        <xs:complexType>
+            <xs:attribute name="meanvalue" type="xs:time" use="required"/>
+            <xs:attribute name="percentagedelayedtrains" type="xs:decimal" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="fsdiagvalue">
+        <xs:complexType>
+            <xs:attribute name="speed" type="xs:decimal" use="required"/>
+            <xs:attribute name="force" type="xs:decimal" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="fsudiagvalue">
+        <xs:complexType>
+            <xs:attribute name="speed" type="xs:decimal" use="required"/>
+            <xs:attribute name="force" type="xs:decimal" use="required"/>
+            <xs:attribute name="utilization" type="xs:decimal" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="srdiagvalue">
+        <xs:complexType>
+            <xs:attribute name="speed" type="xs:decimal" use="required"/>
+            <xs:attribute name="retardation" type="xs:decimal" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="traintyperef">
+        <xs:complexType>
+            <xs:attribute name="traintypeid" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="workingzone">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="wzedge" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="sectionid" type="xs:int" use="required"/>
+            <xs:attribute name="vmax" type="xs:int" use="required"/>
+            <xs:attribute name="electrified" type="xs:boolean" use="required"/>
+            <xs:attribute name="brakingmodeid" type="xs:int" use="optional" default="0"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="attributesection">
+        <xs:complexType>
+            <xs:attribute name="sectionid" type="xs:int" use="required"/>
+            <xs:attribute name="kmregionid" type="xs:int" use="required"/>
+            <xs:attribute name="shortdescription" type="xs:string" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="sectionattribute">
+        <xs:complexType>
+            <xs:attribute name="sectionid" type="xs:int" use="required"/>
+            <xs:attribute name="sectionattributetypeid" type="xs:int" use="required"/>
+            <xs:attribute name="attributeparam" type="xs:int" use="required"/>
+            <xs:attribute name="ascending" type="xs:boolean" use="required"/>
+            <xs:attribute name="kmvaluebegin" type="xs:int" use="required"/>
+            <xs:attribute name="kmvalueend" type="xs:int" use="required"/>
+            <xs:attribute name="value" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="reserveentry">
+        <xs:complexType>
+            <xs:attribute name="speed" type="xs:int" use="required"/>
+            <xs:attribute name="reserve" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="graphictext">
+        <xs:complexType>
+            <xs:attribute name="x" type="xs:decimal" use="required"/>
+            <xs:attribute name="y" type="xs:decimal" use="required"/>
+            <xs:attribute name="size" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="angle" type="xs:int" use="required"/>
+            <xs:attribute name="layers" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="annotation">
+        <xs:complexType>
+            <xs:attribute name="x" type="xs:int" use="required"/>
+            <xs:attribute name="y" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="graphicvector">
+        <xs:complexType>
+            <xs:attribute name="x0" type="xs:decimal" use="required"/>
+            <xs:attribute name="y0" type="xs:decimal" use="required"/>
+            <xs:attribute name="x1" type="xs:decimal" use="required"/>
+            <xs:attribute name="y1" type="xs:decimal" use="required"/>
+            <xs:attribute name="layers" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="incldirection">
+        <xs:complexType>
+            <xs:attribute name="incldirection" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="interlockingsystem">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="basesignaltypeid" type="xs:int" use="required"/>
+            <xs:attribute name="abbrev" type="xs:string" use="required"/>
+            <xs:attribute name="freeingtime" type="xs:int" use="required"/>
+            <xs:attribute name="settime" type="xs:int" use="required"/>
+            <xs:attribute name="releasemode" type="xs:boolean" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="brakingmodeid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="aspects" type="xs:int" use="optional" default="0"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="kmjump">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="directed"/>
+            </xs:sequence>
+            <xs:attribute name="length" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="kmregiondesc">
+        <xs:annotation>
+            <xs:documentation>Structure 'kmregiondesc' (table KMREGIONNAME) is obsolete.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tibline">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="tiblinestation" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="lineid" type="xs:int" use="required"/>
+            <xs:attribute name="desc" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tiblinestation">
+        <xs:complexType>
+            <xs:attribute name="seqno" type="xs:int" use="required"/>
+            <xs:attribute name="stationid" type="xs:string" use="required"/>
+            <xs:attribute name="uiccode" type="xs:int" use="required"/>
+            <xs:attribute name="kmvalue" type="xs:decimal" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="line">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="linestation" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="lineid" type="xs:int" use="required"/>
+            <xs:attribute name="desc" type="xs:string" use="required"/>
+            <xs:attribute name="linetypeid" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="linestation">
+        <xs:complexType>
+            <xs:attribute name="stationid" type="xs:string" use="required"/>
+            <xs:attribute name="uiccode" type="xs:int" use="required"/>
+            <xs:attribute name="kmvalue" type="xs:decimal" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="linetypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="lineproperty">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="linepropertylistentry">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="linepropertytemplate">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="linepropertylistentry" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="powerrestriction">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="powerrestrictionset">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="powerrestriction" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="stationbankid">
+        <xs:complexType>
+            <xs:attribute name="stationbankid" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="stationbankstationlayout">
+        <xs:complexType>
+            <xs:attribute name="stationbanksectionid" type="xs:int" use="required"/>
+            <xs:attribute name="stationbanksectionseq" type="xs:int" use="required"/>
+            <xs:attribute name="seq" type="xs:int" use="required"/>
+            <xs:attribute name="stationbanklayoutcodeid" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="stationbankstationtracklayout">
+        <xs:complexType>
+            <xs:attribute name="stationbanksectionid" type="xs:int" use="required"/>
+            <xs:attribute name="stationbankstationseq" type="xs:int" use="required"/>
+            <xs:attribute name="stationtrackid" type="xs:int" use="required"/>
+            <xs:attribute name="layoutcode" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="stationbankstation">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="stationreference" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="stationbankstationlayout" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="stationbankstationtracklayout" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="stationbanksectionid" type="xs:int" use="required"/>
+            <xs:attribute name="seq" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="stationbankstationproperty">
+        <xs:complexType>
+            <xs:attribute name="stationbanksectionid" type="xs:int" use="required"/>
+            <xs:attribute name="seq" type="xs:int" use="required"/>
+            <xs:attribute name="stationbankstationlevel" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="stationbanksection">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="stationbankstation" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="stationbankstationproperty" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="stationbank">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="stationbankid" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="stationzoneid">
+        <xs:complexType>
+            <xs:attribute name="stationzoneid" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="stationzone">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="stationzoneid" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+            <xs:attribute name="headwayValue" type="xs:int" use="required"/>
+            <xs:attribute name="junctionValue" type="xs:int" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="stationsetstation">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:string" use="required"/>
+            <xs:attribute name="areacode" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="stationset">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="stationsetstation" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+            <xs:attribute name="stationsettype" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="traintractiongroupdesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="shortdescription" type="xs:string" use="optional"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="electricprofiledesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="shortdescription" type="xs:string" use="optional"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="powerrestrictiondesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="shortdescription" type="xs:string" use="optional"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="changegrouptypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="shortdescription" type="xs:string" use="optional"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="infraperioddesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="shortdescription" type="xs:string" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="infraregiondesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="shortdescription" type="xs:string" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tpsicodelistdesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="prefix" type="xs:string" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tpsideliverytypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="dseacwarefcodeattribute">
+        <xs:complexType>
+            <xs:attribute name="refcodeid" type="xs:int" use="required" />
+            <xs:attribute name="value" type="xs:int" use="required" />
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="dseacwaattribute">
+        <xs:complexType>	  
+            <xs:sequence>
+                <xs:element ref="dseacwarefcodeattribute" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="operatorid" type="xs:int" use="required" />
+            <xs:attribute name="bus" type="xs:int" use="optional"/>
+            <xs:attribute name="ship" type="xs:int" use="optional"/>
+            <xs:attribute name="plannernote" type="xs:int" use="required" />
+            <xs:attribute name="publictime" type="xs:int" use="optional"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="dseavalidationconfig">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="messageid" type="xs:int" use="required"/>
+            <xs:attribute name="operatorid" type="xs:int" use="required"/>
+            <xs:attribute name="errorlimit" type="xs:int" use="required"/>
+            <xs:attribute name="warninglimit" type="xs:int" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="period">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="from_not_limited" type="xs:boolean" use="required"/>
+            <xs:attribute name="valid_from" type="xs:date" use="required"/>
+            <xs:attribute name="to_not_limited" type="xs:boolean" use="required"/>
+            <xs:attribute name="valid_to" type="xs:date" use="required"/>
+            <xs:attribute name="floating_valid_from" type="xs:int" use="optional"/>
+            <xs:attribute name="floating_valid_to" type="xs:int" use="optional"/>
+            <xs:attribute name="periodyear" type="xs:int" use="optional"/>
+            <xs:attribute name="periodTypeID" type="xs:int" use="optional"/>
+            <xs:attribute name="name" type="xs:string" use="optional"/>
+            <xs:attribute name="remark" type="xs:string" use="optional"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="refcodetype">
+        <xs:complexType>
+            <xs:attribute name="refcodetypeid" type="xs:int" use="required"/>
+            <xs:attribute name="codetypeid" type="xs:string" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+            <xs:attribute name="gpdatatypeid" type="xs:int" use="required"/>
+            <xs:attribute name="gpdatasize" type="xs:int" use="required"/>
+            <xs:attribute name="enabled" type="xs:boolean" use="required"/>
+            <xs:attribute name="freeform" type="xs:int" use="required"/>
+            <xs:attribute name="minchangeheader" type="xs:int" use="required"/>
+            <xs:attribute name="maxchangeheader" type="xs:int" use="required"/>
+            <xs:attribute name="maxchangeenroute" type="xs:int" use="required"/>
+            <xs:attribute name="classification" type="xs:int" use="required"/>
+            <xs:attribute name="tpsicodelistid" type="xs:int" use="optional"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="documententrytype">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="key" type="xs:string" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="refcode">
+        <xs:annotation>
+            <xs:documentation>Attribute periodid is optional since it is obsolete.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:attribute name="refcodeid" type="xs:int" use="required"/>
+            <xs:attribute name="refcodetypeid" type="xs:int" use="required"/>
+            <xs:attribute name="code" type="xs:string" use="required"/>
+            <xs:attribute name="hafascode" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+            <xs:attribute name="enabled" type="xs:boolean" use="required"/>
+            <xs:attribute name="publication" type="xs:boolean" use="required"/>
+            <xs:attribute name="periodid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="extreference" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="validfrom" type="xs:date" use="optional" default="2000-01-01"/>
+            <xs:attribute name="validto" type="xs:date" use="optional" default="2999-12-31"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="odttimespan">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="odtid" type="xs:int" use="required"/>
+            <xs:attribute name="begintime" type="xs:int" use="required"/>
+            <xs:attribute name="endtime" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="odttimespanpoollistentry">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="odttimespanpool">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="odttimespanpoollistentry" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="prioritydesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="workflowstatedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="worksheetdocumentstatedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="worksheettypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="shortdescription" type="xs:string" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="nonrequiredhandlingdesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="requestactiontypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="solutiontypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tsrefcode">
+        <xs:complexType>
+            <xs:attribute name="refcodeid" type="xs:int" use="required"/>
+            <xs:attribute name="data" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="modeltrain">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="tractionunit" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="publicname" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="desc" type="xs:string" use="required"/>
+            <xs:attribute name="coachtype" type="xs:int" use="optional"/>
+            <xs:attribute name="coachid" type="xs:int" use="required"/>
+            <xs:attribute name="coachestotallength" type="xs:decimal" use="required"/>
+            <xs:attribute name="coachestotalweight" type="xs:decimal" use="required"/>
+            <xs:attribute name="atc" type="xs:boolean" use="required"/>
+            <xs:attribute name="profile" type="xs:int" use="required"/>
+            <xs:attribute name="minstoptime" type="xs:int" use="required"/>
+            <xs:attribute name="seatsfirstclass" type="xs:int" use="required"/>
+            <xs:attribute name="seatssecondclass" type="xs:int" use="required"/>
+            <xs:attribute name="humanreacttime" type="xs:int" use="required"/>
+            <xs:attribute name="inclhumanreacttime" type="xs:boolean" use="optional" default="false"/>
+            <xs:attribute name="supplruntime" type="xs:int" use="required"/>
+            <xs:attribute name="maxspeed" type="xs:int" use="required"/>
+            <xs:attribute name="stationcat" type="xs:int" use="required"/>
+            <xs:attribute name="platformcat" type="xs:int" use="required"/>
+            <xs:attribute name="minoccupationdist" type="xs:int" use="required"/>
+            <xs:attribute name="techreactiontime" type="xs:int" use="required"/>
+            <xs:attribute name="retardation" type="xs:decimal" use="required"/>
+            <xs:attribute name="checkEffectiveTrackLength" type="xs:boolean" use="optional" default="false"/>
+            <xs:attribute name="atcretardation" type="xs:decimal" use="optional"/>
+            <xs:attribute name="accelskip" type="xs:int" use="optional"/>
+            <xs:attribute name="linepropertytemplateid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="periodid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="coachimpliedpowerreductionid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="comfortacceleration" type="xs:decimal" use="optional" default="0"/>
+            <xs:attribute name="durationofcomfortaccel" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="lengthbetweenpantographs" type="xs:int" use="optional" default="0"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="motortypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="node">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="point"/>
+            </xs:sequence>
+            <xs:attribute name="netx" type="xs:decimal" use="required"/>
+            <xs:attribute name="nety" type="xs:decimal" use="required"/>
+            <xs:attribute name="netz" type="xs:decimal" use="required"/>
+            <xs:attribute name="linex" type="xs:decimal" use="required"/>
+            <xs:attribute name="liney" type="xs:decimal" use="required"/>
+            <xs:attribute name="linez" type="xs:decimal" use="required"/>
+            <xs:attribute name="kmregionid" type="xs:int" use="required"/>
+            <xs:attribute name="kmvalue" type="xs:int" use="required"/>
+            <xs:attribute name="secondkmregionid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="secondkmvalue" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="angle" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="opday">
+        <xs:complexType>
+            <xs:attribute name="daytype" type="xs:int" use="required"/>
+            <xs:attribute name="day" type="xs:date" use="optional"/>
+            <xs:attribute name="include" type="xs:boolean" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="daysetreference">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="include" type="xs:boolean" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="opdaycalendar">
+        <xs:complexType>
+            <xs:attribute name="day" type="xs:date" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="day">
+        <xs:complexType>
+            <xs:attribute name="day" type="xs:date" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="dayset">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="day" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+            <xs:attribute name="priority" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="opdaytmpl">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="opday" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="daysetreference" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="opdaycalendar" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="templateid" type="xs:int" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="validfrom" type="xs:date" use="required"/>
+            <xs:attribute name="validto" type="xs:date" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+            <xs:attribute name="untilfurthernotice" type="xs:boolean" use="optional" default="false"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="opdaytype">
+        <xs:complexType>
+            <xs:attribute name="daytypeid" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="vanillatext" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="operator">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="abbreviation" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="address" type="xs:string" use="required"/>
+            <xs:attribute name="phone" type="xs:string" use="required"/>
+            <xs:attribute name="fax" type="xs:string" use="required"/>
+            <xs:attribute name="email" type="xs:string" use="required"/>
+            <xs:attribute name="refperson" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tenant">
+        <xs:complexType>
+            <xs:attribute name="tenantid" type="xs:int" use="required"/>
+            <xs:attribute name="shortdescription" type="xs:string" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+            <xs:attribute name="address1" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="address2" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="address3" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="organisationId" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="languageId" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="deleted" type="xs:boolean" use="optional" default="true"/>
+            <xs:attribute name="datadirectory" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="organisationdesc">
+        <xs:annotation>
+            <xs:documentation>Structure 'organisationdesc' (table ORGANISATION) is obsolete.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="shortdescription" type="xs:string" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="point">
+        <xs:complexType>
+            <xs:attribute name="lineid" type="xs:int" use="required"/>
+            <xs:attribute name="nodeid" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="polyarea">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="polyareacorner" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="polyareacorner">
+        <xs:complexType>
+            <xs:attribute name="x" type="xs:int" use="required"/>
+            <xs:attribute name="y" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="remark">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <!-- duplicated at line 96 <xs:element name="route">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="way"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element> -->
+    <xs:element name="securitysectionveloprofile">
+        <xs:complexType>
+            <xs:attribute name="veloprofilenameid" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="securitysection">
+        <xs:complexType>
+            <xs:sequence minOccurs="0">
+                <xs:element ref="way"/>
+                <xs:element ref="securitysectionveloprofile" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="vmax" type="xs:int" use="required"/>
+            <xs:attribute name="accelerationattail" type="xs:boolean" use="optional" default="true"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="service">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="vanillatext" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="servicelistentry">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="servicetemplate">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="servicelistentry" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="signal">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="directed"/>
+                <xs:element ref="securitysection" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="optional"/>
+            <xs:attribute name="interlockingsysid" type="xs:int" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="zoneid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="tmpclosed" type="xs:boolean" use="optional" default="false"/>
+            <xs:attribute name="usesecsectfreeingtime" type="xs:boolean" use="optional" default="false"/>
+            <xs:attribute name="secsectfreeingtime" type="xs:int" use="optional" default="0"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="specialday">
+        <xs:complexType>
+            <xs:attribute name="day" type="xs:date" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="holiday" type="xs:boolean" use="optional" default="false"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="wzedge">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="directed"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="start">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="point"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="station">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="track" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="stationposition" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="uiccode" type="xs:int" use="required"/>
+            <xs:attribute name="abbrev" type="xs:string" use="required"/>
+            <xs:attribute name="longname" type="xs:string" use="required"/>
+            <xs:attribute name="commentary" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="stdstoppingtime" type="xs:int" use="required"/>
+            <xs:attribute name="stdconnectiontime" type="xs:int" use="required"/>
+            <xs:attribute name="stationtype" type="xs:int" use="required"/>
+            <xs:attribute name="stationcategory" type="xs:int" use="required"/>
+            <xs:attribute name="uicstationcode" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="transportassociation" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="x" type="xs:decimal" use="optional" default="0.0"/>
+            <xs:attribute name="y" type="xs:decimal" use="optional" default="0.0"/>
+            <xs:attribute name="easting" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="northing" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="stanox" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="lpbflag" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="periodid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="capitalsident" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="nalco" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="nlccheckchr" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="pomcpcode" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="crscode" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="desccapri" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="compulsorystop" type="xs:boolean" use="optional" default="false"/>
+            <xs:attribute name="hasopeninghours" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="stationcategorydesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="stationtypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="stoptypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="stationboundary">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="stationreference" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="signalid" type="xs:int" use="required"/>
+            <xs:attribute name="boundarytypeid" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="flag">
+        <xs:complexType>
+            <xs:attribute name="flag" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="nominalodt">
+        <xs:complexType>
+            <xs:attribute name="odtid" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="optypedays">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="opdaycalendar" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="opdaytypeid" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="stationposition">
+        <xs:complexType>
+            <xs:attribute name="kmregionid" type="xs:int" use="required"/>
+            <xs:attribute name="kmvalue" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="scheddocumenttext">
+        <xs:complexType>
+            <xs:attribute name="sequence" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="scheddocumententry">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="scheddocumenttext" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="documententrytypeid" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="scheddocument">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="scheddocumententry" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tadataschedule">
+        <xs:complexType>
+            <xs:attribute name="cgscheduleid" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tastatelog">
+        <xs:complexType>
+            <xs:attribute name="stateid" type="xs:int" use="required"/>
+            <xs:attribute name="user" type="xs:string" use="required"/>
+            <xs:attribute name="date" type="xs:date" use="required"/>
+            <xs:attribute name="time" type="xs:time" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="worksheetdocument">
+        <xs:complexType>
+            <xs:attribute name="scheddocumentid" type="xs:int" use="required"/>
+            <xs:attribute name="creationdatetime" type="xs:dateTime" use="required"/>
+            <xs:attribute name="worksheetdocumentstateid" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="trainrunid">
+        <xs:complexType>
+            <xs:attribute name="trainrunid" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="trainannouncementdata">
+        <xs:annotation>
+            <xs:documentation>Attribute stationsetname is optional since it is obsolete. New versions use attribute stationsetid.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="tadataschedule" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="tastatelog" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="worksheetdocument" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="tatypeid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="tastateid" type="xs:int" use="required"/>
+            <xs:attribute name="referenceid" type="xs:string" use="required"/>
+            <xs:attribute name="internalreferenceid" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="predecessorid" type="xs:int" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+            <xs:attribute name="orderTitle" type="xs:string" use="required"/>
+            <xs:attribute name="workflowstateid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="creationdatetime" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+            <xs:attribute name="lastmodificationuserid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="userid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="worksheettypeid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="priorityid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="validityid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="deadlinedatetime" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+            <xs:attribute name="orderdatetime" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+            <xs:attribute name="requestor" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="stationsetname" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="stationsetid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="solutiontypeid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="nonrequiredhandlingid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="impactanalysis" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="possessionmeasureid" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="possessionid" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="capacityrequestnumber" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="pathnumber" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="requestactiontypeid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="supplinformation" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="deadlineflag" type="xs:boolean" use="optional" default="false"/>
+            <xs:attribute name="toleranceflag" type="xs:boolean" use="optional" default="false"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+            <xs:attribute name="instancename" type="xs:string" use="optional" default=""/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="worksheetrelation">
+        <xs:complexType>
+            <xs:attribute name="worksheetid1" type="xs:int" use="required"/>
+            <xs:attribute name="worksheetid2" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="gttid">
+        <xs:complexType>
+            <xs:attribute name="gttid" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="stationreference">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:string" use="required"/>
+            <xs:attribute name="areacode" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="gtt">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="stationreference" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="gttsheet">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="gttid" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tps_data">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="version" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="projectinfo" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="uiccodedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="trackcategorydesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="stationcategorydesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="stationtypedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="period" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="station" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="gpdatatype" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="linetypedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="line" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="coach" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="tractiontypedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="motortypedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="tractionunit" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="modeltrain" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="operator" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="contractstatedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="contract" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="specialday" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="dayset" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="opdaytype" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="optypedays" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="opdaytmpl" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="service" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="servicetemplate" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="lineproperty" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="linepropertytemplate" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="tastatedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="trainflagdesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="polyarea" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="remark" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="stoptypedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="trainstatedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="etadvicetypedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="etadvice" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="conditionsoftravel" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="coachtypedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="commutertypedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="passengertypedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="vehicletypedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="rounding" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="traintype" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="traintypeset" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="trainlayerdesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="traindeptypedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="veloprofiledesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="delayfunction" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="signalzone" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="basesignaltypedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="sectiontypedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="section" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="restrictionimpacttypedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="restrictionopconddesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="restrictionreqchangedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="restrictionworkflowstatedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="restrictiontypedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="restrictionstatedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="kmregionmasterdesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="stationboundarytypedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="stationlayoutcode" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="stationsettype" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="geogislinecodedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="roplinecodedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="salinecodedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="traingrouptypedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="stationbank" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="stationzone" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="traintractiongroupdesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="electricprofiledesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="powerrestrictiondesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="changegrouptypedesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="gtt" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="gttsheet" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="tibline" minOccurs="0" maxOccurs="unbounded"/>
+                <!-- SUPPL COMPLETELY MISSING HERE -->
+                <xs:element ref="trainrun" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="traindependency" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="restrictionentry" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="restriction" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="new" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="changed" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="deleted" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="kmregiondesc" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="node" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="graphicvector" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="graphictext" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="annotation" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="edge" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="kmjump" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="block" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="route" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="interlockingsystem" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="signal" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="direction" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="disporule" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="workingzone" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="stationboundary" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="nrsmapmodeltrain" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="nrsmaptimingload" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="nrsnetworklink" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="nrsplatform" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="nrstimingload" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="nrstiploc" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="track">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="way" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute name="trackID" type="xs:int" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="longname" type="xs:string" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+            <xs:attribute name="trackcategory" type="xs:int" use="required"/>
+            <xs:attribute name="effectivelength" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="roplinecode" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="salinecode" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="linepropertytemplateid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="periodid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="permissiveWorking" type="xs:boolean" use="optional" default="false"/>
+            <xs:attribute name="tracktmpclosed" type="xs:boolean" use="optional" default="false"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="trackcategorydesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tractiontypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tractionunit">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="srdiagvalue" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="fsdiagvalue" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="fsudiagvalue" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="name" type="xs:string"/>
+            <xs:attribute name="desc" type="xs:string"/>
+            <xs:attribute name="version" type="xs:int"/>
+            <xs:attribute name="type" type="xs:int"/>
+            <xs:attribute name="weight" type="xs:int"/>
+            <xs:attribute name="length" type="xs:int"/>
+            <xs:attribute name="defretardation" type="xs:decimal"/>
+            <xs:attribute name="seatsfirstclass" type="xs:int"/>
+            <xs:attribute name="seatssecondclass" type="xs:int"/>
+            <xs:attribute name="axledist" type="xs:decimal"/>
+            <xs:attribute name="maxallowedspeed" type="xs:int"/>
+            <xs:attribute name="motortype" type="xs:int"/>
+            <xs:attribute name="typeofformula" type="xs:int"/>
+            <xs:attribute name="coeffA" type="xs:decimal"/>
+            <xs:attribute name="coeffB" type="xs:decimal"/>
+            <xs:attribute name="coeffC" type="xs:decimal"/>
+            <xs:attribute name="deftraintype" type="xs:int" use="optional"/>
+            <xs:attribute name="defcoachid" type="xs:int" use="required"/>
+            <xs:attribute name="defcoachtype" type="xs:int" use="optional"/>
+            <xs:attribute name="maxcoach" type="xs:int"/>
+            <xs:attribute name="defveloprof" type="xs:int"/>
+            <xs:attribute name="techreactiontime" type="xs:int"/>
+            <xs:attribute name="crosssectionarea" type="xs:decimal"/>
+            <xs:attribute name="rollingresistance" type="xs:decimal"/>
+            <xs:attribute name="flangeresistance" type="xs:decimal"/>
+            <xs:attribute name="bearingresistance" type="xs:decimal"/>
+            <xs:attribute name="airresistance" type="xs:decimal"/>
+            <xs:attribute name="inertiafactor" type="xs:decimal"/>
+            <xs:attribute name="brakingcurve" type="xs:decimal"/>
+            <xs:attribute name="braketype" type="xs:string"/>
+            <xs:attribute name="brakingratio_r" type="xs:decimal"/>
+            <xs:attribute name="brakingratio_p" type="xs:decimal"/>
+            <xs:attribute name="lowspeedlimitelectbrakes" type="xs:int"/>
+            <xs:attribute name="loadmax" type="xs:int"/>
+            <xs:attribute name="brakeforce" type="xs:int"/>
+            <xs:attribute name="formulatrainlength" type="xs:int"/>
+            <xs:attribute name="formulatrainmass" type="xs:int"/>
+            <xs:attribute name="formulawagons" type="xs:int"/>
+            <xs:attribute name="enginemassfactor" type="xs:decimal"/>
+            <xs:attribute name="periodid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="cutpowertime" type="xs:int" use="optional" default="0"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="traincontrolled">
+        <xs:complexType>
+            <xs:attribute name="traincontrolled" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="traincontrolling">
+        <xs:complexType>
+            <xs:attribute name="traincontrolling" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="traindependency">
+        <xs:annotation>
+            <xs:documentation>Attribute uiccode is optional since the identification of the station is sole via attribute stationid. Attribute stationid and trackid are of type integer but remain as type string for backward compatibility.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="typeid" type="xs:int" use="required"/>
+            <xs:attribute name="opdaytmplid" type="xs:int" use="required"/>
+            <xs:attribute name="nominalopdaytmplid" type="xs:int" use="required"/>
+            <xs:attribute name="stationseq1" type="xs:int" use="required"/>
+            <xs:attribute name="stationid" type="xs:string" use="required"/>
+            <xs:attribute name="uiccode" type="xs:int" use="optional"/>
+            <xs:attribute name="stationseq2" type="xs:int" use="required"/>
+            <xs:attribute name="maxwaiting_days" type="xs:int" use="required"/>
+            <xs:attribute name="maxwaiting" type="xs:time" use="required"/>
+            <xs:attribute name="shuntingtime_days" type="xs:int" use="required"/>
+            <xs:attribute name="shuntingtime" type="xs:time" use="required"/>
+            <xs:attribute name="comment" type="xs:string" use="required"/>
+            <xs:attribute name="firstid" type="xs:int" use="optional"/>
+            <xs:attribute name="secondid" type="xs:int" use="optional"/>
+            <xs:attribute name="sameplatform" type="xs:boolean" use="optional"/>
+            <xs:attribute name="tostationid" type="xs:int" use="optional"/>
+            <xs:attribute name="tostationseq" type="xs:int" use="optional"/>
+            <xs:attribute name="changegrouplock" type="xs:boolean" use="optional"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="restrictionsectiondocument">
+        <xs:complexType>
+            <xs:attribute name="scheddocumentid" type="xs:int" use="required"/>
+            <xs:attribute name="creationdatetime" type="xs:dateTime" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="restrictionentry">
+        <xs:annotation>
+            <xs:documentation>Attribute from_area_code and to_area_code are optional since the identification of the station is sole via attribute from_stationid and to_station_id. Attribute from_stationid and to_station_id are of type integer but remain as type string for backward compatibility.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="restrictionsectiondocument" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="idx" type="xs:int" use="required"/>
+            <xs:attribute name="restrictionimpacttypeid" type="xs:int" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+            <xs:attribute name="fromstationid" type="xs:string" use="required"/>
+            <xs:attribute name="fromareacode" type="xs:int" use="optional"/>
+            <xs:attribute name="tostationid" type="xs:string" use="required"/>
+            <xs:attribute name="toareacode" type="xs:int" use="optional"/>
+            <xs:attribute name="odttimespanpoolid" type="xs:int" use="required"/>
+            <xs:attribute name="bothdirections" type="xs:boolean" use="required"/>
+            <xs:attribute name="extrasupplruntime" type="xs:int" use="required"/>
+            <xs:attribute name="sectionid" type="xs:int" use="required"/>
+            <xs:attribute name="kmBegin" type="xs:int" use="optional"/>
+            <xs:attribute name="kmEnd" type="xs:int" use="optional"/>
+            <xs:attribute name="vmax" type="xs:int" use="optional"/>
+            <xs:attribute name="isElectrified" type="xs:boolean" use="optional"/>
+            <xs:attribute name="brakingModeID" type="xs:int" use="optional"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="restriction">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="restrictionentry" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="desc" type="xs:string" use="required"/>
+            <xs:attribute name="reference_id" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="responsibility_description" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="type" type="xs:int" use="required"/>
+            <xs:attribute name="state" type="xs:int" use="required"/>
+            <xs:attribute name="opcondition" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="requestedchangeid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="worflowstateid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="alternatestate" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="noshowongtt" type="xs:boolean" use="optional" default="false"/>
+            <xs:attribute name="noconflict" type="xs:boolean" use="optional" default="false"/>
+            <xs:attribute name="overmidnight" type="xs:boolean" use="optional" default="false"/>
+            <xs:attribute name="continuous" type="xs:boolean" use="optional" default="false"/>
+            <xs:attribute name="businessreferenceid" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="traindeptypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="trainkey">
+        <xs:complexType>
+            <xs:attribute name="traintypeid" type="xs:int" use="required"/>
+            <xs:attribute name="trainid" type="xs:string" use="required"/>
+            <xs:attribute name="contractid" type="xs:int" use="required"/>
+            <xs:attribute name="opdaytemplate" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="trainremark">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="stopseqno" type="xs:int" use="required"/>
+            <xs:attribute name="stationid" type="xs:string" use="required"/>
+            <xs:attribute name="uiccode" type="xs:int" use="optional"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="arrivaldeparture" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="trainrun">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="trainkey" minOccurs="1" maxOccurs="2"/>
+                <xs:element ref="trainstation" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="trainremark" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="flag" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="nominalodt" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="tenants" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="links" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+            <xs:attribute name="trainid" type="xs:int" use="optional"/>
+            <xs:attribute name="parentid" type="xs:int" use="optional"/>
+            <xs:attribute name="stateid" type="xs:int" use="required"/>
+            <xs:attribute name="onoff_flag" type="xs:boolean" use="optional"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="modeltrainid" type="xs:int" use="required"/>
+            <xs:attribute name="trainlayerdesc" type="xs:int"/>
+            <xs:attribute name="note" type="xs:string" use="required"/>
+            <xs:attribute name="trainLayerID" type="xs:string" use="optional" default="0"/>
+            <xs:attribute name="orderNumber" type="xs:string" use="optional"/>
+            <xs:attribute name="secondaryNumber" type="xs:string" use="optional"/>
+            <xs:attribute name="roundingid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+            <xs:attribute name="nrtrainlink" type="xs:string" use="optional" default="0"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="traingroup">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="trainannouncementdata" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="trainrunid" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="type" type="xs:int" use="required"/>
+            <xs:attribute name="referencetrainid" type="xs:int" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="new">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="trainrun" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="traindependency" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="changed">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="trainrun" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="traindependency" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="deleted">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="trainrun" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="traindependency" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="trainlayerdesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="trainstatedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="etadvicetypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="etadvice">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="etadvicejourney" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="reference" type="xs:string" use="required"/>
+            <xs:attribute name="transportTypeID" type="xs:int" use="required"/>
+            <xs:attribute name="statusID" type="xs:int" use="required"/>
+            <xs:attribute name="opDayTmplID" type="xs:int" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="etadvicejourney">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="etadvicejourneystation" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute name="etAdviceID" type="xs:int" use="required"/>
+            <xs:attribute name="seq" type="xs:int" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="etadvicejourneystation">
+        <xs:complexType>
+            <xs:attribute name="etAdviceID" type="xs:int" use="required"/>
+            <xs:attribute name="etAdviceJourneyID" type="xs:int" use="required"/>
+            <xs:attribute name="stationHeaderID" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="conditionsoftravel">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="reference" type="xs:string" use="required"/>
+            <xs:attribute name="trainReference" type="xs:string" use="required"/>
+            <xs:attribute name="etAdviceReference" type="xs:string" use="required"/>
+            <xs:attribute name="fromStationHeaderID" type="xs:int" use="required"/>
+            <xs:attribute name="toStationHeaderID" type="xs:int" use="required"/>
+            <xs:attribute name="opDayTmplID" type="xs:int" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="coachtypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="commutertypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="passengertypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="vehicletypedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="trainstation">
+        <xs:annotation>
+            <xs:documentation>Attribute uiccode is optional since the identification of the station the train passes is sole via attribute stationid. Attribute stationid and trackid are of type integer but remain as type string for backward compatibility.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:attribute name="seqno" type="xs:int" use="required"/>
+            <xs:attribute name="stationid" type="xs:string" use="required"/>
+            <xs:attribute name="uiccode" type="xs:int" use="optional"/>
+            <xs:attribute name="modeltrainid" type="xs:int" use="required"/>
+            <xs:attribute name="arrival_days" type="xs:int" use="required"/>
+            <xs:attribute name="arrival" type="xs:time" use="required"/>
+            <xs:attribute name="departure_days" type="xs:int" use="required"/>
+            <xs:attribute name="departure" type="xs:time" use="required"/>
+            <xs:attribute name="trackid" type="xs:string" use="required"/>
+            <xs:attribute name="minstoptime" type="xs:int" use="required"/>
+            <xs:attribute name="stoptype" type="xs:int" use="required"/>
+            <xs:attribute name="odtstop" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="arrivaltimedelayid" type="xs:int" use="required"/>
+            <xs:attribute name="minstopdelayid" type="xs:int" use="required"/>
+            <xs:attribute name="pub_arrival_days" type="xs:int" use="required"/>
+            <xs:attribute name="pub_arrival_time" type="xs:time" use="required"/>
+            <xs:attribute name="pub_departure_days" type="xs:int" use="required"/>
+            <xs:attribute name="pub_departure_time" type="xs:time" use="required"/>
+            <xs:attribute name="profileid" type="xs:int" use="required"/>
+            <xs:attribute name="newmaxspeed" type="xs:int" use="required"/>
+            <xs:attribute name="newtractionlength" type="xs:int" use="required"/>
+            <xs:attribute name="newload" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="publicspeed" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="servicetemplateid" type="xs:int" use="required"/>
+            <xs:attribute name="departurelock" type="xs:boolean" use="optional" default="false"/>
+            <xs:attribute name="arrivallock" type="xs:boolean" use="optional" default="false"/>
+            <xs:attribute name="pub_arrival_offset" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="pub_departure_offset" type="xs:int" use="optional" default="0"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="rounding">
+        <xs:complexType>
+            <xs:attribute name="roundingid" type="xs:int" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="roundingString" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="traintype">
+        <xs:complexType>
+            <xs:attribute name="traintypeid" type="xs:int" use="required"/>
+            <xs:attribute name="shortdesc" type="xs:string" use="required"/>
+            <xs:attribute name="desc" type="xs:string" use="required"/>
+            <xs:attribute name="passengerflag" type="xs:int" use="required"/>
+            <xs:attribute name="commuterflag" type="xs:int" use="required"/>
+            <xs:attribute name="vehicletypeflag" type="xs:int" use="required"/>
+            <xs:attribute name="roundingid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="linestyle" type="xs:int" use="required"/>
+            <xs:attribute name="includeinexportflag" type="xs:boolean" use="required"/>
+            <xs:attribute name="hafasservicecategory" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="qsvmax" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="outputtext" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="hafasoutput" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="shortdistance" type="xs:boolean" use="optional" default="false"/>
+            <xs:attribute name="quality" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="tariffgroup" type="xs:string" use="optional" default=""/>
+            <xs:attribute name="additionalfee" type="xs:int" use="optional" default="0"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="traintypeset">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="traintyperef" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="reserveentry" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="desc" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="uiccodedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="gpdatatype">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tastatedesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="trainflagdesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="velocityprofile">
+        <xs:complexType>
+            <xs:attribute name="profileid" type="xs:int" use="required"/>
+            <xs:attribute name="vmax" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="veloprofiledesc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="text" type="xs:string" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="way">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="point" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="nrsmapmodeltrain">
+        <xs:complexType>
+            <xs:attribute name="modeltrainid" type="xs:int" use="required"/>
+            <xs:attribute name="timingloadid" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="nrsmaptimingload">
+        <xs:complexType>
+            <xs:attribute name="timingloadid" type="xs:int" use="required"/>
+            <xs:attribute name="modeltrainid" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="nrstiminglink">
+        <xs:complexType>
+            <xs:attribute name="networklinkid" type="xs:int" use="required"/>
+            <xs:attribute name="timingloadid" type="xs:int" use="required"/>
+            <xs:attribute name="entryspeed" type="xs:int" use="required"/>
+            <xs:attribute name="exitspeed" type="xs:int" use="required"/>
+            <xs:attribute name="runningtime" type="xs:int" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+            <xs:attribute name="startdate" type="xs:date" use="required"/>
+            <xs:attribute name="enddate" type="xs:date" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="nrsnetworklink">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="nrstiminglink" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="srctiplocid" type="xs:int" use="required"/>
+            <xs:attribute name="dsttiplocid" type="xs:int" use="required"/>
+            <xs:attribute name="runninglinecode" type="xs:string" use="required"/>
+            <xs:attribute name="runninglinedesc" type="xs:string" use="required"/>
+            <xs:attribute name="initialdir" type="xs:string" use="required"/>
+            <xs:attribute name="finaldir" type="xs:string" use="required"/>
+            <xs:attribute name="maintenancezone" type="xs:string" use="required"/>
+            <xs:attribute name="reversibleline" type="xs:string" use="required"/>
+            <xs:attribute name="powersupplytype" type="xs:string" use="required"/>
+            <xs:attribute name="routeavailability" type="xs:int" use="required"/>
+            <xs:attribute name="maxtrainlength" type="xs:int" use="required"/>
+            <xs:attribute name="distance" type="xs:int" use="required"/>
+            <xs:attribute name="doopassenger" type="xs:boolean" use="required"/>
+            <xs:attribute name="doononpassenger" type="xs:boolean" use="required"/>
+            <xs:attribute name="retb" type="xs:boolean" use="required"/>
+            <xs:attribute name="startdate" type="xs:date" use="required"/>
+            <xs:attribute name="enddate" type="xs:date" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="nrsplatform">
+        <xs:complexType>
+            <xs:attribute name="tiplocid" type="xs:int" use="required"/>
+            <xs:attribute name="id" type="xs:string" use="required"/>
+            <xs:attribute name="length" type="xs:int" use="required"/>
+            <xs:attribute name="powersupplytype" type="xs:string" use="required"/>
+            <xs:attribute name="doopassenger" type="xs:boolean" use="required"/>
+            <xs:attribute name="doononpassenger" type="xs:boolean" use="required"/>
+            <xs:attribute name="startdate" type="xs:date" use="required"/>
+            <xs:attribute name="enddate" type="xs:date" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="nrstimingload">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="tractiontype" type="xs:string" use="required"/>
+            <xs:attribute name="trailingload" type="xs:string" use="required"/>
+            <xs:attribute name="speed" type="xs:int" use="required"/>
+            <xs:attribute name="ragauge" type="xs:string" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+            <xs:attribute name="tsdbpowertype" type="xs:string" use="required"/>
+            <xs:attribute name="tsdbload" type="xs:string" use="required"/>
+            <xs:attribute name="tsdbspeed" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="nrstiploc">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="shortname" type="xs:string" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="tiploctype" type="xs:string" use="required"/>
+            <xs:attribute name="maintenancezone" type="xs:string" use="required"/>
+            <xs:attribute name="forcelpb" type="xs:string" use="required"/>
+            <xs:attribute name="offnetwork" type="xs:boolean" use="required"/>
+            <xs:attribute name="stanox" type="xs:int" use="required"/>
+            <xs:attribute name="easting" type="xs:int" use="required"/>
+            <xs:attribute name="northing" type="xs:int" use="required"/>
+            <xs:attribute name="startdate" type="xs:date" use="required"/>
+            <xs:attribute name="enddate" type="xs:date" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="rffMapReseau_c">
+        <xs:complexType>
+            <xs:attribute name="reseautsn" type="xs:string" use="required"/>
+            <xs:attribute name="reseaubegin" type="xs:int" use="required"/>
+            <xs:attribute name="reseauend" type="xs:int" use="required"/>
+            <xs:attribute name="thortsn" type="xs:string" use="required"/>
+            <xs:attribute name="thorrevtsn" type="xs:string" use="required"/>
+            <xs:attribute name="thorbegin" type="xs:int" use="required"/>
+            <xs:attribute name="thorend" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tpsiattributesetattribute">
+        <xs:complexType>
+            <xs:annotation>
+                <xs:documentation>Attribute lastmodified is optional since it is obsolete.</xs:documentation>
+            </xs:annotation>
+            <xs:attribute name="refcodetypeid" type="xs:int" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tpsiattributeset">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="tpsiattributesetattribute" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>   
+            <xs:attribute name="remark" type="xs:string" use="optional"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tpsidatafilter">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="type" type="xs:int" use="required"/>
+            <xs:attribute name="value" type="xs:string" use="required"/>
+            <xs:attribute name="remark" type="xs:string" use="optional"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tpsidataproductfilter">
+        <xs:complexType>
+            <xs:attribute name="tpsidatafilterid" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tpsidataproductdataselection">
+        <xs:complexType>
+            <xs:attribute name="interfacedataselectionid" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tpsidataproduct">
+        <xs:annotation>
+            <xs:documentation>Attribute excludeattributesetid is optional since it is obsolete.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="tpsidataproductfilter" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="tpsidataproductdataselection" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="exportdataformatid" type="xs:int" use="required"/>
+            <xs:attribute name="excludeattributesetid" type="xs:int" use="optional"/>
+            <xs:attribute name="remark" type="xs:string" use="optional"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tpsidataversiontype">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="odtid" type="xs:int" use="required"/>
+            <xs:attribute name="remark" type="xs:string" use="optional"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tpsideliverycfg">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="tpsideliverytypeid" type="xs:string" use="required"/>
+            <xs:attribute name="emailaddress" type="xs:string" use="required"/>
+            <xs:attribute name="emailccaddress" type="xs:string" use="required"/>
+            <xs:attribute name="serveraddress" type="xs:string" use="required"/>
+            <xs:attribute name="username" type="xs:string" use="required"/>
+            <xs:attribute name="password" type="xs:string" use="required"/>
+            <xs:attribute name="directory" type="xs:string" use="required"/>
+            <xs:attribute name="organisationid" type="xs:string" use="required"/>
+            <xs:attribute name="remark" type="xs:string" use="optional"/>
+            <xs:attribute name="lastModified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>    
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="jbvvicosroute">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="loc1" type="xs:string" use="required"/>
+            <xs:attribute name="loc2" type="xs:string" use="required"/>
+            <xs:attribute name="loc3" type="xs:string" use="required"/>
+            <xs:attribute name="plat2" type="xs:string" use="required"/>
+            <xs:attribute name="routes" type="xs:string" use="required"/>
+            <xs:attribute name="altroutes" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="integratoroperatormapping">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="nssoperatorcode" type="xs:string" use="required"/>
+            <xs:attribute name="nssoperatorname" type="xs:string" use="required"/>
+            <xs:attribute name="operatorid" type="xs:int" use="required"/>
+            <xs:attribute name="tenantid" type="xs:int" use="required"/>
+            <xs:attribute name="lastmodified" type="xs:dateTime" use="optional" default="1900-01-01T00:00:01"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="integratorstationheaderversion">
+        <xs:complexType>
+            <xs:attribute name="nrsversionid" type="xs:int" use="required"/>
+            <xs:attribute name="stationheaderid" type="xs:int" use="required"/>
+            <xs:attribute name="startdate" type="xs:int" use="required"/>
+            <xs:attribute name="enddate" type="xs:int" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="commentary" type="xs:string" use="required"/>
+            <xs:attribute name="extref" type="xs:string" use="optional"/>
+            <xs:attribute name="defaultnamelanguageid" type="xs:int" use="optional" default="0"/>
+            <xs:attribute name="positionx" type="xs:decimal" use="optional" default="0"/>
+            <xs:attribute name="positiony" type="xs:decimal" use="optional" default="0"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="restrictioncodestage">
+        <xs:complexType>
+            <xs:attribute name="signal" type="xs:int" use="required"/>
+            <xs:attribute name="distance" type="xs:int" use="required"/>
+            <xs:attribute name="speed" type="xs:int" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="restrictioncode">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="restrictioncodestage" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:int" use="required"/>
+            <xs:attribute name="code" type="xs:string" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+            <xs:attribute name="poststopalloc" type="xs:boolean" use="required"/>
+            <xs:attribute name="increasespeedahead" type="xs:boolean" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tenants">
+        <xs:complexType>
+            <xs:attribute name="traintenantid" type="xs:int" use="required"/>
+            <xs:attribute name="mayeditall" type="xs:boolean" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="links">
+        <xs:complexType>
+            <xs:attribute name="seq" type="xs:int" use="required"/>
+            <xs:attribute name="link" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>
