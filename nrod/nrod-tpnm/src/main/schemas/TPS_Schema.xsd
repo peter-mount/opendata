@@ -1201,6 +1201,8 @@
                 <xs:element ref="track" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="stationposition" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <!-- added as in xml -->
+            <xs:attribute name="stationid" type="xs:int" use="required"/>
             <xs:attribute name="uiccode" type="xs:int" use="required"/>
             <xs:attribute name="abbrev" type="xs:string" use="required"/>
             <xs:attribute name="longname" type="xs:string" use="required"/>

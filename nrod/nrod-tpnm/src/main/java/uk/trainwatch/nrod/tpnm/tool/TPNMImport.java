@@ -14,23 +14,26 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.cli.CommandLine;
 import org.kohsuke.MetaInfServices;
 import org.w3c.dom.Node;
+import uk.trainwatch.nrod.tpnm.model.Station;
 import uk.trainwatch.nrod.tpnm.model.Stationcategorydesc;
 import uk.trainwatch.nrod.tpnm.model.Stationtypedesc;
+import uk.trainwatch.nrod.tpnm.model.Track;
 import uk.trainwatch.nrod.tpnm.model.Trackcategorydesc;
 import uk.trainwatch.nrod.tpnm.model.Uiccodedesc;
+import uk.trainwatch.util.ParserUtils;
 import uk.trainwatch.util.Router;
 import uk.trainwatch.util.app.DBUtility;
 import uk.trainwatch.util.app.Utility;
@@ -72,6 +75,21 @@ public class TPNMImport
         cifFiles = Utility.getArgFileList( cmd );
 
         return !cifFiles.isEmpty();
+    }
+
+    @Override
+    protected void initDB( Connection con )
+            throws SQLException
+    {
+        Stream.of(
+                "track",
+                "station",
+                "stationtypedesc",
+                "stationcategorydesc",
+                "trackcategorydesc",
+                "uiccodedesc"
+        ).forEach( k -> SQL.deleteTable( con, SCHEMA, k ) );
+
     }
 
     @Override
@@ -121,7 +139,8 @@ public class TPNMImport
                                                                 (Stationtypedesc) v,
                                                                 Stationtypedesc::getId,
                                                                 Stationtypedesc::getText,
-                                                                Stationtypedesc::getLastmodified ) );
+                                                                Stationtypedesc::getLastmodified ) ).
+                addSQL( Station.class, v -> importStation( con, (Station) v ) );
 
         lastRoute = null;
 
@@ -162,29 +181,20 @@ public class TPNMImport
         }
     }
 
-    private boolean uicodedesc;
-
     private void importUicCodeDesk( Connection con, Uiccodedesc v )
             throws SQLException
     {
-        if( !uicodedesc )
-        {
-            SQL.deleteTable( con, SCHEMA, "uiccodedesc" );
-            uicodedesc = true;
-        }
         try( PreparedStatement ps = SQL.prepare( con,
                                                  "INSERT INTO " + SCHEMA + ".uiccodedesc VALUES (?,?,?,?)",
                                                  v.getId(),
                                                  v.getText(),
-                                                 v.getVanillatext(),
-                                                 new Timestamp( v.getLastmodified().toGregorianCalendar().toInstant().getEpochSecond() ) ) )
+                                                 new Timestamp( v.getLastmodified().toGregorianCalendar().toInstant().getEpochSecond() ),
+                                                 v.getVanillatext() ) )
         {
             ps.executeUpdate();
         }
 
     }
-
-    private Map<String, Boolean> tableInit = new HashMap<>();
 
     private <T> void importText( Connection con, String table,
                                  T v,
@@ -193,12 +203,7 @@ public class TPNMImport
                                  Function<T, XMLGregorianCalendar> ts )
             throws SQLException
     {
-        tableInit.computeIfAbsent( table, k ->
-                           {
-                               SQL.deleteTable( con, SCHEMA, k );
-                               return true;
-        } );
-        
+
         try( PreparedStatement ps = SQL.prepare( con,
                                                  "INSERT INTO " + SCHEMA + "." + table + " (id,text,ts) VALUES (?,?,?)",
                                                  id.apply( v ),
@@ -210,4 +215,61 @@ public class TPNMImport
 
     }
 
+    private final AtomicInteger stcnt = new AtomicInteger();
+
+    private void importStation( Connection con, Station s )
+            throws SQLException
+    {
+        try( PreparedStatement ps = SQL.prepareInsert( con,
+                                                       SCHEMA + ".station",
+                                                       s.getStationid(),
+                                                       s.getUiccode(),
+                                                       s.getAbbrev(),
+                                                       s.getLongname(),
+                                                       s.getCommentary(),
+                                                       s.getStdstoppingtime(),
+                                                       s.getStdconnectiontime(),
+                                                       s.getStationtype(),
+                                                       s.getStationcategory(),
+                                                       s.getUicstationcode(),
+                                                       s.getTransportassociation(),
+                                                       s.getX(),
+                                                       s.getY(),
+                                                       s.getEasting(),
+                                                       s.getNorthing(),
+                                                       ParserUtils.parseInt( s.getStanox() ),
+                                                       s.getLpbflag(),
+                                                       s.getPeriodid(),
+                                                       s.getCapitalsident(),
+                                                       s.getNalco(),
+                                                       new Timestamp( s.getLastmodified().toGregorianCalendar().toInstant().getEpochSecond() ) ) )
+        {
+            ps.executeUpdate();
+        }
+
+        for( Track t : s.getTrack() )
+        {
+            try( PreparedStatement ps = SQL.prepareInsert( con,
+                                                           SCHEMA + ".track",
+                                                           t.getTrackID(),
+                                                           t.getName(),
+                                                           0, // seq
+                                                           t.getDescription(),
+                                                           t.getTrackcategory(),
+                                                           t.getEffectivelength(),
+                                                           t.getRoplinecode(),
+                                                           t.getSalinecode(),
+                                                           t.getLinepropertytemplateid(),
+                                                           t.getPeriodid(),
+                                                           t.getPermissiveWorking(),
+                                                           false, // directed
+                                                           t.getTracktmpclosed()
+            ) )
+            {
+                ps.executeUpdate();
+            }
+        }
+
+        con.commit();
+    }
 }
