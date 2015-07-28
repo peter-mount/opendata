@@ -26,19 +26,21 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.cli.CommandLine;
 import org.kohsuke.MetaInfServices;
-import org.w3c.dom.Node;
+import uk.trainwatch.nrod.tpnm.model.Node;
 import uk.trainwatch.nrod.tpnm.model.Station;
 import uk.trainwatch.nrod.tpnm.model.Stationcategorydesc;
 import uk.trainwatch.nrod.tpnm.model.Stationtypedesc;
 import uk.trainwatch.nrod.tpnm.model.Track;
 import uk.trainwatch.nrod.tpnm.model.Trackcategorydesc;
 import uk.trainwatch.nrod.tpnm.model.Uiccodedesc;
+import uk.trainwatch.nrod.tpnm.model.Way;
 import uk.trainwatch.util.ParserUtils;
 import uk.trainwatch.util.Router;
 import uk.trainwatch.util.app.DBUtility;
 import uk.trainwatch.util.app.Utility;
 import uk.trainwatch.util.counter.RateMonitor;
 import uk.trainwatch.util.sql.SQL;
+import uk.trainwatch.util.sql.SQLConsumer;
 import uk.trainwatch.util.sql.UncheckedSQLException;
 import uk.trainwatch.util.xml.XMLStreamParserBuilder;
 
@@ -118,7 +120,7 @@ public class TPNMImport
                    IOException,
                    ParserConfigurationException
     {
-        RateMonitor<Node> monitor = RateMonitor.log( LOG, "Records" );
+        RateMonitor<org.w3c.dom.Node> monitor = RateMonitor.log( LOG, "Records" );
 
         Router<Class<?>, Object> router = Router.createClassRouter().
                 addSQL( Uiccodedesc.class, v -> importUicCodeDesk( con, (Uiccodedesc) v ) ).
@@ -140,7 +142,8 @@ public class TPNMImport
                                                                 Stationtypedesc::getId,
                                                                 Stationtypedesc::getText,
                                                                 Stationtypedesc::getLastmodified ) ).
-                addSQL( Station.class, v -> importStation( con, (Station) v ) );
+                addSQL( Station.class, v -> importStation( con, (Station) v ) ).
+                addSQL( Node.class, n -> importNode( con, (Node) n ) );
 
         lastRoute = null;
 
@@ -203,7 +206,6 @@ public class TPNMImport
                                  Function<T, XMLGregorianCalendar> ts )
             throws SQLException
     {
-
         try( PreparedStatement ps = SQL.prepare( con,
                                                  "INSERT INTO " + SCHEMA + "." + table + " (id,text,ts) VALUES (?,?,?)",
                                                  id.apply( v ),
@@ -212,10 +214,7 @@ public class TPNMImport
         {
             ps.executeUpdate();
         }
-
     }
-
-    private final AtomicInteger stcnt = new AtomicInteger();
 
     private void importStation( Connection con, Station s )
             throws SQLException
@@ -242,16 +241,22 @@ public class TPNMImport
                                                        s.getPeriodid(),
                                                        s.getCapitalsident(),
                                                        s.getNalco(),
-                                                       new Timestamp( s.getLastmodified().toGregorianCalendar().toInstant().getEpochSecond() ) ) )
+                                                       new Timestamp( s.getLastmodified().toGregorianCalendar().toInstant().getEpochSecond() ),
+                                                       s.getCrscode(),
+                                                       s.getCompulsorystop()
+        ) )
         {
             ps.executeUpdate();
         }
 
         for( Track t : s.getTrack() )
         {
+            int trackId = t.getTrackID();
+
             try( PreparedStatement ps = SQL.prepareInsert( con,
                                                            SCHEMA + ".track",
-                                                           t.getTrackID(),
+                                                           trackId,
+                                                           s.getStationid(),
                                                            t.getName(),
                                                            0, // seq
                                                            t.getDescription(),
@@ -268,8 +273,57 @@ public class TPNMImport
             {
                 ps.executeUpdate();
             }
+
+            importWay( con, t.getWay(), "track",(long) trackId );
+        }
+        con.commit();
+    }
+
+    private void importWay( Connection con, Way way, String type, Object... args )
+            throws SQLException
+    {
+        if( way != null )
+        {
+            long wayId;
+            try( PreparedStatement ps = SQL.prepare( con, "SELECT tpnm.create" + type + "way(?)", args ) )
+            {
+                wayId = SQL.stream( ps, SQL.LONG_LOOKUP ).findAny().get();
+            }
+
+            try( PreparedStatement ps = SQL.prepare( con, "SELECT tpnm.waypoint(?,tpnm.point(?,?))" ) )
+            {
+                way.getPoint().
+                        forEach( SQLConsumer.guard( pt -> SQL.executeQuery( ps, wayId, wayId, pt.getNodeid() ).close() ) );
+            }
+        }
+    }
+
+    private void importNode( Connection con, Node n )
+            throws SQLException
+    {
+        if( n != null && n.getPoint() != null )
+        {
+            try( PreparedStatement ps = SQL.prepareInsert( con,
+                                                           SCHEMA + ".node",
+                                                           n.getPoint().getNodeid(),
+                                                           n.getPoint().getLineid(),
+                                                           n.getNetx(),
+                                                           n.getNety(),
+                                                           n.getNetz(),
+                                                           n.getLinex(),
+                                                           n.getLiney(),
+                                                           n.getLinez(),
+                                                           n.getKmregionid(),
+                                                           n.getKmvalue(),
+                                                           n.getSecondkmregionid(),
+                                                           n.getSecondkmvalue(),
+                                                           n.getName(),
+                                                           n.getAngle()
+            ) )
+            {
+                ps.executeUpdate();
+            }
         }
 
-        con.commit();
     }
 }
