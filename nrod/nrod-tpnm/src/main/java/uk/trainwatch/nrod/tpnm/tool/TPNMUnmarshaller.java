@@ -13,7 +13,8 @@ import uk.trainwatch.util.xml.JAXBSupport;
 import uk.trainwatch.util.xml.XMLDomWriter;
 
 /**
- *
+ * Mapping function to convert a DOM Node into an object within the TPNM JAXB Model
+ * <p>
  * @author peter
  */
 public class TPNMUnmarshaller
@@ -25,12 +26,9 @@ public class TPNMUnmarshaller
     private static JAXBSupport getJaxb()
             throws JAXBException
     {
-        if( jaxb == null )
-        {
-            synchronized( TPNMUnmarshaller.class )
-            {
-                if( jaxb == null )
-                {
+        if( jaxb == null ) {
+            synchronized( TPNMUnmarshaller.class ) {
+                if( jaxb == null ) {
                     jaxb = new JAXBSupport( TpsData.class.getPackage().getName() );
                 }
             }
@@ -38,14 +36,20 @@ public class TPNMUnmarshaller
         return jaxb;
     }
 
+    /**
+     * Apply the unmarshalling against the Node
+     * <p>
+     * @param t Node
+     * <p>
+     * @return Object in the model, null if t is null
+     */
     @Override
     public Object apply( Node t )
     {
-        try
-        {
+        try {
             return t == null ? null : getJaxb().unmarshall( t );
-        } catch( JAXBException ex )
-        {
+        }
+        catch( JAXBException ex ) {
             throw new RuntimeException( XMLDomWriter.toXml( t ), ex );
         }
     }

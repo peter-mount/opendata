@@ -5,7 +5,6 @@
 SET search_path = tpnm;
 
 DROP TABLE waypoint;
-DROP TABLE point;
 DROP TABLE node;
 
 DROP TABLE track_way;
@@ -97,36 +96,7 @@ CREATE TABLE way (
 );
 ALTER TABLE way OWNER TO rail;
 
-CREATE TABLE point (
-    id          SERIAL NOT NULL,
-    wayid       INTEGER NOT NULL,-- REFERENCES way(id),
-    nodeid      INTEGER NOT NULL,-- REFERENCES node(id),
-    PRIMARY KEY (id)
-);
-CREATE INDEX point_w ON point(wayid);
-CREATE INDEX point_wn ON point(wayid,nodeid);
-ALTER TABLE point OWNER TO rail;
-
-CREATE OR REPLACE FUNCTION tpnm.point(pwayid BIGINT,pnodeid INTEGER)
-RETURNS BIGINT AS $$
-DECLARE
-    rec     RECORD;
-BEGIN
-    LOOP
-        SELECT * INTO rec FROM tpnm.point WHERE wayid=pwayid AND nodeid=pnodeid;
-        IF FOUND THEN
-            RETURN rec.id;
-        END IF;
-        BEGIN
-            INSERT INTO tpnm.point (wayid,nodeid) VALUES (pwayid,pnodeid);
-            RETURN currval('tpnm.point_id_seq');
-        EXCEPTION WHEN unique_violation THEN
-            -- do nothing & loop
-        END;
-    END LOOP;
-END;
-$$ LANGUAGE plpgsql;
-
+-- track_way - a way linked to a track
 CREATE TABLE track_way (
     trackid     INTEGER NOT NULL REFERENCES track(id),
     PRIMARY KEY(id)
@@ -146,26 +116,27 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- waypoint links nodes to a way. Nodes in a way are orderd by id here
 CREATE TABLE waypoint (
     id          SERIAL NOT NULL,
     wayid       BIGINT NOT NULL,-- REFERENCES way(id),
-    pointid     BIGINT NOT NULL REFERENCES point(id),
+    nodeid     BIGINT NOT NULL,-- REFERENCES node(id),
     PRIMARY KEY (id)
 );
 ALTER TABLE waypoint OWNER TO rail;
 
-CREATE OR REPLACE FUNCTION tpnm.waypoint(pwayid BIGINT,ppointid BIGINT)
+CREATE OR REPLACE FUNCTION tpnm.waypoint(pwayid BIGINT,pnodeid BIGINT)
 RETURNS BIGINT AS $$
 DECLARE
     rec     RECORD;
 BEGIN
     LOOP
-        SELECT * INTO rec FROM tpnm.waypoint WHERE wayid=pwayid AND pointid=ppointid;
+        SELECT * INTO rec FROM tpnm.waypoint WHERE wayid=pwayid AND nodeid=pnodeid;
         IF FOUND THEN
             RETURN rec.id;
         END IF;
         BEGIN
-            INSERT INTO tpnm.waypoint (wayid,pointid) VALUES (pwayid,ppointid);
+            INSERT INTO tpnm.waypoint (wayid,nodeid) VALUES (pwayid,pnodeid);
             RETURN currval('tpnm.waypoint_id_seq');
         EXCEPTION WHEN unique_violation THEN
             -- do nothing & loop
@@ -173,15 +144,3 @@ BEGIN
     END LOOP;
 END;
 $$ LANGUAGE plpgsql;
-
---<station stationid="1" uiccode="70" abbrev="ADLESTN" longname="ADDLESTONE" commentary="" stdstoppingtime="30"
--- stdconnectiontime="0" stationtype="4" stationcategory="3" uicstationcode="00095" transportassociation=""
--- x="0.0" y="0.0" easting="0" northing="0" stanox="86011" lpbflag="" periodid="0" capitalsident="0" nalco="555000"
--- nlccheckchr="R" pomcpcode="0" crscode="ASN" desccapri="ADDLESTONE" compulsorystop="false" hasopeninghours="0"
--- lastmodified="2015-07-13T14:39:37">
---<track trackID="1" name="U-2" seq="0" longname="2" description="U-2 Fast Up" trackcategory="1" effectivelength="0"
--- roplinecode="159" salinecode="746" linepropertytemplateid="38" periodid="0" permissiveWorking="false" directed="true"
--- trackTmpClosed="false">
---<way>
---<point lineid="0" nodeid="301708"></point>
---<point lineid="0" nodeid="263641"></point>
