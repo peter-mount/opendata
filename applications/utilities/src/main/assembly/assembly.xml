@@ -23,5 +23,13 @@
                 <include>odutils</include>
             </includes>
         </fileSet>
+        <fileSet>
+            <directory>src/main/assembly</directory>
+            <outputDirectory>/</outputDirectory>
+            <fileMode>0644</fileMode>
+            <includes>
+                <include>logging.properties</include>
+            </includes>
+        </fileSet>
     </fileSets>
 </assembly>
