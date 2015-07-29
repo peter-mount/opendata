@@ -17,44 +17,43 @@ import uk.trainwatch.util.sql.SQLConsumer;
  * @author peter
  */
 public class NodeImporter
-        extends AbstractWayImporter
+        extends AbstractWayImporter<Object, Node>
         implements SQLConsumer<Object>
 {
 
+    private PreparedStatement ps;
+
     public NodeImporter( Connection con )
     {
-        super( con );
+        super( con, 2400 );
     }
 
     @Override
-    public void accept( Object o )
+    protected void process( Node n )
             throws SQLException
     {
-        Node n = (Node) o;
+        if( n.getPoint() != null ) {
+            
+            ps = SQL.prepareInsert( ps, con,
+                                    "tpnm.node",
+                                    n.getPoint().getNodeid(),
+                                    n.getPoint().getLineid(),
+                                    n.getNetx(),
+                                    n.getNety(),
+                                    n.getNetz(),
+                                    n.getLinex(),
+                                    n.getLiney(),
+                                    n.getLinez(),
+                                    n.getKmregionid(),
+                                    n.getKmvalue(),
+                                    n.getSecondkmregionid(),
+                                    n.getSecondkmvalue(),
+                                    n.getName(),
+                                    n.getAngle()
+            );
 
-        if( n != null && n.getPoint() != null ) {
-            try( PreparedStatement ps = SQL.prepareInsert( con,
-                                                           "tpnm.node",
-                                                           n.getPoint().getNodeid(),
-                                                           n.getPoint().getLineid(),
-                                                           n.getNetx(),
-                                                           n.getNety(),
-                                                           n.getNetz(),
-                                                           n.getLinex(),
-                                                           n.getLiney(),
-                                                           n.getLinez(),
-                                                           n.getKmregionid(),
-                                                           n.getKmvalue(),
-                                                           n.getSecondkmregionid(),
-                                                           n.getSecondkmvalue(),
-                                                           n.getName(),
-                                                           n.getAngle()
-            ) ) {
-                ps.executeUpdate();
-            }
+            ps.executeUpdate();
         }
-
-        con.commit();
     }
 
 }

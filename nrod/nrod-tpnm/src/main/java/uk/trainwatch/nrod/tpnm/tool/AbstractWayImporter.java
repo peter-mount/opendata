@@ -18,15 +18,36 @@ import uk.trainwatch.util.sql.SQLConsumer;
 /**
  *
  * @author peter
+ * @param <T>
+ * @param <V>
  */
-public abstract class AbstractWayImporter
+public abstract class AbstractWayImporter<T, V extends T>
+        extends AbstractImporter<T, V>
 {
 
-    protected final Connection con;
+    private String wayType;
+    private PreparedStatement wayps;
+    private CallableStatement pointps;
+    private PreparedStatement directedPS;
 
     public AbstractWayImporter( Connection con )
     {
-        this.con = con;
+        super( con );
+    }
+
+    public AbstractWayImporter( Connection con, String name )
+    {
+        super( con, name );
+    }
+
+    public AbstractWayImporter( Connection con, int commit )
+    {
+        super( con, commit );
+    }
+
+    public AbstractWayImporter( Connection con, int commit, String name )
+    {
+        super( con, commit, name );
     }
 
     protected final void importWay( Way way, String type, Object... args )
@@ -34,13 +55,30 @@ public abstract class AbstractWayImporter
     {
         // Don't create null/empty ways
         if( way != null && !way.getPoint().isEmpty() ) {
-            try( PreparedStatement wayps = SQL.prepare( con, "SELECT tpnm.create" + type + "way(?)", args );
-                 CallableStatement pointps = SQL.prepareCall( con, "{call tpnm.waypoint(?,?)}" ) ) {
 
-                long wayId = SQL.stream( wayps, SQL.LONG_LOOKUP ).findAny().get();
+            if( wayType != null && !wayType.equals( type ) ) {
+                if( wayps != null ) {
+                    wayps.close();
+                    wayps = null;
+                }
+                if( pointps != null ) {
+                    pointps.close();
+                    pointps = null;
+                }
+            }
 
-                way.getPoint().
-                        forEach( SQLConsumer.guard( pt -> SQL.executeBatch( pointps, wayId, (long) pt.getNodeid() ) ) );
+            wayps = SQL.prepare( wayps, con, "SELECT tpnm.create" + type + "way(?)", args );
+
+            long wayId = SQL.stream( wayps, SQL.LONG_LOOKUP ).findAny().get();
+
+            way.getPoint().
+                    forEach( SQLConsumer.guard( pt -> {
+                        pointps = SQL.prepareCall( pointps, con, "{call tpnm.waypoint(?,?)}", wayId, (long) pt.getNodeid() );
+
+                        SQL.executeBatch( pointps );
+                    } ) );
+
+            if( pointps != null ) {
                 pointps.executeBatch();
             }
         }
@@ -52,19 +90,16 @@ public abstract class AbstractWayImporter
         if( d == null ) {
             return null;
         }
-        else {
-            Point st = d.getStart().getPoint();
-            Point ed = d.getEnd().getPoint();
-            try( PreparedStatement ps = SQL.prepare( con,
-                                                     "INSERT INTO tpnm.directed (startid,endid) VALUES (?,?)",
-                                                     st.getNodeid(),
-                                                     ed.getNodeid()
-            ) ) {
-                ps.executeUpdate();
-            }
 
-            return SQL.currval( con, "tpnm.directed_id_seq" );
-        }
+        Point st = d.getStart().getPoint();
+        Point ed = d.getEnd().getPoint();
+        directedPS = SQL.prepare( directedPS, con,
+                                  "INSERT INTO tpnm.directed (startid,endid) VALUES (?,?)",
+                                  st.getNodeid(),
+                                  ed.getNodeid() );
+        directedPS.executeUpdate();
+
+        return SQL.currval( con, "tpnm.directed_id_seq" );
     }
 
 }

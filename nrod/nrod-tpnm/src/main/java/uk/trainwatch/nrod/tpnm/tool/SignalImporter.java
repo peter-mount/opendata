@@ -17,49 +17,53 @@ import uk.trainwatch.util.sql.SQLConsumer;
  * @author peter
  */
 public class SignalImporter
-        extends AbstractWayImporter
+        extends AbstractWayImporter<Object, Signal>
         implements SQLConsumer<Object>
 {
 
+    private PreparedStatement signalPS;
+    private PreparedStatement ssectPS;
+
     public SignalImporter( Connection con )
     {
-        super( con );
+        super( con, 1000 );
     }
 
     @Override
-    public void accept( Object o )
+    protected void process( Signal s )
             throws SQLException
     {
-        Signal s = (Signal) o;
-
         Long directedId = importDirected( s.getDirected() );
 
         long signalId = s.getId();
 
-        try( PreparedStatement signalPS = SQL.prepareInsert( con,
-                                                             "tpnm.signal",
-                                                             signalId,
-                                                             s.getInterlockingsysid(),
-                                                             s.getName(),
-                                                             s.getZoneid(),
-                                                             s.getTmpclosed(),
-                                                             s.getUsesecsectfreeingtime(),
-                                                             s.getSecsectfreeingtime(),
-                                                             directedId );
-             PreparedStatement ssectPS = SQL.prepare( con, "INSERT INTO tpnm.securitysection (signalid,vmax,accelerationattail) VALUES (?,?,?)" ) ) {
-            signalPS.executeUpdate();
+        signalPS = SQL.prepareInsert( signalPS, con,
+                                      "tpnm.signal",
+                                      signalId,
+                                      s.getInterlockingsysid(),
+                                      s.getName(),
+                                      s.getZoneid(),
+                                      s.getTmpclosed(),
+                                      s.getUsesecsectfreeingtime(),
+                                      s.getSecsectfreeingtime(),
+                                      directedId );
+        signalPS.executeUpdate();
 
-            if( !s.getSecuritysection().isEmpty() ) {
-                s.getSecuritysection().forEach( SQLConsumer.guard( sect -> {
-                    SQL.executeUpdate( ssectPS, signalId, sect.getVmax(), sect.getAccelerationattail() );
-                    long ssectId = SQL.currval( con, "tpnm.securitysection_id_seq" );
+        if( !s.getSecuritysection().isEmpty() ) {
+            s.getSecuritysection().
+                    forEach( SQLConsumer.guard( sect -> {
+                        ssectPS = SQL.prepare( ssectPS, con,
+                                               "INSERT INTO tpnm.securitysection (signalid,vmax,accelerationattail) VALUES (?,?,?)",
+                                               signalId,
+                                               sect.getVmax(),
+                                               sect.getAccelerationattail() );
+                        ssectPS.executeUpdate();
 
-                    importWay( sect.getWay(), "security", ssectId );
-                } ) );
-            }
+                        long ssectId = SQL.currval( con, "tpnm.securitysection_id_seq" );
+
+                        importWay( sect.getWay(), "security", ssectId );
+                    } ) );
         }
 
-        con.commit();
     }
-
 }

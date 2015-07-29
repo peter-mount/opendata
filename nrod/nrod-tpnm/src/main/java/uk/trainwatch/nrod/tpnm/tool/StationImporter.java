@@ -20,76 +20,75 @@ import uk.trainwatch.util.sql.SQLConsumer;
  * @author peter
  */
 public class StationImporter
-        extends AbstractWayImporter
+        extends AbstractWayImporter<Object, Station>
         implements SQLConsumer<Object>
 {
 
+    private PreparedStatement stationPS;
+    private PreparedStatement trackPS;
+
     public StationImporter( Connection con )
     {
-        super( con );
+        super( con, 100 );
     }
 
     @Override
-    public void accept( Object o )
+    protected void process( Station s )
             throws SQLException
     {
-        Station s = (Station) o;
-        
-        try( PreparedStatement ps = SQL.prepareInsert( con,
-                                                       "tpnm.station",
-                                                       s.getStationid(),
-                                                       s.getUiccode(),
-                                                       s.getAbbrev(),
-                                                       s.getLongname(),
-                                                       s.getCommentary(),
-                                                       s.getStdstoppingtime(),
-                                                       s.getStdconnectiontime(),
-                                                       s.getStationtype(),
-                                                       s.getStationcategory(),
-                                                       s.getUicstationcode(),
-                                                       s.getTransportassociation(),
-                                                       s.getX(),
-                                                       s.getY(),
-                                                       s.getEasting(),
-                                                       s.getNorthing(),
-                                                       ParserUtils.parseInt( s.getStanox() ),
-                                                       s.getLpbflag(),
-                                                       s.getPeriodid(),
-                                                       s.getCapitalsident(),
-                                                       s.getNalco(),
-                                                       new Timestamp( s.getLastmodified().toGregorianCalendar().toInstant().getEpochSecond() ),
-                                                       s.getCrscode(),
-                                                       s.getCompulsorystop()
-        ) ) {
-            ps.executeUpdate();
-        }
+        stationPS = SQL.prepareInsert( stationPS, con,
+                                       "tpnm.station",
+                                       s.getStationid(),
+                                       s.getUiccode(),
+                                       s.getAbbrev(),
+                                       s.getLongname(),
+                                       s.getCommentary(),
+                                       s.getStdstoppingtime(),
+                                       s.getStdconnectiontime(),
+                                       s.getStationtype(),
+                                       s.getStationcategory(),
+                                       s.getUicstationcode(),
+                                       s.getTransportassociation(),
+                                       s.getX(),
+                                       s.getY(),
+                                       s.getEasting(),
+                                       s.getNorthing(),
+                                       ParserUtils.parseInt( s.getStanox() ),
+                                       s.getLpbflag(),
+                                       s.getPeriodid(),
+                                       s.getCapitalsident(),
+                                       s.getNalco(),
+                                       new Timestamp( s.getLastmodified().toGregorianCalendar().toInstant().getEpochSecond() ),
+                                       s.getCrscode(),
+                                       s.getCompulsorystop()
+        );
+
+        stationPS.executeUpdate();
 
         for( Track t: s.getTrack() ) {
             int trackId = t.getTrackID();
 
-            try( PreparedStatement ps = SQL.prepareInsert( con,
-                                                           "tpnm.track",
-                                                           trackId,
-                                                           s.getStationid(),
-                                                           t.getName(),
-                                                           0, // seq
-                                                           t.getDescription(),
-                                                           t.getTrackcategory(),
-                                                           t.getEffectivelength(),
-                                                           t.getRoplinecode(),
-                                                           t.getSalinecode(),
-                                                           t.getLinepropertytemplateid(),
-                                                           t.getPeriodid(),
-                                                           t.getPermissiveWorking(),
-                                                           false, // directed
-                                                           t.getTracktmpclosed()
-            ) ) {
-                ps.executeUpdate();
-            }
+            trackPS = SQL.prepareInsert( trackPS, con,
+                                         "tpnm.track",
+                                         trackId,
+                                         s.getStationid(),
+                                         t.getName(),
+                                         0, // seq
+                                         t.getDescription(),
+                                         t.getTrackcategory(),
+                                         t.getEffectivelength(),
+                                         t.getRoplinecode(),
+                                         t.getSalinecode(),
+                                         t.getLinepropertytemplateid(),
+                                         t.getPeriodid(),
+                                         t.getPermissiveWorking(),
+                                         false, // directed
+                                         t.getTracktmpclosed()
+            );
+            trackPS.executeUpdate();
 
             importWay( t.getWay(), "track", (long) trackId );
         }
-        con.commit();
     }
 
 }

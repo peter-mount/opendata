@@ -20,42 +20,43 @@ import uk.trainwatch.util.sql.SQLConsumer;
  * @param <T>
  */
 public class TextImporter<T>
+        extends AbstractImporter<Object, T>
         implements SQLConsumer<Object>
 {
 
-    private final Connection con;
-    private final String sql;
+    private final String schema;
+    private final String table;
     private final Function<T, Integer> id;
     private final Function<T, String> text;
     private final Function<T, XMLGregorianCalendar> ts;
+    private final PreparedStatement ps;
 
     public TextImporter( Connection con, String schema, String table, Function<T, Integer> id, Function<T, String> text, Function<T, XMLGregorianCalendar> ts )
+            throws SQLException
     {
-        this( con, schema + "." + table, id, text, ts );
-    }
-
-    public TextImporter( Connection con, String table, Function<T, Integer> id, Function<T, String> text, Function<T, XMLGregorianCalendar> ts )
-    {
-        this.con = con;
+        super( con, 100, schema + "." + table );
         this.id = id;
+        this.schema = schema;
         this.text = text;
         this.ts = ts;
+        this.table = table;
 
-        sql = "INSERT INTO " + table + " (id,text,ts) VALUES (?,?,?)";
+        ps = SQL.prepare( con, "INSERT INTO " + schema + "." + table + " (id,text,ts) VALUES (?,?,?)" );
     }
 
     @Override
-    public void accept( Object o )
+    protected void process( T v )
             throws SQLException
     {
-        T v = (T) o;
-        try( PreparedStatement ps = SQL.prepare( con,
-                                                 sql,
-                                                 id.apply( v ),
-                                                 text.apply( v ),
-                                                 new Timestamp( ts.apply( v ).toGregorianCalendar().toInstant().getEpochSecond() ) ) ) {
-            ps.executeUpdate();
+        if( isFirst() ) {
+            SQL.deleteTable( con, schema, table );
         }
+
+        SQL.setParameters( ps,
+                           id.apply( v ),
+                           text.apply( v ),
+                           new Timestamp( ts.apply( v ).toGregorianCalendar().toInstant().getEpochSecond() ) )
+                .executeUpdate();
     }
 
 }
