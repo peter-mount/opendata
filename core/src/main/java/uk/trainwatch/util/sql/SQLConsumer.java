@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.util.sql;
 
+import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -38,8 +39,7 @@ public interface SQLConsumer<T>
     default SQLConsumer<T> andThen( SQLConsumer<? super T> after )
     {
         Objects.requireNonNull( after );
-        return ( T t ) ->
-        {
+        return ( T t ) -> {
             accept( t );
             after.accept( t );
         };
@@ -70,14 +70,14 @@ public interface SQLConsumer<T>
      */
     static <T> Consumer<T> guard( SQLConsumer<T> c )
     {
-        return t ->
-        {
-            try
-            {
+        return t -> {
+            try {
                 c.accept( t );
             }
-            catch( SQLException ex )
-            {
+            catch( BatchUpdateException ex ) {
+                throw new UncheckedSQLException( ex.getNextException() );
+            }
+            catch( SQLException ex ) {
                 throw new UncheckedSQLException( ex );
             }
         };
@@ -106,17 +106,13 @@ public interface SQLConsumer<T>
      */
     static <T> Consumer<T> guardIgnoreDuplicates( SQLConsumer<T> c )
     {
-        return t ->
-        {
-            try
-            {
+        return t -> {
+            try {
                 c.accept( t );
             }
-            catch( SQLException ex )
-            {
+            catch( SQLException ex ) {
                 String m = ex.getMessage();
-                if( m == null || !m.contains( "duplicate key value violates unique constraint" ) )
-                {
+                if( m == null || !m.contains( "duplicate key value violates unique constraint" ) ) {
                     throw new UncheckedSQLException( ex );
                 }
             }
@@ -135,14 +131,11 @@ public interface SQLConsumer<T>
     static <T> SQLConsumer<T> compose( Consumer<T> c )
             throws SQLException
     {
-        return t ->
-        {
-            try
-            {
+        return t -> {
+            try {
                 c.accept( t );
             }
-            catch( UncheckedSQLException ex )
-            {
+            catch( UncheckedSQLException ex ) {
                 throw ex.getCause();
             }
         };

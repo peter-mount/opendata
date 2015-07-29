@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.util.sql;
 
+import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.util.function.Supplier;
 
@@ -36,6 +37,9 @@ public interface SQLSupplier<T>
             try
             {
                 return s.get();
+            }
+            catch( BatchUpdateException ex ) {
+                throw new UncheckedSQLException( ex.getNextException() );
             }
             catch( SQLException ex )
             {

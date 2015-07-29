@@ -15,6 +15,7 @@
  */
 package uk.trainwatch.util.sql;
 
+import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -79,6 +80,9 @@ public interface SQLBiConsumer<T, U>
             try
             {
                 c.accept( t, u );
+            }
+            catch( BatchUpdateException ex ) {
+                throw new UncheckedSQLException( ex.getNextException() );
             }
             catch( SQLException ex )
             {
