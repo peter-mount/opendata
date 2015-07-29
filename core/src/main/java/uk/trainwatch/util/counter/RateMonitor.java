@@ -35,18 +35,19 @@ public class RateMonitor<T>
         implements Consumer<T>
 {
 
-    private static final Logger LOG = Logger.getLogger( RateMonitor.class.getName() );
     private final AtomicInteger counter = new AtomicInteger();
     private final ScheduledFuture<?> scheduledFuture;
+
+    @SuppressWarnings("NonConstantLogger")
     private final Logger log;
-    private final Level level;
+
     private final String label;
     private int lastCount;
     private long total;
 
     public static <T> RateMonitor<T> log( String label )
     {
-        return new RateMonitor<>( LOG, Level.INFO, label );
+        return new RateMonitor<>( null, Level.INFO, label );
     }
 
     public static <T> RateMonitor<T> log( Logger log, String label )
@@ -56,7 +57,7 @@ public class RateMonitor<T>
 
     public static <T> RateMonitor<T> log( Level level, String label )
     {
-        return new RateMonitor<>( LOG, level, label );
+        return new RateMonitor<>( null, level, label );
     }
 
     public static <T> RateMonitor<T> log( Logger log, Level level, String label )
@@ -66,19 +67,16 @@ public class RateMonitor<T>
 
     public RateMonitor( Logger log, Level level, String label )
     {
-        this.log = log;
-        this.level = level;
+        this.log = log == null ? Logger.getLogger( RateMonitor.class.getName() ) : log;
         this.label = label;
-        scheduledFuture = DaemonThreadFactory.INSTANCE.scheduleAtFixedRate( () ->
-        {
+        scheduledFuture = DaemonThreadFactory.INSTANCE.scheduleAtFixedRate( () -> {
             // Read & reset the count. Don't put it in the logger as we use a supplier & won't be invoked if the logger
             // isn't showing the required level
             lastCount = counter.getAndSet( 0 );
             total += lastCount;
 
             // Reduce logspam by only logging when we've done something
-            if( lastCount > 0 )
-            {
+            if( lastCount > 0 ) {
                 log.log( level, () -> label + ' ' + lastCount );
             }
         }, 1L, 1L, TimeUnit.MINUTES );
@@ -139,6 +137,13 @@ public class RateMonitor<T>
     public boolean isDone()
     {
         return scheduledFuture.isDone();
+    }
+
+    public final void reset()
+    {
+        counter.set( 0 );
+        lastCount = 0;
+        total = 0L;
     }
 
 }

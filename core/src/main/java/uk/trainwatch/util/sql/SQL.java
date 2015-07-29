@@ -97,6 +97,12 @@ public class SQL
         return StreamSupport.stream( new SQLSupplierSpliterator<>( s ), false );
     }
 
+    public static PreparedStatement prepare( PreparedStatement ps, Connection c, String sql, Object... args )
+            throws SQLException
+    {
+        return ps == null ? prepare( c, sql, args ) : setParameters( ps, args );
+    }
+
     /**
      * Utility to prepare a {@link PreparedStatement} from a SQL and arguments
      * <p>
@@ -115,11 +121,23 @@ public class SQL
         return setParameters( c.prepareStatement( sql ), args );
     }
 
+    public static CallableStatement prepareCall( CallableStatement cs, Connection c, String sql, Object... args )
+            throws SQLException
+    {
+        return cs == null ? prepareCall( c, sql, args ) : setParameters( cs, args );
+    }
+
     public static CallableStatement prepareCall( Connection c, String sql, Object... args )
             throws SQLException
     {
         Objects.requireNonNull( c );
         return setParameters( c.prepareCall( sql ), args );
+    }
+
+    public static PreparedStatement prepareInsert( PreparedStatement ps, Connection c, String table, Object... args )
+            throws SQLException
+    {
+        return ps == null ? prepareInsert( c, table, args ) : setParameters( ps, args );
     }
 
     public static PreparedStatement prepareInsert( Connection c, String table, Object... args )
@@ -145,9 +163,11 @@ public class SQL
     {
         Objects.requireNonNull( ps );
         Objects.requireNonNull( args );
-        int i = 1;
-        for( Object arg: args ) {
-            ps.setObject( i++, arg );
+        if( args.length > 0 ) {
+            int i = 1;
+            for( Object arg: args ) {
+                ps.setObject( i++, arg );
+            }
         }
         return ps;
     }

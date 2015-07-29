@@ -24,6 +24,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import uk.trainwatch.util.sql.SQLConsumer;
 
 /**
  * A suite of utility consumers
@@ -143,6 +144,12 @@ public final class Consumers
      * @return
      */
     public static <T> Consumer<T> sink()
+    {
+        return v -> {
+        };
+    }
+
+    public static <T> SQLConsumer<T> sqlSink()
     {
         return v -> {
         };

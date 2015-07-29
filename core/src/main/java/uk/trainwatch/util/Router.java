@@ -7,6 +7,7 @@ package uk.trainwatch.util;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import uk.trainwatch.util.sql.SQLConsumer;
@@ -16,6 +17,7 @@ import uk.trainwatch.util.sql.SQLConsumer;
  *
  * @param <K> Routing key
  * @param <T> Payload type
+ * <p>
  * @author peter
  */
 public class Router<K, T>
@@ -25,12 +27,15 @@ public class Router<K, T>
 
     private final Map<K, Consumer<T>> consumers = new HashMap<>();
     private final Function<T, K> router;
-    private final Consumer<T> sink = Consumers.sink();
+    private Consumer<T> sink = Consumers.sink();
+    private K lastKey;
+    private BiConsumer<K, K> keyChangeConsumer;
 
     /**
      * Create a Router which will route buy the payload's class
      *
      * @param <T> Payload type
+     * <p>
      * @return Router
      */
     public static <T> Router<Class<?>, T> createClassRouter()
@@ -51,9 +56,18 @@ public class Router<K, T>
     @Override
     public void accept( T t )
     {
-        if( t != null )
-        {
-            apply( t ).accept( t );
+        if( t != null ) {
+            K key = router.apply( t );
+
+            if( keyChangeConsumer != null ) {
+                if( lastKey != null && !lastKey.equals( key ) ) {
+                    keyChangeConsumer.accept( lastKey, key );
+                }
+                lastKey = key;
+            }
+
+            consumers.getOrDefault( key, sink )
+                    .accept( t );
         }
     }
 
@@ -63,11 +77,28 @@ public class Router<K, T>
         return consumers.getOrDefault( router.apply( t ), sink );
     }
 
+    public void sink( K key )
+    {
+        consumers.put( key, sink );
+    }
+
+    public boolean isSinked( K key )
+    {
+        Consumer<T> c = consumers.get( key );
+        return c != null && c.equals( sink );
+    }
+
+    public boolean isRouted( K key )
+    {
+        return consumers.containsKey( key );
+    }
+
     /**
      * Add a route to this instance. If a route already exists then the consumer is composed with the existing route.
      *
      * @param key
      * @param consumer
+     *                 <p>
      * @return
      */
     public Router<K, T> add( K key, Consumer<T> consumer )
@@ -81,10 +112,24 @@ public class Router<K, T>
      *
      * @param key
      * @param consumer
+     *                 <p>
      * @return
      */
     public Router<K, T> addSQL( K key, SQLConsumer<T> consumer )
     {
         return add( key, SQLConsumer.guard( consumer ) );
     }
+
+    public Router setKeyChangeConsumer( BiConsumer<K, K> keyChangeConsumer )
+    {
+        this.keyChangeConsumer = keyChangeConsumer;
+        return this;
+    }
+
+    public Router setSink( Consumer<T> sink )
+    {
+        this.sink = sink;
+        return this;
+    }
+
 }
