@@ -133,27 +133,24 @@ public class TPNMImport
 
         Router<Class<?>, Object> router = Router.createClassRouter().
                 addSQL( Uiccodedesc.class, v -> importUicCodeDesk( con, (Uiccodedesc) v ) ).
-                addSQL( Trackcategorydesc.class, v -> importText( con,
-                                                                  "trackcategorydesc",
-                                                                  (Trackcategorydesc) v,
-                                                                  Trackcategorydesc::getId,
-                                                                  Trackcategorydesc::getText,
-                                                                  Trackcategorydesc::getLastmodified ) ).
-                addSQL( Stationcategorydesc.class, v -> importText( con,
-                                                                    "stationcategorydesc",
-                                                                    (Stationcategorydesc) v,
-                                                                    Stationcategorydesc::getId,
-                                                                    Stationcategorydesc::getText,
-                                                                    Stationcategorydesc::getLastmodified ) ).
-                addSQL( Stationtypedesc.class, v -> importText( con,
-                                                                "stationtypedesc",
-                                                                (Stationtypedesc) v,
-                                                                Stationtypedesc::getId,
-                                                                Stationtypedesc::getText,
-                                                                Stationtypedesc::getLastmodified ) ).
-                addSQL( Station.class, v -> importStation( con, (Station) v ) ).
-                addSQL( Node.class, n -> importNode( con, (Node) n ) ).
-                addSQL( Signal.class, n -> importSignal( con, (Signal) n ) );
+                addSQL( Trackcategorydesc.class, new TextImporter<>( con,
+                                                                     SCHEMA, "trackcategorydesc",
+                                                                     Trackcategorydesc::getId,
+                                                                     Trackcategorydesc::getText,
+                                                                     Trackcategorydesc::getLastmodified ) ).
+                addSQL( Stationcategorydesc.class, new TextImporter<>( con,
+                                                                       SCHEMA, "stationcategorydesc",
+                                                                       Stationcategorydesc::getId,
+                                                                       Stationcategorydesc::getText,
+                                                                       Stationcategorydesc::getLastmodified ) ).
+                addSQL( Stationtypedesc.class, new TextImporter<>( con,
+                                                                   SCHEMA, "stationtypedesc",
+                                                                   Stationtypedesc::getId,
+                                                                   Stationtypedesc::getText,
+                                                                   Stationtypedesc::getLastmodified ) ).
+                addSQL( Station.class, new StationImporter( con ) ).
+                addSQL( Node.class, new NodeImporter( con ) ).
+                addSQL( Signal.class, new SignalImporter( con ) );
 
         lastRoute = null;
 
@@ -203,178 +200,4 @@ public class TPNMImport
 
     }
 
-    private <T> void importText( Connection con, String table,
-                                 T v,
-                                 Function<T, Integer> id,
-                                 Function<T, String> text,
-                                 Function<T, XMLGregorianCalendar> ts )
-            throws SQLException
-    {
-        try( PreparedStatement ps = SQL.prepare( con,
-                                                 "INSERT INTO " + SCHEMA + "." + table + " (id,text,ts) VALUES (?,?,?)",
-                                                 id.apply( v ),
-                                                 text.apply( v ),
-                                                 new Timestamp( ts.apply( v ).toGregorianCalendar().toInstant().getEpochSecond() ) ) ) {
-            ps.executeUpdate();
-        }
-    }
-
-    private void importStation( Connection con, Station s )
-            throws SQLException
-    {
-        try( PreparedStatement ps = SQL.prepareInsert( con,
-                                                       SCHEMA + ".station",
-                                                       s.getStationid(),
-                                                       s.getUiccode(),
-                                                       s.getAbbrev(),
-                                                       s.getLongname(),
-                                                       s.getCommentary(),
-                                                       s.getStdstoppingtime(),
-                                                       s.getStdconnectiontime(),
-                                                       s.getStationtype(),
-                                                       s.getStationcategory(),
-                                                       s.getUicstationcode(),
-                                                       s.getTransportassociation(),
-                                                       s.getX(),
-                                                       s.getY(),
-                                                       s.getEasting(),
-                                                       s.getNorthing(),
-                                                       ParserUtils.parseInt( s.getStanox() ),
-                                                       s.getLpbflag(),
-                                                       s.getPeriodid(),
-                                                       s.getCapitalsident(),
-                                                       s.getNalco(),
-                                                       new Timestamp( s.getLastmodified().toGregorianCalendar().toInstant().getEpochSecond() ),
-                                                       s.getCrscode(),
-                                                       s.getCompulsorystop()
-        ) ) {
-            ps.executeUpdate();
-        }
-
-        for( Track t: s.getTrack() ) {
-            int trackId = t.getTrackID();
-
-            try( PreparedStatement ps = SQL.prepareInsert( con,
-                                                           SCHEMA + ".track",
-                                                           trackId,
-                                                           s.getStationid(),
-                                                           t.getName(),
-                                                           0, // seq
-                                                           t.getDescription(),
-                                                           t.getTrackcategory(),
-                                                           t.getEffectivelength(),
-                                                           t.getRoplinecode(),
-                                                           t.getSalinecode(),
-                                                           t.getLinepropertytemplateid(),
-                                                           t.getPeriodid(),
-                                                           t.getPermissiveWorking(),
-                                                           false, // directed
-                                                           t.getTracktmpclosed()
-            ) ) {
-                ps.executeUpdate();
-            }
-
-            importWay( con, t.getWay(), "track", (long) trackId );
-        }
-        con.commit();
-    }
-
-    private Long importDirected( Connection con, Directed d )
-            throws SQLException
-    {
-        if( d == null ) {
-            return null;
-        }
-        else {
-            Point st = d.getStart().getPoint();
-            Point ed = d.getEnd().getPoint();
-            try( PreparedStatement ps = SQL.prepare( con,
-                                                     "INSERT INTO tpnm.directed (startid,endid) VALUES (?,?)",
-                                                     st.getNodeid(),
-                                                     ed.getNodeid()
-            ) ) {
-                ps.executeUpdate();
-            }
-
-            return SQL.currval( con, "tpnm.directed_id_seq" );
-        }
-    }
-
-    private void importSignal( Connection con, Signal s )
-            throws SQLException
-    {
-        Long directedId = importDirected( con, s.getDirected() );
-
-        long signalId = s.getId();
-
-        try( PreparedStatement signalPS = SQL.prepareInsert( con,
-                                                             "tpnm.signal",
-                                                             signalId,
-                                                             s.getInterlockingsysid(),
-                                                             s.getName(),
-                                                             s.getZoneid(),
-                                                             s.getTmpclosed(),
-                                                             s.getUsesecsectfreeingtime(),
-                                                             s.getSecsectfreeingtime(),
-                                                             directedId );
-             PreparedStatement ssectPS = SQL.prepare( con, "INSERT INTO tpnm.securitysection (signalid,vmax,accelerationattail) VALUES (?,?,?)" ) ) {
-            signalPS.executeUpdate();
-
-            if( !s.getSecuritysection().isEmpty() ) {
-                s.getSecuritysection().forEach( SQLConsumer.guard( sect -> {
-                    SQL.executeUpdate( ssectPS, signalId, sect.getVmax(), sect.getAccelerationattail() );
-                    long ssectId = SQL.currval( con, "tpnm.securitysection_id_seq" );
-
-                    importWay( con, sect.getWay(), "security", ssectId );
-                } ) );
-            }
-        }
-
-        con.commit();
-    }
-
-    private void importWay( Connection con, Way way, String type, Object... args )
-            throws SQLException
-    {
-        // Don't create null/empty ways
-        if( way != null && !way.getPoint().isEmpty() ) {
-            try( PreparedStatement wayps = SQL.prepare( con, "SELECT tpnm.create" + type + "way(?)", args );
-                 CallableStatement pointps = SQL.prepareCall( con, "{call tpnm.waypoint(?,?)}" ) ) {
-
-                long wayId = SQL.stream( wayps, SQL.LONG_LOOKUP ).findAny().get();
-
-                way.getPoint().
-                        forEach( SQLConsumer.guard( pt -> SQL.executeBatch( pointps, wayId, (long) pt.getNodeid() ) ) );
-                pointps.executeBatch();
-            }
-        }
-    }
-
-    private void importNode( Connection con, Node n )
-            throws SQLException
-    {
-        if( n != null && n.getPoint() != null ) {
-            try( PreparedStatement ps = SQL.prepareInsert( con,
-                                                           SCHEMA + ".node",
-                                                           n.getPoint().getNodeid(),
-                                                           n.getPoint().getLineid(),
-                                                           n.getNetx(),
-                                                           n.getNety(),
-                                                           n.getNetz(),
-                                                           n.getLinex(),
-                                                           n.getLiney(),
-                                                           n.getLinez(),
-                                                           n.getKmregionid(),
-                                                           n.getKmvalue(),
-                                                           n.getSecondkmregionid(),
-                                                           n.getSecondkmvalue(),
-                                                           n.getName(),
-                                                           n.getAngle()
-            ) ) {
-                ps.executeUpdate();
-            }
-        }
-
-        con.commit();
-    }
 }
