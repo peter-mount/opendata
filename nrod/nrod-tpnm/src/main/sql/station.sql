@@ -120,23 +120,24 @@ $$ LANGUAGE plpgsql;
 CREATE TABLE waypoint (
     id          SERIAL NOT NULL,
     wayid       BIGINT NOT NULL,-- REFERENCES way(id),
-    nodeid     BIGINT NOT NULL,-- REFERENCES node(id),
+    nodeid      BIGINT NOT NULL,-- REFERENCES node(id),
+    seq         INTEGER NOT NULL,   -- sequence within the way
     PRIMARY KEY (id)
 );
 ALTER TABLE waypoint OWNER TO rail;
 
-CREATE OR REPLACE FUNCTION tpnm.waypoint(pwayid BIGINT,pnodeid BIGINT)
+CREATE OR REPLACE FUNCTION tpnm.waypoint(pwayid BIGINT,pnodeid BIGINT, pseq INTEGER)
 RETURNS BIGINT AS $$
 DECLARE
     rec     RECORD;
 BEGIN
     LOOP
-        SELECT * INTO rec FROM tpnm.waypoint WHERE wayid=pwayid AND nodeid=pnodeid;
+        SELECT * INTO rec FROM tpnm.waypoint WHERE wayid=pwayid AND nodeid=pnodeid AND seq=pseq;
         IF FOUND THEN
             RETURN rec.id;
         END IF;
         BEGIN
-            INSERT INTO tpnm.waypoint (wayid,nodeid) VALUES (pwayid,pnodeid);
+            INSERT INTO tpnm.waypoint (wayid,nodeid,seq) VALUES (pwayid,pnodeid,pseq);
             RETURN currval('tpnm.waypoint_id_seq');
         EXCEPTION WHEN unique_violation THEN
             -- do nothing & loop

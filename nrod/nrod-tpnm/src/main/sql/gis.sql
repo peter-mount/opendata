@@ -15,10 +15,10 @@ CREATE TABLE feat_node (
     PRIMARY KEY(id)
 );
 ALTER TABLE feat_node OWNER TO rail;
-SELECT AddGeometryColumn('tpnm','feat_node','geom',-1,'POINT',2);
+SELECT AddGeometryColumn('tpnm','feat_node','geom',4258,'POINT',2);
 
 INSERT INTO tpnm.feat_node
-    SELECT id, netx::INTEGER, nety::INTEGER, ST_MakePoint(netx, nety)
+    SELECT id, netx::INTEGER, nety::INTEGER, ST_SetSRID(ST_MakePoint(netx*1.609344, -nety*1.609344),4258)
         FROM tpnm.node;
 
 -- ------------------------------------------------------------
@@ -34,12 +34,74 @@ CREATE TABLE feat_track (
 );
 ALTER TABLE feat_track OWNER TO rail;
 
-SELECT AddGeometryColumn('tpnm','feat_track','geom',-1,'LINESTRING',2);
+SELECT AddGeometryColumn('tpnm','feat_track','geom',4258,'LINESTRING',2);
 
+--INSERT INTO feat_track
+--    SELECT  t.id, t.name, t.descr, ST_MakeLine(n.geom)
+--        FROM track t
+--            INNER JOIN track_way tw ON t.id=tw.trackid
+--            INNER JOIN waypoint wp ON tw.id=wp.wayid
+--            INNER JOIN feat_node n ON wp.nodeid=n.id
+--        GROUP BY t.id;
+
+DELETE FROM feat_track;
+WITH
+    nodes AS (
+        SELECT w.id, wp.seq, n.geom
+            FROM feat_node n
+                INNER JOIN waypoint wp ON wp.nodeid=n.id
+                INNER JOIN track_way w ON w.id=wp.wayid
+            ORDER BY w.id,wp.seq
+    ),
+    lines AS (
+        SELECT n.id,ST_MakeLine(n.geom) as geom
+            FROM nodes n
+            GROUP BY n.id
+    )
 INSERT INTO feat_track
-    SELECT  t.id, t.name, t.descr, ST_MakeLine(n.geom)
+    SELECT  t.id, t.name, t.descr, ST_MakeLine(g.geom)
         FROM track t
-        INNER JOIN track_way tw ON t.id=tw.trackid
-        INNER JOIN waypoint wp ON tw.id=wp.wayid
-        INNER JOIN feat_node n ON wp.nodeid=n.id
+            INNER JOIN track_way w ON t.id=w.trackid
+            INNER JOIN lines g ON w.id = g.id
         GROUP BY t.id;
+
+-- ------------------------------------------------------------
+-- Signal feature
+-- ------------------------------------------------------------
+
+DROP TABLE feat_signal;
+CREATE TABLE feat_signal (
+    id                  BIGINT NOT NULL,
+    signalid            BIGINT NOT NULL,
+    vmax                INTEGER NOT NULL,
+    accelerationattail  BOOLEAN NOT NULL,
+    PRIMARY KEY(id)
+);
+ALTER TABLE feat_signal OWNER TO rail;
+
+SELECT AddGeometryColumn('tpnm','feat_signal','geom',4258,'LINESTRING',2);
+
+DELETE FROM feat_signal;
+WITH
+    nodes AS (
+        SELECT w.id, wp.seq, n.geom
+            FROM feat_node n
+                INNER JOIN waypoint wp ON wp.nodeid=n.id
+                INNER JOIN security_way w ON w.id=wp.wayid
+            ORDER BY w.id,wp.seq
+    ),
+    lines AS (
+        SELECT n.id,ST_MakeLine(n.geom) as geom
+            FROM nodes n
+            GROUP BY n.id
+    )
+INSERT INTO feat_signal
+    SELECT  ss.id,
+            ss.signalid,
+            ss.vmax,
+            ss.accelerationattail,
+            g.geom
+        FROM securitysection ss
+            INNER JOIN security_way w ON ss.id=w.securitysectionid
+            INNER JOIN lines g ON w.id = g.id;
+        GROUP BY ss.id;

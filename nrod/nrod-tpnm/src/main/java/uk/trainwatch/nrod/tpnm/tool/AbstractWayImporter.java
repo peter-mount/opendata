@@ -9,6 +9,7 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicInteger;
 import uk.trainwatch.nrod.tpnm.model.Directed;
 import uk.trainwatch.nrod.tpnm.model.Point;
 import uk.trainwatch.nrod.tpnm.model.Way;
@@ -71,9 +72,12 @@ public abstract class AbstractWayImporter<T, V extends T>
 
             long wayId = SQL.stream( wayps, SQL.LONG_LOOKUP ).findAny().get();
 
+            // The sequence within the way
+            AtomicInteger seq = new AtomicInteger();
+            
             way.getPoint().
                     forEach( SQLConsumer.guard( pt -> {
-                        pointps = SQL.prepareCall( pointps, con, "{call tpnm.waypoint(?,?)}", wayId, (long) pt.getNodeid() );
+                        pointps = SQL.prepareCall( pointps, con, "{call tpnm.waypoint(?,?,?)}", wayId, (long) pt.getNodeid(), seq.incrementAndGet() );
 
                         SQL.executeBatch( pointps );
                     } ) );
