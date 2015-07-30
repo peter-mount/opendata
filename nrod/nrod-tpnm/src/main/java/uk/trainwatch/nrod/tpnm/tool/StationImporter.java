@@ -36,6 +36,12 @@ public class StationImporter
     protected void process( Station s )
             throws SQLException
     {
+        if( isFirst() ) {
+            SQL.deleteTable( con, "tpnm", "track_way" );
+            SQL.deleteTable( con, "tpnm", "track" );
+            SQL.deleteTable( con, "tpnm", "station" );
+        }
+
         stationPS = SQL.prepareInsert( stationPS, con,
                                        "tpnm.station",
                                        s.getStationid(),

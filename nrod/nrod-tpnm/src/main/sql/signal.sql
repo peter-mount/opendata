@@ -28,14 +28,14 @@ CREATE TABLE signal (
     tmpclosed           BOOLEAN NOT NULL DEFAULT FALSE,
     usesecsectfreeingtm BOOLEAN,
     secsectfreeingtm    INTEGER,
-    directedid          BIGINT REFERENCES tpnm.directed(id),
+    directedid          BIGINT,-- REFERENCES tpnm.directed(id),
     PRIMARY KEY(id)
 );
 ALTER TABLE signal OWNER TO rail;
 
 CREATE TABLE securitysection (
     id                  SERIAL NOT NULL,
-    signalid            BIGINT NOT NULL REFERENCES signal(id),
+    signalid            BIGINT,-- NOT NULL REFERENCES signal(id),
     vmax                INTEGER NOT NULL,
     accelerationattail  BOOLEAN NOT NULL DEFAULT FALSE,
     PRIMARY KEY (id)
@@ -44,7 +44,7 @@ ALTER TABLE securitysection OWNER TO rail;
 
 -- security_way - a way linked to a securitysection
 CREATE TABLE security_way (
-    securitysectionid   INTEGER NOT NULL REFERENCES securitysection(id),
+    securitysectionid   INTEGER NOT NULL,-- REFERENCES securitysection(id),
     PRIMARY KEY(id)
 ) INHERITS (way);
 CREATE INDEX security_way_s ON security_way(securitysectionid);

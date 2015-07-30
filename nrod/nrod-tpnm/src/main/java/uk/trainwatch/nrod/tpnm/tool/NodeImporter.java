@@ -33,7 +33,12 @@ public class NodeImporter
             throws SQLException
     {
         if( n.getPoint() != null ) {
-            
+
+            if( isFirst() ) {
+                SQL.deleteTable( con, "tpnm", "feat_node" );
+                SQL.deleteTable( con, "tpnm", "node" );
+            }
+
             ps = SQL.prepareInsert( ps, con,
                                     "tpnm.node",
                                     n.getPoint().getNodeid(),

@@ -19,7 +19,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.cli.CommandLine;
 import org.kohsuke.MetaInfServices;
@@ -35,12 +34,10 @@ import uk.trainwatch.nrod.tpnm.model.Trackcategorydesc;
 import uk.trainwatch.nrod.tpnm.model.Uiccodedesc;
 import uk.trainwatch.nrod.tpnm.model.Version;
 import uk.trainwatch.util.Consumers;
-import static uk.trainwatch.util.Consumers.sink;
 import uk.trainwatch.util.Router;
 import uk.trainwatch.util.app.DBUtility;
 import uk.trainwatch.util.app.Utility;
 import uk.trainwatch.util.counter.RateMonitor;
-import uk.trainwatch.util.sql.SQL;
 import uk.trainwatch.util.sql.SQLBiConsumer;
 import uk.trainwatch.util.sql.SQLConsumer;
 import uk.trainwatch.util.xml.XMLStreamParserBuilder;
@@ -101,28 +98,6 @@ public class TPNMImport
         cifFiles = Utility.getArgFileList( cmd );
 
         return !cifFiles.isEmpty();
-    }
-
-    @Override
-    protected void initDB( Connection con )
-            throws SQLException
-    {
-        if( fullImport ) {
-            LOG.log( Level.INFO, "Clearing down database" );
-            Stream.of(
-                    "security_way",
-                    "securitysection",
-                    "signal",
-                    //
-                    "waypoint",
-                    "node",
-                    "way",
-                    //
-                    "track",
-                    "station"
-            ).forEach( k -> SQL.deleteTable( con, SCHEMA, k ) );
-        }
-
     }
 
     @Override

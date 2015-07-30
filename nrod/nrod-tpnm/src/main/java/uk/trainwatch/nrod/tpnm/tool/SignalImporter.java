@@ -33,6 +33,12 @@ public class SignalImporter
     protected void process( Signal s )
             throws SQLException
     {
+        if( isFirst() ) {
+            SQL.deleteTable( con, "tpnm", "security_way" );
+            SQL.deleteTable( con, "tpnm", "securitysection" );
+            SQL.deleteTable( con, "tpnm", "signal" );
+        }
+
         Long directedId = importDirected( s.getDirected() );
 
         long signalId = s.getId();
