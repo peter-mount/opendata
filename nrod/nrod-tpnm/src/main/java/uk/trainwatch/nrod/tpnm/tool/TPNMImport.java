@@ -60,6 +60,7 @@ public class TPNMImport
     private List<Path> cifFiles;
     private boolean fullImport;
     private boolean textImport, stationImport, nodeImport, signalImport;
+    private boolean scan;
 
     public TPNMImport()
     {
@@ -69,7 +70,8 @@ public class TPNMImport
                 addOption( null, "text", false, "Import text only" ).
                 addOption( null, "station", false, "Import stations" ).
                 addOption( null, "node", false, "Import nodes" ).
-                addOption( null, "signal", false, "Import signals" );
+                addOption( null, "signal", false, "Import signals" ).
+                addOption( null, "scan", false, "Scan the file but do nothing" );
 
         monitor = RateMonitor.log( LOG, "Records" );
 
@@ -89,7 +91,15 @@ public class TPNMImport
         nodeImport = fullImport || cmd.hasOption( "node" );
         signalImport = fullImport || cmd.hasOption( "signal" );
 
-        if( !(fullImport || textImport || stationImport || nodeImport || signalImport) ) {
+        scan = cmd.hasOption( "scan" );
+
+        if( fullImport || textImport || stationImport || nodeImport || signalImport ) {
+            if( scan ) {
+                LOG.log( Level.SEVERE, "Cannot scan with other options set" );
+                return false;
+            }
+        }
+        else if( !scan ) {
             LOG.log( Level.SEVERE, "No options set" );
             return false;
         }
