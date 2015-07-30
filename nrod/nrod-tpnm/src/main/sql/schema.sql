@@ -6,11 +6,13 @@
 --CREATE SCHEMA tpnm;
 --GRANT ALL ON tpnm TO rail;
 
-SET search_path = tpnm;
-
 -- ------------------------------------------------------------
 -- Setup postgis
 -- ------------------------------------------------------------
 
 -- Ignore if this says it already exists
+
+-- Also this needs to run twice
+CREATE EXTENSION postgis;
+SET search_path = tpnm;
 CREATE EXTENSION postgis;

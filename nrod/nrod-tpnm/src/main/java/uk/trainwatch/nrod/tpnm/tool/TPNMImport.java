@@ -22,7 +22,9 @@ import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.cli.CommandLine;
 import org.kohsuke.MetaInfServices;
+import uk.trainwatch.nrod.tpnm.model.Graphicvector;
 import uk.trainwatch.nrod.tpnm.model.Node;
+import uk.trainwatch.nrod.tpnm.model.Polyarea;
 import uk.trainwatch.nrod.tpnm.model.Projectinfo;
 import uk.trainwatch.nrod.tpnm.model.Projecttype;
 import uk.trainwatch.nrod.tpnm.model.Schedversiontype;
@@ -59,6 +61,7 @@ public class TPNMImport
 
     private List<Path> cifFiles;
     private boolean fullImport;
+    private boolean polyarea, graphicvector;
     private boolean textImport, stationImport, nodeImport, signalImport;
     private boolean scan;
 
@@ -66,12 +69,14 @@ public class TPNMImport
     {
         super();
         getOptions().
+                addOption( null, "scan", false, "Scan the file but do nothing" ).
                 addOption( null, "full", false, "Full rather than Incremental import" ).
-                addOption( null, "text", false, "Import text only" ).
-                addOption( null, "station", false, "Import stations" ).
+                addOption( null, "graphicvector", false, "Import graphic vectors" ).
                 addOption( null, "node", false, "Import nodes" ).
+                addOption( null, "polyarea", false, "Import polyareas" ).
                 addOption( null, "signal", false, "Import signals" ).
-                addOption( null, "scan", false, "Scan the file but do nothing" );
+                addOption( null, "station", false, "Import stations" ).
+                addOption( null, "text", false, "Import text only" );
 
         monitor = RateMonitor.log( LOG, "Records" );
 
@@ -90,10 +95,12 @@ public class TPNMImport
         stationImport = fullImport || cmd.hasOption( "station" );
         nodeImport = fullImport || cmd.hasOption( "node" );
         signalImport = fullImport || cmd.hasOption( "signal" );
+        polyarea = fullImport || cmd.hasOption( "polyarea" );
+        graphicvector = fullImport || cmd.hasOption( "graphicvector" );
 
         scan = cmd.hasOption( "scan" );
 
-        if( fullImport || textImport || stationImport || nodeImport || signalImport ) {
+        if( fullImport || textImport || stationImport || nodeImport || signalImport || polyarea || graphicvector ) {
             if( scan ) {
                 LOG.log( Level.SEVERE, "Cannot scan with other options set" );
                 return false;
@@ -149,13 +156,15 @@ public class TPNMImport
         } ) );
 
         // Log anything not supported then sink the rest
-        router.setSink( o -> {
-            Class<?> c = o.getClass();
-            if( !unsupported.contains( c ) ) {
-                LOG.log( Level.INFO, () -> "Unsupported " + o.getClass().getSimpleName() );
-                unsupported.add( c );
-            }
-        } );
+        if( fullImport || scan ) {
+            router.setSink( o -> {
+                Class<?> c = o.getClass();
+                if( !unsupported.contains( c ) ) {
+                    LOG.log( Level.INFO, () -> "Unsupported " + o.getClass().getSimpleName() );
+                    unsupported.add( c );
+                }
+            } );
+        }
 
         // These are always unsupported or we have no use for them
         unsupported.add( Version.class );
@@ -203,6 +212,20 @@ public class TPNMImport
         }
         else {
             unsupported.add( Node.class );
+        }
+
+        if( polyarea ) {
+            router.addSQL( Polyarea.class, new PolyareaImporter( con ) );
+        }
+        else {
+            unsupported.add( Polyarea.class );
+        }
+
+        if( graphicvector ) {
+            router.addSQL( Graphicvector.class, new GraphicvectorImporter( con ) );
+        }
+        else {
+            unsupported.add( Polyarea.class );
         }
 
         if( signalImport ) {

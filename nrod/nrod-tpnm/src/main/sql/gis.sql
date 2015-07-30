@@ -105,3 +105,27 @@ INSERT INTO feat_signal
             INNER JOIN security_way w ON ss.id=w.securitysectionid
             INNER JOIN lines g ON w.id = g.id;
         GROUP BY ss.id;
+
+-- ------------------------------------------------------------
+-- Graphic vectors
+-- ------------------------------------------------------------
+DROP TABLE feat_graphicvector;
+
+CREATE TABLE feat_graphicvector (
+    layer   INTEGER NOT NULL
+);
+CREATE INDEX feat_graphicvector_il ON graphicvector(id,layer);
+CREATE INDEX feat_graphicvector_l ON graphicvector(layer);
+ALTER TABLE feat_graphicvector OWNER TO rail;
+
+SELECT AddGeometryColumn('tpnm','feat_graphicvector','geom',4258,'LINESTRING',2);
+
+DELETE FROM feat_graphicvector;
+INSERT INTO feat_graphicvector
+    SELECT  layer,
+            tpnm.ST_MakeLine(
+                ST_SetSRID(ST_MakePoint(x0*1.609344, -y0*1.609344),4258),
+                ST_SetSRID(ST_MakePoint(x1*1.609344, -y1*1.609344),4258)
+            )
+        FROM graphicvector;
+

@@ -57,7 +57,7 @@ public abstract class AbstractImporter<T, V extends T>
     public final void accept( T t )
             throws SQLException
     {
-        if( t == null ) {
+        if( t == null || !filter( (V) t ) ) {
             return;
         }
 
@@ -73,6 +73,12 @@ public abstract class AbstractImporter<T, V extends T>
             log.log( Level.INFO, "Committing..." );
             con.commit();
         }
+    }
+
+    protected boolean filter( V v )
+            throws SQLException
+    {
+        return true;
     }
 
     protected abstract void process( V v )
