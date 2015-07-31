@@ -29,3 +29,14 @@ CREATE TABLE graphicvector (
 CREATE INDEX graphicvector_l ON graphicvector(layer);
 ALTER TABLE graphicvector OWNER TO rail;
 
+DROP TABLE graphictext;
+CREATE TABLE graphictext (
+    layer   INTEGER NOT NULL,
+    angle   INTEGER NOT NULL,
+    text    TEXT NOT NULL,
+    x       INTEGER NOT NULL,
+    y       INTEGER NOT NULL,
+    size    INTEGER NOT NULL
+);
+ALTER TABLE graphictext OWNER TO rail;
+

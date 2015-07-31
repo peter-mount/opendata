@@ -129,3 +129,20 @@ INSERT INTO feat_graphicvector
             )
         FROM graphicvector;
 
+DROP TABLE feat_graphictext;
+
+CREATE TABLE feat_graphictext (
+    layer   INTEGER NOT NULL,
+    text    TEXT,
+    angle   INTEGER,
+    size    INTEGER
+);
+ALTER TABLE feat_graphictext OWNER TO rail;
+
+SELECT AddGeometryColumn('tpnm','feat_graphictext','geom',4258,'POINT',2);
+
+DELETE FROM feat_graphictext;
+INSERT INTO feat_graphictext
+    SELECT  layer, text, angle, size,
+            ST_SetSRID(ST_MakePoint(x*1.609344, -y*1.609344),4258)
+        FROM graphictext;

@@ -8,7 +8,7 @@ package uk.trainwatch.nrod.tpnm.tool;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import uk.trainwatch.nrod.tpnm.model.Graphicvector;
+import uk.trainwatch.nrod.tpnm.model.Graphictext;
 import uk.trainwatch.util.sql.SQL;
 import uk.trainwatch.util.sql.SQLConsumer;
 
@@ -16,36 +16,37 @@ import uk.trainwatch.util.sql.SQLConsumer;
  *
  * @author peter
  */
-public class GraphicvectorImporter
-        extends AbstractImporter<Object, Graphicvector>
+public class GraphictextImporter
+        extends AbstractImporter<Object, Graphictext>
         implements SQLConsumer<Object>
 {
 
     private PreparedStatement ps;
 
-    public GraphicvectorImporter( Connection con )
+    public GraphictextImporter( Connection con )
     {
         super( con, 100000 );
     }
 
     @Override
-    protected void process( Graphicvector s )
+    protected void process( Graphictext s )
             throws SQLException
     {
         if( isFirst() ) {
-            SQL.deleteTable( con, "tpnm", "graphicvector" );
+            SQL.deleteTable( con, "tpnm", "graphictext" );
         }
 
         ps = SQL.prepareInsert( ps, con,
-                          "tpnm.graphicvector",
-                          s.getLayers(),
-                          s.getX0().intValue(),
-                          s.getY0().intValue(),
-                          s.getX1().intValue(),
-                          s.getY1().intValue()
+                                "tpnm.graphictext",
+                                s.getLayers(),
+                                s.getAngle(),
+                                s.getText(),
+                                s.getX(),
+                                s.getY(),
+                                s.getSize()
         );
 
         ps.executeUpdate();
-        
+
     }
 }

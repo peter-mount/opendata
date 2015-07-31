@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.cli.CommandLine;
 import org.kohsuke.MetaInfServices;
+import uk.trainwatch.nrod.tpnm.model.Graphictext;
 import uk.trainwatch.nrod.tpnm.model.Graphicvector;
 import uk.trainwatch.nrod.tpnm.model.Node;
 import uk.trainwatch.nrod.tpnm.model.Polyarea;
@@ -61,7 +62,7 @@ public class TPNMImport
 
     private List<Path> cifFiles;
     private boolean fullImport;
-    private boolean polyarea, graphicvector;
+    private boolean polyarea, graphictext, graphicvector;
     private boolean textImport, stationImport, nodeImport, signalImport;
     private boolean scan;
 
@@ -71,6 +72,7 @@ public class TPNMImport
         getOptions().
                 addOption( null, "scan", false, "Scan the file but do nothing" ).
                 addOption( null, "full", false, "Full rather than Incremental import" ).
+                addOption( null, "graphictext", false, "Import graphic tex" ).
                 addOption( null, "graphicvector", false, "Import graphic vectors" ).
                 addOption( null, "node", false, "Import nodes" ).
                 addOption( null, "polyarea", false, "Import polyareas" ).
@@ -96,11 +98,12 @@ public class TPNMImport
         nodeImport = fullImport || cmd.hasOption( "node" );
         signalImport = fullImport || cmd.hasOption( "signal" );
         polyarea = fullImport || cmd.hasOption( "polyarea" );
+        graphictext = fullImport || cmd.hasOption( "graphictext" );
         graphicvector = fullImport || cmd.hasOption( "graphicvector" );
 
         scan = cmd.hasOption( "scan" );
 
-        if( fullImport || textImport || stationImport || nodeImport || signalImport || polyarea || graphicvector ) {
+        if( fullImport || textImport || stationImport || nodeImport || signalImport || polyarea || graphictext || graphicvector ) {
             if( scan ) {
                 LOG.log( Level.SEVERE, "Cannot scan with other options set" );
                 return false;
@@ -221,11 +224,18 @@ public class TPNMImport
             unsupported.add( Polyarea.class );
         }
 
+        if( graphictext ) {
+            router.addSQL( Graphictext.class, new GraphictextImporter( con ) );
+        }
+        else {
+            unsupported.add( Graphictext.class );
+        }
+
         if( graphicvector ) {
             router.addSQL( Graphicvector.class, new GraphicvectorImporter( con ) );
         }
         else {
-            unsupported.add( Polyarea.class );
+            unsupported.add( Graphicvector.class );
         }
 
         if( signalImport ) {
