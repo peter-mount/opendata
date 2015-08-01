@@ -14,4 +14,13 @@
         <put-attribute name="center" value="/common/tpnm/index.jsp" />
     </definition>
     
+    <definition name="tpnm.map" extends="layout.main">
+        <put-attribute name="title" value="Train Planning Network Model" />
+        <put-attribute name="body" value=".tpnm.map" />
+        <put-attribute name="javascript" value="/common/tpnm/javascript.jsp" />
+    </definition>
+    <definition name=".tpnm.map" extends="layout.1col">
+        <put-attribute name="center" value="/common/tpnm/map.jsp" />
+    </definition>
+    
 </tiles-definitions>
