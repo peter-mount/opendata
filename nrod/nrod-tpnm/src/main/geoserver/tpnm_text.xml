@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<StyledLayerDescriptor version="1.0.0" xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc"
+                       xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                       xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd">
+    <NamedLayer>
+        <Name>NR TPNM Graphtext - Standard style</Name>
+        <UserStyle>
+            <Title>Graphtext</Title>
+            <Abstract>Network Rail &#169; Open Government Licence</Abstract>
+      
+            <FeatureTypeStyle>
+        
+                <Rule>
+                    <Name>Graph Text layer 1</Name>
+                    <!--
+                    <ogc:Filter>
+                        <ogc:PropertyIsEqualTo>
+                            <ogc:PropertyName>classifica</ogc:PropertyName>
+                            <ogc:Literal>Light Rapid Transit Station</ogc:Literal>
+                        </ogc:PropertyIsEqualTo>
+                    </ogc:Filter>
+                    <MinScaleDenominator>17000</MinScaleDenominator>
+                    <MaxScaleDenominator>23607</MaxScaleDenominator>
+                    -->
+                    <TextSymbolizer>
+                        <Label>
+                            <ogc:PropertyName>text</ogc:PropertyName>
+                            <ogc:Literal></ogc:Literal>
+                        </Label>
+                        <Font>
+                            <CssParameter name="font-family">Arial</CssParameter>
+                            <CssParameter name="font-size">
+                                <ogc:PropertyName>size</ogc:PropertyName>
+                            </CssParameter>
+                            <CssParameter name="font-weight">bold</CssParameter>
+                        </Font>
+                        <LabelPlacement>
+                            <PointPlacement>
+                                <Rotation>
+                                    <ogc:PropertyName>angle</ogc:PropertyName>
+                                </Rotation>
+                            </PointPlacement>
+                        </LabelPlacement>
+                        <Fill>
+                            <CssParameter name="fill">#737171</CssParameter>
+                        </Fill>
+                        <Priority>1000</Priority>
+                    </TextSymbolizer>
+                </Rule>
+        
+            </FeatureTypeStyle>
+        </UserStyle>
+    </NamedLayer>
+</StyledLayerDescriptor>

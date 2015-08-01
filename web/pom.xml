@@ -15,6 +15,7 @@
     <description>Various web applications that use the open data</description>
     
     <modules>
+        <module>departureboards</module>
         <module>uktrain</module>
         <module>web-cms</module> 
         <module>web-core</module>
@@ -27,10 +28,10 @@
         <module>web-timetable</module>
         <module>web-train</module>
         <module>web-workbench</module>
-        <module>departureboards</module>
         <module>web-rest</module>
         <module>web-rtt</module>
         <module>web-reference</module>
+        <module>web-svgmap</module>
     </modules>
     
 </project>

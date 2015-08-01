@@ -55,3 +55,5 @@
 /tflod/tfl-model/target/
 /applications/tfl/target/
 /nrod/nrod-tpnm/target/
+/web/postgis/target/
+/web/web-svgmap/target/

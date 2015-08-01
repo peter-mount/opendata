@@ -26,14 +26,6 @@
     
     <dependencies>
         
-        <!--
-        <dependency>
-            <groupId>org.tomitribe</groupId>
-            <artifactId>jcache-cdi</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        -->
-        
         <dependency>
             <groupId>uk.trainwatch.web</groupId>
             <artifactId>web-core</artifactId>
@@ -74,6 +66,12 @@
         <dependency>
             <groupId>uk.trainwatch.web</groupId>
             <artifactId>web-station</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>uk.trainwatch.web</groupId>
+            <artifactId>web-svgmap</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         
@@ -252,6 +250,26 @@
             <scope>runtime</scope>
         </dependency>
         
+        <!-- Cannot be deployed with the webapp -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.3-1102-jdbc41</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgis</groupId>
+            <artifactId>postgis-jdbc</artifactId>
+            <version>2.2.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat</groupId>
+            <artifactId>tomcat-dbcp</artifactId>
+            <version>8.0.8</version>
+            <scope>provided</scope>
+        </dependency>
+
     </dependencies>
 
     <build>

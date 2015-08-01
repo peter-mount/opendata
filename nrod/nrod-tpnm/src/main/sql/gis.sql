@@ -18,7 +18,7 @@ ALTER TABLE feat_node OWNER TO rail;
 SELECT AddGeometryColumn('tpnm','feat_node','geom',4258,'POINT',2);
 
 INSERT INTO tpnm.feat_node
-    SELECT id, netx::INTEGER, nety::INTEGER, ST_SetSRID(ST_MakePoint(netx*1.609344, -nety*1.609344),4258)
+    SELECT id, netx::INTEGER, nety::INTEGER, ST_SetSRID(ST_MakePoint(netx, nety),4258)
         FROM tpnm.node;
 
 -- ------------------------------------------------------------
@@ -73,6 +73,10 @@ DROP TABLE feat_signal;
 CREATE TABLE feat_signal (
     id                  BIGINT NOT NULL,
     signalid            BIGINT NOT NULL,
+    interlockingsysid   INTEGER NOT NULL,
+    name                NAME,
+    zoneid              INTEGER NOT NULL,
+    tmpclosed           BOOLEAN NOT NULL,
     vmax                INTEGER NOT NULL,
     accelerationattail  BOOLEAN NOT NULL,
     PRIMARY KEY(id)
@@ -98,13 +102,17 @@ WITH
 INSERT INTO feat_signal
     SELECT  ss.id,
             ss.signalid,
+            s.interlockingsysid,
+            s.name,
+            s.zoneid,
+            s.tmpclosed,
             ss.vmax,
             ss.accelerationattail,
             g.geom
         FROM securitysection ss
             INNER JOIN security_way w ON ss.id=w.securitysectionid
+            INNER JOIN signal s ON ss.signalid=s.id
             INNER JOIN lines g ON w.id = g.id;
-        GROUP BY ss.id;
 
 -- ------------------------------------------------------------
 -- Graphic vectors
@@ -124,8 +132,8 @@ DELETE FROM feat_graphicvector;
 INSERT INTO feat_graphicvector
     SELECT  layer,
             tpnm.ST_MakeLine(
-                ST_SetSRID(ST_MakePoint(x0*1.609344, -y0*1.609344),4258),
-                ST_SetSRID(ST_MakePoint(x1*1.609344, -y1*1.609344),4258)
+                ST_SetSRID(ST_MakePoint(x0, y0),4258),
+                ST_SetSRID(ST_MakePoint(x1, y1),4258)
             )
         FROM graphicvector;
 
@@ -144,5 +152,5 @@ SELECT AddGeometryColumn('tpnm','feat_graphictext','geom',4258,'POINT',2);
 DELETE FROM feat_graphictext;
 INSERT INTO feat_graphictext
     SELECT  layer, text, angle, size,
-            ST_SetSRID(ST_MakePoint(x*1.609344, -y*1.609344),4258)
+            ST_SetSRID(ST_MakePoint(x, y),4258)
         FROM graphictext;
