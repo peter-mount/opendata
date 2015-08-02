@@ -153,8 +153,11 @@ public class SvgUtils
      * @param x        Supplier of x coordinate, not null
      * @param y        Supplier of y coordinate, not null
      * @param angle    Supplier of angle. Ignored if null or it returns 0
+     * @param size
      * @param fill     Supplier of fill or null if none
      * @param stroke   Supplier of stroke or null if none
+     * @param anchor
+     * @param baseline
      * @param text     Supplier of text, must not be null
      */
     public static void writeText( XMLStreamWriter w,
@@ -162,8 +165,11 @@ public class SvgUtils
                                   DoubleSupplier x,
                                   DoubleSupplier y,
                                   IntSupplier angle,
+                                  IntSupplier size,
                                   Supplier<String> fill,
                                   Supplier<String> stroke,
+                                  Supplier<String> anchor,
+                                  Supplier<String> baseline,
                                   Supplier<String> text
     )
     {
@@ -179,6 +185,19 @@ public class SvgUtils
                     w.writeAttribute( "transform", "rotate(" + ang + ")" );
                 }
             }
+
+            if( size != null ) {
+                w.writeAttribute( "font-size", String.valueOf( size.getAsInt() ) );
+            }
+
+            if( anchor != null ) {
+                w.writeAttribute( "font-text-anchor", anchor.get() );
+            }
+
+            if( baseline != null ) {
+                w.writeAttribute( "alignment-baseline", baseline.get() );
+            }
+
             w.writeCharacters( text.get() );
             w.writeEndElement();
         }

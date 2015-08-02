@@ -62,20 +62,12 @@ public class GraphicVectorRenderer
 
     }
 
-    public void render( XMLStreamWriter w, Connection con, SvgBounds tileBounds )
+    public void render( XMLStreamWriter w, Connection con, SvgBounds bounds )
             throws SQLException,
                    XMLStreamException
     {
-        try( PreparedStatement gvPS = SQL.prepare( con,
-                                                   "SELECT layer,geom"
-                                                   + " FROM tpnm.feat_graphicvector"
-                                                   + " WHERE geom && (tpnm.ST_MakeEnvelope(?,?,?,?,4258)::geometry)",
-                                                   (int) tileBounds.getMinX(),
-                                                   (int) tileBounds.getMinY(),
-                                                   (int) tileBounds.getMaxX(),
-                                                   (int) tileBounds.getMaxY()
-        ) ) {
-            LOG.log( Level.INFO, () -> gvPS.toString() );
+        try( PreparedStatement gvPS = bounds.prepare( con, "layer", "tpnm.feat_graphicvector", "geom" ) ) {
+            //LOG.log( Level.INFO, () -> gvPS.toString() );
 
             // Create a map of each layer
             Map<Integer, List<Layer>> layers = SQL.stream( gvPS, Layer::new ).
@@ -87,7 +79,7 @@ public class GraphicVectorRenderer
                         forEach( e -> {
                             // Form the SVG Path
                             sla.reset();
-                            e.getValue().stream().map( Layer::getLine ).map( tileBounds::transformLineString ).forEach( sla::append );
+                            e.getValue().stream().map( Layer::getLine ).map( bounds::transformLineString ).forEach( sla::append );
 
                             if( !sla.isEmpty() ) {
                                 SvgUtils.writePath( w,

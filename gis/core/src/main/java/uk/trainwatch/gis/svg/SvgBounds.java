@@ -6,8 +6,12 @@
 package uk.trainwatch.gis.svg;
 
 import java.awt.geom.Rectangle2D;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import org.postgis.LineString;
 import org.postgis.Point;
+import uk.trainwatch.util.sql.SQL;
 
 /**
  * Class that holds the bounds of a dataset and manages the transformation from source and svg coordinate space
@@ -76,7 +80,7 @@ public class SvgBounds
      */
     public double getX( double netx )
     {
-        return (netx - getMinX()) / scale;
+        return transformScale( netx - getMinX() );
     }
 
     /**
@@ -88,7 +92,17 @@ public class SvgBounds
      */
     public double getY( double nety )
     {
-        return (nety - getMinY()) / scale;
+        return transformScale( nety - getMinY() );
+    }
+
+    public double transformScale( double v )
+    {
+        return v / scale;
+    }
+
+    public int transformScale( int v )
+    {
+        return (int) (v / scale);
     }
 
     /**
@@ -118,6 +132,30 @@ public class SvgBounds
             transformPoint( p );
         }
         return l;
+    }
+
+    public PreparedStatement prepare( PreparedStatement ps, Connection con, String fields, String table, String geom )
+            throws SQLException
+    {
+        return ps == null ? prepare( con, fields, table, geom ) : SQL.setParameters( ps,
+                                                                                     (int) getMinX(),
+                                                                                     (int) getMinY(),
+                                                                                     (int) getMaxX(),
+                                                                                     (int) getMaxY() );
+    }
+
+    public PreparedStatement prepare( Connection con, String fields, String table, String geom )
+            throws SQLException
+    {
+        return SQL.prepare( con,
+                            "SELECT " + fields + "," + geom
+                            + " FROM " + table
+                            + " WHERE " + geom + " && (tpnm.ST_MakeEnvelope(?,?,?,?,4258)::geometry)",
+                            (int) getMinX(),
+                            (int) getMinY(),
+                            (int) getMaxX(),
+                            (int) getMaxY()
+        );
     }
 
 }

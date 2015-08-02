@@ -12,6 +12,7 @@
         <img id="zoomIn" src="/images/general/ZoomIn24.png"/>
         <div id="zoomLevel">XXX</div>
     </div>
+    <div id="layers"></div>
 </div>
 <div id="map"></div>
 <div id="loading"></div>
@@ -19,6 +20,9 @@
     var tpnm;
     $(document).ready(function () {
         tpnm = new TPNM();
-        setTimeout(TPNM.refresh, 25);
-    });
+    <c:if test="${not empty scale}">TPNM.scale =${scale};</c:if>
+    <c:if test="${not empty x}">TPNM.x =${x};</c:if>
+    <c:if test="${not empty y}">TPNM.y =${y};</c:if>
+            setTimeout(TPNM.refresh, 25);
+        });
 </script>

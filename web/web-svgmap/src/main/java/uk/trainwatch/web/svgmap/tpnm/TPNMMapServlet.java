@@ -23,7 +23,7 @@ public class TPNMMapServlet
         extends AbstractServlet
 {
 
-    private static final Pattern PATTERN = Pattern.compile( "^/([0-9]+)/([0-9.-]+)/([0-9.-]+)$" );
+    private static final Pattern PATTERN = Pattern.compile( "^/([0-9]+)/([0-9.-]+)/([0-9.-]+)(|/([0-9A-Fa-f/]+))$" );
 
     @Override
     protected void doGet( ApplicationRequest request )
@@ -42,6 +42,14 @@ public class TPNMMapServlet
 
                     req.put( "x", Math.min( Math.max( Double.parseDouble( m.group( 2 ) ), 92844 ), 128509 ) );
                     req.put( "y", Math.min( Math.max( Double.parseDouble( m.group( 3 ) ), -36544 ), 19563 ) );
+                    
+                    if( !m.group(4).isEmpty()) {
+                        String s[] = m.group(5).split( "/");
+                        for(int i=0;i<s.length;i++) {
+                            req.put( "p"+i,s[i]);
+                        }
+                    }
+                    
                     req.entrySet().forEach(
                             e -> log( "Req " + e.getKey() + "=" + e.getValue() )
                     );

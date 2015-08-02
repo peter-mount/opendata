@@ -88,6 +88,38 @@
     border: 1px solid black;
 }
 
+#layers {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    top: 64px;
+}
+
+#layers .layer_hdr {
+    display: block;
+    font-weight: bold;
+    text-align: center;
+    border-bottom: 1px solid #888;
+    padding-top: 5px;
+    padding-bottom: 1px;
+    margin-bottom: 5px;
+}
+
+.layer_ctrl img {
+    width: 13px;
+    height: 13px;
+    cursor: default;
+}
+
+.layer_ctrl span {
+    padding-left: 2px;
+    font-size: 12px;
+    vertical-align: top;
+    font-family: Arial, sans-serif;
+    color: #000;
+    cursor: default;
+}
+
 .tpnm_wrapper svg {
     //display: inline-block;
     border: 1px solid red;
@@ -103,23 +135,51 @@
     /* No fill - some signals render wrong otherwise*/
     fill-opacity: 0;
 }
+.tpnm_sig_area {
+}
+.tpnm_sig_point {
+}
+
 
 /* GraphicVector */
 .tpnm_vec {
     stroke: #000;
+    stroke-width: 1px;
+}
+
+/* Other stuff not in layer 1 - some dead track - shows lighter than disused in layer 4 */
+.tpnm_vec_0 {
+    stroke: #bbb;
+    stroke-width: 1px;
 }
 
 /* Most common layer: tracks, platforms pretty much everything */
-.tpnm_vec_1 {}
+.tpnm_vec_1 {
+    stroke: #000;
+    stroke-width: 1px;
+}
 /* Not certain what 2 is, at MDE/MDB its part line under the MDE line */
 .tpnm_vec_2 {}
 /* 4 is disused or rarely used lines (MDE Plat 3 is an example) */
 .tpnm_vec_4 {
     stroke: #888;
-    stroke-width: 2px;
+    stroke-width: 1px;
 }
 /* Not certain but looks like barrier around some feature/line */
 .tpnm_vec_5 {
-    stroke: #f00;
+    stroke: #c00;
     stroke-width: 2px;
+}
+/* Green hatching? - looking at LBG. Also mentions blue but can't tell which? */
+.tpnm_vec_8 { stroke: #0F0; }
+
+/* 12 Blue arrow near CST/LBG? */
+.tpnm_vec_12 { stroke: #0FF; }
+
+/* 32 & 33 Red hatching?- looking at LBG */
+.tpnm_vec_32, .tpnm_vec_33 { stroke: #F00; }
+
+/* 36 Seems to be around specific platforms, OOU? CST P3 LBG P7 */
+.tpnm_vec_36 {
+    stroke: #ff0;
 }

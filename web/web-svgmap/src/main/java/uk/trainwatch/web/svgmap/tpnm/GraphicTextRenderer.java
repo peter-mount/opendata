@@ -32,20 +32,12 @@ public class GraphicTextRenderer
     private static final Logger LOG = Logger.getLogger( GraphicTextRenderer.class.getName() );
 
     @Override
-    public void render( XMLStreamWriter w, Connection con, SvgBounds tileBounds )
+    public void render( XMLStreamWriter w, Connection con, SvgBounds bounds )
             throws SQLException,
                    XMLStreamException
     {
-        try( PreparedStatement gvPS = SQL.prepare( con,
-                                                   "SELECT layer,text,angle,size,geom"
-                                                   + " FROM tpnm.feat_graphictext"
-                                                   + " WHERE geom && (tpnm.ST_MakeEnvelope(?,?,?,?,4258)::geometry)",
-                                                   (int) tileBounds.getMinX(),
-                                                   (int) tileBounds.getMinY(),
-                                                   (int) tileBounds.getMaxX(),
-                                                   (int) tileBounds.getMaxY()
-        ) ) {
-            LOG.log( Level.INFO, () -> gvPS.toString() );
+        try( PreparedStatement gvPS = bounds.prepare( con, "layer,text,angle,size", "tpnm.feat_graphictext", "geom" ) ) {
+            //LOG.log( Level.INFO, () -> gvPS.toString() );
 
             // Create a map of each layer
             SQL.stream( gvPS, rs -> new Object()
@@ -53,16 +45,20 @@ public class GraphicTextRenderer
                 int layer = rs.getInt( 1 );
                 String text = rs.getString( 2 );
                 int angle = rs.getInt( 3 );
-                int size = (int) (rs.getInt( 4 ) / tileBounds.getScale());
-                Point point = tileBounds.transformPoint( PostGISUtils.getPoint( rs, 5 ) );
+                int size = (int) (rs.getInt( 4 ) / bounds.getScale());
+                Point point = bounds.transformPoint( PostGISUtils.getPoint( rs, 5 ) );
             } ).
+                    filter( o -> o.size > 4 ).
                     forEach( o -> SvgUtils.writeText(
                                     w,
                                     () -> "tpnm_tl_" + o.layer + " tpnm_ts_" + o.size,
                                     o.point::getX,
                                     o.point::getY,
                                     () -> o.angle,
-                                    null,//() -> "#000000",
+                                    () -> -bounds.transformScale( o.size ),
+                                    () -> "middle",
+                                    () -> "middle",
+                                    null,
                                     null,
                                     () -> o.text )
                     );
