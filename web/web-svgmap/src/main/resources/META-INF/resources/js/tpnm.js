@@ -171,8 +171,9 @@ var TPNM = (function () {
             s: scales[TPNM.scale],
             x: Math.floor(TPNM.x),
             y: Math.floor(TPNM.y),
-            w: TPNM.container.width(),
-            h: TPNM.container.height()
+            // Some chrome's send this as doubles
+            w: Math.floor(TPNM.container.width()),
+            h: Math.floor(TPNM.container.height())
         };
         $.ajax({
             url: '/tpnm/map/refresh',
