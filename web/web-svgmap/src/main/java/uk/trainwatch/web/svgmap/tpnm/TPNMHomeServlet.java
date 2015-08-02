@@ -14,11 +14,10 @@ import uk.trainwatch.web.servlet.AbstractHomeServlet;
  * @author peter
  */
 @WebServlet(name = "TPNMHomeServlet",
-            urlPatterns = {"/tpnm", "/tpnm/", "/tpnm/map"},
+            urlPatterns = {"/tpnm", "/tpnm/"},
             initParams = {
                 @WebInitParam(name = "/tpnm", value = "tpnm.home"),
-                @WebInitParam(name = "/tpnm/", value = "tpnm.home"),
-                @WebInitParam(name = "/tpnm/map", value = "tpnm.map")
+                @WebInitParam(name = "/tpnm/", value = "tpnm.home")
             })
 public class TPNMHomeServlet
         extends AbstractHomeServlet
