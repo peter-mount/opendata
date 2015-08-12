@@ -466,7 +466,7 @@ public class RabbitMQ
                                      Map<String, Object> properties,
                                      Consumer<Stream<byte[]>> factory )
     {
-        String realQueue = queueName + "." + getHostname();
+        String realQueue = getRealQueue( queueName, properties );
         RabbitSupplier supplier = new RabbitSupplier( connection, realQueue, topic, routingKey, durable, properties );
         Streams.supplierStream( supplier, factory );
         supplier.start();
@@ -479,10 +479,20 @@ public class RabbitMQ
                                        Map<String, Object> properties,
                                        Consumer<byte[]> consumer )
     {
-        new RabbitSupplier( connection, queueName + "." + getHostname(), topic, routingKey,
+        new RabbitSupplier( connection,
+                            getRealQueue( queueName, properties ),
+                            topic,
+                            routingKey,
                             consumer.andThen( RateMonitor.log( LOG, routingKey == null ? queueName : (queueName + "[" + routingKey + "]") ) ),
                             durable, properties ).
                 start();
+    }
+
+    public static final String NO_HOSTNAME = "no.host.name";
+
+    private static String getRealQueue( String queueName, Map<String, Object> properties )
+    {
+        return properties == null || properties.containsKey( NO_HOSTNAME ) ? queueName : (queueName + "." + getHostname());
     }
 
     public static String getHostname()

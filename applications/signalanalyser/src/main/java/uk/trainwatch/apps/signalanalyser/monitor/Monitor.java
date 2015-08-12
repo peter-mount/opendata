@@ -29,7 +29,6 @@ import uk.trainwatch.nrod.td.model.TDMessage;
 import uk.trainwatch.nrod.td.model.TDMessageFactory;
 import uk.trainwatch.nrod.td.model.TDVisitor;
 import uk.trainwatch.rabbitmq.RabbitMQ;
-import uk.trainwatch.util.JsonUtils;
 import uk.trainwatch.util.counter.RateMonitor;
 
 /**
@@ -55,9 +54,6 @@ public class Monitor
     protected void setupApplication()
             throws IOException
     {
-        BerthAreaMap areaMap = new BerthAreaMap();
-        Consumer<TDMessage> tdPopulator = areaMap.getTDVisitor();
-
         Consumer<TDMessage> rawMonitor = RateMonitor.log( LOG, "Receive " + routingKey );
 
         Consumer<TDMessage> tdViewer = new TDVisitor()
@@ -92,28 +88,22 @@ public class Monitor
         RabbitMQ.queueStream( getRabbitmq(),
                               queueName,
                               routingKey,
-                              s -> s.map( RabbitMQ.toString.
-                                      andThen( JsonUtils.parseJsonObject ).
-                                      andThen( TDMessageFactory.INSTANCE ) ).
+                              s -> s.map( RabbitMQ.toJsonObject.andThen( TDMessageFactory.INSTANCE ) ).
                               filter( Objects::nonNull ).
-                              forEach( rawMonitor.
-                                      andThen( tdPopulator ).
-                                      andThen( tdViewer ) )
+                              forEach( rawMonitor.andThen( tdViewer ) )
         );
     }
 
     public static void main( String... args )
             throws Exception
     {
-        if( args.length != 1 )
-        {
+        if( args.length != 1 ) {
             LOG.log( Level.SEVERE, "A signalling area is required" );
             System.exit( 1 );
         }
 
         String area = args[0].toUpperCase();
-        if( area.isEmpty() || area.length() != 2 )
-        {
+        if( area.isEmpty() || area.length() != 2 ) {
             LOG.log( Level.SEVERE, "Signalling area code is 2 characters only." );
             System.exit( 1 );
         }

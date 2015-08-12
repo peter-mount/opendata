@@ -31,6 +31,12 @@ public class Rabbit
 
     private volatile RabbitConnection connection;
 
+    public boolean isDev()
+    {
+        String localHost = RabbitMQ.getHostname();
+        return "europa".equals( localHost ) || "phoebe".equals( localHost );
+    }
+
     public RabbitConnection getConnection()
     {
         if( connection == null ) {

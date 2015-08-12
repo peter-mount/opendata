@@ -58,13 +58,9 @@ public class SignalContextListener
             return;
         }
 
-        // Dev, connect to prod for data but only request a single area to keep volumne down.
-        String localHost = RabbitMQ.getHostname();
-        boolean dev = "europa".equals( localHost ) || "phoebe".equals( localHost );
-
         // Now pass all messages to an event
         rabbit.queueDurableEvent( QUEUE_NAME,
-                                  dev ? "nr.td.area.A3" : "nr.td.area.#",
+                                  rabbit.isDev() ? "nr.td.area.A3" : "nr.td.area.#",
                                   RabbitMQ.toJsonObject.andThen( TDMessageFactory.INSTANCE ),
                                   event );
     }
