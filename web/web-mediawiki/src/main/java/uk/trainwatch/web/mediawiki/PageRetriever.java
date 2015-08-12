@@ -9,7 +9,6 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.function.UnaryOperator;
@@ -53,8 +52,8 @@ public class PageRetriever
             return null;
         }
         catch( IOException ex ) {
-            LOG.log( Level.SEVERE, null, ex );
-            throw new UncheckedIOException( ex );
+            LOG.log( Level.SEVERE, () -> "Failed for" + page.getName() );
+            return null;
         }
     }
 

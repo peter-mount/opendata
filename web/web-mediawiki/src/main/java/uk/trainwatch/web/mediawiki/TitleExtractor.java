@@ -24,15 +24,17 @@ public class TitleExtractor
     public Page apply( Page page )
     {
         // Get the page title
-        page.lines().
-                filter( l -> l.contains( "<title>" ) ).
-                forEach( l -> {
+        if( page != null ) {
+            page.lines().
+                    filter( l -> l.contains( "<title>" ) ).
+                    forEach( l -> {
 
-                    Matcher m = TITLE.matcher( l );
-                    if( m.matches() ) {
-                        page.setTitle( m.group( 1 ) );
-                    }
-                } );
+                        Matcher m = TITLE.matcher( l );
+                        if( m.matches() ) {
+                            page.setTitle( m.group( 1 ) );
+                        }
+                    } );
+        }
 
         return page;
     }

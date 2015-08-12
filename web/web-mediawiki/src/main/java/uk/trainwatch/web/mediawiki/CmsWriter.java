@@ -36,6 +36,10 @@ public class CmsWriter
     @Override
     public void accept( CmsFile t )
     {
+        if( t == null ) {
+            return;
+        }
+
         Path path = t.toPath( basePath );
 
         LOG.log( Level.INFO, () -> "Writing " + path );

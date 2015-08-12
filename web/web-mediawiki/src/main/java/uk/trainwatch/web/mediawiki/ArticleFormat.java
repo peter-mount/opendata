@@ -20,10 +20,11 @@ public class ArticleFormat
     @Override
     public Page apply( Page page )
     {
-        List<String> list = page.getContent();
-        list.add( 0, "<article id=\"er-article-body\">" );
-        list.add( "</article>" );
-
+        if( page != null ) {
+            List<String> list = page.getContent();
+            list.add( 0, "<article id=\"er-article-body\">" );
+            list.add( "</article>" );
+        }
         return page;
     }
 

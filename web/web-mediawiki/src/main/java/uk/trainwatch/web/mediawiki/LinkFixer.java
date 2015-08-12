@@ -20,18 +20,19 @@ public class LinkFixer
     @Override
     public Page apply( Page page )
     {
-        page.setContent( page.lines().
-                map( l -> l.
-                        // Remove MediaWiki view prefix
-                        replaceAll( "href=\"/index.php/", "href=\"/" ).
-                        // Remove nofollow tag
-                        replaceAll( " rel=\"nofollow\"", "" ).
-                        // Remove unavailable page links leaving the text present
-                        replaceAll( "<a href=\"/index.php?.+?>(.+?)</a>", "$1")
-                        ).
-                collect( Collectors.toList() )
-        );
-
+        if( page != null ) {
+            page.setContent( page.lines().
+                    map( l -> l.
+                            // Remove MediaWiki view prefix
+                            replaceAll( "href=\"/index.php/", "href=\"/" ).
+                            // Remove nofollow tag
+                            replaceAll( " rel=\"nofollow\"", "" ).
+                            // Remove unavailable page links leaving the text present
+                            replaceAll( "<a href=\"/index.php?.+?>(.+?)</a>", "$1" )
+                    ).
+                    collect( Collectors.toList() )
+            );
+        }
         return page;
     }
 

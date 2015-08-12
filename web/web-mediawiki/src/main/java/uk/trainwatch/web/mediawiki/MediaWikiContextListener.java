@@ -6,16 +6,16 @@
 package uk.trainwatch.web.mediawiki;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-import uk.trainwatch.rabbitmq.RabbitConnection;
+import uk.trainwatch.rabbitmq.Rabbit;
 import uk.trainwatch.rabbitmq.RabbitMQ;
-import uk.trainwatch.util.JsonUtils;
 import uk.trainwatch.util.config.Configuration;
 import uk.trainwatch.util.config.JNDIConfig;
 
@@ -24,13 +24,15 @@ import uk.trainwatch.util.config.JNDIConfig;
  * @author peter
  */
 @WebListener
+@ApplicationScoped
 public class MediaWikiContextListener
         implements ServletContextListener
 {
 
     private static final Logger LOG = Logger.getLogger( MediaWikiContextListener.class.getName() );
 
-    private RabbitConnection rabbitConnection;
+    @Inject
+    private Rabbit rabbit;
 
     @Override
     public void contextInitialized( ServletContextEvent sce )
@@ -41,8 +43,6 @@ public class MediaWikiContextListener
 
         LOG.log( Level.INFO, "Initialising MediaWiki integration" );
 
-        rabbitConnection = RabbitMQ.createJNDIConnection( "rabbit/uktrain" );
-
         Configuration config = JNDIConfig.INSTANCE;
         final String wikiUrl = config.get( "mediawiki.url" );
 
@@ -52,39 +52,36 @@ public class MediaWikiContextListener
         // Retrieve page inserts & updates. We need to use parking queues & set a long timeout as we may have a bulk update which can take some time
         Map<String, Object> properties = RabbitMQ.parkQueue( 3000L );
         RabbitMQ.queueTTL( properties, 86400000L );
-        RabbitMQ.queueDurableStream( rabbitConnection, "cms.page", "cms.page.insert.#,cms.page.update.#", properties,
-                                     s -> s.map( RabbitMQ.toString ).
-                                     map( JsonUtils.parseJsonObject ).
-                                     map( Page::new ).
-                                     map( new PageRetriever( wikiUrl ) ).
-                                     filter( Objects::nonNull ).
-                                     map( new TitleExtractor() ).
-                                     map( new ContentExtractor() ).
-                                     map( new ArticleFormat() ).
-                                     map( new LinkFixer() ).
-                                     forEach( writer )
+
+        rabbit.queueDurableConsumer( "cms.page",
+                                     "cms.page.insert.#,cms.page.update.#",
+                                     properties,
+                                     RabbitMQ.toJsonObject.
+                                     andThen( Page::new ).
+                                     andThen( new PageRetriever( wikiUrl ) ).
+                                     andThen( new TitleExtractor() ).
+                                     andThen( new ContentExtractor() ).
+                                     andThen( new ArticleFormat() ).
+                                     andThen( new LinkFixer() ),
+                                     writer
         );
 
         // Retrieve image inserts & updates. Again use parking & long timeout
         properties = RabbitMQ.parkQueue( 3000L );
         RabbitMQ.queueTTL( properties, 86400000L );
-        RabbitMQ.queueDurableStream( rabbitConnection, "cms.image", "cms.image.insert.#,cms.image.update.#", properties,
-                                     s -> s.map( RabbitMQ.toString ).
-                                     map( JsonUtils.parseJsonObject ).
-                                     map( Image::new ).
-                                     map( new ImageRetriever( wikiUrl ) ).
-                                     filter( Objects::nonNull ).
-                                     forEach( writer )
+        rabbit.queueDurableConsumer( "cms.image",
+                                     "cms.image.insert.#,cms.image.update.#",
+                                     properties,
+                                     RabbitMQ.toJsonObject.
+                                     andThen( Image::new ).
+                                     andThen( new ImageRetriever( wikiUrl ) ),
+                                     writer
         );
     }
 
     @Override
     public void contextDestroyed( ServletContextEvent sce )
     {
-        if( rabbitConnection != null ) {
-            rabbitConnection.close();
-            rabbitConnection = null;
-        }
     }
 
 }

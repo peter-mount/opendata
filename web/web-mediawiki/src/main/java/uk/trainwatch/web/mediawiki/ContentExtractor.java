@@ -20,19 +20,20 @@ public class ContentExtractor
     @Override
     public Page apply( Page page )
     {
-        AtomicBoolean extract = new AtomicBoolean( true );
-        
-        page.getContent().removeIf( l -> {
-            if( l.contains( "<!-- bodycontent -->" ) ) {
-                return extract.getAndSet( false );
-            }
+        if( page != null ) {
+            AtomicBoolean extract = new AtomicBoolean( true );
 
-            if( l.contains( "<!-- /bodycontent -->" ) ) {
-                extract.set( true );
-            }
-            return extract.get();
-        } );
+            page.getContent().removeIf( l -> {
+                if( l.contains( "<!-- bodycontent -->" ) ) {
+                    return extract.getAndSet( false );
+                }
 
+                if( l.contains( "<!-- /bodycontent -->" ) ) {
+                    extract.set( true );
+                }
+                return extract.get();
+            } );
+        }
         return page;
     }
 

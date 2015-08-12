@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 import uk.trainwatch.web.cms.StaticContentManager;
 
 /**
- * Retrieves the image from MediaWiki 
+ * Retrieves the image from MediaWiki
  * <p>
  * @author peter
  */
@@ -38,34 +38,36 @@ public class ImageRetriever
     @Override
     public Image apply( Image image )
     {
-        try {
-            LOG.log( Level.INFO, () -> "Retrieving " + image.getName() );
-            String realName = cmsPrefix + StaticContentManager.INSTANCE.getRealImagePath( image.getName() );
+        if( image != null ) {
+            try {
+                LOG.log( Level.INFO, () -> "Retrieving " + image.getName() );
+                String realName = cmsPrefix + StaticContentManager.INSTANCE.getRealImagePath( image.getName() );
 
-            LOG.log( Level.INFO, () -> "Retrieving " + realName );
-            URL url = new URL( realName );
-            URLConnection con = url.openConnection();
-            try( InputStream is = con.getInputStream() ) {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                byte b[] = new byte[1024];
-                int s = is.read( b );
-                while( s > -1 ) {
-                    baos.write( b, 0, s );
-                    s = is.read( b );
+                LOG.log( Level.INFO, () -> "Retrieving " + realName );
+                URL url = new URL( realName );
+                URLConnection con = url.openConnection();
+                try( InputStream is = con.getInputStream() ) {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    byte b[] = new byte[1024];
+                    int s = is.read( b );
+                    while( s > -1 ) {
+                        baos.write( b, 0, s );
+                        s = is.read( b );
+                    }
+                    image.setContent( baos.toByteArray() );
                 }
-                image.setContent( baos.toByteArray() );
             }
+            catch( FileNotFoundException ex ) {
+                LOG.log( Level.SEVERE, () -> "Could not find " + image.getName() );
+                return null;
+            }
+            catch( IOException ex ) {
+                LOG.log( Level.SEVERE, null, ex );
+                throw new UncheckedIOException( ex );
+            }
+        }
 
-            return image;
-        }
-        catch( FileNotFoundException ex ) {
-            LOG.log( Level.SEVERE, () -> "Could not find " + image.getName() );
-            return null;
-        }
-        catch( IOException ex ) {
-            LOG.log( Level.SEVERE, null, ex );
-            throw new UncheckedIOException( ex );
-        }
+        return image;
     }
 
 }
