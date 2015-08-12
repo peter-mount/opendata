@@ -11,8 +11,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import javax.annotation.Resource;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.sql.DataSource;
 import uk.trainwatch.nrod.td.berth.BerthAreaMap;
 import uk.trainwatch.nrod.td.berth.BerthMap;
@@ -25,24 +27,22 @@ import uk.trainwatch.util.sql.SQL;
  *
  * @author peter
  */
-public enum SignalManager
+@ApplicationScoped
+public class SignalManager
 {
-
-    INSTANCE;
 
     private static final String SQL_SELECT = "SELECT * FROM reference.smart_area";
     private static final String SQL_ALL_AREAS = SQL_SELECT + " ORDER BY area";
     private static final String SQL_AREA = SQL_SELECT + " WHERE area=?";
 
+    @Resource(name = "jdbc/rail")
     private DataSource dataSource;
 
-    private final BerthAreaMap areaMap = new BerthAreaMap();
-    private final RecentAreaMap recentMap = new RecentAreaMap();
+    @Inject
+    private BerthAreaMap areaMap;
 
-    final void setDataSource( DataSource dataSource )
-    {
-        this.dataSource = dataSource;
-    }
+    @Inject
+    private RecentAreaMap recentMap;
 
     public BerthAreaMap getAreaMap()
     {
@@ -67,17 +67,6 @@ public enum SignalManager
     }
 
     /**
-     * Returns a consumer that will populate this manager
-     * <p>
-     * @return
-     */
-    public Consumer<TDMessage> getTDConsumer()
-    {
-        return areaMap.getTDVisitor().
-                andThen( recentMap.getTDVisitor() );
-    }
-
-    /**
      * Returns the list of signal areas available in Smart
      * <p>
      * @return
@@ -88,8 +77,7 @@ public enum SignalManager
             throws SQLException
     {
         try( Connection con = dataSource.getConnection();
-             Statement s = con.createStatement() )
-        {
+             Statement s = con.createStatement() ) {
             return SQL.stream( s.executeQuery( SQL_ALL_AREAS ), SignalArea.fromSQL ).
                     collect( Collectors.toList() );
         }
@@ -99,8 +87,7 @@ public enum SignalManager
             throws SQLException
     {
         try( Connection con = dataSource.getConnection();
-             PreparedStatement ps = SQL.prepare( con, SQL_AREA, area ) )
-        {
+             PreparedStatement ps = SQL.prepare( con, SQL_AREA, area ) ) {
             return SQL.stream( ps, SignalArea.fromSQL ).
                     findFirst();
         }

@@ -15,94 +15,66 @@
  */
 package uk.trainwatch.web.signal;
 
-import java.sql.SQLException;
-import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
-import javax.naming.NamingException;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
 import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
+import uk.trainwatch.nrod.td.model.TDMessage;
 import uk.trainwatch.nrod.td.model.TDMessageFactory;
 import uk.trainwatch.rabbitmq.RabbitConnection;
 import uk.trainwatch.rabbitmq.RabbitMQ;
-import uk.trainwatch.util.JsonUtils;
 import uk.trainwatch.util.config.JNDIConfig;
-import uk.trainwatch.util.counter.RateMonitor;
-import uk.trainwatch.util.sql.DBContextListener;
 
 /**
- *
+ * Ensures that, if enabled, we start receiving signal messages and populate our caches
  * @author peter
  */
+@ApplicationScoped
 @WebListener
 public class SignalContextListener
-        extends DBContextListener
+        implements ServletContextListener
 {
 
     private static final Logger LOG = Logger.getLogger( SignalContextListener.class.getName() );
 
+    private static final String QUEUE_NAME = "signal.map";
+
+    @Inject
+    private Event<TDMessage> event;
+
     private RabbitConnection rabbitConnection;
 
     @Override
-    protected void init( ServletContextEvent sce )
-            throws SQLException
+    public void contextInitialized( ServletContextEvent sce )
     {
-        log.log( Level.INFO, "Initialising SignalManager" );
-        SignalManager.INSTANCE.setDataSource( getRailDataSource() );
-
-        try
-        {
-            String localHost = RabbitMQ.getHostname();
-
-            boolean dev = "europa".equals( localHost ) || "phoebe".equals( localHost );
-            // Dev, connect to prod for data but only request a single area to keep volumne down.
-            configure( dev ? "nr.td.area.A3" : "nr.td.area.#", "signal.map", true );
-        } catch( NamingException ex )
-        {
-            LOG.log( Level.SEVERE, null, ex );
-        }
-    }
-
-    @Override
-    protected void shutdown( ServletContextEvent sce )
-    {
-        if( rabbitConnection != null )
-        {
-            rabbitConnection.close();
-            rabbitConnection = null;
-        }
-    }
-
-    private void configure( String routingKey, String queueName, boolean durable )
-            throws NamingException
-    {
-        if( JNDIConfig.INSTANCE.getBoolean( "signal.disabled" ) )
-        {
+        if( JNDIConfig.INSTANCE.getBoolean( "signal.disabled" ) ) {
+            LOG.log( Level.INFO, "Signalling has been disabled for this instance" );
             return;
         }
 
-        LOG.log( Level.INFO, () -> "Requesting " + routingKey + " on " + queueName );
+        // Dev, connect to prod for data but only request a single area to keep volumne down.
+        String localHost = RabbitMQ.getHostname();
+        boolean dev = "europa".equals( localHost ) || "phoebe".equals( localHost );
 
         rabbitConnection = RabbitMQ.createJNDIConnection( "rabbit/uktrain" );
 
-        Consumer<Stream<byte[]>> consumer = s
-                -> s.map( RabbitMQ.toString.
-                        andThen( JsonUtils.parseJsonObject ).
-                        andThen( TDMessageFactory.INSTANCE ) ).
-                filter( Objects::nonNull ).
-                forEach(
-                        SignalManager.INSTANCE.getTDConsumer().
-                        andThen( RateMonitor.log( LOG, "Receive " + routingKey ) )
-                );
+        RabbitMQ.queueDurableStream( rabbitConnection,
+                                     QUEUE_NAME,
+                                     dev ? "nr.td.area.A3" : "nr.td.area.#",
+                                     RabbitMQ.toJsonObject.andThen( TDMessageFactory.INSTANCE ),
+                                     event );
+    }
 
-        if( durable )
-        {
-            RabbitMQ.queueDurableStream( rabbitConnection, queueName, routingKey, consumer );
-        } else
-        {
-            RabbitMQ.queueStream( rabbitConnection, queueName, routingKey, consumer );
+    @Override
+    public void contextDestroyed( ServletContextEvent sce )
+    {
+        if( rabbitConnection != null ) {
+            rabbitConnection.close();
+            rabbitConnection = null;
         }
     }
 

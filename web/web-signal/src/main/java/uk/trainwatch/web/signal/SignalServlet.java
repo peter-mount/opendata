@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
@@ -23,16 +24,21 @@ import uk.trainwatch.web.servlet.ApplicationRequest;
  *
  * @author peter
  */
-@WebServlet(name = "SignalServlet", urlPatterns
-                                    = {
-            "/signal/map",
-            "/signal/map/*"
-        })
+@WebServlet(name = "SignalServlet",
+            loadOnStartup = 1,
+            urlPatterns
+            = {
+                "/signal/map",
+                "/signal/map/*"
+            })
 public class SignalServlet
         extends AbstractServlet
 {
 
     private static final Logger LOG = Logger.getLogger( SignalServlet.class.getName() );
+
+    @Inject
+    private SignalManager signalManager;
 
     @Override
     protected void doGet( ApplicationRequest request )
@@ -59,12 +65,12 @@ public class SignalServlet
                    SQLException
     {
         Map<String, Object> req = request.getRequestScope();
-        req.put( "areas", SignalManager.INSTANCE.getSignalAreas() );
+        req.put( "areas", signalManager.getSignalAreas() );
 
         request.expiresIn( 1, ChronoUnit.DAYS );
         request.maxAge( 1, ChronoUnit.DAYS );
         request.lastModified( Instant.now() );
-        
+
         request.renderTile( "signal.home" );
     }
 
@@ -73,13 +79,13 @@ public class SignalServlet
                    IOException,
                    SQLException
     {
-        Optional<SignalArea> signalArea = SignalManager.INSTANCE.getSignalArea( area );
+        Optional<SignalArea> signalArea = signalManager.getSignalArea( area );
 
         if( signalArea.isPresent() ) {
             Map<String, Object> req = request.getRequestScope();
             req.put( "area", signalArea.get() );
-            req.put( "berthmap", SignalManager.INSTANCE.getArea( area ) );
-            req.put( "recent", SignalManager.INSTANCE.getRecent( area ) );
+            req.put( "berthmap", signalManager.getArea( area ) );
+            req.put( "recent", signalManager.getRecent( area ) );
 
             request.expiresIn( 1, ChronoUnit.DAYS );
             request.maxAge( 1, ChronoUnit.DAYS );

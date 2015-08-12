@@ -14,6 +14,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
@@ -41,6 +42,9 @@ public class OccupiedBerthServlet
 
     private static final Logger LOG = Logger.getLogger( SignalServlet.class.getName() );
 
+    @Inject
+    private SignalManager signalManager;
+
     @Override
     protected void doGet( ApplicationRequest request )
             throws ServletException,
@@ -54,16 +58,16 @@ public class OccupiedBerthServlet
             if( pathInfo != null && !pathInfo.isEmpty() ) {
                 area = pathInfo.substring( 1 ).
                         toUpperCase();
-                signalArea = SignalManager.INSTANCE.getSignalArea( area );
+                signalArea = signalManager.getSignalArea( area );
             }
 
             if( signalArea.isPresent() ) {
                 JsonObjectBuilder berths = Json.createObjectBuilder();
-                SignalManager.INSTANCE.getArea( area ).
+                signalManager.getArea( area ).
                         forEach( ( b, n ) -> berths.add( b, n ) );
 
                 JsonArrayBuilder recent = Json.createArrayBuilder();
-                SignalManager.INSTANCE.getRecent( area ).
+                signalManager.getRecent( area ).
                         forEach( t -> {
                             LocalTime time = TimeUtils.getLocalDateTime( t.getTime() ).
                             toLocalTime();

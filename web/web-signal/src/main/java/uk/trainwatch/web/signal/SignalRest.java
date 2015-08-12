@@ -8,9 +8,9 @@ package uk.trainwatch.web.signal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -31,7 +31,8 @@ import uk.trainwatch.web.rest.Rest;
 public class SignalRest
 {
 
-    private static final Logger LOG = Logger.getLogger( SignalRest.class.getName() );
+    @Inject
+    private SignalManager signalManager;
 
     /**
      * Returns a JSON Object defining the signal berths within a signalling area that is currently occupied.
@@ -49,11 +50,11 @@ public class SignalRest
         return Rest.invoke( response -> {
             Optional<SignalArea> signalArea = Optional.empty();
             if( area != null ) {
-                signalArea = SignalManager.INSTANCE.getSignalArea( area );
+                signalArea = signalManager.getSignalArea( area );
             }
 
             if( signalArea.isPresent() ) {
-                BerthMap map = SignalManager.INSTANCE.getArea( area );
+                BerthMap map = signalManager.getArea( area );
                 if( map != null ) {
                     response.entity( map.stream().
                             collect( Collectors.toMap( KeyValue::getKey, KeyValue::getValue ) ) ).
