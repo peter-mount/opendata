@@ -492,7 +492,7 @@ public class RabbitMQ
 
     private static String getRealQueue( String queueName, Map<String, Object> properties )
     {
-        return properties == null || properties.containsKey( NO_HOSTNAME ) ? queueName : (queueName + "." + getHostname());
+        return properties != null && properties.containsKey( NO_HOSTNAME ) ? queueName : (queueName + "." + getHostname());
     }
 
     public static String getHostname()

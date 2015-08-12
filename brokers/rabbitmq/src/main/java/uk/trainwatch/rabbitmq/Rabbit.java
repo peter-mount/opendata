@@ -52,7 +52,11 @@ public class Rabbit
     void close()
     {
         if( connection != null ) {
-            connection.close();
+            try {
+                connection.close();
+            }
+            catch( IllegalStateException ex ) {
+            }
         }
     }
 
