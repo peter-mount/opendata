@@ -17,9 +17,13 @@ package uk.trainwatch.nrod.td.berth;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import uk.trainwatch.nrod.td.model.BerthCancel;
 import uk.trainwatch.nrod.td.model.BerthInterpose;
 import uk.trainwatch.nrod.td.model.BerthStep;
+import uk.trainwatch.nrod.td.model.TDMessage;
 import uk.trainwatch.nrod.td.model.TDVisitor;
 
 /**
@@ -27,44 +31,12 @@ import uk.trainwatch.nrod.td.model.TDVisitor;
  * <p>
  * @author peter
  */
+@ApplicationScoped
 public class BerthAreaMap
 {
 
     private final Map<String, BerthMap> berths = new ConcurrentHashMap<>();
-
-    /**
-     * Returns the {@link BerthMap} for a signalling area.
-     * <p>
-     * Note: Area is a 2 character code. Any
-     * <p>
-     * @param area Signalling area
-     * <p>
-     * @return BerthMap
-     * <p>
-     * @throws IllegalArgumentException if area is invalid.
-     */
-    public BerthMap getArea( String area )
-    {
-        if( area == null || area.length() != 2 )
-        {
-            throw new IllegalArgumentException( "Invalid signalling area " + area );
-        }
-        return berths.computeIfAbsent( area.toUpperCase(), k -> new BerthHashMap() );
-    }
-
-    public boolean containsArea( String area )
-    {
-        return area == null || area.length() != 2 ? false : berths.containsKey( area.toUpperCase() );
-    }
-
-    /**
-     * Returns a TDVisitor that will populate the appropriate berth
-     * <p>
-     * @return
-     */
-    public TDVisitor getTDVisitor()
-    {
-        return new TDVisitor()
+    private final Consumer<TDMessage> consumer =         new TDVisitor()
         {
 
             @Override
@@ -91,5 +63,38 @@ public class BerthAreaMap
             }
 
         };
+
+    /**
+     * Accept via CDI eventing a TD Message and add it to this map
+     * @param t 
+     */
+    void accept( @Observes TDMessage t )
+    {
+        consumer.accept( t );
+    }
+
+    /**
+     * Returns the {@link BerthMap} for a signalling area.
+     * <p>
+     * Note: Area is a 2 character code. Any
+     * <p>
+     * @param area Signalling area
+     * <p>
+     * @return BerthMap
+     * <p>
+     * @throws IllegalArgumentException if area is invalid.
+     */
+    public BerthMap getArea( String area )
+    {
+        if( area == null || area.length() != 2 )
+        {
+            throw new IllegalArgumentException( "Invalid signalling area " + area );
+        }
+        return berths.computeIfAbsent( area.toUpperCase(), k -> new BerthHashMap() );
+    }
+
+    public boolean containsArea( String area )
+    {
+        return area == null || area.length() != 2 ? false : berths.containsKey( area.toUpperCase() );
     }
 }

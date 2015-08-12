@@ -17,6 +17,9 @@ package uk.trainwatch.nrod.td.berth;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import uk.trainwatch.nrod.td.model.BerthCancel;
 import uk.trainwatch.nrod.td.model.BerthInterpose;
 import uk.trainwatch.nrod.td.model.BerthStep;
@@ -29,10 +32,43 @@ import uk.trainwatch.util.RecentList;
  * <p>
  * @author peter
  */
+@ApplicationScoped
 public class RecentAreaMap
 {
 
     private final Map<String, RecentList<TDMessage>> areas = new ConcurrentHashMap<>();
+    private final Consumer<TDMessage> consumer = new TDVisitor()
+    {
+
+        @Override
+        public void visit( BerthCancel s )
+        {
+            add( s );
+        }
+
+        @Override
+        public void visit( BerthInterpose s )
+        {
+            add( s );
+        }
+
+        @Override
+        public void visit( BerthStep s )
+        {
+            add( s );
+        }
+
+    };
+
+    /**
+     * Accept via CDI eventing a TD Message and add it to this map
+     * <p>
+     * @param t
+     */
+    void accept( @Observes TDMessage t )
+    {
+        consumer.accept( t );
+    }
 
     public RecentList getRecentList( String area )
     {
@@ -45,29 +81,4 @@ public class RecentAreaMap
                 add( m );
     }
 
-    public TDVisitor getTDVisitor()
-    {
-        return new TDVisitor()
-        {
-
-            @Override
-            public void visit( BerthCancel s )
-            {
-                add( s );
-            }
-
-            @Override
-            public void visit( BerthInterpose s )
-            {
-                add( s );
-            }
-
-            @Override
-            public void visit( BerthStep s )
-            {
-                add( s );
-            }
-
-        };
-    }
 }
