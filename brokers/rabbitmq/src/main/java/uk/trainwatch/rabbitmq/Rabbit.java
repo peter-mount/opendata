@@ -20,6 +20,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
+import javax.json.JsonStructure;
+import uk.trainwatch.util.Consumers;
 
 /**
  *
@@ -204,4 +206,43 @@ public class Rabbit
         RabbitMQ.queueDurableEvent( getConnection(), queueName, topic, routingKey, mapper, event );
     }
 
+    public Consumer<byte[]> publisher( String routingKey )
+    {
+        return publish( RabbitMQ.DEFAULT_TOPIC, routingKey );
+    }
+
+    public Consumer<byte[]> publish( String topic, String routingKey )
+    {
+        return new RabbitConsumer( connection, topic, routingKey );
+    }
+
+    public <T> Consumer<T> publish( String routingKey, Function<T, byte[]> mapper )
+    {
+        return Consumers.consumeIfNotNull( mapper, publisher( routingKey ) );
+    }
+
+    public <T> Consumer<T> publish( String topic, String routingKey, Function<T, byte[]> mapper )
+    {
+        return Consumers.consumeIfNotNull( mapper, publish( topic, routingKey ) );
+    }
+
+    public Consumer<String> publishString( String routingKey )
+    {
+        return publishString( RabbitMQ.DEFAULT_TOPIC, routingKey );
+    }
+
+    public Consumer<String> publishString( String topic, String routingKey )
+    {
+        return publish( topic, routingKey, s -> s != null && !s.isEmpty() ? s.getBytes( RabbitMQ.UTF8 ) : null );
+    }
+
+    public Consumer<? super JsonStructure> publishJson( String routingKey )
+    {
+        return publishJson( RabbitMQ.DEFAULT_TOPIC, routingKey );
+    }
+
+    public Consumer<? super JsonStructure> publishJson( String topic, String routingKey )
+    {
+        return publish( topic, routingKey, j -> j == null ? null : RabbitMQ.jsonToBytes.apply( j ) );
+    }
 }

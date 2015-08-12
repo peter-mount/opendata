@@ -18,12 +18,14 @@ package uk.trainwatch.analysis.rtppm;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Properties;
 import java.util.function.Consumer;
+import javax.annotation.Resource;
+import javax.enterprise.context.ApplicationScoped;
+import javax.sql.DataSource;
 import uk.trainwatch.nrod.trust.model.ChangeOfOrigin;
 import uk.trainwatch.nrod.trust.model.TrainActivation;
 import uk.trainwatch.nrod.trust.model.TrainCancellation;
@@ -44,6 +46,7 @@ import uk.trainwatch.util.sql.SQLConsumer;
  * <p>
  * @author Peter T Mount
  */
+@ApplicationScoped
 public class TrustLogger
         implements SQLConsumer<String>
 {
@@ -56,14 +59,18 @@ public class TrustLogger
 
     private static Properties jdbcProps;
 
-    private static Connection getConnection()
-            throws SQLException
-    {
-        return DriverManager.getConnection( jdbcProps.getProperty( "url" ),
-                                            jdbcProps.getProperty( "username" ),
-                                            jdbcProps.getProperty( "password" )
-        );
-    }
+    
+    @Resource(name = "jdbc/rail")
+    private DataSource dataSource;
+
+//    private static Connection getConnection()
+//            throws SQLException
+//    {
+//        return DriverManager.getConnection( jdbcProps.getProperty( "url" ),
+//                                            jdbcProps.getProperty( "username" ),
+//                                            jdbcProps.getProperty( "password" )
+//        );
+//    }
 
     public static void setup( RabbitConnection rabbitmq )
             throws IOException
@@ -95,7 +102,7 @@ public class TrustLogger
             return;
         }
 
-        try( Connection con = getConnection() )
+        try( Connection con = dataSource.getConnection() )
         {
             final String trainId = t.getTrain_id();
             final int trainClass = Integer.parseInt( trainId.substring( 2, 3 ) );

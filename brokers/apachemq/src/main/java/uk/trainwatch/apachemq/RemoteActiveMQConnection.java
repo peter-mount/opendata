@@ -19,12 +19,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import uk.trainwatch.util.Consumers;
+import uk.trainwatch.util.config.Configuration;
+import uk.trainwatch.util.config.JNDIConfig;
 
 /**
  * Manages a connection to a remote ApacheMQ instance
@@ -44,10 +48,21 @@ public class RemoteActiveMQConnection
     private final ActiveMQConnectionFactory connectionFactory;
     private Connection connection;
 
+    public static RemoteActiveMQConnection getJNDIConnection( String jndiPrefix )
+    {
+        Configuration config = JNDIConfig.INSTANCE;
+        return new RemoteActiveMQConnection(
+                config.get( jndiPrefix + "/host" ),
+                config.getInt( jndiPrefix + "/port" ),
+                config.get( jndiPrefix + "/user" ),
+                config.get( jndiPrefix + "/password" )
+        );
+    }
+
     /**
      *
-     * @param server Server name
-     * @param port Server port
+     * @param server   Server name
+     * @param port     Server port
      * @param username Username
      * @param password Password
      */
@@ -58,24 +73,24 @@ public class RemoteActiveMQConnection
 
     /**
      *
-     * @param server Server name
-     * @param port Server port
+     * @param server   Server name
+     * @param port     Server port
      * @param clientId Unique client id
      * @param username Username
      * @param password Password
      */
     public RemoteActiveMQConnection( final String server, final int port, final String clientId, final String username,
-            final String password )
+                                     final String password )
     {
         this.username = Objects.requireNonNull( username );
         this.clientId = Objects.requireNonNull( clientId );
         this.password = Objects.requireNonNull( password );
 
         brokerUri = "tcp://" + Objects.requireNonNull( server )
-                + ":" + port
-                + "?trace=false"
-                + "&daemon=true"
-                + "&soTimeout=30000";
+                    + ":" + port
+                    + "?trace=false"
+                    + "&daemon=true"
+                    + "&soTimeout=30000";
 
         connectionFactory = new ActiveMQConnectionFactory( brokerUri );
 
@@ -102,17 +117,27 @@ public class RemoteActiveMQConnection
         watchdog.reconnect();
     }
 
+    public <T> void registerTopicConsumer( String topicName, Function<Message, T> mapper, Consumer<T> consumer )
+    {
+        registerTopicConsumer( topicName, Consumers.consumeIfNotNull( mapper, consumer ) );
+    }
+
     /**
      * Register a {@link Consumer} to a topic.
      * <p>
      * A topic can only have one consumer associated with it
      * <p>
      * @param topicName Topic name
-     * @param consumer Consumer
+     * @param consumer  Consumer
      */
     public void registerTopicConsumer( String topicName, Consumer<Message> consumer )
     {
         clients.computeIfAbsent( topicName, k -> new TopicClient( this, topicName, consumer ) );
+    }
+
+    public <T> void registerQueueConsumer( String queueName, Function<Message, T> mapper, Consumer<T> consumer )
+    {
+        registerQueueConsumer( queueName, Consumers.consumeIfNotNull( mapper, consumer ) );
     }
 
     public void registerQueueConsumer( String queueName, Consumer<Message> consumer )
@@ -135,8 +160,7 @@ public class RemoteActiveMQConnection
      */
     public void start()
     {
-        if( watchdog == null )
-        {
+        if( watchdog == null ) {
             watchdog = new Watchdog( this );
         }
         watchdog.start();
@@ -149,13 +173,11 @@ public class RemoteActiveMQConnection
      */
     public void stop()
     {
-        if( watchdog != null )
-        {
-            try
-            {
+        if( watchdog != null ) {
+            try {
                 watchdog.stop();
-            } finally
-            {
+            }
+            finally {
                 watchdog = null;
             }
         }
@@ -171,10 +193,9 @@ public class RemoteActiveMQConnection
      */
     public void connect()
             throws JMSException,
-            InterruptedException
+                   InterruptedException
     {
-        if( disconnect() )
-        {
+        if( disconnect() ) {
             // Sleep for 1 second so we don't flood the broker
             Thread.sleep( 1000L );
         }
@@ -201,24 +222,21 @@ public class RemoteActiveMQConnection
      */
     public boolean disconnect()
     {
-        if( connection != null )
-        {
+        if( connection != null ) {
             LOG.info( () -> "Disconnecting from " + brokerUri );
 
-            try
-            {
+            try {
                 clients.values().forEach( MQClient::stop );
-            } finally
-            {
+            }
+            finally {
 
-                try
-                {
+                try {
                     connection.close();
-                } catch( JMSException ex )
-                {
+                }
+                catch( JMSException ex ) {
                     LOG.log( Level.SEVERE, null, ex );
-                } finally
-                {
+                }
+                finally {
                     connection = null;
                 }
             }

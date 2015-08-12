@@ -12,6 +12,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.inject.Inject;
+import uk.trainwatch.util.CDIUtils;
 import uk.trainwatch.util.DaemonThreadFactory;
 
 /**
@@ -41,6 +43,9 @@ public class RateMonitor<T>
     @SuppressWarnings("NonConstantLogger")
     private final Logger log;
 
+    @Inject
+    private RateStatistics rateStatistics;
+
     private final String label;
     private int lastCount;
     private long total;
@@ -65,6 +70,7 @@ public class RateMonitor<T>
         return new RateMonitor<>( log, level, label );
     }
 
+    @SuppressWarnings("LeakingThisInConstructor")
     public RateMonitor( Logger log, Level level, String label )
     {
         this.log = log == null ? Logger.getLogger( RateMonitor.class.getName() ) : log;
@@ -77,9 +83,13 @@ public class RateMonitor<T>
 
             // Reduce logspam by only logging when we've done something
             if( lastCount > 0 ) {
-                log.log( level, () -> label + ' ' + lastCount );
+                this.log.log( level, () -> label + ' ' + lastCount );
             }
+
+            rateStatistics.submit( label, lastCount );
         }, 1L, 1L, TimeUnit.MINUTES );
+
+        CDIUtils.inject( this );
     }
 
     @Override
