@@ -8,6 +8,7 @@ package uk.trainwatch.rabbitmq;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.ShutdownSignalException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Map;
@@ -103,8 +104,7 @@ public class RabbitConnection
     public synchronized Connection getConnection()
             throws IOException
     {
-        if( connection == null )
-        {
+        if( connection == null ) {
             createConnection();
         }
         return connection;
@@ -113,8 +113,7 @@ public class RabbitConnection
     private void createConnection()
             throws IOException
     {
-        if( connection != null )
-        {
+        if( connection != null ) {
             close();
         }
 
@@ -122,13 +121,11 @@ public class RabbitConnection
         ConnectionFactory factory = new ConnectionFactory();
         factory.setUsername( username );
         factory.setPassword( password );
-        if( virtualHost != null )
-        {
+        if( virtualHost != null ) {
             factory.setVirtualHost( virtualHost );
         }
         factory.setHost( host );
-        if( portNumber > 0 )
-        {
+        if( portNumber > 0 ) {
             factory.setPort( portNumber );
         }
 
@@ -151,23 +148,18 @@ public class RabbitConnection
     public synchronized Channel getChannel( Object key )
     {
         Channel channel = null;
-        do
-        {
-            channel = channels.computeIfAbsent( key, k ->
-                                        {
-                                            try
-                                            {
-                                                LOG.log( Level.FINE, "creating channel" );
-                                                return getConnection().
-                                                        createChannel();
-                                            }
-                                            catch( IOException ex )
-                                            {
-                                                throw new UncheckedIOException( ex );
-                                            }
+        do {
+            channel = channels.computeIfAbsent( key, k -> {
+                try {
+                    LOG.log( Level.FINE, "creating channel" );
+                    return getConnection().
+                            createChannel();
+                }
+                catch( IOException ex ) {
+                    throw new UncheckedIOException( ex );
+                }
             } );
-            if( channel != null && !channel.isOpen() )
-            {
+            if( channel != null && !channel.isOpen() ) {
                 LOG.log( Level.FINE, "discarding dead channel" );
 
                 channels.remove( key );
@@ -175,20 +167,20 @@ public class RabbitConnection
             }
         }
         while( channel == null );
-        
+
         return channel;
     }
 
     public void close( Object key, Channel channel )
     {
-        if( channels.remove( key, channel ) )
-        {
-            try
-            {
+        if( channels.remove( key, channel ) ) {
+            try {
                 channel.close();
             }
-            catch( IOException ex )
-            {
+            catch( ShutdownSignalException ex ) {
+                // Ignore
+            }
+            catch( IOException ex ) {
                 Logger.getLogger( RabbitConnection.class.getName() ).
                         log( Level.SEVERE, null, ex );
             }
@@ -201,36 +193,27 @@ public class RabbitConnection
     public synchronized void close()
     {
         LOG.log( Level.FINE, "closing connection" );
-        try
-        {
-            try
-            {
-                channels.forEach( (n, c) ->
-                {
-                    try
-                    {
+        try {
+            try {
+                channels.forEach( ( n, c ) -> {
+                    try {
                         c.close();
                     }
-                    catch( Throwable t )
-                    {
+                    catch( Throwable t ) {
                         // Ignore as we are cleaning up
                     }
                 } );
             }
-            finally
-            {
-                if( connection != null )
-                {
+            finally {
+                if( connection != null ) {
                     connection.close();
                 }
             }
         }
-        catch( Throwable t )
-        {
+        catch( Throwable t ) {
             // Ignore as we are cleaning up
         }
-        finally
-        {
+        finally {
             channels.clear();
             connection = null;
         }

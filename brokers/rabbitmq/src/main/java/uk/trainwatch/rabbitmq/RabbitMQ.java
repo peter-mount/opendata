@@ -11,15 +11,20 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
+import javax.enterprise.event.Event;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 import javax.json.JsonStructure;
+import uk.trainwatch.util.Consumers;
 import uk.trainwatch.util.JsonUtils;
 import uk.trainwatch.util.Streams;
 import uk.trainwatch.util.config.Configuration;
 import uk.trainwatch.util.config.JNDIConfig;
+import uk.trainwatch.util.counter.RateMonitor;
 
 /**
  *
@@ -27,6 +32,8 @@ import uk.trainwatch.util.config.JNDIConfig;
  */
 public class RabbitMQ
 {
+
+    private static final Logger LOG = Logger.getLogger( RabbitMQ.class.getName() );
 
     public static final String DEFAULT_TOPIC = "amq.topic";
     public static final Charset UTF8 = Charset.forName( "UTF-8" );
@@ -44,6 +51,10 @@ public class RabbitMQ
      * Composed function to encode a {@link JsonStructure} into a byte[] using UTF-8
      */
     public static final Function<? super JsonStructure, byte[]> jsonToBytes = JsonUtils.toString.andThen( toBytes );
+
+    public static final Function<byte[], JsonObject> toJsonObject = toString.andThen( JsonUtils.parseJsonObject );
+
+    public static final Function<byte[], JsonArray> toJsonArray = toString.andThen( JsonUtils.parseJsonArray );
 
     /**
      * Convenience method that returns a {@link Consumer} of String that will publish to the remote default topic
@@ -188,6 +199,57 @@ public class RabbitMQ
     /**
      * Create an infinite Stream fed by the broker. This stream will run on a background thread.
      * <p>
+     * @param <T>        Type of message
+     * @param connection Broker connection
+     * @param queueName  Queue name
+     * @param routingKey Routing Key to bind to
+     * @param mapper     Mapping function to form T from a byte[]
+     * @param event      CDI Event to fire
+     */
+    public static <T> void queueStream( RabbitConnection connection, String queueName, String routingKey, Function<byte[], T> mapper, Event<T> event )
+    {
+        queueStream( connection, queueName, DEFAULT_TOPIC, routingKey, mapper, event );
+    }
+
+    /**
+     * Create a consumer that will take a stream and consume it
+     * <p>
+     * @param <T>        Type of message
+     * @param queueName  used in logging
+     * @param routingKey used in logging
+     * @param mapper     Mapping function to form T from a byte[]
+     * @param event      CDI Event to fire
+     * <p>
+     * @return
+     */
+    public static <T> Consumer<Stream<byte[]>> queueConsumer( String queueName, String routingKey, Function<byte[], T> mapper, Event<T> event )
+    {
+        final Consumer<T> consumer = Consumers.guard( event::fire ).
+                andThen( RateMonitor.log( LOG, "Receive " + queueName + "[" + routingKey + "]" ) );
+        return s -> s.map( mapper ).filter( Objects::nonNull ).forEach( consumer );
+    }
+
+    /**
+     * Create an infinite Stream fed by the broker. This stream will run on a background thread.
+     * <p>
+     * @param <T>        Type of message
+     * @param connection Broker connection
+     * @param queueName  Queue name
+     * @param topic      Topic to bind to
+     * @param routingKey Routing Key to bind to
+     * @param mapper     Mapping function to form T from a byte[]
+     * @param event      CDI Event to fire
+     */
+    public static <T> void queueStream( RabbitConnection connection, String queueName, String topic, String routingKey,
+                                        Function<byte[], T> mapper,
+                                        Event<T> event )
+    {
+        queueStream( connection, queueName, topic, routingKey, false, null, queueConsumer( queueName, routingKey, mapper, event ) );
+    }
+
+    /**
+     * Create an infinite Stream fed by the broker. This stream will run on a background thread.
+     * <p>
      * @param connection Broker connection
      * @param queueName  Queue name
      * @param factory    Consumer that will take the final stream and consume it
@@ -210,6 +272,35 @@ public class RabbitMQ
                                            Consumer<Stream<byte[]>> factory )
     {
         queueStream( connection, queueName, DEFAULT_TOPIC, routingKey, true, null, factory );
+    }
+
+    /**
+     * Create an infinite Stream fed by the broker. This stream will run on a background thread.
+     * <p>
+     * @param <T>        Type of message
+     * @param connection Broker connection
+     * @param queueName  Queue name
+     * @param mapper     Mapping function to form T from a byte[]
+     * @param event      CDI Event to fire
+     */
+    public static <T> void queueDurableStream( RabbitConnection connection, String queueName, Function<byte[], T> mapper, Event<T> event )
+    {
+        queueStream( connection, queueName, null, mapper, event );
+    }
+
+    /**
+     * Create an infinite Stream fed by the broker. This stream will run on a background thread.
+     * <p>
+     * @param <T>        Type of message
+     * @param connection Broker connection
+     * @param queueName  Queue name
+     * @param routingKey Routing Key to bind to
+     * @param mapper     Mapping function to form T from a byte[]
+     * @param event      CDI Event to fire
+     */
+    public static <T> void queueDurableStream( RabbitConnection connection, String queueName, String routingKey, Function<byte[], T> mapper, Event<T> event )
+    {
+        queueStream( connection, queueName, DEFAULT_TOPIC, routingKey, true, null, queueConsumer( queueName, routingKey, mapper, event ) );
     }
 
     /**

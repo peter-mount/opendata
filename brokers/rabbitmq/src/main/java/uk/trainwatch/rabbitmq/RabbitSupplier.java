@@ -7,6 +7,7 @@ package uk.trainwatch.rabbitmq;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
+import com.rabbitmq.client.ShutdownSignalException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -125,6 +126,9 @@ public class RabbitSupplier
                         LOG.log( Level.SEVERE, "IOException, attempting to recover", ex );
                         closeImpl();
                     }
+                }
+                catch( ShutdownSignalException ex ) {
+                    LOG.log( Level.WARNING, "Shutting down" );
                 }
                 catch( Throwable ex ) {
                     // Catch all others so the thread doesn't terminate but try to recover by reconnecting.
