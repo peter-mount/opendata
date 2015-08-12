@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,9 +45,19 @@ public class RabbitSupplier
     /**
      * Only allow a single message to be queued
      */
-    private final BlockingSupplierConsumer<byte[]> supplier = new BlockingSupplierConsumer<>( 1 );
+    private final BlockingSupplierConsumer<byte[]> supplier;
+    private final Consumer<byte[]> optionalConsumer;
+    private Thread thread;
 
     RabbitSupplier( RabbitConnection connection, String queueName, String bindTopic, String bindRoutingKey,
+                    boolean durable,
+                    Map<String, Object> queueProperties )
+    {
+        this( connection, queueName, bindTopic, bindRoutingKey, null, durable, queueProperties );
+    }
+
+    RabbitSupplier( RabbitConnection connection, String queueName, String bindTopic, String bindRoutingKey,
+                    Consumer<byte[]> optionalConsumer,
                     boolean durable,
                     Map<String, Object> queueProperties )
     {
@@ -56,6 +67,9 @@ public class RabbitSupplier
         this.bindRoutingKey = bindRoutingKey;
         this.durable = durable;
 
+        this.optionalConsumer = optionalConsumer;
+        supplier = optionalConsumer == null ? new BlockingSupplierConsumer<>( 1 ) : null;
+        
         if( durable ) {
             this.queueProperties = queueProperties == null ? new HashMap<>() : queueProperties;
 
@@ -111,7 +125,7 @@ public class RabbitSupplier
     @SuppressWarnings("UseSpecificCatch")
     public final void start()
     {
-        DaemonThreadFactory.INSTANCE.newThread( () -> {
+        thread = DaemonThreadFactory.INSTANCE.newThread( () -> {
             running = true;
             while( running ) {
                 try {
@@ -129,6 +143,7 @@ public class RabbitSupplier
                 }
                 catch( ShutdownSignalException ex ) {
                     LOG.log( Level.WARNING, "Shutting down" );
+                    running = false;
                 }
                 catch( Throwable ex ) {
                     // Catch all others so the thread doesn't terminate but try to recover by reconnecting.
@@ -143,14 +158,18 @@ public class RabbitSupplier
                 }
             }
             LOG.log( Level.FINE, () -> "Worker " + queueName + " terminated" );
+            closeImpl();
 
-        } ).
-                start();
+        } );
+        thread.start();
     }
 
     public final void stop()
     {
         running = false;
+        if( thread != null ) {
+            thread.interrupt();
+        }
         closeImpl();
     }
 
@@ -210,7 +229,12 @@ public class RabbitSupplier
                 nextDelivery();
 
         try {
-            supplier.accept( delivery.getBody() );
+            if( optionalConsumer == null ) {
+                supplier.accept( delivery.getBody() );
+            }
+            else {
+                optionalConsumer.accept( delivery.getBody() );
+            }
 
             // ack as we have handled it safely
             channel.basicAck( delivery.getEnvelope().

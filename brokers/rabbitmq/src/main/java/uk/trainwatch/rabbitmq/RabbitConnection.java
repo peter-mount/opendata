@@ -40,6 +40,16 @@ public class RabbitConnection
      */
     private final Map<Object, Channel> channels = new ConcurrentHashMap<>();
 
+    RabbitConnection()
+    {
+        this.username = null;
+        this.password = null;
+        this.virtualHost = null;
+        this.host = null;
+        this.portNumber = 0;
+    }
+
+    
     /**
      *
      * @param username    remote username

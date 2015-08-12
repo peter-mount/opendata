@@ -25,12 +25,13 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 import uk.trainwatch.nrod.td.model.TDMessage;
 import uk.trainwatch.nrod.td.model.TDMessageFactory;
-import uk.trainwatch.rabbitmq.RabbitConnection;
+import uk.trainwatch.rabbitmq.Rabbit;
 import uk.trainwatch.rabbitmq.RabbitMQ;
 import uk.trainwatch.util.config.JNDIConfig;
 
 /**
  * Ensures that, if enabled, we start receiving signal messages and populate our caches
+ * <p>
  * @author peter
  */
 @ApplicationScoped
@@ -46,7 +47,8 @@ public class SignalContextListener
     @Inject
     private Event<TDMessage> event;
 
-    private RabbitConnection rabbitConnection;
+    @Inject
+    private Rabbit rabbit;
 
     @Override
     public void contextInitialized( ServletContextEvent sce )
@@ -60,22 +62,16 @@ public class SignalContextListener
         String localHost = RabbitMQ.getHostname();
         boolean dev = "europa".equals( localHost ) || "phoebe".equals( localHost );
 
-        rabbitConnection = RabbitMQ.createJNDIConnection( "rabbit/uktrain" );
-
-        RabbitMQ.queueDurableStream( rabbitConnection,
-                                     QUEUE_NAME,
-                                     dev ? "nr.td.area.A3" : "nr.td.area.#",
-                                     RabbitMQ.toJsonObject.andThen( TDMessageFactory.INSTANCE ),
-                                     event );
+        // Now pass all messages to an event
+        rabbit.queueDurableEvent( QUEUE_NAME,
+                                  dev ? "nr.td.area.A3" : "nr.td.area.#",
+                                  RabbitMQ.toJsonObject.andThen( TDMessageFactory.INSTANCE ),
+                                  event );
     }
 
     @Override
     public void contextDestroyed( ServletContextEvent sce )
     {
-        if( rabbitConnection != null ) {
-            rabbitConnection.close();
-            rabbitConnection = null;
-        }
     }
 
 }

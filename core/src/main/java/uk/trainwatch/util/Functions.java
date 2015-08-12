@@ -23,7 +23,7 @@ public class Functions
      * <p>
      * @return mapping function
      */
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public static <I, R> Function<I, R> castingIdentity()
     {
         return i -> (R) i;
@@ -38,8 +38,7 @@ public class Functions
      */
     public static <T> BinaryOperator<T> throwingBinaryOperator()
     {
-        return ( u, v ) ->
-        {
+        return ( u, v ) -> {
             throw new IllegalStateException( String.format( "Duplicate key %s", u ) );
         };
     }
@@ -71,7 +70,7 @@ public class Functions
     /**
      * Cast to a specific class
      * <p>
-     * @param <T> Type of class
+     * @param <T>   Type of class
      * @param clazz Class of type T to cast to
      * <p>
      * @return casted object or null if null or not an instance of clazz
@@ -85,22 +84,20 @@ public class Functions
      * Get a class by name
      * <p>
      * @param <T> Type of class
-     * @param n class name
+     * @param n   class name
      * <p>
      * @return Class or null if not found
      */
     public static <T> Class<T> forName( String n )
     {
-        if( n == null || n.isEmpty() )
-        {
+        if( n == null || n.isEmpty() ) {
             return null;
-        } else
-        {
-            try
-            {
+        }
+        else {
+            try {
                 return (Class<T>) Class.forName( n );
-            } catch( ClassNotFoundException ex )
-            {
+            }
+            catch( ClassNotFoundException ex ) {
                 return null;
             }
         }
@@ -112,7 +109,7 @@ public class Functions
      * This is equivalent of newInstance(forName(n))
      * <p>
      * @param <T> Type of class
-     * @param n Class name
+     * @param n   Class name
      * <p>
      * @return new instance or null if it could not be instantiated
      */
@@ -124,27 +121,36 @@ public class Functions
     /**
      * Create a new instance of a class
      * <p>
-     * @param <T> Type of class
+     * @param <T>   Type of class
      * @param clazz Class
      * <p>
      * @return new instance or null if it could not be instantiated
      */
     public static <T> T newInstance( Class<T> clazz )
     {
-        if( clazz == null )
-        {
+        if( clazz == null ) {
             return null;
-        } else
-        {
-            try
-            {
+        }
+        else {
+            try {
                 return clazz.newInstance();
-            } catch( InstantiationException |
-                    IllegalAccessException ex )
-            {
+            }
+            catch( InstantiationException |
+                   IllegalAccessException ex ) {
                 return null;
             }
         }
     }
 
+    public static <T, R> Function<T, R> guard( Function<T, R> f )
+    {
+        return r -> {
+            try {
+                return f.apply( r );
+            }
+            catch( Throwable t ) {
+                return null;
+            }
+        };
+    }
 }

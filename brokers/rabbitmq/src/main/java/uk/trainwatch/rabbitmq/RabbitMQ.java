@@ -196,6 +196,66 @@ public class RabbitMQ
         queueStream( connection, queueName, topic, routingKey, false, null, factory );
     }
 
+    public static <T> void queueConsumer( RabbitConnection connection, String queueName, String routingKey,
+                                          Map<String, Object> properties,
+                                          Function<byte[], T> mapper,
+                                          Consumer<T> consumer )
+    {
+        queueConsumer( connection, queueName, DEFAULT_TOPIC, routingKey, properties, mapper, consumer );
+    }
+
+    public static <T> void queueConsumer( RabbitConnection connection, String queueName, String routingKey,
+                                          Function<byte[], T> mapper,
+                                          Consumer<T> consumer )
+    {
+        queueConsumer( connection, queueName, DEFAULT_TOPIC, routingKey, null, mapper, consumer );
+    }
+
+    public static <T> void queueConsumer( RabbitConnection connection, String queueName, String topic, String routingKey,
+                                          Function<byte[], T> mapper,
+                                          Consumer<T> consumer )
+    {
+        queueConsumer( connection, queueName, DEFAULT_TOPIC, routingKey, null, mapper, consumer );
+    }
+
+    public static <T> void queueConsumer( RabbitConnection connection, String queueName, String topic, String routingKey,
+                                          Map<String, Object> properties,
+                                          Function<byte[], T> mapper,
+                                          Consumer<T> consumer )
+    {
+        queueConsumer( connection, queueName, topic, routingKey, false, properties, Consumers.consumeIfNotNull( mapper, consumer ) );
+    }
+
+    public static <T> void queueDurableConsumer( RabbitConnection connection, String queueName, String routingKey,
+                                                 Function<byte[], T> mapper,
+                                                 Consumer<T> consumer )
+    {
+        queueDurableConsumer( connection, queueName, DEFAULT_TOPIC, routingKey, null, mapper, consumer );
+    }
+
+    public static <T> void queueDurableConsumer( RabbitConnection connection, String queueName, String routingKey,
+                                                 Map<String, Object> properties,
+                                                 Function<byte[], T> mapper,
+                                                 Consumer<T> consumer )
+    {
+        queueDurableConsumer( connection, queueName, DEFAULT_TOPIC, routingKey, properties, mapper, consumer );
+    }
+
+    public static <T> void queueDurableConsumer( RabbitConnection connection, String queueName, String topic, String routingKey,
+                                                 Function<byte[], T> mapper,
+                                                 Consumer<T> consumer )
+    {
+        queueDurableConsumer( connection, queueName, topic, routingKey, null, mapper, consumer );
+    }
+
+    public static <T> void queueDurableConsumer( RabbitConnection connection, String queueName, String topic, String routingKey,
+                                                 Map<String, Object> properties,
+                                                 Function<byte[], T> mapper,
+                                                 Consumer<T> consumer )
+    {
+        queueConsumer( connection, queueName, topic, routingKey, true, properties, Consumers.consumeIfNotNull( mapper, consumer ) );
+    }
+
     /**
      * Create an infinite Stream fed by the broker. This stream will run on a background thread.
      * <p>
@@ -206,27 +266,9 @@ public class RabbitMQ
      * @param mapper     Mapping function to form T from a byte[]
      * @param event      CDI Event to fire
      */
-    public static <T> void queueStream( RabbitConnection connection, String queueName, String routingKey, Function<byte[], T> mapper, Event<T> event )
+    public static <T> void queueEvent( RabbitConnection connection, String queueName, String routingKey, Function<byte[], T> mapper, Event<T> event )
     {
-        queueStream( connection, queueName, DEFAULT_TOPIC, routingKey, mapper, event );
-    }
-
-    /**
-     * Create a consumer that will take a stream and consume it
-     * <p>
-     * @param <T>        Type of message
-     * @param queueName  used in logging
-     * @param routingKey used in logging
-     * @param mapper     Mapping function to form T from a byte[]
-     * @param event      CDI Event to fire
-     * <p>
-     * @return
-     */
-    public static <T> Consumer<Stream<byte[]>> queueConsumer( String queueName, String routingKey, Function<byte[], T> mapper, Event<T> event )
-    {
-        final Consumer<T> consumer = Consumers.guard( event::fire ).
-                andThen( RateMonitor.log( LOG, "Receive " + queueName + "[" + routingKey + "]" ) );
-        return s -> s.map( mapper ).filter( Objects::nonNull ).forEach( consumer );
+        queueConsumer( connection, queueName, routingKey, mapper, event::fire );
     }
 
     /**
@@ -240,11 +282,11 @@ public class RabbitMQ
      * @param mapper     Mapping function to form T from a byte[]
      * @param event      CDI Event to fire
      */
-    public static <T> void queueStream( RabbitConnection connection, String queueName, String topic, String routingKey,
-                                        Function<byte[], T> mapper,
-                                        Event<T> event )
+    public static <T> void queueEvent( RabbitConnection connection, String queueName, String topic, String routingKey,
+                                       Function<byte[], T> mapper,
+                                       Event<T> event )
     {
-        queueStream( connection, queueName, topic, routingKey, false, null, queueConsumer( queueName, routingKey, mapper, event ) );
+        queueConsumer( connection, queueName, topic, routingKey, mapper, event::fire );
     }
 
     /**
@@ -283,9 +325,9 @@ public class RabbitMQ
      * @param mapper     Mapping function to form T from a byte[]
      * @param event      CDI Event to fire
      */
-    public static <T> void queueDurableStream( RabbitConnection connection, String queueName, Function<byte[], T> mapper, Event<T> event )
+    public static <T> void queueDurableEvent( RabbitConnection connection, String queueName, String routingKey, Function<byte[], T> mapper, Event<T> event )
     {
-        queueStream( connection, queueName, null, mapper, event );
+        queueDurableConsumer( connection, queueName, routingKey, mapper, event::fire );
     }
 
     /**
@@ -298,9 +340,10 @@ public class RabbitMQ
      * @param mapper     Mapping function to form T from a byte[]
      * @param event      CDI Event to fire
      */
-    public static <T> void queueDurableStream( RabbitConnection connection, String queueName, String routingKey, Function<byte[], T> mapper, Event<T> event )
+    public static <T> void queueDurableEvent( RabbitConnection connection, String queueName, String topic, String routingKey, Function<byte[], T> mapper,
+                                              Event<T> event )
     {
-        queueStream( connection, queueName, DEFAULT_TOPIC, routingKey, true, null, queueConsumer( queueName, routingKey, mapper, event ) );
+        queueDurableConsumer( connection, queueName, topic, routingKey, mapper, event::fire );
     }
 
     /**
@@ -427,6 +470,19 @@ public class RabbitMQ
         RabbitSupplier supplier = new RabbitSupplier( connection, realQueue, topic, routingKey, durable, properties );
         Streams.supplierStream( supplier, factory );
         supplier.start();
+    }
+
+    private static void queueConsumer( RabbitConnection connection,
+                                       String queueName,
+                                       String topic, String routingKey,
+                                       boolean durable,
+                                       Map<String, Object> properties,
+                                       Consumer<byte[]> consumer )
+    {
+        new RabbitSupplier( connection, queueName + "." + getHostname(), topic, routingKey,
+                            consumer.andThen( RateMonitor.log( LOG, routingKey == null ? queueName : (queueName + "[" + routingKey + "]") ) ),
+                            durable, properties ).
+                start();
     }
 
     public static String getHostname()
