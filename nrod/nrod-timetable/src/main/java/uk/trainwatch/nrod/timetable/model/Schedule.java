@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.nrod.timetable.model;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -42,7 +43,10 @@ import uk.trainwatch.nrod.timetable.util.TrainUID;
  * @author Peter T Mount
  */
 public class Schedule
+        implements Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     private final BasicSchedule basicSchedule;
     private final BasicScheduleExtras basicScheduleExtras;
@@ -72,8 +76,7 @@ public class Schedule
      */
     public OriginLocation getOrigin()
     {
-        if( locations == null || locations.isEmpty() )
-        {
+        if( locations == null || locations.isEmpty() ) {
             return null;
         }
         return (OriginLocation) locations.get( 0 );
@@ -82,12 +85,10 @@ public class Schedule
     public LocalTime getDeparture()
     {
         OriginLocation l = getOrigin();
-        if( l == null )
-        {
+        if( l == null ) {
             return null;
         }
-        if( isClass5() || isFreight() )
-        {
+        if( isClass5() || isFreight() ) {
             return l.getWorkDeparture();
         }
         return l.getPublicDeparture();
@@ -100,8 +101,7 @@ public class Schedule
      */
     public TerminatingLocation getDestination()
     {
-        if( locations == null || locations.isEmpty() )
-        {
+        if( locations == null || locations.isEmpty() ) {
             return null;
         }
         return (TerminatingLocation) locations.get( locations.size() - 1 );
@@ -110,12 +110,10 @@ public class Schedule
     public LocalTime getArrival()
     {
         TerminatingLocation l = getDestination();
-        if( l == null )
-        {
+        if( l == null ) {
             return null;
         }
-        if( isClass5() || isFreight() )
-        {
+        if( isClass5() || isFreight() ) {
             return l.getWorkArrival();
         }
         return l.getPublicArrival();

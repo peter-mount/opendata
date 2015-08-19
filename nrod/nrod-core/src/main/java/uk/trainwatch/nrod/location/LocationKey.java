@@ -4,6 +4,7 @@
  */
 package uk.trainwatch.nrod.location;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -11,8 +12,11 @@ import java.util.Objects;
  * @author peter
  */
 public class LocationKey
-        implements Comparable<LocationKey>
+        implements Comparable<LocationKey>,
+                   Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     private final String key;
     private final long id;
@@ -54,8 +58,7 @@ public class LocationKey
     @Override
     public final boolean equals( Object obj )
     {
-        if( obj == null || getClass() != obj.getClass() )
-        {
+        if( obj == null || getClass() != obj.getClass() ) {
             return false;
         }
         final LocationKey other = (LocationKey) obj;

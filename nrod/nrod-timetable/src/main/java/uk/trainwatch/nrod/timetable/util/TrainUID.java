@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.nrod.timetable.util;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -12,7 +13,10 @@ import java.util.Objects;
  * @author Peter T Mount
  */
 public class TrainUID
+        implements Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     private final String id;
 

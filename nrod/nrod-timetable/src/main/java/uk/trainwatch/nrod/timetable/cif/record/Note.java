@@ -5,6 +5,8 @@
  */
 package uk.trainwatch.nrod.timetable.cif.record;
 
+import java.io.Serializable;
+
 /**
  * Train Specific Note
  * <p>
@@ -14,7 +16,10 @@ package uk.trainwatch.nrod.timetable.cif.record;
  */
 public abstract class Note
         extends Record
+        implements Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     private final String noteType;
     private final String note;

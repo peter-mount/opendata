@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.nrod.timetable.cif.record;
 
+import java.io.Serializable;
 import uk.trainwatch.nrod.location.Tiploc;
 
 /**
@@ -13,7 +14,10 @@ import uk.trainwatch.nrod.location.Tiploc;
  */
 public abstract class TIPLOCAction
         extends Record
+        implements Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     private final Tiploc tiploc;
 

@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.nrod.timetable.util;
 
+import java.io.Serializable;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,7 +19,10 @@ import java.util.Objects;
  * @author Peter T Mount
  */
 public class DaysRun
+        implements Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     private static final Day DAYS[] = Day.values();
 

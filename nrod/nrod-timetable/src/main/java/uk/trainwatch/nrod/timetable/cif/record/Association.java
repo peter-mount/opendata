@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.nrod.timetable.cif.record;
 
+import java.io.Serializable;
 import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.util.function.Function;
@@ -24,7 +25,10 @@ import uk.trainwatch.util.sql.SQLFunction;
  */
 public class Association
         extends Record
+        implements Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     static final Function<CIFParser, Record> factory = p -> new Association(
             p.getTransactionType(),

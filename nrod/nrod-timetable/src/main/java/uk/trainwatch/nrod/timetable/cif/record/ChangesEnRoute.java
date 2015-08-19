@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.nrod.timetable.cif.record;
 
+import java.io.Serializable;
 import java.time.LocalTime;
 import java.util.function.Function;
 import javax.json.Json;
@@ -28,7 +29,10 @@ import uk.trainwatch.util.JsonUtils;
  */
 public class ChangesEnRoute
         extends Location
+        implements Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     static final Function<CIFParser, Record> factory = p -> new ChangesEnRoute(
             p.getTiplocSuffix(),

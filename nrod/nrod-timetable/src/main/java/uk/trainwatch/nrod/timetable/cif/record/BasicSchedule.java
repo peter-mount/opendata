@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.nrod.timetable.cif.record;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.function.Function;
 import javax.json.Json;
@@ -34,7 +35,10 @@ import uk.trainwatch.util.TimeUtils;
  */
 public class BasicSchedule
         extends Record
+        implements Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     // Page 17
     static final Function<CIFParser, Record> factory = p -> new BasicSchedule(

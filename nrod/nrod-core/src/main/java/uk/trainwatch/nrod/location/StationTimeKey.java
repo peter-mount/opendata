@@ -15,6 +15,9 @@ public class StationTimeKey
         implements Serializable
 {
 
+    private static final long serialVersionUID = 1L;
+    
+
     private final long stanox;
     private final long start;
 

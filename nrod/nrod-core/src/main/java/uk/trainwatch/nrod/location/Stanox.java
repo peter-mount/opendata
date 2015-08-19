@@ -4,13 +4,18 @@
  */
 package uk.trainwatch.nrod.location;
 
+import java.io.Serializable;
+
 /**
  *
  * @author peter
  */
 public class Stanox
         extends LocationKey
+        implements Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * Ensures that the supplied stanox is within the range 0...99999

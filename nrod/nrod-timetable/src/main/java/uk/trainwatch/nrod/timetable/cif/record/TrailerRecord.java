@@ -5,6 +5,7 @@
  */
 package uk.trainwatch.nrod.timetable.cif.record;
 
+import java.io.Serializable;
 import java.util.function.Function;
 
 /**
@@ -13,8 +14,11 @@ import java.util.function.Function;
  */
 public class TrailerRecord
         extends Record
+        implements Serializable
 {
 
+    private static final long serialVersionUID = 1L;
+    
     static final Function<CIFParser, Record> factory = p -> new TrailerRecord();
 
     public TrailerRecord()
