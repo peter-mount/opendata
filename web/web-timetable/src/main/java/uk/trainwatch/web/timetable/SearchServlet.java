@@ -9,8 +9,10 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
+import uk.trainwatch.nrod.location.TrainLocationFactory;
 import uk.trainwatch.web.servlet.ApplicationRequest;
 
 /**
@@ -22,6 +24,9 @@ import uk.trainwatch.web.servlet.ApplicationRequest;
 public class SearchServlet
         extends AbstractSearchServlet
 {
+
+    @Inject
+    protected TrainLocationFactory trainLocationFactory;
 
     @Override
     protected void doSearch( ApplicationRequest request )

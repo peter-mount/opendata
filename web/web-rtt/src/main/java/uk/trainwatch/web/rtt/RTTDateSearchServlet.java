@@ -82,7 +82,7 @@ public class RTTDateSearchServlet
     {
         LocalDateTime start = LocalDateTime.of( date, time ).truncatedTo( ChronoUnit.HOURS );
         LocalDateTime now = LocalDateTime.now( TimeUtils.LONDON );
-        if( start.isBefore( now.minusDays( 7 ) ) ) {
+        if( start.isBefore( now.minusMonths( 2 ).withDayOfMonth( 1 ).minusDays( 1 ) ) ) {
             request.sendError( HttpServletResponse.SC_GONE, "Requested date/time is too far in the past" );
         }
         else if( now.truncatedTo( ChronoUnit.DAYS ).plusDays( 1 ).isBefore( start ) ) {
@@ -116,7 +116,7 @@ public class RTTDateSearchServlet
             req.put( "startDate", TimeUtils.toDate( start.toLocalDate() ) );
 
             LocalDateTime back = start.minusHours( 1 );
-            if( back.isAfter( now.minusDays( 7 ) ) ) {
+            if( back.isAfter( now.minusMonths( 2 ).withDayOfMonth( 1 ).minusDays( 1 ) ) ) {
                 req.put( "back", back );
             }
 

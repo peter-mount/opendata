@@ -12,9 +12,11 @@ import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
+import uk.trainwatch.nrod.location.TrainLocationFactory;
 import uk.trainwatch.util.TimeUtils;
 import uk.trainwatch.web.servlet.ApplicationRequest;
 
@@ -30,6 +32,9 @@ public class StationScheduleServlet
 
     private static final Pattern STATION_TODAY = Pattern.compile( "^/([a-zA-Z]+)$" );
     private static final Pattern STATION_DATE = Pattern.compile( "^/([a-zA-Z]+)/([0-9]+)/([0-9]+)/([0-9]+)$" );
+
+    @Inject
+    protected TrainLocationFactory trainLocationFactory;
 
     /**
      * Validates the path is uppercase as locations are from a mainframe. If not then issue a redirect.

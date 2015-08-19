@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+<tiles-definitions>
+    
+    <!-- The new homepage layout and search pages -->
+    
+    <!-- Search panels -->
+    <definition name=".panel.search" template="/common/search/search_panel.jsp" />
+    
+    <!-- new home page -->
+    <definition name="ukt.search" extends="layout.main">
+        <put-attribute name="title" value="UKTrain Home" />
+        <put-attribute name="body" value=".ukt.search" />
+        <put-attribute name="javascript" value="/common/jquery_flot.jsp" />
+    </definition>
+    <definition name=".ukt.search" extends="layout.1col">
+        <put-attribute name="center" value=".ukt.search.panel" />
+    </definition>
+    <definition name=".ukt.search.panel" template="/common/search/home.jsp">
+        <put-attribute name="search" value=".panel.search" />
+    </definition>
+
+    <!-- Timetable search results -->
+    <definition name="ukt.timetable.search" extends="layout.main">
+        <put-attribute name="title" value="UK Timetables" />
+        <put-attribute name="body" value=".ukt.timetable.search" />
+        <put-attribute name="javascript" value="/common/jquery.jsp" />
+    </definition>
+    <definition name=".ukt.timetable.search" extends="layout.1col">
+        <put-attribute name="center" value=".ukt.timetable.search.pane" />
+    </definition>
+    <definition name=".ukt.timetable.search.pane" template="/common/search/results.jsp">
+        <put-attribute name="search" value=".panel.search" />
+        <put-attribute name="results" value="/common/timetable/search_center.jsp" />
+    </definition>
+    
+    <!-- Past/Current search results -->
+    <definition name="ukt.train.search" extends="layout.main">
+        <put-attribute name="title" value="Current Train Status" />
+        <put-attribute name="body" value=".ukt.train.search" />
+        <put-attribute name="javascript" value="/common/rtt/javascript.jsp" />
+    </definition>
+    <definition name=".ukt.train.search" extends="layout.1col">
+        <put-attribute name="center" value=".ukt.train.search.pane" />
+    </definition>
+    <definition name=".ukt.train.search.pane" template="/common/search/results.jsp">
+        <put-attribute name="search" value=".panel.search" />
+        <put-attribute name="results" value="/common/rtt/search.jsp" />
+    </definition>
+    
+</tiles-definitions>

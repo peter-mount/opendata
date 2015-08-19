@@ -6,13 +6,10 @@
 package uk.trainwatch.web.timetable;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.servlet.ServletException;
-import uk.trainwatch.nrod.location.TrainLocation;
-import uk.trainwatch.nrod.location.TrainLocationFactory;
 import uk.trainwatch.web.servlet.AbstractServlet;
 import uk.trainwatch.web.servlet.ApplicationRequest;
 
@@ -26,8 +23,8 @@ public abstract class AbstractSearchServlet
 {
 
     @Inject
-    protected TrainLocationFactory trainLocationFactory;
-    
+    protected TimeTableSearch timeTableSearch;
+
     @Override
     protected void doGet( ApplicationRequest request )
             throws ServletException,
@@ -52,33 +49,19 @@ public abstract class AbstractSearchServlet
             throws ServletException,
                    IOException
     {
-
-        TrainLocation loc = trainLocationFactory.resolveTrainLocation( station );
-        if( loc == null )
-        {
-            request.getRequestScope().
-                    put( "msg", "The station you have requested is unknown" );
+        TimeTableSearchResult result = timeTableSearch.search( station, date );
+        if( result.isError() ) {
+            request.getRequestScope().put( "msg", result.getError() );
             showHome( request );
         }
-        else
-        {
-            try
-            {
-                Map<String, Object> req = request.getRequestScope();
-                req.put( "pageTitle", "UK Time Table" );
-                req.put( "station", loc );
-                req.put( "searchDate", date );
-                req.put( "schedules", ScheduleSQL.getSchedules( loc, date ) );
+        else {
+            Map<String, Object> req = request.getRequestScope();
+            req.put( "pageTitle", "UK Time Table" );
+            req.put( "station", result.getStation() );
+            req.put( "searchDate", result.getSearchDate() );
+            req.put( "schedules", result.getSchedules() );
 
-                request.renderTile( "timetable.search" );
-            }
-            catch( SQLException ex )
-            {
-                log( "Search " + loc + " " + date, ex );
-                request.getRequestScope().
-                        put( "msg", "Something unexpected just went wrong, please try again later." );
-                showHome( request );
-            }
+            request.renderTile( "timetable.search" );
         }
     }
 
