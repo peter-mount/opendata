@@ -8,7 +8,6 @@ package uk.trainwatch.web.rtt;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -32,7 +31,7 @@ public class RTTHomeServlet
         // Set the date range from 7 days ago to now
         Map<String, Object> req = request.getRequestScope();
         LocalDate end = LocalDate.now();
-        LocalDate start = end.minus( 7, ChronoUnit.DAYS );
+        LocalDate start = end.minusMonths( 2 ).withDayOfMonth( 1 );
         req.put( "start", start );
         req.put( "end", end );
 
