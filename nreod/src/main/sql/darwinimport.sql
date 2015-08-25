@@ -593,7 +593,7 @@ BEGIN
 
     FOREACH axml IN ARRAY xpath('//pport:alarm/alarm:clear/text()',pxml,ns)
     LOOP
-        UPDATE darwin.alarm SET cleared=true, clearedts=ats WHERE aid=axml::TEXT;
+        UPDATE darwin.alarms SET cleared=true, clearedts=ats WHERE aid=axml::TEXT;
     END LOOP;
 
     -- ---------------------------------------------------------------------------
