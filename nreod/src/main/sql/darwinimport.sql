@@ -537,7 +537,7 @@ BEGIN
                 (xpath('name(/alarm:set/*)',axml,ns))[1]::TEXT AS type
             INTO arec LIMIT 1;
 
-        INSERT INTO darwin.alarms (aid,settd,type,xml) VALUES (arec.id,arec.type,ats,array_to_string(axml,''));
+        INSERT INTO darwin.alarms (aid,setts,type,xml) VALUES (arec.id,arec.type,ats,array_to_string(axml,''));
     END LOOP;
 
     FOREACH axml IN ARRAY xpath('//pport:alarm/alarm:clear/text()',pxml,ns)
@@ -589,11 +589,6 @@ BEGIN
                 arec.rid2,arec.tid2,arec.pta2,arec.ptd2,arec.wta2,arec.wtd2,
                 arec.rid3,arec.tid3,arec.pta3,arec.ptd3,arec.wta3,arec.wtd3
             );
-    END LOOP;
-
-    FOREACH axml IN ARRAY xpath('//pport:alarm/alarm:clear/text()',pxml,ns)
-    LOOP
-        UPDATE darwin.alarms SET cleared=true, clearedts=ats WHERE aid=axml::TEXT;
     END LOOP;
 
     -- ---------------------------------------------------------------------------
