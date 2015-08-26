@@ -30,6 +30,7 @@ public class Train
 
     private Schedule schedule;
     private List<ScheduleEntry> scheduleEntries = Collections.emptyList();
+    private List<Association> associations = Collections.emptyList();
     private Forecast forecast;
     private List<ForecastEntry> forecastEntries = Collections.emptyList();
     private boolean archived;
@@ -199,6 +200,16 @@ public class Train
             lastReport = null;
         }
 
+    }
+
+    public List<Association> getAssociations()
+    {
+        return associations;
+    }
+
+    public void setAssociations( List<Association> associations )
+    {
+        this.associations = associations;
     }
 
     /**

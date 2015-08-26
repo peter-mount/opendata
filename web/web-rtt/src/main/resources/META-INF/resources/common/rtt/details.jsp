@@ -162,6 +162,12 @@
         <div class="ldb-label"></div>
     </div>
 
+    <c:if test="${not empty train.associations}">
+        <c:forEach var="entry" varStatus="status" items="${train.associations}">
+            <p>${entry}</p>
+        </c:forEach>
+    </c:if>
+
     <%-- Show full details only if deactivated --%>
     <c:set var="showPlat" value="${detailed and train.deactivated}"/>
 

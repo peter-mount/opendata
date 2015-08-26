@@ -36,8 +36,6 @@ public interface LDB
 
     long getId();
 
-    CallingPoint getLastReport();
-
     int getLateReason();
 
     /**
@@ -140,8 +138,6 @@ public interface LDB
      * @return
      */
     boolean isDisplayPlatform();
-
-    boolean isLastReportPresent();
 
     /**
      * No report. This is defined as having no reported arrival nor departure times

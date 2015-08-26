@@ -20,7 +20,8 @@ import uk.trainwatch.util.sql.SQLFunction;
  * @author peter
  */
 public class LDBTFL
-        implements Serializable, LDB
+        implements Serializable,
+                   LDB
 {
 
     private static final long serialVersionUID = 1L;
@@ -100,7 +101,6 @@ public class LDBTFL
     private final Duration delay;
     private final int length;
     private Collection<CallingPoint> points;
-    private CallingPoint lastReport;
     private final String curloc;
 
     public LDBTFL(
@@ -192,11 +192,6 @@ public class LDBTFL
     public void setPoints( Collection<CallingPoint> points )
     {
         this.points = points;
-        points.forEach( pt -> {
-            if( pt.isReport() ) {
-                lastReport = pt;
-            }
-        } );
     }
 
     @Override
@@ -503,18 +498,6 @@ public class LDBTFL
     public String getToc()
     {
         return toc;
-    }
-
-    @Override
-    public CallingPoint getLastReport()
-    {
-        return lastReport;
-    }
-
-    @Override
-    public boolean isLastReportPresent()
-    {
-        return lastReport != null;
     }
 
     /**

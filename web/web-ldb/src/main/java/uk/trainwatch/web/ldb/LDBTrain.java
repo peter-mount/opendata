@@ -38,8 +38,6 @@ public class LDBTrain
     private final int length;
 
     private final Collection<CallingPoint> points;
-    private CallingPoint lastReport;
-    private final String curloc;
     private final ForecastEntry fe;
 
     public LDBTrain( LDB.Type type, Train train,
@@ -90,18 +88,10 @@ public class LDBTrain
                                 false,
                                 darwinReferenceManager.getLocationRefFromTiploc( fe.getTpl() )
                         ) ).
-                peek( pt -> {
-                    if( pt.isReport() ) {
-                        lastReport = pt;
-                    }
-                } ).
                 collect( Collectors.toList() );
 
         // FIXME add length to Train
         length = 0;
-
-        // As original SQL
-        curloc = "";
     }
 
     public Train getTrain()
@@ -415,16 +405,6 @@ public class LDBTrain
         return isSchedulePresent() ? train.getSchedule().getToc() : "";
     }
 
-    public CallingPoint getLastReport()
-    {
-        return lastReport;
-    }
-
-    public boolean isLastReportPresent()
-    {
-        return lastReport != null;
-    }
-
     /**
      * The train length at this location
      *
@@ -437,7 +417,8 @@ public class LDBTrain
 
     public String getCurloc()
     {
-        return curloc;
+        ForecastEntry last = train.getLastReport();
+        return last == null ? "" : last.getTpl();
     }
 
     /**
@@ -465,7 +446,7 @@ public class LDBTrain
     @Override
     public String toString()
     {
-        return "LDBTrain{" + "type=" + type + ", train=" + train + ", terminated=" + terminated + ", delayUnknown=" + delayUnknown + ", length=" + length + ", points=" + points + ", lastReport=" + lastReport + ", curloc=" + curloc + ", fe=" + fe + '}';
+        return "LDBTrain{" + "type=" + type + ", train=" + train + ", terminated=" + terminated + ", delayUnknown=" + delayUnknown + ", length=" + length + ", points=" + points +  ", fe=" + fe + '}';
     }
 
 }

@@ -20,6 +20,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 import uk.trainwatch.util.Predicates;
+import uk.trainwatch.web.ldb.model.Association;
 import uk.trainwatch.web.ldb.model.Forecast;
 import uk.trainwatch.web.ldb.model.ForecastEntry;
 import uk.trainwatch.web.ldb.model.Schedule;
@@ -69,9 +70,11 @@ public class TrainCache
             if( train.isSchedulePresent() ) {
                 if( train.isArchived() ) {
                     ScheduleEntry.populateArc.accept( con, train );
+                    Association.populateArc.accept( con, train );
                 }
                 else {
                     ScheduleEntry.populate.accept( con, train );
+                    Association.populate.accept( con, train );
                 }
             }
 
