@@ -10,9 +10,14 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib prefix="cms" uri="http://uktra.in/tld/cms" %>
 <h1>${location.location}</h1>
-<tiles:insertAttribute name="messages"/>
-<tiles:insertAttribute name="map"/>
-<tiles:insertAttribute name="details"/>
-<tiles:insertAttribute name="nearby"/>
-
-<cms:page page="${location.crs}"/>
+<div class="right" style="width:38%;">
+    <tiles:insertAttribute name="details"/>
+    <tiles:insertAttribute name="departures"/>
+    <tiles:insertAttribute name="nearby"/>
+</div>
+<div class="left" style="width:60%;">
+    <tiles:insertAttribute name="messages"/>
+    <tiles:insertAttribute name="map"/>
+    <cms:page page="${location.crs}"/>
+</div>
+<div class="clear"></div>

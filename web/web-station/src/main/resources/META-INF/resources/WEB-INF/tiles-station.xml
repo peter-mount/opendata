@@ -26,18 +26,11 @@
     <definition name=".station.js" template="/common/station/javascript.jsp">
         <put-attribute name="javascript" value="/common/jquery_map.jsp" />
     </definition>
-    <definition name=".station.info" extends="layout.3col">
-        <put-attribute name="center" value=".station.info.center" />
-        <put-attribute name="left" value=".left" />
-        <put-attribute name="right" value=".station.info.right" />
-    </definition>
-    <definition name=".station.info.center" template="/common/station/center.jsp">
+    <definition name=".station.info" template="/common/station/center.jsp">
         <put-attribute name="map" value="/common/station/map.jsp" />
         <put-attribute name="messages" value="/common/station/messages.jsp" />
         <put-attribute name="details" value="/common/station/details.jsp" />
         <put-attribute name="nearby" value="/common/station/nearby.jsp" />
-    </definition>
-    <definition name=".station.info.right" template="/common/station/right.jsp">
         <put-attribute name="departures" value="/common/station/departures.jsp" />
     </definition>
     

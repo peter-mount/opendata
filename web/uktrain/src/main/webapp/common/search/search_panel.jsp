@@ -13,17 +13,24 @@
 
 <form method="POST" action="/search">
     <h2>Search for trains</h2>
+
     <div class="ui-widget">
-        <label for="searchDate">Date to search:</label>
+        <label for="searchStation">Where:</label>
+        <input id="searchStation" name="station" type="text" value="<c:if test="${not empty station}">${station.location}</c:if>"/>
+        <input id="searchCrs" name="crs" value="${crs}" type="hidden"/>
+    </div>
+    <div class="ui-widget">
+        <label for="searchDate">Date:</label>
         <input id="searchDate" name="date" type="date" value="${date}" min="${start}" max="${end}"/>
-        <label for="searchTime">Time</label>
+    </div>
+
+    <div class="ui-widget">
+        <label for="searchTime">When:</label>
         <select name="time" id="searchTime"></select>
     </div>
 
     <div class="ui-widget">
-        <label for="searchStation">Station name:</label>
-        <input id="searchStation" name="station" value="<c:if test="${not empty station}">${station.location}</c:if>"/>
-        <input id="searchCrs" name="crs" value="${crs}" type="hidden"/>
+        <label for="searchSubmit"></label>
         <input id="searchSubmit" name="submitStation" type="submit" value="Search"/>
     </div>
 

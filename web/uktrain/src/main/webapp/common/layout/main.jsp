@@ -7,6 +7,7 @@
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
     <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
     <head>
+        <meta name=viewport content="width=device-width, initial-scale=1">
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>
             <c:choose>
@@ -21,7 +22,10 @@
     </head>
     <body>
         <div id="main-outer">
-            <div id="top-menu"><tiles:insertAttribute name="cookie"/><tiles:insertAttribute name="banner"/></div>
+            <div id="top-menu">
+                <tiles:insertAttribute name="cookie"/>
+                <tiles:insertAttribute name="banner"/>
+            </div>
             <div id="navbar"><tiles:insertAttribute name="navbar"/></div>
             <div id="main-body">
                 <div id="main-content"><tiles:insertAttribute name="body"/></div>

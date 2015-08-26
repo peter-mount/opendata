@@ -294,7 +294,7 @@ input {
     .ui-autocomplete li { font-size: 12pt; }
 }
 
-/* Samsung Note 3 Portrait */
+/* Samsung Note 3 Landscape */
 @media all and ( min-width: 444px ) and ( max-width: 640px ) {
     .ldbbutton { font-size: 80% }
     h1 {

@@ -180,6 +180,8 @@ div.notice {
 
 #main-content {
     font-size: 0.8em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
 }
 
 table.wikitable {
@@ -449,4 +451,49 @@ tr.rttTableResult {
 }
 th.rttTableSep, td.rttTableSep {
     border-left: 1px solid #bbb;
+}
+
+div.homebox {
+    border-radius: 1em;
+    border: 1px solid #339966;
+    background: #85C2A3;
+    font-size: 1em;
+    padding: 1em;
+    margin: 0.25em;
+    width: 45%;
+    float: left;
+}
+
+div.homebox h1,
+div.homebox h2,
+div.homebox h3{
+    -webkit-margin-before: 0;
+    -webkit-margin-after: 0;
+    -webkit-margin-start: 0;
+    -webkit-margin-end: 0;
+}
+
+div.homebox .ui-widget {
+    margin-top: 0.125em;
+}
+
+div.homebox .ui-widget label {
+    display: inline-block;
+    width: 8em;
+    max-width: 8em;
+    text-align: right;
+}
+
+div.homebox .ui-widget input[type="text"] {
+    display: inline-block;
+    width: 12em;
+    max-width: 12em;
+    text-align: left;
+}
+
+div.homebox .ui-widget input[type="date"] {
+    display: inline-block;
+    width: 12em;
+    max-width: 12em;
+    text-align: left;
 }

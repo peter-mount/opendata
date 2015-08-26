@@ -1,5 +1,10 @@
 /* LDB Small Theme */
 
+.ldbHead .ldbCont,
+.ldbHead .ldbForecast,
+.ldbHead .ldbSched,
+.ldbHead .ldbPlat { font-size: 50%; }
+
 .ldbCol, .ldbCont { font-size: 80%; }
 .ldbForecast, .ldbSched, .ldbPlat { font-size: 70%; }
 
