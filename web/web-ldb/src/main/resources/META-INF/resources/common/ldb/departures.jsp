@@ -178,6 +178,10 @@
                                         Formed&nbsp;of&nbsp;${dep.length}&nbsp;coaches.
                                     </span>
                                 </c:if>
+                                <c:if test="${not empty dep.curloc}">
+                                    <span class="ldbHeader">Last report:</span>
+                                    <span class="ldbDest"><d:tiploc value="${dep.curloc}" link="false"/></span>
+                                </c:if>
                                 <c:if test="${not empty dep.toc}">
                                     <span>
                                         <d:operator value="${dep.toc}"/>&nbsp;service.
