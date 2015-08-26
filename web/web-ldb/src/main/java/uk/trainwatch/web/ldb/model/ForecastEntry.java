@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.Duration;
 import java.time.LocalTime;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import uk.trainwatch.util.TimeUtils;
 import uk.trainwatch.util.sql.SQL;
@@ -298,4 +299,23 @@ public class ForecastEntry
         return SORT.compare( this, o );
     }
 
+    /**
+     * Do we have a report
+     * <p>
+     * @return
+     */
+    public boolean isReport()
+    {
+        return dep != null || arr != null;
+    }
+
+    /**
+     * Is this a calling point
+     * <p>
+     * @return
+     */
+    public boolean isCallingPoint()
+    {
+        return !(pass != null || etpass != null);
+    }
 }

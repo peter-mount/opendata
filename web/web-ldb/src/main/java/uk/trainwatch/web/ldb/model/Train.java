@@ -27,6 +27,7 @@ public class Train
     private static final long serialVersionUID = 1L;
 
     private final String rid;
+
     private Schedule schedule;
     private List<ScheduleEntry> scheduleEntries = Collections.emptyList();
     private Forecast forecast;
@@ -85,6 +86,32 @@ public class Train
     public boolean isValid()
     {
         return isSchedulePresent() || isForecastPresent();
+    }
+
+    public String getOrigin()
+    {
+        if( isSchedulePresent() ) {
+            return schedule.getOrigin();
+        }
+
+        if( forecastEntries != null && !forecastEntries.isEmpty() ) {
+            return forecastEntries.get( 0 ).getTpl();
+        }
+
+        return "";
+    }
+
+    public String getDest()
+    {
+        if( isSchedulePresent() ) {
+            return schedule.getDest();
+        }
+
+        if( forecastEntries != null && !forecastEntries.isEmpty() ) {
+            return forecastEntries.get( forecastEntries.size() - 1 ).getTpl();
+        }
+
+        return "";
     }
 
     public boolean isSchedulePresent()

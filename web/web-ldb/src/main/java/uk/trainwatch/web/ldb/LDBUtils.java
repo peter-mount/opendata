@@ -25,7 +25,6 @@ import uk.trainwatch.nre.darwin.stationmsg.StationMessageManager;
 import uk.trainwatch.nrod.location.TrainLocation;
 import uk.trainwatch.tfl.model.cache.TflLocationCache;
 import uk.trainwatch.util.TimeUtils;
-import uk.trainwatch.util.sql.SQLConsumer;
 import uk.trainwatch.web.ldb.cache.LDBCallingPointCache;
 import uk.trainwatch.web.ldb.cache.LDBDepartureCache;
 import uk.trainwatch.web.ldb.cache.LocationTimeKey;
@@ -120,15 +119,15 @@ public class LDBUtils
         Collection<LDB> departures = departureCache.getDepartures( new LocationTimeKey( crs, time ) );
 
         // get calling points for each departure and flag it if its been canceled
-        departures.forEach( SQLConsumer.guard( dep -> {
-            Collection<CallingPoint> points = callingPointCache.getCallingPoints( dep.getId() );
-            dep.setPoints( points );
-            points.forEach( c -> {
-                if( darwinReferenceManager.isCrs( crs, c.getTpl() ) ) {
-                    dep.setCanc( c.isCanc() );
-                }
-            } );
-        } ) );
+//        departures.forEach( SQLConsumer.guard( dep -> {
+//            Collection<CallingPoint> points = callingPointCache.getCallingPoints( dep.getId() );
+//            dep.setPoints( points );
+//            points.forEach( c -> {
+//                if( darwinReferenceManager.isCrs( crs, c.getTpl() ) ) {
+//                    dep.setCanc( c.isCanc() );
+//                }
+//            } );
+//        } ) );
 
         req.put( "departures", departures );
 

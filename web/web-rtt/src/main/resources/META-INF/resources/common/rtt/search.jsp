@@ -37,7 +37,7 @@
         <th colspan="3">Working</th>
     </tr>
     <tr class="rttTableHeader">
-        <th>RID</th>
+        <th>Headcode</th>
         <th>Destination</th>
         <th>Plat</th>
         <th>Arr</th>
@@ -62,14 +62,14 @@
                         </c:when>
                         <c:otherwise>
                             <%-- For rare cases of no schedule --%>
-                            Headcode&nbsp;N/A
+                            &nbsp;N/A&nbsp;
                         </c:otherwise>
                     </c:choose>
                 </a>
             </td>
             <td valign="top" class="${style}">
+                <d:tiploc value="${result.train.dest}" link="false"/>
                 <c:if test="${result.train.schedulePresent}">
-                    <d:tiploc value="${result.train.schedule.dest}" link="false"/>
                     <c:if test="${result.train.schedule.via>0}">
                         <div class="ldbVia">
                             <d:via value="${result.train.schedule.via}"/>

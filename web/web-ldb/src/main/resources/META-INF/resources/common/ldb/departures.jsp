@@ -104,6 +104,12 @@
                                         Terminates Here
                                     </a>
                                 </c:when>
+                                <c:when test="${not dep.schedulePresent}">
+                                    <%-- Handles case where we don't have the trains schedule --%>
+                                    <a onclick="document.location = '/train/${dep.rid}';">
+                                        Check front of train
+                                    </a>
+                                </c:when>
                                 <c:otherwise>
                                     <a onclick="document.location = '/train/${dep.rid}';">
                                         <d:tiploc value="${dep.dest}" link="false"/>

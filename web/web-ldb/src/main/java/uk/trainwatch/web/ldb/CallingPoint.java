@@ -45,7 +45,7 @@ public class CallingPoint
     private final String crs;
     private final String location;
 
-    private CallingPoint( String tpl, LocalTime time, boolean report, boolean canc, TrainLocation loc )
+    public CallingPoint( String tpl, LocalTime time, boolean report, boolean canc, TrainLocation loc )
     {
         this.tpl = tpl;
         this.time = time;

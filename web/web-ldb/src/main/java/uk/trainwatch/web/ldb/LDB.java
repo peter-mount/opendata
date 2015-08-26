@@ -5,293 +5,61 @@
  */
 package uk.trainwatch.web.ldb;
 
-import java.io.Serializable;
-import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collection;
-import uk.trainwatch.util.TimeUtils;
-import uk.trainwatch.util.sql.SQLFunction;
 
 /**
  *
  * @author peter
  */
-public class LDB
-        implements Serializable
+public interface LDB
 {
 
-    private static final long serialVersionUID = 1L;
+    LocalTime getArr();
 
-    public static final SQLFunction<ResultSet, LDB> fromSQL = rs -> {
-        String altdest = rs.getString( "altdest" );
-        return new LDB(
-                Type.valueOf( rs.getString( "type" ) ),
-                TimeUtils.getLocalTime( rs, "tm" ),
-                TimeUtils.getLocalDateTime( rs, "ts" ),
-                rs.getTimestamp( "ts" ),
-                rs.getString( "toc" ),
-                rs.getString( "origin" ),
-                altdest == null || altdest.isEmpty() ? rs.getString( "destination" ) : altdest,
-                rs.getInt( "via" ),
-                rs.getInt( "cancreason" ),
-                rs.getInt( "latereason" ),
-                // Identity
-                rs.getLong( "id" ),
-                rs.getString( "rid" ),
-                rs.getString( "uid" ),
-                rs.getInt( "schedule" ),
-                // actual arrive/depart
-                TimeUtils.getLocalTime( rs, "arr" ),
-                TimeUtils.getLocalTime( rs, "dep" ),
-                // estimated arrive/depart
-                TimeUtils.getLocalTime( rs, "etarr" ),
-                TimeUtils.getLocalTime( rs, "etdep" ),
-                // timetabled arrive/depart
-                TimeUtils.getLocalTime( rs, "pta" ),
-                TimeUtils.getLocalTime( rs, "ptd" ),
-                // Platform
-                rs.getString( "plat" ),
-                // Data suppression
-                rs.getBoolean( "supp" ),
-                rs.getBoolean( "platsup" ),
-                rs.getBoolean( "cisplatsup" ),
-                // Delay tbi
-                TimeUtils.getDuration( rs, "delay" ),
-                // Terminated/terminates here
-                rs.getBoolean( "term" ),
-                // Is the delay unknown
-                rs.getBoolean( "ldbdel" ),
-                // Train length, 0 for unknown
-                rs.getInt( "length" ),
-                rs.getString( "curloc" )
-        );
-    };
+    int getCancReason();
 
-    private final Type type;
-    private final LocalTime time;
-    private final LocalDateTime tsDT;
-    private final Timestamp ts;
-    private final boolean terminated;
-    private final boolean delayUnknown;
-    private final String toc;
-    private final String dest;
-    private final String origin;
-    private final int via;
-    private final int cancReason;
-    private final int lateReason;
-    private boolean canc;
-    private final long id;
-    private final String rid;
-    private final String uid;
-    private final int scheduleId;
-    private final LocalTime arr;
-    private final LocalTime dep;
-    private final LocalTime eta;
-    private final LocalTime etd;
-    private final LocalTime pta;
-    private final LocalTime ptd;
-    private final String plat;
-    private final boolean sup;
-    private final boolean platSup;
-    private final boolean cisPlatSup;
-    private final Duration delay;
-    private final int length;
-    private Collection<CallingPoint> points;
-    private CallingPoint lastReport;
-    private final String curloc;
+    String getCurloc();
 
-    private LDB(
-            Type type,
-            LocalTime time,
-            LocalDateTime tsDT, Timestamp ts,
-            String toc,
-            String origin,
-            String dest, int via,
-            Integer cancReason, Integer lateReason,
-            long id, String rid, String uid,
-            int scheduleId,
-            LocalTime arr, LocalTime dep,
-            LocalTime eta, LocalTime etd,
-            LocalTime pta, LocalTime ptd,
-            String plat,
-            boolean sup, boolean platSup, boolean cisPlatSup,
-            Duration delay,
-            boolean terminated,
-            boolean delayUnknown,
-            int length,
-            String curloc )
-    {
-        this.type = type;
-        this.time = time;
+    Duration getDelay();
 
-        this.tsDT = tsDT;
-        this.ts = ts;
+    LocalTime getDep();
 
-        this.toc = toc;
-        this.origin = origin;
-        this.dest = dest;
-        this.via = via;
+    String getDest();
 
-        this.cancReason = cancReason;
-        this.lateReason = lateReason;
+    LocalTime getEta();
 
-        this.id = id;
-        this.rid = rid;
-        this.uid = uid;
-        this.scheduleId = scheduleId;
-        this.arr = arr;
-        this.dep = dep;
-        this.eta = eta;
-        this.etd = etd;
-        this.pta = pta;
-        this.ptd = ptd;
-        this.sup = sup;
-        this.plat = plat;
-        this.platSup = platSup;
-        this.cisPlatSup = cisPlatSup;
-        this.delay = delay;
-        this.terminated = terminated;
-        this.delayUnknown = delayUnknown;
-        this.length = length;
+    LocalTime getEtd();
 
-        this.curloc = curloc;
-    }
+    long getId();
+
+    CallingPoint getLastReport();
+
+    int getLateReason();
 
     /**
-     * The type of entry
-     * <p>
-     * @return
+     * The train length at this location
+     *
+     * @return number of carriages, 0 for unknown
      */
-    public Type getType()
-    {
-        return type;
-    }
+    int getLength();
 
-    public Timestamp getTs()
-    {
-        return ts;
-    }
+    String getOrigin();
 
-    public LocalDateTime getTsDT()
-    {
-        return tsDT;
-    }
+    String getPlat();
 
-    public Collection<CallingPoint> getPoints()
-    {
-        return points;
-    }
+    Collection<CallingPoint> getPoints();
 
-    public void setPoints( Collection<CallingPoint> points )
-    {
-        this.points = points;
-        points.forEach( pt -> {
-            if( pt.isReport() ) {
-                lastReport = pt;
-            }
-        } );
-    }
+    LocalTime getPta();
 
-    public int getCancReason()
-    {
-        return cancReason;
-    }
+    LocalTime getPtd();
 
-    public int getLateReason()
-    {
-        return lateReason;
-    }
+    String getRid();
 
-    public boolean isCanc()
-    {
-        return canc;
-    }
-
-    public void setCanc( boolean canc )
-    {
-        this.canc = canc;
-    }
-
-    public int getVia()
-    {
-        return via;
-    }
-
-    /**
-     * Terminated.
-     *
-     * If {@link #isArrived()} is true then the train has terminated. If not then it's due to terminate here.
-     *
-     * @return
-     */
-    public boolean isTerminated()
-    {
-        return terminated;
-    }
-
-    /**
-     * Has this train arrived.
-     *
-     * Note to see if the train has arrived but not yet departed use {@link #isOnPlatform()}
-     *
-     * @return
-     */
-    public boolean isArrived()
-    {
-        return arr != null;
-    }
-
-    /**
-     * Has the train departed
-     *
-     * @return
-     */
-    public boolean isDeparted()
-    {
-        return dep != null;
-    }
-
-    /**
-     * Is the train on the platform.
-     *
-     * This is defined as having an arrival but no departure time. However a cancelled, terminated or non-timetabled (working)
-     * train will not show regardless of the times.
-     *
-     * @return
-     */
-    public boolean isOnPlatform()
-    {
-        // Cancelled, terminated or not timetabled then no
-        if( isCanc() || isTerminated() || !isTimetabled() ) {
-            return false;
-        }
-
-        // True if arrived but not departed
-        return isArrived() && !isDeparted();
-    }
-
-    /**
-     * Is the train on time. This is defined as being within ±1 minute of the timetable,
-     *
-     * @return
-     */
-    public boolean isOntime()
-    {
-        return delay.isZero() || Math.abs( delay.getSeconds() ) < 60;
-    }
-
-    /**
-     * No report. This is defined as having no reported arrival nor departure times
-     *
-     * @return
-     */
-    public boolean isNoReport()
-    {
-        return !isArrived() && !isDeparted();
-    }
+    int getScheduleId();
 
     /**
      * The recorded time for this entry as defined by the database.
@@ -300,106 +68,43 @@ public class LDB
      *
      * @return
      */
-    public LocalTime getTime()
-    {
-        return time;
-    }
-
-    public long getId()
-    {
-        return id;
-    }
-
-    public String getRid()
-    {
-        return rid;
-    }
-
-    public String getUid()
-    {
-        return uid;
-    }
-
-    public LocalTime getArr()
-    {
-        return arr;
-    }
-
-    public LocalTime getDep()
-    {
-        return dep;
-    }
-
-    public LocalTime getEta()
-    {
-        return eta;
-    }
-
-    public LocalTime getEtd()
-    {
-        return etd;
-    }
-
-    public LocalTime getPta()
-    {
-        return pta;
-    }
-
-    public LocalTime getPtd()
-    {
-        return ptd;
-    }
+    LocalTime getTime();
 
     /**
-     * Is this timetabled. A working train will return false here
+     * Duration from now until the expected time. If the expected time has passed
+     * then this returns 0
+     * <p>
+     * @return Duration, never negative
+     */
+    Duration getTimeUntil();
+
+    String getToc();
+
+    Timestamp getTs();
+
+    LocalDateTime getTsDT();
+
+    /**
+     * The type of entry
+     * <p>
+     * @return
+     */
+    Type getType();
+
+    String getUid();
+
+    int getVia();
+
+    /**
+     * Has this train arrived.
+     *
+     * Note to see if the train has arrived but not yet departed use {@link #isOnPlatform()}
      *
      * @return
      */
-    public boolean isTimetabled()
-    {
-        return pta != null || ptd != null;
-    }
+    boolean isArrived();
 
-    public String getPlat()
-    {
-        return plat;
-    }
-
-    /**
-     * Is this entry suppressed.
-     *
-     * Licence restriction means that if this returns true then this entry must not be displayed to the general public.
-     *
-     * @return
-     */
-    public boolean isSup()
-    {
-        return sup;
-    }
-
-    /**
-     * Is this entry public.
-     *
-     * License restriction means that if this returns false then the entry must not be displayed to the general public.
-     *
-     * @return
-     */
-    public boolean isPublic()
-    {
-        return !isSup();
-    }
-
-    /**
-     * Platform suppressed.
-     *
-     * Licence restriction means that if this returns true then the platform must not be displayed.
-     *
-     * @return
-     */
-    public boolean isPlatSup()
-    {
-        return platSup;
-    }
+    boolean isCanc();
 
     /**
      * Platform suppressed manually from a CIS terminal.
@@ -408,10 +113,23 @@ public class LDB
      *
      * @return
      */
-    public boolean isCisPlatSup()
-    {
-        return cisPlatSup;
-    }
+    boolean isCisPlatSup();
+
+    /**
+     * Is the service delayed. This will be true if the delay is unknown and "Delayed" should be shown on any display boards.
+     *
+     * @return
+     */
+    boolean isDelayUnknown();
+
+    boolean isDelayed();
+
+    /**
+     * Has the train departed
+     *
+     * @return
+     */
+    boolean isDeparted();
 
     /**
      * Can the platform be displayed
@@ -421,98 +139,79 @@ public class LDB
      *
      * @return
      */
-    public boolean isDisplayPlatform()
-    {
-        return !(platSup || cisPlatSup);
-    }
+    boolean isDisplayPlatform();
 
-    public Duration getDelay()
-    {
-        return delay;
-    }
-
-    public boolean isDelayed()
-    {
-        return delay != null && !(delay.isNegative() || delay.isZero());
-    }
+    boolean isLastReportPresent();
 
     /**
-     * Is the service delayed. This will be true if the delay is unknown and "Delayed" should be shown on any display boards.
+     * No report. This is defined as having no reported arrival nor departure times
      *
      * @return
      */
-    public boolean isDelayUnknown()
-    {
-        return delayUnknown;
-    }
-
-    public int getScheduleId()
-    {
-        return scheduleId;
-    }
-
-    public String getOrigin()
-    {
-        return origin;
-    }
-
-    public String getDest()
-    {
-        return dest;
-    }
-
-    public String getToc()
-    {
-        return toc;
-    }
-
-    public CallingPoint getLastReport()
-    {
-        return lastReport;
-    }
-
-    public boolean isLastReportPresent()
-    {
-        return lastReport != null;
-    }
+    boolean isNoReport();
 
     /**
-     * The train length at this location
+     * Is the train on the platform.
      *
-     * @return number of carriages, 0 for unknown
+     * This is defined as having an arrival but no departure time. However a cancelled, terminated or non-timetabled (working)
+     * train will not show regardless of the times.
+     *
+     * @return
      */
-    public int getLength()
-    {
-        return length;
-    }
-
-    public String getCurloc()
-    {
-        return curloc;
-    }
+    boolean isOnPlatform();
 
     /**
-     * Duration from now until the expected time. If the expected time has passed
-     * then this returns 0
-     * <p>
-     * @return Duration, never negative
+     * Is the train on time. This is defined as being within ±1 minute of the timetable,
+     *
+     * @return
      */
-    public Duration getTimeUntil()
-    {
-        LocalDateTime now = getTsDT();
-        LocalDateTime time = now.toLocalDate().atTime( getTime() );
+    boolean isOntime();
 
-        if( time == null ) {
-            return Duration.ZERO;
-        }
+    /**
+     * Platform suppressed.
+     *
+     * Licence restriction means that if this returns true then the platform must not be displayed.
+     *
+     * @return
+     */
+    boolean isPlatSup();
 
-        if( time.isBefore( now ) && Math.abs( time.getHour() - now.getHour() ) > 18 ) {
-            time = time.plusDays( 1 );
-        }
+    /**
+     * Is this entry public.
+     *
+     * License restriction means that if this returns false then the entry must not be displayed to the general public.
+     *
+     * @return
+     */
+    boolean isPublic();
 
-        return Duration.between( now, time );
-    }
+    /**
+     * Is this entry suppressed.
+     *
+     * Licence restriction means that if this returns true then this entry must not be displayed to the general public.
+     *
+     * @return
+     */
+    boolean isSup();
 
+    /**
+     * Terminated.
+     *
+     * If {@link #isArrived()} is true then the train has terminated. If not then it's due to terminate here.
+     *
+     * @return
+     */
+    boolean isTerminated();
+
+    /**
+     * Is this timetabled. A working train will return false here
+     *
+     * @return
+     */
+    boolean isTimetabled();
+
+    void setCanc( boolean canc );
+    
     /**
      * The type of this LDB entry
      */

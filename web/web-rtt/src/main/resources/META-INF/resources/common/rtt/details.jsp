@@ -15,11 +15,11 @@
         <c:if test="${train.originForecastPresent}">
             <t:time value="${train.originForecast.getPTT()}"/>
         </c:if>
-        <d:tiploc value="${train.schedule.origin}" link="false"/>
+        <d:tiploc value="${train.origin}" link="false"/>
         <span class="ldbVia">
             to
         </span>
-        <d:tiploc value="${train.schedule.dest}" link="false"/>
+        <d:tiploc value="${train.dest}" link="false"/>
         <c:if test="${train.schedule.via gt 0}">
             <div class="ldbVia">
                 <d:via value="${train.schedule.via}"/>
