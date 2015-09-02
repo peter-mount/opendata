@@ -3,6 +3,7 @@
 <%@ taglib prefix="f" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="t" uri="http://uktra.in/tld/opendata" %>
 <%@ taglib prefix="d" uri="http://uktra.in/tld/darwin" %>
+<%@ taglib prefix="ldb" uri="http://uktra.in/tld/ldb" %>
 
 <f:formatNumber var="startHr" value="${start.toLocalTime().getHour()}" pattern="00"/>
 <f:formatNumber var="endHr" value="${start.plusHours(1).toLocalTime().getHour()}" pattern="00"/>
@@ -76,6 +77,26 @@
                         </div>
                     </c:if>
                 </c:if>
+
+                <%-- VV Splits so include in main departure if in future --%>
+                <c:forEach var="assoc" varStatus="assocStat" items="${result.train.associations}">
+                    <c:if test="${assoc.cat eq 'VV' and not empty assoc.ptd}">
+                        <ldb:train rid="${assoc.assoc}" var="train"/>
+                        <c:if test="${not empty train and train.forecastPresent}">
+                            <%-- check to see if split is after this location --%>
+                            <c:forEach var="point" items="${train.forecastEntries}">
+                                <c:if test="${point.tpl eq assoc.tpl and point.getPTT().isAfter(result.time.getPTT())}">
+                                    &amp;
+                                    <d:tiploc value="${train.dest}" link="false"/>
+                                    <c:if test="${train.schedulePresent}">
+                                        <span class="ldbVia"><d:via value="${train.schedule.via}"/></span>
+                                    </c:if>
+                                </c:if>
+                            </c:forEach>
+                        </c:if>
+                    </c:if>
+                </c:forEach>
+
             </td>
             <td valign="top" class="rttTableSep center ${style}">
                 <c:choose>

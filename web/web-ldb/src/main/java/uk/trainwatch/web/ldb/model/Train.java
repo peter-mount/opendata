@@ -201,6 +201,11 @@ public class Train
 
     }
 
+    public boolean isAssociationsPresent()
+    {
+        return associations != null && !associations.isEmpty();
+    }
+
     public List<Association> getAssociations()
     {
         return associations;

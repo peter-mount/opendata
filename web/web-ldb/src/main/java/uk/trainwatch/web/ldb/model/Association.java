@@ -75,7 +75,7 @@ public class Association
     };
 
     public static final SQLBiConsumer<Connection, Train> populateArc = ( c, t ) -> {
-        if( t.isForecastPresent() ) {
+        if( t.isSchedulePresent() ) {
             try( PreparedStatement ps = SQL.prepare( c, SELECT_ARC, t.getRid() ) ) {
                 t.setAssociations( SQL.stream( ps, fromSQL ).
                         sorted().

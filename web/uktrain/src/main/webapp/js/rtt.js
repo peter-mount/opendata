@@ -29,6 +29,11 @@ var Track = (function () {
         Track.rows[im + 1] = track.height();
 
         var svg = $('#track svg');
+        var numCols = svg.attr("width");
+        var rw = track.width();
+        var rc = track.attr('rows');
+        var rh = track.height() / rc;
+        track.width((numCols-1) * track.width());
         svg.attr({
             width: track.width(),
             height: track.height()
@@ -37,9 +42,6 @@ var Track = (function () {
             width: track.width() + 'px',
             height: track.height() + 'px'
         });
-        var rc = track.attr('rows');
-        var rw = track.width() >> 1;
-        var rh = track.height() / rc;
 
         svg.find('line').each(function (i, e) {
             e = $(e);
@@ -66,7 +68,7 @@ var Track = (function () {
             e.attr({
                 cx: e.attr('cx') * rw,
                 cy: Track.y(e.attr('cy')),
-                r: e.attr('r') * rw
+                r: e.attr('r') * rw / 1.75
             });
         });
     };

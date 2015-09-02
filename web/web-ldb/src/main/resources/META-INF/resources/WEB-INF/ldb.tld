@@ -5,6 +5,7 @@
     <uri>http://uktra.in/tld/ldb</uri>
     <tag>
         <name>train</name>
+        <description>Retrieves a Train from the cache</description>
         <tag-class>uk.trainwatch.web.ldb.tag.TrainTag</tag-class>
         <body-content>empty</body-content>
         <attribute>
@@ -19,6 +20,31 @@
             <rtexprvalue>true</rtexprvalue>
             <type>java.lang.String</type>
             <description>Variable to store the train</description>
+        </attribute>
+    </tag>
+    <tag>
+        <name>trainEntry</name>
+        <description>Forms a detail table of this train for display</description>
+        <tag-class>uk.trainwatch.web.ldb.tag.TrainEntryTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>train</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+            <type>uk.trainwatch.web.ldb.model.Train</type>
+            <description>The Train for this table</description>
+        </attribute>
+        <attribute>
+            <name>var</name>
+            <rtexprvalue>true</rtexprvalue>
+            <type>java.lang.String</type>
+            <description>Variable to store the table</description>
+        </attribute>
+        <attribute>
+            <name>maxIndex</name>
+            <rtexprvalue>true</rtexprvalue>
+            <type>java.lang.String</type>
+            <description>Variable to store the number of trains in the table</description>
         </attribute>
     </tag>
 </taglib>

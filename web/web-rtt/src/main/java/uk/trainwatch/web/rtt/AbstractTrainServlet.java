@@ -68,33 +68,6 @@ public abstract class AbstractTrainServlet
 
             request.lastModified( train.getLastUpdate() );
 
-            // The train track details
-            AtomicInteger row = new AtomicInteger( 0 );
-            Collection<Track> track = Streams.stream( train.getForecastEntries() ).
-                    map( e -> new Track( train, e ) ).
-                    sorted().
-                    // Now sorted set the row number
-                    map( t -> t.setRow( row.getAndIncrement() ) ).
-                    collect( Collectors.toList() );
-
-            // Now check for last report & if we have one set past flag to everything before it
-            track.stream().
-                    sorted( Track.reverseSort ).
-                    filter( Track::isPast ).
-                    findAny().
-                    ifPresent( lr -> {
-                        track.stream().
-                        filter( t -> t.getRow() <= lr.getRow() ).
-                        forEach( Track::setPast );
-                    } );
-
-            // TODO cancelled entries where we start at a new station
-            // Finally generate the json
-//            JsonArrayBuilder builder = Json.createArrayBuilder();
-//            track.forEach( t -> builder.add( t.toBuilder() ) );
-//            req.put( "track", JsonUtils.toString.apply( builder.build() ) );
-            req.put( "track", track );
-
             request.renderTile( getTile() );
         }
         catch( SQLException ex ) {
