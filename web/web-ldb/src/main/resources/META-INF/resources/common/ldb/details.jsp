@@ -148,12 +148,74 @@
 
     <%-- NP association - where the train goes next after terminating --%>
     <c:forEach var="assoc" varStatus="assocStat" items="${train.associations}">
-        <c:if test="${assoc.cat eq 'NP' and not empty assoc.ptd}">
-            <ldb:train rid="${assoc.assoc}" var="train"/>
-            <c:if test="${not empty train and train.forecastPresent}">
-                <div class="ldb-row">
-                    <div class="ldb-label">Forms the</div>
-                    <div class="ldb-value">
+        <c:choose>
+            <%-- Train Joins --%>
+            <c:when test="${assoc.cat eq 'JJ' and not empty assoc.ptd}">
+                <ldb:train rid="${assoc.assoc}" var="train"/>
+                <c:if test="${not empty train and train.forecastPresent}">
+                    <div class="ldb-row">
+                        <c:choose>
+                            <c:when test="${train.dest eq assoc.tpl}">
+                                Attaches at
+                                <a onclick="document.location = '/train/${train.rid}';">
+                                    <d:tiploc value="${assoc.tpl}" link="false"/>
+                                </a>
+                                by
+                                <d:tiploc value="${train.origin}" link="false"/>
+                                <c:if test="${train.schedulePresent}">
+                                    <span class="ldbVia"><d:via value="${train.schedule.via}"/></span>
+                                </c:if>
+                            </c:when>
+                            <c:otherwise>
+                                Joins at
+                                <a onclick="document.location = '/train/${train.rid}';">
+                                    <d:tiploc value="${assoc.tpl}" link="false"/>
+                                </a>
+                                to
+                                <d:tiploc value="${train.dest}" link="false"/>
+                                <c:if test="${train.schedulePresent}">
+                                    <span class="ldbVia"><d:via value="${train.schedule.via}"/></span>
+                                </c:if>
+                                <c:forEach var="adep" varStatus="adeps" items="${train.forecastEntries}">
+                                    <c:if test="${adeps.last}">
+                                        due
+                                        <t:time value="${adep.pta}"/>
+                                    </c:if>
+                                </c:forEach>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                </c:if>
+            </c:when>
+            <%-- Train splits --%>
+            <c:when test="${assoc.cat eq 'VV' and not empty assoc.ptd}">
+                <ldb:train rid="${assoc.assoc}" var="train"/>
+                <c:if test="${not empty train and train.forecastPresent}">
+                    <div class="ldb-row">
+                        Divides at
+                        <a onclick="document.location = '/train/${train.rid}';">
+                            <d:tiploc value="${train.origin}" link="false"/>
+                        </a>
+                        to
+                        <d:tiploc value="${train.dest}" link="false"/>
+                        <c:if test="${train.schedulePresent}">
+                            <span class="ldbVia"><d:via value="${train.schedule.via}"/></span>
+                        </c:if>
+                        <c:forEach var="adep" varStatus="adeps" items="${train.forecastEntries}">
+                            <c:if test="${adeps.last}">
+                                due
+                                <t:time value="${adep.pta}"/>
+                            </c:if>
+                        </c:forEach>
+                    </div>
+                </c:if>
+            </c:when>
+            <%-- forms next --%>
+            <c:when test="${assoc.cat eq 'NP' and not empty assoc.ptd}">
+                <ldb:train rid="${assoc.assoc}" var="train"/>
+                <c:if test="${not empty train and train.forecastPresent}">
+                    <div class="ldb-row">
+                        Forms the
                         <c:forEach var="adep" varStatus="adeps" items="${train.forecastEntries}">
                             <a href="/train/${assoc.assoc}">
                                 <c:if test="${adeps.first}">
@@ -168,9 +230,9 @@
                             </a>
                         </c:forEach>
                     </div>
-                </div>
-            </c:if>
-        </c:if>
+                </c:if>
+            </c:when>
+        </c:choose>
     </c:forEach>
 
     <c:if test="${train.isSchedulePresent()}">

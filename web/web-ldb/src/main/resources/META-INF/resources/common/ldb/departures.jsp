@@ -116,6 +116,28 @@
                                         <d:tiploc value="${dep.dest}" link="false"/>
                                     </a>
                                     <span class="ldbVia"><d:via value="${dep.via}"/></span>
+
+                                    <%-- VV Splits so include in main departure if in future --%>
+                                    <c:forEach var="assoc" varStatus="assocStat" items="${dep.train.associations}">
+                                        <c:if test="${assoc.cat eq 'VV' and not empty assoc.ptd}">
+                                            <ldb:train rid="${assoc.assoc}" var="train"/>
+                                            <c:if test="${not empty train and train.forecastPresent}">
+                                                <%-- check to see if split is after this location --%>
+                                                <c:forEach var="point" items="${train.forecastEntries}">
+                                                    <c:if test="${point.tpl eq assoc.tpl and point.getPTT().isAfter(dep.time)}">
+                                                        &amp;
+                                                        <a onclick="document.location = '/train/${train.rid}';">
+                                                            <d:tiploc value="${train.dest}" link="false"/>
+                                                        </a>
+                                                        <c:if test="${train.schedulePresent}">
+                                                            <span class="ldbVia"><d:via value="${train.schedule.via}"/></span>
+                                                        </c:if>
+                                                    </c:if>
+                                                </c:forEach>
+                                            </c:if>
+                                        </c:if>
+                                    </c:forEach>
+
                                 </c:otherwise>
                             </c:choose>
                         </div>
@@ -239,6 +261,42 @@
                                     </c:if>
                                 </c:forEach>
                             </div>
+
+                            <%-- VV Splits --%>
+                            <c:forEach var="assoc" varStatus="assocStat" items="${dep.train.associations}">
+                                <c:if test="${assoc.cat eq 'VV' and not empty assoc.ptd}">
+                                    <ldb:train rid="${assoc.assoc}" var="train"/>
+                                    <c:if test="${not empty train and train.forecastPresent}">
+                                        <%-- check to see if split is after this location --%>
+                                        <c:forEach var="point" items="${train.forecastEntries}">
+                                            <c:if test="${point.tpl eq assoc.tpl and point.getPTT().isAfter(dep.time)}">
+                                                <div class="ldb-entbot">
+                                                    <span class="ldbHeader">
+                                                        This train divides at
+                                                        <d:tiploc value="${assoc.tpl}" nowrap="true" link="false"/>
+                                                    </span>
+                                                    <c:set var="point1" value="true"/>
+                                                    <c:forEach var="point" varStatus="pstat" items="${train.forecastEntries}">
+                                                        <c:if test="${point.callingPoint and assoc.tpl ne point.tpl}">
+                                                            <c:if test="${point1}">
+                                                                <c:set var="point1" value="false"/>
+                                                                <span class="ldbHeader">
+                                                                    calling at:
+                                                                </span>
+                                                            </c:if>
+                                                            <span class="${callList}">
+                                                                <d:tiploc value="${point.tpl}" nowrap="true" link="true" prefix="/mldb/"/>
+                                                                (<t:time value="${point.getPTT()}"/>)
+                                                            </span>
+                                                        </c:if>
+                                                    </c:forEach>
+                                                </div>
+                                            </c:if>
+                                        </c:forEach>
+                                    </c:if>
+                                </c:if>
+                            </c:forEach>
+
                             <div class="ldb-entbot">
 
                                 <%-- Train length --%>
@@ -277,7 +335,7 @@
                                         </span>
                                     </c:if>
                                 </c:if>
-                                    
+
                                 <%-- do we want this?
                                 <c:if test="${dep.delayed}">
                                     <p>
@@ -288,21 +346,6 @@
                                 </c:if>
                                 --%>
                             </div>
-
-                            <%-- VV Splits --%>
-                            <c:forEach var="assoc" varStatus="assocStat" items="${dep.train.associations}">
-                                <c:if test="${assoc.cat eq 'VV' and not empty assoc.ptd}">
-                                    <ldb:train rid="${assoc.assoc}" var="train"/>
-                                    <c:if test="${not empty train and train.forecastPresent}">
-                                        <div class="ldb-entbot">
-                                            <span class="ldbHeader">This train divides at</span>
-                                            <span class="ldbDest">
-                                                <d:tiploc value="${assoc.tpl}" nowrap="true" link="false"/>
-                                            </span>
-                                        </div>
-                                    </c:if>
-                                </c:if>
-                            </c:forEach>
 
                             <%-- NP association - where the train goes next after terminating --%>
                             <c:forEach var="assoc" varStatus="assocStat" items="${dep.train.associations}">

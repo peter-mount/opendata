@@ -173,11 +173,19 @@ public class TrainCacheContextListener
         inputSource.setCharacterStream( new StringReader( s ) );
         Document doc = builder.parse( inputSource );
 
-        // Clear all RID entries for schedules and forecasts
         // Set to only do it once per rid
         set.clear();
+
+        // Clear all RID entries for schedules and forecasts
         getRid( set, (NodeList) xpath.evaluate( "//schedule/@rid", doc, XPathConstants.NODESET ) );
         getRid( set, (NodeList) xpath.evaluate( "//TS/@rid", doc, XPathConstants.NODESET ) );
+        getRid( set, (NodeList) xpath.evaluate( "//association/sched:main/@rid", doc, XPathConstants.NODESET ) );
+        getRid( set, (NodeList) xpath.evaluate( "//association/sched:assoc/@rid", doc, XPathConstants.NODESET ) );
+
+        // Deactivations, usually that'll be it unless requested again
+        getRid( set, (NodeList) xpath.evaluate( "//deactivated/@rid", doc, XPathConstants.NODESET ) );
+
+        // Now clear them
         set.forEach( trainCache::clear );
     }
 
