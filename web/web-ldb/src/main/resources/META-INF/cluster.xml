@@ -25,8 +25,8 @@
         <statistics-enabled>true</statistics-enabled>
         <management-enabled>false</management-enabled>
         
-        <!-- 1 minute as per licence with NRE -->
-        <expiry-policy-factory class-name="uk.trainwatch.util.cache.MinuteExpiryPolicyFactory"/>
+        <!-- 1 minute as per licence with NRE but we cache for an hour, removing when updated -->
+        <expiry-policy-factory class-name="uk.trainwatch.util.cache.HourExpiryPolicyFactory"/>
         
     </cache>
         

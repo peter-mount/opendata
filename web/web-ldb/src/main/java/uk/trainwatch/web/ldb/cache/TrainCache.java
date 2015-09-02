@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 import javax.annotation.Resource;
 import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CacheKey;
+import javax.cache.annotation.CacheRemove;
 import javax.cache.annotation.CacheResult;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -48,6 +49,17 @@ public class TrainCache
 
     @Inject
     private TiplocCache tiplocCache;
+
+    public void init()
+    {
+        LOG.log( Level.INFO, "Initialising TrainCache" );
+    }
+
+    @CacheRemove
+    public void clear( @CacheKey String rid )
+    {
+        LOG.log( Level.FINE, () -> "Removing " + rid );
+    }
 
     @CacheResult
     public Train get( @CacheKey String rid )
@@ -142,7 +154,7 @@ public class TrainCache
         try {
             return tiplocCache.get( tiploc ).
                     stream().
-                    peek( tpl -> LOG.log( Level.INFO, () -> "tiploc " + tiploc + " id " + tpl + ":" ) ).
+                    //peek( tpl -> LOG.log( Level.INFO, () -> "tiploc " + tiploc + " id " + tpl + ":" ) ).
                     map( tpl -> (Predicate<TimetableEntry>) tte -> tpl.equals( tte.getTplid() ) ).
                     reduce( null, Predicates::or, Predicates::or );
         }
