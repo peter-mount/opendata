@@ -108,46 +108,55 @@ public class LDBTrain
      * <p>
      * @return
      */
+    @Override
     public LDB.Type getType()
     {
         return type;
     }
 
+    @Override
     public Timestamp getTs()
     {
         return train.getForecast().getTs();
     }
 
+    @Override
     public LocalDateTime getTsDT()
     {
         return train.getForecast().getTs().toLocalDateTime();
     }
 
+    @Override
     public Collection<CallingPoint> getPoints()
     {
         return points;
     }
 
+    @Override
     public int getCancReason()
     {
         return train.isSchedulePresent() ? train.getSchedule().getCancReason() : 0;
     }
 
+    @Override
     public int getLateReason()
     {
         return 0;
     }
 
+    @Override
     public boolean isCanc()
     {
         return fe.isScheduleEntryPresent() ? fe.getScheduleEntry().isCan() : false;
     }
 
+    @Override
     public void setCanc( boolean canc )
     {
         //this.canc = canc;
     }
 
+    @Override
     public int getVia()
     {
         return train.isSchedulePresent() ? train.getSchedule().getVia() : 0;
@@ -160,6 +169,7 @@ public class LDBTrain
      *
      * @return
      */
+    @Override
     public boolean isTerminated()
     {
         return terminated;
@@ -172,6 +182,7 @@ public class LDBTrain
      *
      * @return
      */
+    @Override
     public boolean isArrived()
     {
         return fe.getArr() != null;
@@ -182,6 +193,7 @@ public class LDBTrain
      *
      * @return
      */
+    @Override
     public boolean isDeparted()
     {
         return fe.getDep() != null;
@@ -195,6 +207,7 @@ public class LDBTrain
      *
      * @return
      */
+    @Override
     public boolean isOnPlatform()
     {
         // Cancelled, terminated or not timetabled then no
@@ -211,6 +224,7 @@ public class LDBTrain
      *
      * @return
      */
+    @Override
     public boolean isOntime()
     {
         return fe.getDelay().isZero() || Math.abs( fe.getDelay().getSeconds() ) < 60;
@@ -221,6 +235,7 @@ public class LDBTrain
      *
      * @return
      */
+    @Override
     public boolean isNoReport()
     {
         return !isArrived() && !isDeparted();
@@ -233,51 +248,61 @@ public class LDBTrain
      *
      * @return
      */
+    @Override
     public LocalTime getTime()
     {
         return fe.getTm();
     }
 
+    @Override
     public long getId()
     {
         return train.getForecastId();
     }
 
+    @Override
     public String getRid()
     {
         return train.getRid();
     }
 
+    @Override
     public String getUid()
     {
         return train.isSchedulePresent() ? train.getSchedule().getUid() : "";
     }
 
+    @Override
     public LocalTime getArr()
     {
         return fe.getArr();
     }
 
+    @Override
     public LocalTime getDep()
     {
         return fe.getDep();
     }
 
+    @Override
     public LocalTime getEta()
     {
         return fe.getEtarr();
     }
 
+    @Override
     public LocalTime getEtd()
     {
         return fe.getEtdep();
     }
 
+    @Override
     public LocalTime getPta()
     {
         return fe.getPta();
     }
 
+    @Override
     public LocalTime getPtd()
     {
         return fe.getPtd();
@@ -288,11 +313,13 @@ public class LDBTrain
      *
      * @return
      */
+    @Override
     public boolean isTimetabled()
     {
         return getPta() != null || fe.getPtd() != null;
     }
 
+    @Override
     public String getPlat()
     {
         return fe.getPlat();
@@ -305,6 +332,7 @@ public class LDBTrain
      *
      * @return
      */
+    @Override
     public boolean isSup()
     {
         return fe.isSup();
@@ -317,6 +345,7 @@ public class LDBTrain
      *
      * @return
      */
+    @Override
     public boolean isPublic()
     {
         return !isSup();
@@ -329,6 +358,7 @@ public class LDBTrain
      *
      * @return
      */
+    @Override
     public boolean isPlatSup()
     {
         return fe.isPlatsup();
@@ -341,6 +371,7 @@ public class LDBTrain
      *
      * @return
      */
+    @Override
     public boolean isCisPlatSup()
     {
         return fe.isCisplatsup();
@@ -354,16 +385,19 @@ public class LDBTrain
      *
      * @return
      */
+    @Override
     public boolean isDisplayPlatform()
     {
         return !(isPlatSup() || isCisPlatSup());
     }
 
+    @Override
     public Duration getDelay()
     {
         return fe.getDelay();
     }
 
+    @Override
     public boolean isDelayed()
     {
         return getDelay() != null && !(getDelay().isNegative() || getDelay().isZero());
@@ -374,11 +408,13 @@ public class LDBTrain
      *
      * @return
      */
+    @Override
     public boolean isDelayUnknown()
     {
         return delayUnknown;
     }
 
+    @Override
     public int getScheduleId()
     {
         return 0;
@@ -389,16 +425,19 @@ public class LDBTrain
         return train.isSchedulePresent();
     }
 
+    @Override
     public String getOrigin()
     {
         return train.getOrigin();
     }
 
+    @Override
     public String getDest()
     {
         return train.getDest();
     }
 
+    @Override
     public String getToc()
     {
         return isSchedulePresent() ? train.getSchedule().getToc() : "";
@@ -409,11 +448,13 @@ public class LDBTrain
      *
      * @return number of carriages, 0 for unknown
      */
+    @Override
     public int getLength()
     {
         return length;
     }
 
+    @Override
     public String getCurloc()
     {
         ForecastEntry last = train.getLastReport();
@@ -426,6 +467,7 @@ public class LDBTrain
      * <p>
      * @return Duration, never negative
      */
+    @Override
     public Duration getTimeUntil()
     {
         LocalDateTime now = getTsDT();
@@ -445,7 +487,7 @@ public class LDBTrain
     @Override
     public String toString()
     {
-        return "LDBTrain{" + "type=" + type + ", train=" + train + ", terminated=" + terminated + ", delayUnknown=" + delayUnknown + ", length=" + length + ", points=" + points +  ", fe=" + fe + '}';
+        return "LDBTrain{" + "type=" + type + ", train=" + train + ", terminated=" + terminated + ", delayUnknown=" + delayUnknown + ", length=" + length + ", points=" + points + ", fe=" + fe + '}';
     }
 
 }

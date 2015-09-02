@@ -123,20 +123,39 @@
                     <c:choose>
                         <%-- check both as cancReason could be for another location when only partially cancelled --%>
                         <c:when test="${dep.canc and dep.cancReason>0}">
+                            <c:if test="${dep.type=='DARWIN'}">
+                                <%-- Handle when partially cancelled show where it next runs from --%>
+                                <c:if test="${dep.canc and dep.train.forecastPresent}">
+                                    <c:set var="depPart" value="true"/>
+                                    <c:forEach var="point" varStatus="pstat" items="${dep.train.forecastEntries}">
+                                        <c:if test="${depPart and point.callingPoint and (not point.scheduleEntryPresent or not point.scheduleEntry.can) and point.getPTT().isAfter(dep.time)}">
+                                            <c:set var="depPart" value="false"/>
+                                            <div class="ldb-entbot">
+                                                <div class="ldbLate">
+                                                    This train starts at
+                                                    <d:tiploc value="${point.tpl}" nowrap="true" link="true" prefix="/mldb/"/>
+                                                    (<t:time value="${point.getPTT()}"/>)
+                                                </div>
+                                            </div>
+                                        </c:if>
+                                    </c:forEach>
+                                </c:if>
+                            </c:if>
+
                             <div class="ldb-entbot">
-                                <div class=".ldbCancelled"><d:cancelReason value="${dep.cancReason}"/></div>
+                                <div class="ldbCancelled"><d:cancelReason value="${dep.cancReason}"/></div>
                             </div>
                         </c:when>
                         <c:when test="${dep.lateReason>0}">
                             <div class="ldb-entbot">
-                                <div class=".ldbLate"><d:lateReason value="${dep.lateReason}"/></div>
+                                <div class="ldbLate"><d:lateReason value="${dep.lateReason}"/></div>
                             </div>
                         </c:when>
                     </c:choose>
                     <c:choose>
                         <c:when test="${dep.terminated}">
                             <div class="ldb-entbot">
-                                <span class="ldbHeader ${callList}">
+                                <div class="ldbLate">
                                     This was the
                                     <c:forEach var="point" varStatus="pstat" items="${dep.points}">
                                         <c:if test="${pstat.first}">${point.time}</c:if>
@@ -147,8 +166,34 @@
                                     <d:tiploc value="${dep.origin}" link="false"/>
                                     <d:via value="${dep.via}"/>
                                     to <d:tiploc value="${dep.dest}" link="false"/>
-                                </span>
+                                </div>
                             </div>
+
+                            <%-- Where we last saw a report for this train --%>
+                            <c:if test="${not empty dep.curloc}">
+                                <div class="ldb-entbot">
+                                    <span class="ldbHeader">Last report:</span>
+                                    <span class="ldbDest">
+                                        <d:tiploc value="${dep.curloc}" link="false"/>
+                                        <t:time value="${dep.train.lastReport.getPTT()}"/>
+                                    </span>
+                                    <c:if test="${dep.train.lastReport.delay.seconds ge 60 or dep.train.lastReport.delay.seconds le -60}">
+                                        <span class="ldbLate">
+                                            Running
+                                            <t:delay value="${dep.train.lastReport.delay}" ontime="false" absolute="true" early="false"/>
+                                            <c:choose>
+                                                <c:when test="${dep.train.lastReport.delay.seconds ge 60}">
+                                                    late
+                                                </c:when>
+                                                <c:otherwise>
+                                                    early
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </span>
+                                    </c:if>
+                                </div>
+                            </c:if>
+
                             <%-- NP association - where the train goes next after terminating --%>
                             <c:forEach var="assoc" varStatus="assocStat" items="${dep.train.associations}">
                                 <c:if test="${assoc.cat eq 'NP' and not empty assoc.ptd}">
@@ -167,8 +212,6 @@
                             </c:forEach>
                         </c:when>
                         <c:when test="${dep.type=='DARWIN'}">
-                            <%-- Handle when partially cancelled --%>
-
                             <%-- Calling points --%>
                             <div class="ldb-entbot">
                                 <span class="ldbHeader ${callList}">
@@ -181,7 +224,7 @@
                                     <c:if test="${not empty point.crs}">
                                         <c:choose>
                                             <c:when test="${pstat.last}">
-                                                <span class="ldbDest ${callList}">
+                                                <span class="${callList}">
                                                     <d:crs value="${point.crs}" nowrap="true" link="true" prefix="/mldb/"/>
                                                     (<t:time value="${point.time}"/>)
                                                 </span>
@@ -195,20 +238,46 @@
                                         </c:choose>
                                     </c:if>
                                 </c:forEach>
+                            </div>
+                            <div class="ldb-entbot">
+
+                                <%-- Train length --%>
                                 <c:if test="${dep.length gt 0}">
                                     <span>
                                         Formed&nbsp;of&nbsp;${dep.length}&nbsp;coaches.
                                     </span>
                                 </c:if>
-                                <c:if test="${not empty dep.curloc}">
-                                    <span class="ldbHeader">Last report:</span>
-                                    <span class="ldbDest"><d:tiploc value="${dep.curloc}" link="false"/></span>
-                                </c:if>
+
+                                <%-- The operating company --%>
                                 <c:if test="${not empty dep.toc}">
                                     <span>
                                         <d:operator value="${dep.toc}"/>&nbsp;service.
                                     </span>
                                 </c:if>
+
+                                <%-- Where we last saw a report for this train --%>
+                                <c:if test="${not empty dep.curloc}">
+                                    <span class="ldbHeader">Last report:</span>
+                                    <span class="ldbDest">
+                                        <d:tiploc value="${dep.curloc}" link="false"/>
+                                        <t:time value="${dep.train.lastReport.getPTT()}"/>
+                                    </span>
+                                    <c:if test="${dep.train.lastReport.delay.seconds ge 60 or dep.train.lastReport.delay.seconds le -60}">
+                                        <span class="ldbLate">
+                                            Running
+                                            <t:delay value="${dep.train.lastReport.delay}" ontime="false" absolute="true" early="false"/>
+                                            <c:choose>
+                                                <c:when test="${dep.train.lastReport.delay.seconds ge 60}">
+                                                    late
+                                                </c:when>
+                                                <c:otherwise>
+                                                    early
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </span>
+                                    </c:if>
+                                </c:if>
+                                    
                                 <%-- do we want this?
                                 <c:if test="${dep.delayed}">
                                     <p>
@@ -241,23 +310,41 @@
                                     <ldb:train rid="${assoc.assoc}" var="train"/>
                                     <c:if test="${not empty train and train.forecastPresent}">
                                         <div class="ldb-entbot">
-                                            <span class="ldbHeader">Forms the</span>
-                                            <span class="ldbDest">
-                                                <c:forEach var="adep" varStatus="adeps" items="${train.forecastEntries}">
-                                                    <a href="/train/${assoc.assoc}">
-                                                        <c:if test="${adeps.first}">
-                                                            <t:time value="${adep.ptd}"/>
-                                                            <d:tiploc value="${adep.tpl}" nowrap="true" link="false"/>
-                                                        </c:if>
-                                                        <c:if test="${adeps.last}">
-                                                            to
-                                                            <d:tiploc value="${adep.tpl}" nowrap="true" link="false"/>
-                                                            due
-                                                            <t:time value="${adep.pta}"/>
-                                                        </c:if>
-                                                    </a>
+                                            <c:forEach var="adep" varStatus="adeps" items="${train.forecastEntries}">
+                                                <a href="/train/${assoc.assoc}">
+                                                    <c:if test="${adeps.first}">
+                                                        <c:set var="adep1" value="${adep}"/>
+                                                    </c:if>
+                                                    <c:if test="${adeps.last}">
+                                                        <c:choose>
+                                                            <c:when test="${empty adep.pta}">
+                                                                <span class="ldbHeader">
+                                                                    Will then run empty to                                                                    
+                                                                </span>
+                                                                <span class="ldbDest">
+                                                                    <a href="/train/${assoc.assoc}">
+                                                                        <d:tiploc value="${adep.tpl}" nowrap="true" link="false"/>
+                                                                    </a>
+                                                                </span>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <span class="ldbHeader">
+                                                                    Forms the
+                                                                </span>
+                                                                <span class="ldbDest">
+                                                                    <a href="/train/${assoc.assoc}">
+                                                                        <t:time value="${adep1.ptd}"/>
+                                                                        <d:tiploc value="${adep1.tpl}" nowrap="true" link="false"/>
+                                                                        to
+                                                                        <d:tiploc value="${adep.tpl}" nowrap="true" link="false"/>
+                                                                        due
+                                                                        <t:time value="${adep.pta}"/>
+                                                                    </a>
+                                                                </span>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </c:if>
                                                 </c:forEach>
-                                            </span>
                                         </div>
                                     </c:if>
                                 </c:if>
