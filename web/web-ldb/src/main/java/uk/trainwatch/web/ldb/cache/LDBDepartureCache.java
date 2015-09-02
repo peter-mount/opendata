@@ -41,7 +41,7 @@ import uk.trainwatch.web.ldb.LDBTrain;
 public class LDBDepartureCache
 {
 
-    private static final String DARWIN_SELECT = "SELECT f.rid"
+    private static final String DARWIN_SELECT = "SELECT f.rid, fe.tm"
                                                 + " FROM darwin.forecast f"
                                                 //                                                + " INNER JOIN darwin.schedule s ON f.schedule=s.id"
                                                 //                                                + " INNER JOIN darwin.location d ON s.dest=d.tpl"
@@ -185,7 +185,15 @@ public class LDBDepartureCache
             // must have a working departure
             // order by first of actual departure, estimated then working departure
             try( PreparedStatement ps = SQL.prepare( con, DARWIN_SELECT, crs ) ) {
-                return SQL.stream( ps, SQL.STRING_LOOKUP ).
+                // Filter out entries we don't want
+                return SQL.stream( ps, rs -> new Object()
+                {
+                    String rid = rs.getString( 1 );
+                    LocalTime tm = TimeUtils.getLocalTime( rs, "tm" );
+                } ).
+                        filter( l -> filter.test( l.tm ) ).
+                        map( o -> o.rid ).
+                        // Now get the full Train
                         map( SQLFunction.guard( trainCache::get ) ).
                         filter( Objects::nonNull ).
                         map( t -> new LDBTrain( LDB.Type.DARWIN, t, crsFilter, darwinReferenceManager ) ).
@@ -194,7 +202,7 @@ public class LDBDepartureCache
                         // Filter those that have departed
                         filter( l -> !l.isDeparted() ).
                         // Filter out those out of range, accounting for midnight
-                        filter( l -> filter.test( l.getTime() ) ).
+                        //filter( l -> filter.test( l.getTime() ) ).
                         // Sort to Darwin rules, accounts for midnight
                         sorted( ( a, b ) -> TimeUtils.compareLocalTimeDarwin.compare( a.getTime(), b.getTime() ) ).
                         collect( Collectors.toList() );

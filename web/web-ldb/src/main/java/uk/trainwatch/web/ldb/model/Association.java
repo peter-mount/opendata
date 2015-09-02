@@ -21,27 +21,30 @@ import uk.trainwatch.util.sql.SQLFunction;
  * @author peter
  */
 public class Association
-        implements Serializable
+        implements TimetableEntry,
+                   Serializable,
+                   Comparable<Association>
 {
 
     private static final long serialVersionUID = 1L;
 
     private static final String SELECT_SQL = "SELECT"
-                                         + " m.rid as main,"
-                                         + " a.rid as assoc,"
-                                         + " t.tpl as tpl,"
-                                         + " r.cat,"
-                                         + " r.cancelled,"
-                                         + " r.deleted,"
-                                         + " r.pta,"
-                                         + " r.wta,"
-                                         + " r.ptd,"
-                                         + " r.wtd"
-                                         + " FROM darwin.%s r"
-                                         + " INNER JOIN darwin.%s m ON r.mainid=m.id"
-                                         + " INNER JOIN darwin.%s a ON r.associd=a.id"
-                                         + " INNER JOIN darwin.tiploc t ON r.tpl=t.id"
-                                         + " WHERE m.rid=?";
+                                             + " m.rid as main,"
+                                             + " a.rid as assoc,"
+                                             + " t.tpl as tpl,"
+                                             + " t.id as tplid,"
+                                             + " r.cat,"
+                                             + " r.cancelled,"
+                                             + " r.deleted,"
+                                             + " r.pta,"
+                                             + " r.wta,"
+                                             + " r.ptd,"
+                                             + " r.wtd"
+                                             + " FROM darwin.%s r"
+                                             + " INNER JOIN darwin.%s m ON r.mainid=m.id"
+                                             + " INNER JOIN darwin.%s a ON r.associd=a.id"
+                                             + " INNER JOIN darwin.tiploc t ON r.tpl=t.id"
+                                             + " WHERE m.rid=?";
 
     public static final String SELECT = String.format( SELECT_SQL, "schedule_assoc", "schedule", "schedule" );
     public static final String SELECT_ARC = String.format( SELECT_SQL, "schedule_assocarc", "schedulearc", "schedulearc" );
@@ -50,6 +53,7 @@ public class Association
             rs.getString( "main" ),
             rs.getString( "assoc" ),
             rs.getString( "tpl" ),
+            rs.getInt( "tplid" ),
             rs.getString( "cat" ),
             rs.getBoolean( "cancelled" ),
             rs.getBoolean( "deleted" ),
@@ -84,6 +88,7 @@ public class Association
     private final String main;
     private final String assoc;
     private final String tpl;
+    private final int tplId;
     private final String cat;
     private final boolean canc;
     private final boolean del;
@@ -92,11 +97,13 @@ public class Association
     private final LocalTime ptd;
     private final LocalTime wtd;
 
-    public Association( String main, String assoc, String tpl, String cat, boolean canc, boolean del, LocalTime pta, LocalTime wta, LocalTime ptd, LocalTime wtd )
+    public Association( String main, String assoc, String tpl, int tplId, String cat, boolean canc, boolean del, LocalTime pta, LocalTime wta, LocalTime ptd,
+                        LocalTime wtd )
     {
         this.main = main;
         this.assoc = assoc;
         this.tpl = tpl;
+        this.tplId = tplId;
         this.cat = cat;
         this.canc = canc;
         this.del = del;
@@ -121,6 +128,12 @@ public class Association
         return tpl;
     }
 
+    @Override
+    public int getTplid()
+    {
+        return tplId;
+    }
+
     public String getCat()
     {
         return cat;
@@ -136,24 +149,40 @@ public class Association
         return del;
     }
 
+    @Override
     public LocalTime getPta()
     {
         return pta;
     }
 
+    @Override
     public LocalTime getWta()
     {
         return wta;
     }
 
+    @Override
     public LocalTime getPtd()
     {
         return ptd;
     }
 
+    @Override
     public LocalTime getWtd()
     {
         return wtd;
+    }
+
+    @Override
+    public LocalTime getWtp()
+    {
+        return null;
+    }
+
+    @Override
+    public int compareTo( Association o )
+    {
+        return TimetableEntry.SORT.compare( this, o );
     }
 
 }

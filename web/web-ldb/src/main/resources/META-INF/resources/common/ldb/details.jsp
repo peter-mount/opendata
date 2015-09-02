@@ -3,6 +3,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="t" uri="http://uktra.in/tld/opendata" %>
 <%@ taglib prefix="d" uri="http://uktra.in/tld/darwin" %>
+<%@ taglib prefix="ldb" uri="http://uktra.in/tld/ldb" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <div class="ldbWrapper">
 
@@ -144,6 +145,33 @@
             </table>
         </div>
     </c:if>
+
+    <%-- NP association - where the train goes next after terminating --%>
+    <c:forEach var="assoc" varStatus="assocStat" items="${train.associations}">
+        <c:if test="${assoc.cat eq 'NP' and not empty assoc.ptd}">
+            <ldb:train rid="${assoc.assoc}" var="train"/>
+            <c:if test="${not empty train and train.forecastPresent}">
+                <div class="ldb-row">
+                    <div class="ldb-label">Forms the</div>
+                    <div class="ldb-value">
+                        <c:forEach var="adep" varStatus="adeps" items="${train.forecastEntries}">
+                            <a href="/train/${assoc.assoc}">
+                                <c:if test="${adeps.first}">
+                                    <t:time value="${adep.ptd}"/>
+                                </c:if>
+                                <c:if test="${adeps.last}">
+                                    to
+                                    <d:tiploc value="${adep.tpl}" nowrap="true" link="false"/>
+                                    due
+                                    <t:time value="${adep.pta}"/>
+                                </c:if>
+                            </a>
+                        </c:forEach>
+                    </div>
+                </div>
+            </c:if>
+        </c:if>
+    </c:forEach>
 
     <c:if test="${train.isSchedulePresent()}">
         <div class="ldb-row">
