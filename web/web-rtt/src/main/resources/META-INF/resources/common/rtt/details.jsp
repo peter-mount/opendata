@@ -423,11 +423,9 @@
                                     <c:when test="${t.canc}">
                                         <c:set var="style" value="canc"/>
                                     </c:when>
-                                    <%--
                                     <c:when test="${t.past}">
                                         <c:set var="style" value="past"/>
                                     </c:when>
-                                    --%>
                                     <c:otherwise>
                                         <c:set var="style" value="expt"/>
                                     </c:otherwise>
@@ -442,11 +440,9 @@
                                         <c:when test="${t.canc}">
                                             <c:set var="style" value="canc"/>
                                         </c:when>
-                                        <%--
                                         <c:when test="${t.past}">
                                             <c:set var="style" value="past"/>
                                         </c:when>
-                                        --%>
                                         <c:otherwise>
                                             <c:set var="style" value="expt"/>
                                         </c:otherwise>

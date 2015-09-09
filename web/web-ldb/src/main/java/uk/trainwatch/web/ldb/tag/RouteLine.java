@@ -26,7 +26,8 @@ public class RouteLine
             rs.getFloat( 6 ),
             rs.getBoolean( 7 ),
             rs.getBoolean( 8 ),
-            rs.getBoolean( 9 )
+            rs.getBoolean( 9 ),
+            rs.getBoolean( 10 )
     );
 
     private final float sx;
@@ -36,8 +37,9 @@ public class RouteLine
     private final boolean canc;
     private final boolean pass;
     private final boolean stop;
+    private final boolean past;
 
-    RouteLine( float sx, float sy, float ex, float ey, boolean canc, boolean pass, boolean stop )
+    RouteLine( float sx, float sy, float ex, float ey, boolean canc, boolean pass, boolean stop, boolean past )
     {
         this.sx = sx;
         this.sy = sy;
@@ -46,6 +48,7 @@ public class RouteLine
         this.canc = canc;
         this.pass = pass;
         this.stop = stop;
+        this.past = past;
     }
 
     public float getSx()
@@ -81,6 +84,11 @@ public class RouteLine
     public boolean isStop()
     {
         return stop;
+    }
+
+    public boolean isPast()
+    {
+        return past;
     }
 
 }
