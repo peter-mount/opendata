@@ -415,8 +415,7 @@
                     </c:if>
                     <c:if test="${status.first}">
                         <td id="track" class="track" rowspan="${table.size()}" rows="${table.size()}">
-                            <%--svg width="${maxIndex}" height="${table.size()}"--%>
-                            <svg width="6" height="${table.size()}">
+                            <svg width="${maxIndex+0.25}" height="${table.size()}">
 
                             <%-- Track lines --%>
                             <c:forEach var="t" items="${tableLine}" varStatus="tstat">

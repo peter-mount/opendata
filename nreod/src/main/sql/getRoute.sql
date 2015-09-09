@@ -1,4 +1,77 @@
 
+-- Returns the forecast entries for getRoute & others for a train
+DROP FUNCTION darwin.getRouteDetails( prid TEXT, idx INTEGER );
+CREATE OR REPLACE FUNCTION darwin.getRouteDetails( prid TEXT, idx INTEGER )
+RETURNS TABLE( index INTEGER, fid BIGINT, tiploc VARCHAR(16), tm TIME WITHOUT TIME ZONE, canc BOOLEAN, pass BOOLEAN, stop BOOLEAN ) AS $$
+DECLARE
+    rec     RECORD;
+BEGIN
+    RETURN QUERY
+        WITH tiplocs AS (
+            SELECT
+                idx as index,
+                e.fid as fid,
+                t.tpl as tiploc,
+                COALESCE( e.ptd, e.pta, e.wtd, e.wta, e.wtp ) as tm,
+                COALESCE( se.can, false ) AS canc,
+                e.wtp IS NOT NULL AS pass,
+                COALESCE( e.ptd, e.pta ) IS NOT NULL AS stop
+            FROM darwin.forecast_entry e
+                INNER JOIN darwin.forecast f ON e.fid = f.id
+                INNER JOIN darwin.tiploc t ON e.tpl=t.id
+                LEFT OUTER JOIN darwin.schedule s ON s.rid = f.rid
+                LEFT OUTER JOIN darwin.schedule_entry se ON se.schedule=s.id AND se.tpl=e.tpl
+            WHERE f.rid = prid --AND e.wtp IS NULL
+        UNION
+            SELECT
+                idx as index,
+                e.fid as fid,
+                t.tpl as tiploc,
+                COALESCE( e.ptd, e.pta, e.wtd, e.wta, e.wtp ) as tm,
+                COALESCE( se.can, false ) AS canc,
+                e.wtp IS NOT NULL AS pass,
+                COALESCE( e.ptd, e.pta ) IS NOT NULL AS stop
+            FROM darwin.forecast_entryarc e
+                INNER JOIN darwin.forecastarc f ON e.fid = f.id
+                INNER JOIN darwin.tiploc t ON e.tpl=t.id
+                LEFT OUTER JOIN darwin.schedulearc s ON s.rid = f.rid
+                LEFT OUTER JOIN darwin.schedule_entryarc se ON se.schedule=s.id AND se.tpl=e.tpl
+            WHERE f.rid = prid --AND e.wtp IS NULL
+        )
+        SELECT * FROM tiplocs ORDER BY tm;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Returns all entries including associations
+-- DROP FUNCTION darwin.getFullRouteDetails( prid TEXT );
+CREATE OR REPLACE FUNCTION darwin.getFullRouteDetails( prid TEXT )
+RETURNS TABLE( index INTEGER, fid BIGINT, tiploc VARCHAR(16), tm TIME WITHOUT TIME ZONE, canc BOOLEAN, pass BOOLEAN, stop BOOLEAN ) AS $$
+DECLARE
+    rec     RECORD;
+    idx     INTEGER = 0;
+BEGIN
+    RETURN QUERY SELECT * FROM darwin.getRouteDetails( prid, idx );
+
+    FOR rec IN
+        SELECT sa.rid
+            FROM darwin.schedule_assoc a
+                INNER JOIN darwin.schedule s ON a.mainid = s.id
+                INNER JOIN darwin.schedule sa ON a.associd = sa.id
+            WHERE s.rid = prid
+    UNION
+        SELECT sa.rid
+            FROM darwin.schedule_assocarc a
+                INNER JOIN darwin.schedulearc s ON a.mainid = s.id
+                INNER JOIN darwin.schedulearc sa ON a.associd = sa.id
+            WHERE s.rid = prid
+    LOOP
+        idx = idx + 1;
+        RETURN QUERY SELECT * FROM darwin.getRouteDetails( rec.rid, idx );
+    END LOOP;
+
+END;
+$$ LANGUAGE plpgsql;
+
 -- Return a route based on a train in Darwin
 
 -- DROP FUNCTION darwin.getRoute( prid TEXT, x FLOAT, starty FLOAT );
@@ -16,33 +89,9 @@ DECLARE
     xo      FLOAT = 0.5;
 BEGIN
 
-    FOR rec IN 
-        WITH tiplocs AS (
-            SELECT t.tpl as tiploc,
-                COALESCE( e.ptd, e.pta, e.wtd, e.wta, e.wtp ) as tm,
-                COALESCE( se.can, false ) AS canc,
-                e.wtp IS NOT NULL AS pass,
-                COALESCE( e.ptd, e.pta ) IS NOT NULL AS stop
-                FROM darwin.forecast_entry e
-                INNER JOIN darwin.forecast f ON e.fid = f.id
-                INNER JOIN darwin.tiploc t ON e.tpl=t.id
-                LEFT OUTER JOIN darwin.schedule s ON s.rid = f.rid
-                LEFT OUTER JOIN darwin.schedule_entry se ON se.schedule=s.id AND se.tpl=e.tpl
-                WHERE f.rid = prid --AND e.wtp IS NULL
-        UNION
-            SELECT t.tpl as tiploc,
-                COALESCE( e.ptd, e.pta, e.wtd, e.wta, e.wtp ) as tm,
-                COALESCE( se.can, false ) AS canc,
-                e.wtp IS NOT NULL AS pass,
-                COALESCE( e.ptd, e.pta ) IS NOT NULL AS stop
-                FROM darwin.forecast_entryarc e
-                INNER JOIN darwin.forecastarc f ON e.fid = f.id
-                INNER JOIN darwin.tiploc t ON e.tpl=t.id
-                LEFT OUTER JOIN darwin.schedulearc s ON s.rid = f.rid
-                LEFT OUTER JOIN darwin.schedule_entryarc se ON se.schedule=s.id AND se.tpl=e.tpl
-                WHERE f.rid = prid --AND e.wtp IS NULL
-        ) SELECT * FROM tiplocs ORDER BY tm
+    FOR rec IN SELECT * FROM darwin.getFullRouteDetails( prid ) ORDER BY tm
     LOOP
+        x = rec.index;
         IF fst THEN
             fst=FALSE;
             mode=rec.canc;
