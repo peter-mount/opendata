@@ -5,23 +5,34 @@
  */
 package uk.trainwatch.web.ldb.tag;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyTagSupport;
+import javax.sql.DataSource;
 import uk.trainwatch.util.CDIUtils;
 import uk.trainwatch.util.Streams;
+import uk.trainwatch.util.sql.SQL;
+import uk.trainwatch.util.sql.SQLFunction;
 import uk.trainwatch.web.ldb.cache.TrainCache;
 import uk.trainwatch.web.ldb.model.Association;
+import uk.trainwatch.web.ldb.model.ForecastEntry;
 import uk.trainwatch.web.ldb.model.Train;
 import uk.trainwatch.web.ldb.model.TrainEntry;
 
@@ -41,6 +52,9 @@ public class TrainEntryTag
     @Inject
     private TrainCache trainCache;
 
+    @Resource(name = "jdbc/rail")
+    private DataSource dataSource;
+
     @SuppressWarnings("LeakingThisInConstructor")
     public TrainEntryTag()
     {
@@ -52,7 +66,7 @@ public class TrainEntryTag
 
         private final Association assoc;
         private final Train train;
-        private final int index;
+        private int index;
         private TrainEntry entry;
         private List<TrainEntry> entries;
 
@@ -78,6 +92,11 @@ public class TrainEntryTag
             return index;
         }
 
+        public void setIndex( int index )
+        {
+            this.index = index;
+        }
+
         public TrainEntry getEntry()
         {
             return entry;
@@ -100,6 +119,19 @@ public class TrainEntryTag
 
     }
 
+    private Collection<RouteLine> getRoute( Train t )
+    {
+        try( Connection con = dataSource.getConnection() ) {
+            try( PreparedStatement ps = SQL.prepare( con, "SELECT * FROM darwin.getRoute(?::TEXT, 0.0, 0.0)", t.getRid() ) ) {
+                return SQL.executeQuery( ps, RouteLine.fromSQL );
+            }
+        }
+        catch( SQLException ex ) {
+            Logger.getLogger( TrainEntryTag.class.getName() ).log( Level.SEVERE, null, ex );
+            return Collections.emptyList();
+        }
+    }
+
     @Override
     public int doStartTag()
             throws JspException
@@ -112,16 +144,7 @@ public class TrainEntryTag
                 ? train.getAssociations().
                         stream().
                         filter( a -> "VV".equals( a.getCat() ) || "JJ".equals( a.getCat() ) ).
-                        map( a -> {
-                            try {
-                                Train t = trainCache.get( a.getAssoc() );
-                                return new T( a, t, index.getAndIncrement() );
-                            }
-                            catch( SQLException ex ) {
-                                Logger.getLogger( TrainEntryTag.class.getName() ).log( Level.SEVERE, null, ex );
-                                return null;
-                            }
-                        } )
+                        map( SQLFunction.guard( a -> new T( a, trainCache.get( a.getAssoc() ), index.getAndIncrement() ) ) )
                 : Stream.empty()
         ).
                 filter( Objects::nonNull ).
@@ -153,6 +176,10 @@ public class TrainEntryTag
                 sorted().
                 collect( Collectors.toList() );
 
+        // Fix the line indices so they appear in the correct sequence
+//        index.set( 0 );
+//        trains.forEach( t -> t.setIndex( index.get() ) );
+//        fixIndices( entries );
         // Now link the lines by each association so they get placed in the correct position
         trains.stream().
                 filter( t -> t.assoc != null ).
@@ -177,7 +204,6 @@ public class TrainEntryTag
                         } );
                     } );
                 } );
-        //Collections.sort( entries );
 
         // Finally override the row positions to the indices
         for( int i = 0; i < entries.size(); i++ ) {
@@ -185,6 +211,7 @@ public class TrainEntryTag
         }
 
         pageContext.setAttribute( var, entries );
+        pageContext.setAttribute( var + "Line", getRoute( train ) );
 
         if( maxIndex != null ) {
             pageContext.setAttribute( maxIndex, index.incrementAndGet() );

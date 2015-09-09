@@ -21,7 +21,7 @@ public class TrainEntry
     private final Association association;
     private final Train train;
     private final ForecastEntry entry;
-    private final int index;
+    private int index;
     private int row = -1;
     private TrainEntry previous;
 
@@ -30,6 +30,11 @@ public class TrainEntry
         this.association = association;
         this.train = train;
         this.entry = entry;
+        this.index = index;
+    }
+
+    public void setIndex( int index )
+    {
         this.index = index;
     }
 

@@ -415,45 +415,49 @@
                     </c:if>
                     <c:if test="${status.first}">
                         <td id="track" class="track" rowspan="${table.size()}" rows="${table.size()}">
-                            <svg width="${maxIndex}" height="${table.size()}">
+                            <%--svg width="${maxIndex}" height="${table.size()}"--%>
+                            <svg width="6" height="${table.size()}">
 
                             <%-- Track lines --%>
-                            <c:forEach var="t" items="${table}" varStatus="tstat">
-                                <c:if test="${not tstat.first}">
-                                    <c:choose>
-                                        <c:when test="${t.cancelled}">
-                                            <c:set var="style" value="canc"/>
-                                        </c:when>
-                                        <c:when test="${t.past}">
-                                            <c:set var="style" value="past"/>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <c:set var="style" value="expt"/>
-                                        </c:otherwise>
-                                    </c:choose>
-                                    <line x1="${t.previousIndex+0.5}" y1="${t.previousRow+0.5}" x2="${t.index+0.5}" y2="${t.row+0.5}" class="track-line-${style}"/>
-                                </c:if>
-                                <c:set var="last" value="${t}"/>
-                            </c:forEach>
-
-                            <%-- Stop's --%>
-                            <c:forEach var="t" items="${table}">
+                            <c:forEach var="t" items="${tableLine}" varStatus="tstat">
                                 <c:choose>
-                                    <c:when test="${t.cancelled}">
+                                    <c:when test="${t.canc}">
                                         <c:set var="style" value="canc"/>
                                     </c:when>
+                                    <%--
                                     <c:when test="${t.past}">
                                         <c:set var="style" value="past"/>
                                     </c:when>
+                                    --%>
                                     <c:otherwise>
                                         <c:set var="style" value="expt"/>
                                     </c:otherwise>
                                 </c:choose>
-                                <c:set var="r" value="0.5"/>
-                                <c:if test="${not empty t.wtp}">
-                                    <c:set var="r" value="0.25"/>
+                                <line x1="${t.sx+0.5}" y1="${t.sy+0.5}" x2="${t.ex+0.5}" y2="${t.ey+0.5}" class="track-line-${style}"/>
+                            </c:forEach>
+
+                            <%-- Stop's --%>
+                            <c:forEach var="t" items="${tableLine}">
+                                <c:if test="${t.pass or t.stop}">
+                                    <c:choose>
+                                        <c:when test="${t.canc}">
+                                            <c:set var="style" value="canc"/>
+                                        </c:when>
+                                        <%--
+                                        <c:when test="${t.past}">
+                                            <c:set var="style" value="past"/>
+                                        </c:when>
+                                        --%>
+                                        <c:otherwise>
+                                            <c:set var="style" value="expt"/>
+                                        </c:otherwise>
+                                    </c:choose>
+                                    <c:set var="r" value="0.5"/>
+                                    <c:if test="${t.pass}">
+                                        <c:set var="r" value="0.25"/>
+                                    </c:if>
+                                    <circle cx="${t.ex+0.5}" cy="${t.ey+0.5}" r="${r}" class="track-stop-${style}"/>
                                 </c:if>
-                                <circle cx="${t.index+0.5}" cy="${t.row+0.5}" r="${r}" class="track-stop-${style}"/>
                             </c:forEach>
 
                             </svg>
