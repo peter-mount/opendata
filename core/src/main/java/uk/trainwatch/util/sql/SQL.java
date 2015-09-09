@@ -26,6 +26,7 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -412,4 +413,22 @@ public class SQL
             ps.setTimestamp( i, Timestamp.valueOf( ldt ) );
         }
     }
+
+    /**
+     * Return a result set as a collection.
+     * <p>
+     * @param <T>     Type of object
+     * @param s       PreparedStatement
+     * @param factory Function to generate the object from the ResultSet
+     * <p>
+     * @return Collection
+     * <p>
+     * @throws SQLException if the query fails
+     */
+    public static <T> Collection<T> executeQuery( PreparedStatement s, SQLFunction<ResultSet, T> factory )
+            throws SQLException
+    {
+        return stream( s, factory ).collect( Collectors.toList() );
+    }
+
 }
