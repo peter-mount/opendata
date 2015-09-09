@@ -85,13 +85,16 @@ DECLARE
     ltpl    VARCHAR(16) = NULL;
     tpl     VARCHAR(16) = NULL;
     y       FLOAT = starty;
-    ty      FLOAT;
+    ty      FLOAT[] = ARRAY[0];
+    ly      FLOAT[] = ARRAY[0];
     xo      FLOAT = 0.5;
+    xs      FLOAT;
 BEGIN
 
     FOR rec IN SELECT * FROM darwin.getFullRouteDetails( prid ) ORDER BY tm
     LOOP
         x = rec.index;
+
         IF fst THEN
             fst=FALSE;
             mode=rec.canc;
@@ -100,18 +103,26 @@ BEGIN
             RETURN QUERY SELECT ltpl, rec.tiploc, x, y, x, y, mode, rec.pass, rec.stop;
             y = y + 1;
         ELSE
+            -- Start of a new branch?
+            IF ly[x] = 0 THEN
+                ly[x] = y-1;
+                xs = x-1;
+            ELSE
+                xs = x;
+            END IF;
+
             IF mode != rec.canc THEN
                 mode = rec.canc;
                 IF mode THEN
                     -- switching to cancelled
                     tpl = ltpl;
-                    ty = y-1;
+                    ty[x] = y-1;
                 ELSE
                     IF tpl IS NOT NULL THEN
                         -- Route around the cancelled stations
-                        RETURN QUERY SELECT tpl, rec.tiploc, x, ty, x+xo, ty+1, FALSE, FALSE, FALSE;
-                        IF ty < (y-1) THEN
-                            RETURN QUERY SELECT tpl, rec.tiploc, x+xo, ty+1, x+xo, y-1, FALSE, FALSE, FALSE;
+                        RETURN QUERY SELECT tpl, rec.tiploc, x, ty[x], x+xo, ty[x]+1, FALSE, FALSE, FALSE;
+                        IF ty[x] < (y-1) THEN
+                            RETURN QUERY SELECT tpl, rec.tiploc, x+xo, ty[x]+1, x+xo, y-1, FALSE, FALSE, FALSE;
                         END IF;
                         RETURN QUERY SELECT tpl, rec.tiploc, x+xo, y-1, x, y, FALSE, FALSE, FALSE;
                     END IF;
@@ -119,8 +130,9 @@ BEGIN
                 END IF;
             END IF;
 
-            RETURN QUERY SELECT ltpl, rec.tiploc, x, y-1, x, y, mode, rec.pass, rec.stop;
+            RETURN QUERY SELECT ltpl, rec.tiploc, xs, ly[x], x, y, mode, rec.pass, rec.stop;
             ltpl = rec.tiploc;
+            ly[x] = y;
             y = y + 1;
         END IF;
     END LOOP;
