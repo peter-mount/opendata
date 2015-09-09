@@ -6,215 +6,53 @@
 package uk.trainwatch.web.ldb.model;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import uk.trainwatch.util.Streams;
-import uk.trainwatch.util.TimeUtils;
 
 /**
- *
+ * A representation of a Train as stored in the cache.
+ * 
+ * User code should access a Train reference from the cache or from {@link TrainFactory}.
+ * 
  * @author peter
  */
-public class Train
-        implements Serializable
+public interface Train
+        extends Serializable
 {
 
-    private static final long serialVersionUID = 1L;
+    TimetableEntry findTime( Predicate<Integer> tplFilter );
 
-    private final String rid;
+    Stream<ForecastEntry> forecastEntries();
 
-    private Schedule schedule;
-    private List<ScheduleEntry> scheduleEntries = Collections.emptyList();
-    private List<Association> associations = Collections.emptyList();
-    private Forecast forecast;
-    private List<ForecastEntry> forecastEntries = Collections.emptyList();
-    private boolean archived;
+    List<Association> getAssociations();
 
-    private ForecastEntry lastReport, startsFrom, originForecast, destinationForecast;
+    String getDest();
 
-    public Train( String rid )
-    {
-        this.rid = rid;
-    }
+    ForecastEntry getDestinationForecast();
 
-    public boolean isArchived()
-    {
-        return archived;
-    }
+    Forecast getForecast();
 
-    public Train setArchived( boolean archived )
-    {
-        this.archived = archived;
-        return this;
-    }
+    List<ForecastEntry> getForecastEntries();
 
-    public LocalDateTime getLastUpdate()
-    {
-        Timestamp t = null;
-        if( forecast != null ) {
-            t = forecast.getTs();
-        }
-        else if( schedule != null ) {
-            t = schedule.getTs();
-        }
-        if( t == null ) {
-            return LocalDateTime.now();
-        }
+    long getForecastId();
 
-        LocalDateTime dt = t.toLocalDateTime();
+    ForecastEntry getLastReport();
 
-        // Fix as DB time is wrong
-        dt.plus( TimeUtils.LONDON.getRules().getDaylightSavings( t.toInstant() ) );
+    LocalDateTime getLastUpdate();
 
-        return dt;
-    }
+    String getOrigin();
 
-    public ForecastEntry getLastReport()
-    {
-        return lastReport;
-    }
+    ForecastEntry getOriginForecast();
 
-    public String getRid()
-    {
-        return rid;
-    }
+    String getRid();
 
-    public boolean isValid()
-    {
-        return isSchedulePresent() || isForecastPresent();
-    }
+    Schedule getSchedule();
 
-    public String getOrigin()
-    {
-        if( isSchedulePresent() ) {
-            return schedule.getOrigin();
-        }
+    List<ScheduleEntry> getScheduleEntries();
 
-        if( forecastEntries != null && !forecastEntries.isEmpty() ) {
-            return forecastEntries.get( 0 ).getTpl();
-        }
-
-        return "";
-    }
-
-    public String getDest()
-    {
-        if( isSchedulePresent() ) {
-            return schedule.getDest();
-        }
-
-        if( forecastEntries != null && !forecastEntries.isEmpty() ) {
-            return forecastEntries.get( forecastEntries.size() - 1 ).getTpl();
-        }
-
-        return "";
-    }
-
-    public boolean isSchedulePresent()
-    {
-        return schedule != null;
-    }
-
-    public long getScheduleId()
-    {
-        return isSchedulePresent() ? schedule.getId() : 0;
-    }
-
-    public Schedule getSchedule()
-    {
-        return schedule;
-    }
-
-    public void setSchedule( Schedule schedule )
-    {
-        this.schedule = schedule;
-    }
-
-    public List<ScheduleEntry> getScheduleEntries()
-    {
-        return scheduleEntries;
-    }
-
-    public void setScheduleEntries( List<ScheduleEntry> scheduleEntries )
-    {
-        this.scheduleEntries = scheduleEntries;
-    }
-
-    public boolean isForecastPresent()
-    {
-        return forecast != null;
-    }
-
-    public long getForecastId()
-    {
-        return isForecastPresent() ? forecast.getId() : 0;
-    }
-
-    public boolean isActivated()
-    {
-        return !archived && (isForecastPresent() && forecast.isActivated());
-    }
-
-    public boolean isDeactivated()
-    {
-        return archived || (isForecastPresent() && forecast.isDeactivated());
-    }
-
-    public Forecast getForecast()
-    {
-        return forecast;
-    }
-
-    public void setForecast( Forecast forecast )
-    {
-        this.forecast = forecast;
-    }
-
-    public List<ForecastEntry> getForecastEntries()
-    {
-        return forecastEntries;
-    }
-
-    public Stream<ForecastEntry> forecastEntries()
-    {
-        return Streams.stream( forecastEntries );
-    }
-
-    public void setForecastEntries( List<ForecastEntry> forecastEntries )
-    {
-        this.forecastEntries = forecastEntries;
-        if( forecastEntries != null && !forecastEntries.isEmpty() ) {
-            // Find last arr/dep/pass
-            lastReport = forecastEntries.stream().
-                    filter( e -> e.getArr() != null || e.getDep() != null || e.getPass() != null ).
-                    sorted( ForecastEntry.SORT_REVERSE ).
-                    findAny().
-                    orElse( null );
-        }
-        else {
-            lastReport = null;
-        }
-
-    }
-
-    public boolean isAssociationsPresent()
-    {
-        return associations != null && !associations.isEmpty();
-    }
-
-    public List<Association> getAssociations()
-    {
-        return associations;
-    }
-
-    public void setAssociations( List<Association> associations )
-    {
-        this.associations = associations;
-    }
+    long getScheduleId();
 
     /**
      * If not null, where the train starts from.
@@ -223,62 +61,44 @@ public class Train
      * <p>
      * @return
      */
-    public ForecastEntry getStartsFrom()
-    {
-        return startsFrom;
-    }
+    ForecastEntry getStartsFrom();
 
-    public boolean isStartsFromSet()
-    {
-        return startsFrom != null;
-    }
+    boolean isActivated();
 
-    public void setStartsFrom( ForecastEntry startsFrom )
-    {
-        this.startsFrom = startsFrom;
-    }
+    boolean isArchived();
 
-    public boolean isOriginForecastPresent()
-    {
-        return originForecast != null;
-    }
+    boolean isAssociationsPresent();
 
-    public ForecastEntry getOriginForecast()
-    {
-        return originForecast;
-    }
+    boolean isDeactivated();
 
-    public void setOriginForecast( ForecastEntry originForecast )
-    {
-        this.originForecast = originForecast;
-    }
+    boolean isDestinationForecastPresent();
 
-    public boolean isDestinationForecastPresent()
-    {
-        return destinationForecast != null;
-    }
+    boolean isForecastPresent();
 
-    public ForecastEntry getDestinationForecast()
-    {
-        return destinationForecast;
-    }
+    boolean isOriginForecastPresent();
 
-    public void setDestinationForecast( ForecastEntry destinationForecast )
-    {
-        this.destinationForecast = destinationForecast;
-    }
+    boolean isSchedulePresent();
 
-    public TimetableEntry findTime( Predicate<Integer> tplFilter )
-    {
-        TimetableEntry e = null;
+    boolean isStartsFromSet();
 
-        if( isForecastPresent() ) {
-            e = TimetableEntry.findTime( forecastEntries, tplFilter );
-        }
-        if( e == null && isSchedulePresent() ) {
-            e = TimetableEntry.findTime( scheduleEntries, tplFilter );
-        }
+    boolean isValid();
 
-        return e;
-    }
+    Train setArchived( boolean archived );
+
+    void setAssociations( List<Association> associations );
+
+    void setDestinationForecast( ForecastEntry destinationForecast );
+
+    void setForecast( Forecast forecast );
+
+    void setForecastEntries( List<ForecastEntry> forecastEntries );
+
+    void setOriginForecast( ForecastEntry originForecast );
+
+    void setSchedule( Schedule schedule );
+
+    void setScheduleEntries( List<ScheduleEntry> scheduleEntries );
+
+    void setStartsFrom( ForecastEntry startsFrom );
+
 }

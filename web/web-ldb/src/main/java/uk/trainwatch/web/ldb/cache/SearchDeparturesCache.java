@@ -27,8 +27,8 @@ import javax.inject.Inject;
 import javax.sql.DataSource;
 import uk.trainwatch.util.Predicates;
 import uk.trainwatch.util.sql.SQL;
-import uk.trainwatch.util.sql.SQLFunction;
 import uk.trainwatch.web.ldb.model.SearchResult;
+import uk.trainwatch.web.ldb.model.TrainFactory;
 
 /**
  * Cache that holds Crs to Tiplocs... used often in ldb lookups
@@ -143,7 +143,7 @@ public class SearchDeparturesCache
                         sorted().
                         distinct().
                         // If searching in the past then force archived so the search doesn't scan the live tables
-                        map( SQLFunction.guard( rid -> trainCache.get( rid ) ) ).
+                        map( TrainFactory::getTrainProxy ).
                         // Flag as archived?
                         map( t -> t.setArchived( archiveOnly ) ).
                         // Perform the search

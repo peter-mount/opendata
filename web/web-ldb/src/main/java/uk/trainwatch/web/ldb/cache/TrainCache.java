@@ -28,6 +28,7 @@ import uk.trainwatch.web.ldb.model.Schedule;
 import uk.trainwatch.web.ldb.model.ScheduleEntry;
 import uk.trainwatch.web.ldb.model.TimetableEntry;
 import uk.trainwatch.web.ldb.model.Train;
+import uk.trainwatch.web.ldb.model.TrainFactory;
 
 /**
  * Cache holding Train details - used in searches but also allows reduction of size of queries
@@ -68,7 +69,7 @@ public class TrainCache
         LOG.log( Level.INFO, () -> "Looking up Train " + rid );
 
         try( Connection con = dataSource.getConnection() ) {
-            Train train = new Train( rid );
+            Train train = TrainFactory.newTrainInstance( rid );
 
             // Archive flag may be set if we already know we are searching in the past
             if( !train.isSchedulePresent() && !train.isArchived() ) {
