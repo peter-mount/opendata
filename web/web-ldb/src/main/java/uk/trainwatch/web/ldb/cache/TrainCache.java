@@ -70,48 +70,15 @@ public class TrainCache
 
         try( Connection con = dataSource.getConnection() ) {
             Train train = TrainFactory.newTrainInstance( rid );
+            Schedule.populate.accept( con, train );
+            ScheduleEntry.populate.accept( con, train );
+            Forecast.populate.accept( con, train );
+            ForecastEntry.populate.accept( con, train );
+            Association.populate.accept( con, train );
 
-            // Archive flag may be set if we already know we are searching in the past
-            if( !train.isSchedulePresent() && !train.isArchived() ) {
-                Schedule.populate.accept( con, train );
-            }
-            if( !train.isSchedulePresent() ) {
-                Schedule.populateArc.accept( con, train );
-            }
-
-            // Only get entries if we have a schedule
-            if( train.isSchedulePresent() ) {
-                if( train.isArchived() ) {
-                    ScheduleEntry.populateArc.accept( con, train );
-                    Association.populateArc.accept( con, train );
-                }
-                else {
-                    ScheduleEntry.populate.accept( con, train );
-                    Association.populate.accept( con, train );
-                }
-            }
-
-            // No need to search live table if archived
-            if( !train.isArchived() ) {
-                Forecast.populate.accept( con, train );
-            }
-            if( !train.isForecastPresent() ) {
-                Forecast.populateArc.accept( con, train );
-            }
-
-            // Only get entries if we have a forecast
-            if( train.isForecastPresent() ) {
-                if( train.isArchived() ) {
-                    ForecastEntry.populateArc.accept( con, train );
-                }
-                else {
-                    ForecastEntry.populate.accept( con, train );
-                }
-            }
-
-            if( train.getForecastEntries() != null ) {
-                Collections.sort( train.getForecastEntries() );
-            }
+//            if( train.getForecastEntries() != null ) {
+//                Collections.sort( train.getForecastEntries() );
+//            }
 
             if( train.isForecastPresent() && train.isSchedulePresent() ) {
                 // Now link forecast & schedule entries - otherwise we'll have no idea of cancelled stops

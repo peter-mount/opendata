@@ -11,7 +11,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.Duration;
 import java.time.LocalTime;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import uk.trainwatch.util.TimeUtils;
 import uk.trainwatch.util.sql.SQL;
@@ -30,22 +29,7 @@ public class ForecastEntry
 
     private static final long serialVersionUID = 1L;
 
-    private static final String SELECT_PATTERN = "SELECT f.fid,"
-                                                 + " t.tpl, f.tpl as tplid,"
-                                                 + " f.supp,"
-                                                 + "f.pta, f.ptd, f.wta, f.wtd, f.wtp,"
-                                                 + "f.delay,"
-                                                 + "f.arr, f.dep, f.etarr, f.etdep,"
-                                                 + "f.pass, f.etpass,"
-                                                 + "f.plat, f.platsup, f.cisplatsup, f.platsrc,"
-                                                 + "f.length, f.detachfront,"
-                                                 + "f.tm"
-                                                 + " FROM darwin.%s f"
-                                                 + " INNER JOIN darwin.tiploc t ON f.tpl=t.id"
-                                                 + " WHERE f.fid=?";
-
-    public static final String SELECT = String.format( SELECT_PATTERN, "forecast_entry" );
-    public static final String SELECT_ARC = String.format( SELECT_PATTERN, "forecast_entryarc" );
+    private static final String SELECT = "SELECT * FROM darwin.getForecastEntries(?)";
 
     public static final SQLFunction<ResultSet, ForecastEntry> fromSQL = rs -> new ForecastEntry(
             rs.getLong( "fid" ),
@@ -70,27 +54,20 @@ public class ForecastEntry
             rs.getString( "platsrc" ),
             rs.getInt( "length" ),
             rs.getBoolean( "detachfront" ),
-            TimeUtils.getLocalTime( rs, "tm" )
+            TimeUtils.getLocalTime( rs, "tm" ),
+            rs.getBoolean( "ldb" ),
+            rs.getBoolean( "term" ),
+            rs.getBoolean( "etarrdel" ),
+            rs.getBoolean( "etdepdel" ),
+            rs.getBoolean( "etpassdel" ),
+            rs.getBoolean( "ldbdel" ),
+            rs.getBoolean( "canc" )
     );
 
     public static final SQLBiConsumer<Connection, Train> populate = ( c, t ) -> {
         if( t.isForecastPresent() ) {
-            try( PreparedStatement ps = SQL.prepare( c, SELECT, t.getForecastId() ) ) {
-                t.setForecastEntries( SQL.stream( ps, fromSQL ).
-                        sorted().
-                        collect( Collectors.toList() )
-                );
-            }
-        }
-    };
-
-    public static final SQLBiConsumer<Connection, Train> populateArc = ( c, t ) -> {
-        if( t.isForecastPresent() ) {
-            try( PreparedStatement ps = SQL.prepare( c, SELECT_ARC, t.getForecastId() ) ) {
-                t.setForecastEntries( SQL.stream( ps, fromSQL ).
-                        sorted().
-                        collect( Collectors.toList() )
-                );
+            try( PreparedStatement ps = SQL.prepare( c, SELECT, t.getRid() ) ) {
+                t.setForecastEntries( SQL.stream( ps, fromSQL ).collect( Collectors.toList() ) );
             }
         }
     };
@@ -118,6 +95,13 @@ public class ForecastEntry
     private final int length;
     private final boolean detatchfront;
     private final LocalTime tm;
+    private final boolean term;
+    private final boolean etarrdel;
+    private final boolean etdepdel;
+    private final boolean etpassdel;
+    private final boolean ldb;
+    private final boolean ldbdel;
+    private final boolean canc;
 
     private ScheduleEntry scheduleEntry;
 
@@ -129,7 +113,15 @@ public class ForecastEntry
                           LocalTime pass, LocalTime etpass,
                           String plat,
                           boolean platsup, boolean cisplatsup,
-                          String platsrc, int length, boolean detatchfront, LocalTime tm )
+                          String platsrc, int length, boolean detatchfront, LocalTime tm,
+                          boolean term,
+                          boolean etarrdel,
+                          boolean etdepdel,
+                          boolean etpassdel,
+                          boolean ldb,
+                          boolean ldbdel,
+                          boolean canc
+    )
     {
         this.id = id;
         this.tpl = tpl;
@@ -154,6 +146,13 @@ public class ForecastEntry
         this.length = length;
         this.detatchfront = detatchfront;
         this.tm = tm;
+        this.term = term;
+        this.etarrdel = etarrdel;
+        this.etdepdel = etdepdel;
+        this.etpassdel = etpassdel;
+        this.ldb = ldb;
+        this.ldbdel = ldbdel;
+        this.canc = canc;
     }
 
     public long getId()
@@ -318,4 +317,50 @@ public class ForecastEntry
     {
         return !(pass != null || etpass != null);
     }
+
+    /**
+     * Is the train delayed. This means we must show DELAYED not the estimated time
+     * <p>
+     * @return
+     */
+    public boolean isDelayed()
+    {
+        return etarrdel || etdepdel || etpassdel;
+    }
+
+    public boolean isTerm()
+    {
+        return term;
+    }
+
+    public boolean isEtarrdel()
+    {
+        return etarrdel;
+    }
+
+    public boolean isEtdepdel()
+    {
+        return etdepdel;
+    }
+
+    public boolean isEtpassdel()
+    {
+        return etpassdel;
+    }
+
+    public boolean isLdb()
+    {
+        return ldb;
+    }
+
+    public boolean isLdbdel()
+    {
+        return ldbdel;
+    }
+
+    public boolean isCanc()
+    {
+        return canc;
+    }
+
 }

@@ -13,7 +13,7 @@ BEGIN
                 idx as index,
                 e.fid as fid,
                 t.tpl as tiploc,
-                COALESCE( e.ptd, e.pta, e.wtd, e.wta, e.wtp ) as tm,
+                COALESCE( e.wtd, e.wta, e.wtp ) as tm,
                 COALESCE( se.can, false ) AS canc,
                 e.wtp IS NOT NULL AS pass,
                 COALESCE( e.ptd, e.pta ) IS NOT NULL AS stop,
@@ -29,7 +29,7 @@ BEGIN
                 idx as index,
                 e.fid as fid,
                 t.tpl as tiploc,
-                COALESCE( e.ptd, e.pta, e.wtd, e.wta, e.wtp ) as tm,
+                COALESCE( e.wtd, e.wta, e.wtp ) as tm,
                 COALESCE( se.can, false ) AS canc,
                 e.wtp IS NOT NULL AS pass,
                 COALESCE( e.ptd, e.pta ) IS NOT NULL AS stop,
@@ -57,22 +57,23 @@ CREATE OR REPLACE FUNCTION darwin.getFullRouteDetails( prid TEXT )
 RETURNS TABLE( index INTEGER, fid BIGINT, tiploc VARCHAR(16), tm TIME WITHOUT TIME ZONE, canc BOOLEAN, pass BOOLEAN, stop BOOLEAN, past BOOLEAN ) AS $$
 DECLARE
     rec     RECORD;
-    idx     INTEGER = 0;
+    idx     INTEGER = 1;
 BEGIN
     RETURN QUERY SELECT * FROM darwin.getRouteDetails( prid, idx );
 
+    -- Note filter out NP associations here
     FOR rec IN
         SELECT sa.rid
             FROM darwin.schedule_assoc a
                 INNER JOIN darwin.schedule s ON a.mainid = s.id
                 INNER JOIN darwin.schedule sa ON a.associd = sa.id
-            WHERE s.rid = prid
+            WHERE s.rid = prid AND a.cat != 'NP'
     UNION
         SELECT sa.rid
             FROM darwin.schedule_assocarc a
                 INNER JOIN darwin.schedulearc s ON a.mainid = s.id
                 INNER JOIN darwin.schedulearc sa ON a.associd = sa.id
-            WHERE s.rid = prid
+            WHERE s.rid = prid AND a.cat != 'NP'
     LOOP
         idx = idx + 1;
         RETURN QUERY SELECT * FROM darwin.getRouteDetails( rec.rid, idx );
@@ -89,61 +90,65 @@ CREATE OR REPLACE FUNCTION darwin.getRoute( prid TEXT, x FLOAT, starty FLOAT )
 RETURNS TABLE( stpl VARCHAR(16), etpl VARCHAR(16), sx FLOAT, sy FLOAT, ex FLOAT, ey FLOAT, can BOOLEAN, pass BOOLEAN, stop BOOLEAN, past BOOLEAN ) AS $$
 DECLARE
     rec     RECORD;
-    fst     BOOLEAN = TRUE;
-    mode    BOOLEAN;
-    ltpl    VARCHAR(16) = NULL;
-    tpl     VARCHAR(16) = NULL;
+    mode    BOOLEAN[] = ARRAY[0];
+    ltpl    VARCHAR(16)[] = ARRAY[0];
+    tpl     VARCHAR(16)[] = ARRAY[0];
     y       FLOAT = starty;
+    fst     BOOLEAN[] = ARRAY[0];
     ty      FLOAT[] = ARRAY[0];
     ly      FLOAT[] = ARRAY[0];
     xo      FLOAT = 0.5;
-    xs      FLOAT;
+    xs      FLOAT[] = ARRAY[0];
 BEGIN
 
     FOR rec IN SELECT * FROM darwin.getFullRouteDetails( prid ) ORDER BY tm
     LOOP
         x = rec.index;
 
-        IF fst THEN
-            fst=FALSE;
-            mode=rec.canc;
-            ltpl = rec.tiploc;
-            -- A point to ensure we can display the start point
-            RETURN QUERY SELECT ltpl, rec.tiploc, x, y, x, y, mode, rec.pass, rec.stop, rec.past;
-            y = y + 1;
-        ELSE
-            -- Start of a new branch?
-            IF ly[x] = 0 THEN
-                ly[x] = y-1;
-                xs = x-1;
-            ELSE
-                xs = x;
-            END IF;
+        IF NOT COALESCE(fst[x],FALSE) THEN
+            fst[x]=TRUE;
+            mode[x]=rec.canc;
 
-            IF mode != rec.canc THEN
-                mode = rec.canc;
-                IF mode THEN
+            ltpl[x] = rec.tiploc;
+            ly[x] = y;
+            xs[x] = x-1;
+
+            -- Splits need to join to first point
+             IF x > 1 THEN
+                 RETURN QUERY SELECT rec.tiploc, rec.tiploc, xs[x]-1, ly[x]-1, xs[x], ly[x], mode[x], rec.pass, rec.stop, rec.past;
+            ELSE
+                -- A point to ensure we can display the start point
+                RETURN QUERY SELECT rec.tiploc, rec.tiploc, xs[x], ly[x], xs[x], ly[x], mode[x], rec.pass, rec.stop, rec.past;
+            END IF;
+        ELSE
+            IF mode[x] = rec.canc THEN
+                RETURN QUERY SELECT ltpl[x], rec.tiploc, xs[x], ly[x], xs[x], y, rec.canc, rec.pass, rec.stop, rec.past;
+            ELSE
+                RAISE NOTICE '% % % %', ltpl[x], rec.tiploc, mode[x], rec.canc;
+                RETURN QUERY SELECT ltpl[x], rec.tiploc, xs[x], ly[x], xs[x], y, true, rec.pass, rec.stop, rec.past;
+
+                IF rec.canc THEN
                     -- switching to cancelled
-                    tpl = ltpl;
+                    tpl[x] = ltpl[x];
                     ty[x] = y-1;
                 ELSE
-                    IF tpl IS NOT NULL THEN
-                        -- Route around the cancelled stations
-                        RETURN QUERY SELECT tpl, rec.tiploc, x, ty[x], x+xo, ty[x]+1, FALSE, FALSE, FALSE, rec.past;
-                        IF ty[x] < (y-1) THEN
-                            RETURN QUERY SELECT tpl, rec.tiploc, x+xo, ty[x]+1, x+xo, y-1, FALSE, FALSE, FALSE, rec.past;
-                        END IF;
-                        RETURN QUERY SELECT tpl, rec.tiploc, x+xo, y-1, x, y, FALSE, FALSE, FALSE, rec.past;
+                    -- Route around the cancelled stations
+                    RETURN QUERY SELECT tpl[x], rec.tiploc, xs[x], ty[x], xs[x]+xo, ty[x]+1, FALSE, FALSE, FALSE, rec.past;
+                    IF ty[x] < (y-1) THEN
+                        RETURN QUERY SELECT tpl[x], rec.tiploc, xs[x]+xo, ty[x]+1, xs[x]+xo, y-1, FALSE, FALSE, FALSE, rec.past;
                     END IF;
-                    tpl=NULL;
+                    RETURN QUERY SELECT tpl[x], rec.tiploc, xs[x]+xo, y-1, xs[x], y, FALSE, rec.pass, rec.stop, rec.past;
                 END IF;
+
+                mode[x] = rec.canc;
             END IF;
 
-            RETURN QUERY SELECT ltpl, rec.tiploc, xs, ly[x], x, y, mode, rec.pass, rec.stop, rec.past;
-            ltpl = rec.tiploc;
             ly[x] = y;
-            y = y + 1;
         END IF;
+
+        ltpl[x] = rec.tiploc;
+        y = y + 1;
+
     END LOOP;
 END;
 $$ LANGUAGE plpgsql;

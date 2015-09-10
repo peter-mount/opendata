@@ -28,26 +28,7 @@ public class Association
 
     private static final long serialVersionUID = 1L;
 
-    private static final String SELECT_SQL = "SELECT"
-                                             + " m.rid as main,"
-                                             + " a.rid as assoc,"
-                                             + " t.tpl as tpl,"
-                                             + " t.id as tplid,"
-                                             + " r.cat,"
-                                             + " r.cancelled,"
-                                             + " r.deleted,"
-                                             + " r.pta,"
-                                             + " r.wta,"
-                                             + " r.ptd,"
-                                             + " r.wtd"
-                                             + " FROM darwin.%s r"
-                                             + " INNER JOIN darwin.%s m ON r.mainid=m.id"
-                                             + " INNER JOIN darwin.%s a ON r.associd=a.id"
-                                             + " INNER JOIN darwin.tiploc t ON r.tpl=t.id"
-                                             + " WHERE m.rid=?";
-
-    public static final String SELECT = String.format( SELECT_SQL, "schedule_assoc", "schedule", "schedule" );
-    public static final String SELECT_ARC = String.format( SELECT_SQL, "schedule_assocarc", "schedulearc", "schedulearc" );
+    private static final String SELECT = "SELECT * FROM darwin.getAssociations(?)";
 
     public static final SQLFunction<ResultSet, Association> fromSQL = rs -> new Association(
             rs.getString( "main" ),
@@ -66,21 +47,7 @@ public class Association
     public static final SQLBiConsumer<Connection, Train> populate = ( c, t ) -> {
         if( t.isSchedulePresent() ) {
             try( PreparedStatement ps = SQL.prepare( c, SELECT, t.getRid() ) ) {
-                t.setAssociations( SQL.stream( ps, fromSQL ).
-                        sorted().
-                        collect( Collectors.toList() )
-                );
-            }
-        }
-    };
-
-    public static final SQLBiConsumer<Connection, Train> populateArc = ( c, t ) -> {
-        if( t.isSchedulePresent() ) {
-            try( PreparedStatement ps = SQL.prepare( c, SELECT_ARC, t.getRid() ) ) {
-                t.setAssociations( SQL.stream( ps, fromSQL ).
-                        sorted().
-                        collect( Collectors.toList() )
-                );
+                t.setAssociations( SQL.stream( ps, fromSQL ).collect( Collectors.toList() ) );
             }
         }
     };

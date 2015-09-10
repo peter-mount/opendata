@@ -49,6 +49,7 @@ public class RouteLine
         this.pass = pass;
         this.stop = stop;
         this.past = past;
+        System.out.printf( "%f %f %f %f\n", sx,sy,ex,ey);
     }
 
     public float getSx()

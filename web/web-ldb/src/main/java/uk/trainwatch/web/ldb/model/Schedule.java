@@ -24,15 +24,7 @@ public class Schedule
 
     private static final long serialVersionUID = 1L;
 
-    private static final String SELECT_PATTERN = "SELECT s.id, s.rid, s.uid, s.ssd, s.ts, s.trainid, s.toc, s.cancreason, s.via, o.tpl as origin, d.tpl as dest"
-                                                 + " FROM darwin.%s s"
-                                                 + " INNER JOIN darwin.tiploc o ON s.origin=o.id"
-                                                 + " INNER JOIN darwin.tiploc d ON s.dest=d.id"
-                                                 + " WHERE s.rid=?"
-                                                 + " ORDER BY s.id DESC";
-
-    public static final String SELECT = String.format( SELECT_PATTERN, "schedule" );
-    public static final String SELECT_ARC = String.format( SELECT_PATTERN, "schedulearc" );
+    public static final String SELECT = "SELECT * FROM darwin.getSchedule(?)";
 
     public static final SQLFunction<ResultSet, Schedule> fromSQL = rs -> new Schedule(
             rs.getLong( "id" ),
@@ -45,19 +37,13 @@ public class Schedule
             rs.getInt( "cancreason" ),
             rs.getInt( "via" ),
             rs.getString( "origin" ),
-            rs.getString( "dest" )
+            rs.getString( "dest" ),
+            rs.getBoolean( "archived" )
     );
 
     public static final SQLBiConsumer<Connection, Train> populate = ( c, t ) -> {
         try( PreparedStatement ps = SQL.prepare( c, SELECT, t.getRid() ) ) {
             t.setSchedule( SQL.stream( ps, fromSQL ).findAny().orElse( null ) );
-        }
-    };
-
-    public static final SQLBiConsumer<Connection, Train> populateArc = ( c, t ) -> {
-        try( PreparedStatement ps = SQL.prepare( c, SELECT_ARC, t.getRid() ) ) {
-            t.setSchedule( SQL.stream( ps, fromSQL ).findAny().orElse( null ) );
-            t.setArchived( t.isArchived() || t.isSchedulePresent() );
         }
     };
 
@@ -72,8 +58,10 @@ public class Schedule
     private final int via;
     private final String origin;
     private final String dest;
+    private final boolean archived;
 
-    public Schedule( long id, String rid, String uid, String ssd, Timestamp ts, String trainId, String toc, int cancReason, int via, String origin, String dest )
+    public Schedule( long id, String rid, String uid, String ssd, Timestamp ts, String trainId, String toc, int cancReason, int via, String origin, String dest,
+                     boolean archived )
     {
         this.id = id;
         this.rid = rid;
@@ -86,6 +74,7 @@ public class Schedule
         this.via = via;
         this.origin = origin;
         this.dest = dest;
+        this.archived = archived;
     }
 
     public long getId()
@@ -141,6 +130,11 @@ public class Schedule
     public String getDest()
     {
         return dest;
+    }
+
+    public boolean isArchived()
+    {
+        return archived;
     }
 
 }
