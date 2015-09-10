@@ -68,7 +68,9 @@ RETURNS TABLE(
     etarr       TIME WITHOUT TIME ZONE,
     etdep       TIME WITHOUT TIME ZONE,
     delayed     BOOLEAN,
+    latereason  INTEGER,
     canc        BOOLEAN,
+    cancreason  INTEGER,
     term        BOOLEAN,
     -- meta
     rid         VARCHAR(16),
@@ -78,6 +80,7 @@ RETURNS TABLE(
     -- meta
     callpoint   TEXT,
     lastreport  VARCHAR(16),
+    length      INTEGER,
     -- association
     assoc       VARCHAR(16),
     assoctpl    VARCHAR(16),
@@ -107,7 +110,9 @@ BEGIN
                         e.etarr,
                         e.etdep,
                         COALESCE( e.etdepdel, etarrdel, FALSE),
+                        COALESCE( f.latereason, 0 ),
                         COALESCE( se.can, false ),
+                        COALESCE( s.cancreason, 0 ),
                         sl.crs=crsid,
                         f.rid,
                         s.via,
@@ -115,6 +120,7 @@ BEGIN
                         -- main calling points
                         darwin.callingPoints(f.rid, COALESCE( e.ptd, e.pta )),
                         darwin.lastreport(f.rid),
+                        COALESCE( e.length, 0 ),
                         -- association
                         sas.rid,
                         sat.tpl,
