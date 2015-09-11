@@ -9,15 +9,13 @@ import uk.trainwatch.web.servlet.AbstractServlet;
 import uk.trainwatch.web.servlet.ApplicationRequest;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.time.Instant;
-import java.time.LocalTime;
-import java.util.Date;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
+import uk.trainwatch.nre.darwin.stationmsg.StationMessageManager;
 import uk.trainwatch.nrod.location.TrainLocation;
-import uk.trainwatch.util.TimeUtils;
+import uk.trainwatch.web.ldb.cache.LDBDepartureCache;
 
 /**
  * Performance Home
@@ -29,7 +27,9 @@ public abstract class AbstractLDBServlet
 {
 
     @Inject
-    protected LDBUtils lDBUtils;
+    protected LDBDepartureCache departureCache;
+    @Inject
+    protected StationMessageManager stationMessageManager;
 
     protected abstract String getRenderTile();
 
@@ -37,20 +37,14 @@ public abstract class AbstractLDBServlet
             throws ServletException,
                    IOException
     {
+        String crs = loc.getCrs();
+
         Map<String, Object> req = request.getRequestScope();
         req.put( "location", loc );
         req.put( "pageTitle", loc.getLocation() );
-        try
-        {
-            LocalTime time = TimeUtils.getLondonDateTime().toLocalTime();
-            String otherTime = request.getParam().get( "t" );
-            if( otherTime != null )
-            {
-                time = LocalTime.parse( otherTime );
-            }
-
-            // Get the departures and the Instant the last entry was last updated
-            Instant lastUpdate = lDBUtils.getDepartures( req, loc, time );
+        try {
+            req.put( "departures", departureCache.getDarwinDepartures( crs ) );
+            req.put( "stationMessages", stationMessageManager.getMessages( crs ) );
 
             // TfL requires 30s whilst NRE/Darwin 60s
             int maxAge = loc.isTfl() ? 30 : 60;
@@ -61,11 +55,11 @@ public abstract class AbstractLDBServlet
             HttpServletResponse response = request.getResponse();
             response.addHeader( "Cache-Control", String.format( "public, max-age=%1$d, s-maxage=%<d, no-transform", maxAge ) );
             response.addDateHeader( "Expires", now + (maxAge * 1000L) );
-            response.addDateHeader( "last-modified", Date.from( lastUpdate ).getTime() );
+            response.addDateHeader( "last-modified", System.currentTimeMillis() );
 
             request.renderTile( getRenderTile() );
-        } catch( SQLException ex )
-        {
+        }
+        catch( SQLException ex ) {
             log( "show " + loc, ex );
             request.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
         }

@@ -25,8 +25,11 @@ public abstract class AbstractLDBViewServlet
     protected abstract String getServletPrefix();
 
     @Inject
+    private LDBUtils lDBUtils;
+
+    @Inject
     private StationMessageManager stationMessageManager;
-    
+
     @Override
     protected void doGet( ApplicationRequest request )
             throws ServletException,

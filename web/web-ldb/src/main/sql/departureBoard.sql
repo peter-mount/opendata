@@ -6,6 +6,24 @@
 
 SET search_path = darwin;
 
+-- Missing indices
+CREATE INDEX forecast_entry_pd ON darwin.forecast_entry(ptd);
+CREATE INDEX forecast_entry_pa ON darwin.forecast_entry(pta);
+CREATE INDEX forecast_entry_pad ON darwin.forecast_entry(pta,ptd);
+
+CREATE INDEX schedule_ssd ON darwin.schedule(ssd);
+CREATE INDEX schedulearc_ssd ON darwin.schedulearc(ssd);
+
+CREATE INDEX schedulearc_ssddest ON darwin.schedulearc(ssd,dest);
+CREATE INDEX schedule_ssddest ON darwin.schedule(ssd,dest);
+
+CREATE INDEX schedule_assoc_mac ON darwin.schedule_assoc(mainid,associd,cat);
+CREATE INDEX schedule_assoc_ac ON darwin.schedule_assoc(associd,cat);
+CREATE INDEX schedule_assoc_c ON darwin.schedule_assoc(cat);
+CREATE INDEX schedule_assoc_mc ON darwin.schedule_assoc(mainid,cat);
+
+
+
 -- Search for departures within one hour of a specified date/time
 -- Used for the rtt search page
 
@@ -27,7 +45,10 @@ DECLARE
     ret     JSON[] = ARRAY[]::JSON[];
 BEGIN
     IF prid IS NOT NULL THEN
-        FOR rec IN SELECT cp.tpl,cp.tm FROM darwin.getForecastEntries(prid) cp WHERE NOT cp.canc AND cp.tm > ps ORDER BY cp.wtm
+        FOR rec IN
+            SELECT cp.tpl,cp.tm
+                FROM darwin.getForecastEntries(prid) cp
+                WHERE NOT cp.canc AND cp.wtp IS NULL AND cp.tm > ps ORDER BY cp.wtm
         LOOP
             ret = array_append(ret, array_to_json(ARRAY[ rec.tpl::TEXT, rec.tm::TEXT ]));
         END LOOP;
@@ -38,14 +59,14 @@ $$ LANGUAGE plpgsql;
 
 -- Return the last report for a train
 CREATE OR REPLACE FUNCTION darwin.lastReport(prid TEXT)
-RETURNS VARCHAR(16) AS $$
+RETURNS TEXT AS $$
 DECLARE
     rec     RECORD;
 BEGIN
     IF prid IS NOT NULL THEN
         SELECT INTO rec * FROM darwin.getForecastEntries(prid) e WHERE COALESCE( e.dep, e.arr, e.pass ) IS NOT NULL ORDER BY e.wtm DESC LIMIT 1;
         IF FOUND THEN
-            RETURN rec.tpl;
+            RETURN array_to_json(ARRAY[rec.tpl::TEXT, rec.tm::TEXT]);
         END IF;
     END IF;
     RETURN NULL;
@@ -67,6 +88,8 @@ RETURNS TABLE(
     ptd         TIME WITHOUT TIME ZONE,
     etarr       TIME WITHOUT TIME ZONE,
     etdep       TIME WITHOUT TIME ZONE,
+    arrived     BOOLEAN,
+    departed    BOOLEAN,
     delayed     BOOLEAN,
     latereason  INTEGER,
     canc        BOOLEAN,
@@ -79,8 +102,9 @@ RETURNS TABLE(
     tm          TIME WITHOUT TIME ZONE,
     -- meta
     callpoint   TEXT,
-    lastreport  VARCHAR(16),
+    lastreport  TEXT,
     length      INTEGER,
+    toc         CHAR(2),
     -- association
     assoc       VARCHAR(16),
     assoctpl    VARCHAR(16),
@@ -99,7 +123,7 @@ BEGIN
         IF crsid IS NOT NULL THEN
             RETURN QUERY
                 WITH departures AS (
-                    SELECT
+                    SELECT DISTINCT ON (f.rid)
                         'D'::CHAR,
                         t.tpl,
                         e.plat,
@@ -109,11 +133,13 @@ BEGIN
                         e.ptd,
                         e.etarr,
                         e.etdep,
+                        e.arr IS NOT NULL,
+                        e.dep IS NOT NULL,
                         COALESCE( e.etdepdel, etarrdel, FALSE),
-                        COALESCE( f.latereason, 0 ),
+                        f.latereason,
                         COALESCE( se.can, false ),
                         COALESCE( s.cancreason, 0 ),
-                        sl.crs=crsid,
+                        COALESCE( e.term, false ),
                         f.rid,
                         s.via,
                         COALESCE( e.ptd, e.pta ) AS ptm,
@@ -121,6 +147,7 @@ BEGIN
                         darwin.callingPoints(f.rid, COALESCE( e.ptd, e.pta )),
                         darwin.lastreport(f.rid),
                         COALESCE( e.length, 0 ),
+                        s.toc,
                         -- association
                         sas.rid,
                         sat.tpl,
@@ -128,7 +155,6 @@ BEGIN
                     FROM darwin.forecast f
                         INNER JOIN darwin.forecast_entry e ON f.id=e.fid
                         INNER JOIN darwin.location l ON e.tpl=l.tpl
-                        INNER JOIN darwin.crs c ON l.crs = c.id
                         LEFT OUTER JOIN darwin.schedule s ON f.schedule=s.id
                         LEFT OUTER JOIN darwin.tiploc t ON s.dest=t.id
                         LEFT OUTER JOIN darwin.schedule_entry se ON se.schedule=f.schedule AND se.tpl=e.tpl
@@ -138,8 +164,9 @@ BEGIN
                         LEFT OUTER JOIN darwin.tiploc sat ON sa.tpl=sat.id
                     WHERE l.crs=crsid AND f.ssd=pssd
                         AND e.wtp IS NULL
+                        AND ( e.ptd BETWEEN ps AND pe OR e.pta BETWEEN ps AND pe)
                 )
-                SELECT * FROM departures where ptm BETWEEN ps AND pe ORDER BY ptm;
+                SELECT * FROM departures ORDER BY ptm;
         END IF;
     ELSE
         -- TODO add TFL, LUxxx for Tube, DLxxx for DVR
@@ -147,3 +174,5 @@ BEGIN
     RETURN;
 END;
 $$ LANGUAGE plpgsql;
+
+select * from darwin.departureboard('MDE');

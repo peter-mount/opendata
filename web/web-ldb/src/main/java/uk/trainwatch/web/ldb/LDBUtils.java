@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -25,9 +26,7 @@ import uk.trainwatch.nre.darwin.stationmsg.StationMessageManager;
 import uk.trainwatch.nrod.location.TrainLocation;
 import uk.trainwatch.tfl.model.cache.TflLocationCache;
 import uk.trainwatch.util.TimeUtils;
-import uk.trainwatch.web.ldb.cache.LDBCallingPointCache;
 import uk.trainwatch.web.ldb.cache.LDBDepartureCache;
-import uk.trainwatch.web.ldb.cache.LocationTimeKey;
 import uk.trainwatch.web.servlet.ApplicationRequest;
 
 /**
@@ -38,17 +37,9 @@ import uk.trainwatch.web.servlet.ApplicationRequest;
 public class LDBUtils
 {
 
-    @Inject
-    private LDBCallingPointCache callingPointCache;
-
-    @Inject
-    private LDBDepartureCache departureCache;
 
     @Inject
     private DarwinReferenceManager darwinReferenceManager;
-
-    @Inject
-    private StationMessageManager stationMessageManager;
 
     @Inject
     protected TflLocationCache tflLocationCache;
@@ -93,58 +84,6 @@ public class LDBUtils
             return null;
         }
         return loc;
-    }
-
-    /**
-     * Timetabled departures
-     * <p>
-     * @param req
-     * @param loc  <p>
-     * @param time <p>
-     * @return <p>
-     * @throws SQLException
-     */
-    public Instant getDepartures( Map<String, Object> req, TrainLocation loc, LocalTime time )
-            throws SQLException
-    {
-        // FIXME allow to be shown whilst at the platform. However this might cause issues
-        // with a train sitting at the platform but not on the boards?
-        LocalTime timeAfter = time.minusMinutes( 2 );
-        LocalTime timeBefore = time.plusHours( 1 );
-        boolean midnight = timeBefore.isBefore( timeAfter );
-        req.put( "midnight", midnight );
-
-        final String crs = loc.getCrs();
-
-        Collection<LDB> departures = departureCache.getDepartures( new LocationTimeKey( crs, time ) );
-
-        // get calling points for each departure and flag it if its been canceled
-//        departures.forEach( SQLConsumer.guard( dep -> {
-//            Collection<CallingPoint> points = callingPointCache.getCallingPoints( dep.getId() );
-//            dep.setPoints( points );
-//            points.forEach( c -> {
-//                if( darwinReferenceManager.isCrs( crs, c.getTpl() ) ) {
-//                    dep.setCanc( c.isCanc() );
-//                }
-//            } );
-//        } ) );
-
-        req.put( "departures", departures );
-
-        req.put( "stationMessages",
-                 stationMessageManager.getMessages( loc.getCrs() ).
-                 collect( Collectors.toList() ) );
-
-        // Return the last update time
-        Timestamp ts = departures.stream().
-                map( LDB::getTs ).
-                sorted( ( a, b ) -> b.compareTo( a ) ).
-                findAny().
-                orElse( new Timestamp( System.currentTimeMillis() ) );
-
-        LocalDateTime dt = ts.toLocalDateTime().truncatedTo( ChronoUnit.MINUTES );
-        req.put( "lastUpdated", dt );
-        return ZonedDateTime.of( dt, TimeUtils.LONDON ).toInstant();
     }
 
 }

@@ -8,26 +8,16 @@ package uk.trainwatch.web.ldb.cache;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.time.LocalTime;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheResult;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.sql.DataSource;
-import uk.trainwatch.nre.darwin.reference.DarwinReferenceManager;
-import uk.trainwatch.util.Predicates;
 import uk.trainwatch.util.TimeUtils;
 import uk.trainwatch.util.sql.SQL;
-import uk.trainwatch.util.sql.SQLConsumer;
-import uk.trainwatch.util.sql.SQLFunction;
-import uk.trainwatch.web.ldb.CallingPoint;
 import uk.trainwatch.web.ldb.LDB;
 import uk.trainwatch.web.ldb.LDBTFL;
 import uk.trainwatch.web.ldb.LDBTrain;
@@ -41,42 +31,8 @@ import uk.trainwatch.web.ldb.LDBTrain;
 public class LDBDepartureCache
 {
 
-    private static final String DARWIN_SELECT = "SELECT f.rid, fe.tm"
-                                                + " FROM darwin.forecast f"
-                                                //                                                + " INNER JOIN darwin.schedule s ON f.schedule=s.id"
-                                                //                                                + " INNER JOIN darwin.location d ON s.dest=d.tpl"
-                                                //                                                + " INNER JOIN darwin.location o ON s.origin=o.tpl"
-                                                + " INNER JOIN darwin.forecast_entry fe ON f.id=fe.fid"
-                                                + " INNER JOIN darwin.location l ON fe.tpl=l.tpl"
-                                                + " INNER JOIN darwin.crs c ON l.crs=c.id"
-                                                // Only for this station
-                                                + " WHERE c.crs=?"
-                                                // Flagged for display
-                                                + " AND fe.ldb=TRUE"
-                                                // all non-passes required so we can use Terminates/Starts here etc
-                                                + " AND fe.wtp IS NULL";
+    private static final String DARWIN_SELECT = "SELECT * FROM darwin.departureboard(?)";
 
-//    private static final String DARWIN_SELECT = "SELECT *,"
-//                                                + "'DARWIN' as type,"
-//                                                + "   s.toc AS toc,"
-//                                                + "   o.name AS origin,"
-//                                                + "   d.name AS destination,"
-//                                                + "   f.ts AS ts,"
-//                                                + "   '' AS curloc,"
-//                                                + "   NULL AS altdest"
-//                                                + " FROM darwin.forecast f"
-//                                                + " INNER JOIN darwin.schedule s ON f.schedule=s.id"
-//                                                + " INNER JOIN darwin.location d ON s.dest=d.tpl"
-//                                                + " INNER JOIN darwin.location o ON s.origin=o.tpl"
-//                                                + " INNER JOIN darwin.forecast_entry fe ON f.id=fe.fid"
-//                                                + " INNER JOIN darwin.location l ON fe.tpl=l.tpl"
-//                                                + " INNER JOIN darwin.crs c ON l.crs=c.id"
-//                                                // Only for this station
-//                                                + " WHERE c.crs=?"
-//                                                // Flagged for display
-//                                                + " AND fe.ldb=TRUE"
-//                                                // all non-passes required so we can use Terminates/Starts here etc
-//                                                + " AND fe.wtp IS NULL";
     private static final String TFL_SELECT = "SELECT "
                                              + "   'TFL' as type,"
                                              + "   b.expt as tm,"
@@ -119,102 +75,23 @@ public class LDBDepartureCache
     @Resource(name = "jdbc/rail")
     private DataSource dataSource;
 
-    @Inject
-    private TrainCache trainCache;
-
-    @Inject
-    private CrsTiplocCache crsTiplocCache;
-
-    @Inject
-    private LDBCallingPointCache callingPointCache;
-
-    @Inject
-    private DarwinReferenceManager darwinReferenceManager;
-
-    /**
-     * Timetabled departures
-     * <p>
-     * @param key
-     *            <p>
-     * @return <p>
-     * @throws SQLException
-     */
     @CacheResult
-    public Collection<LDB> getDepartures( @CacheKey LocationTimeKey key )
+    public Collection<LDBTrain> getDarwinDepartures( @CacheKey String crs )
             throws SQLException
     {
-        switch( key.getCrs().length() ) {
-            // 3Alpha code, specifically Darwin departure boards
-            case 3:
-                return getDarwinDepartures( key );
-
-            // 5Alpha code - the last 5 chars of the NapTAN code so a TFL Departure Board
-            case 5:
-                return getTfLDepartures( key );
-
-            default:
-                return Collections.emptyList();
-        }
-    }
-
-    private Collection<LDB> getDarwinDepartures( @CacheKey LocationTimeKey key )
-            throws SQLException
-    {
-        // FIXME allow to be shown whilst at the platform. However this might cause issues with a train sitting at the platform but not on the boards?
-        LocalTime time = LocalTime.ofSecondOfDay( key.getTime() );
-        LocalTime timeAfter = time.minusMinutes( 2 );
-        LocalTime timeBefore = time.plusHours( 1 );
-        boolean midnight = timeBefore.isBefore( timeAfter );
-
-        // Filter a LocalTime to fit between the required times, accounting for midnight
-        Predicate<LocalTime> filter = midnight
-                                      ? t -> t.isAfter( timeAfter ) || t.isBefore( timeBefore )
-                                      : t -> t.isAfter( timeAfter ) && t.isBefore( timeBefore );
-
-        final String crs = key.getCrs();
-
-        // FIXME this gets all trains at a location not by time from the db
         try( Connection con = dataSource.getConnection() ) {
-
-            // Form a filter from all tiplocs for the crs
-            Predicate<Integer> crsFilter = crsTiplocCache.get( crs ).
-                    stream().
-                    map( tpl -> (Predicate<Integer>) id -> tpl.equals( id ) ).
-                    reduce( null, Predicates::or, Predicates::or );
-
-            // must have a working departure
-            // order by first of actual departure, estimated then working departure
             try( PreparedStatement ps = SQL.prepare( con, DARWIN_SELECT, crs ) ) {
-                // Filter out entries we don't want
-                return SQL.stream( ps, rs -> new Object()
-                {
-                    String rid = rs.getString( 1 );
-                    LocalTime tm = TimeUtils.getLocalTime( rs, "tm" );
-                } ).
-                        filter( l -> filter.test( l.tm ) ).
-                        map( o -> o.rid ).
-                        // Now get the full Train
-                        map( SQLFunction.guard( trainCache::get ) ).
-                        filter( Objects::nonNull ).
-                        map( t -> new LDBTrain( LDB.Type.DARWIN, t, crsFilter, darwinReferenceManager ) ).
-                        // Filter only public entries
-                        filter( LDB::isPublic ).
-                        // Filter those that have departed
-                        filter( l -> !l.isDeparted() ).
-                        // Filter out those out of range, accounting for midnight
-                        //filter( l -> filter.test( l.getTime() ) ).
-                        // Sort to Darwin rules, accounts for midnight
-                        sorted( ( a, b ) -> TimeUtils.compareLocalTimeDarwin.compare( a.getTime(), b.getTime() ) ).
-                        collect( Collectors.toList() );
+                return SQL.executeQuery( ps, LDBTrain.fromSQL );
             }
         }
     }
 
-    private Collection<LDB> getTfLDepartures( @CacheKey LocationTimeKey key )
+    @CacheResult
+    public Collection<LDB> getTfLDepartures( @CacheKey String crs )
             throws SQLException
     {
         try( Connection con = dataSource.getConnection() ) {
-            try( PreparedStatement ps = SQL.prepare( con, TFL_SELECT, "%" + key.getCrs() ) ) {
+            try( PreparedStatement ps = SQL.prepare( con, TFL_SELECT, "%" + crs ) ) {
                 return SQL.stream( ps, LDBTFL.fromSQL ).
                         // Sort to Darwin rules, accounts for midnight
                         sorted( ( a, b ) -> TimeUtils.compareLocalTimeDarwin.compare( a.getTime(), b.getTime() ) ).

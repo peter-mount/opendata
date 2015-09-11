@@ -50,16 +50,16 @@
     <c:forEach var="result" items="${trains}">
         <c:set var="canc" value="false"/>
         <c:set var="style" value=""/>
-        <c:if test="${not empty result.time.scheduleEntry and result.time.scheduleEntry.can}">
+        <c:if test="${result.canc}">
             <c:set var="canc" value="true"/>
             <c:set var="style" value="ldbSearchCancelled"/>
         </c:if>
         <tr class="rttTableResult">
             <td valign="top">
-                <a href="/rtt/train/${result.train.rid}">
+                <a href="/rtt/train/${result.rid}">
                     <c:choose>
-                        <c:when test="${result.train.schedulePresent}">
-                            ${result.train.schedule.trainId}
+                        <c:when test="${not empty result.trainid}">
+                            ${result.trainid}
                         </c:when>
                         <c:otherwise>
                             <%-- For rare cases of no schedule --%>
@@ -69,33 +69,34 @@
                 </a>
             </td>
             <td valign="top" class="${style}">
-                <d:tiploc value="${result.train.dest}" link="false"/>
-                <c:if test="${result.train.schedulePresent}">
-                    <c:if test="${result.train.schedule.via>0}">
-                        <div class="ldbVia">
-                            <d:via value="${result.train.schedule.via}"/>
-                        </div>
-                    </c:if>
-                </c:if>
+                <c:choose>
+                    <c:when test="${result.term}">Terminates here</c:when>
+                    <c:otherwise>
+                        <d:tiploc value="${result.tpl}" link="false"/>
+                        <c:if test="${result.via>0}">
+                            <div class="ldbVia">
+                                <d:via value="${result.via}"/>
+                            </div>
+                        </c:if>
+                    </c:otherwise>
+                </c:choose>
 
                 <%-- VV Splits so include in main departure if in future --%>
-                <c:forEach var="assoc" varStatus="assocStat" items="${result.train.associations}">
-                    <c:if test="${assoc.cat eq 'VV' and not empty assoc.ptd}">
-                        <ldb:train rid="${assoc.assoc}" var="train"/>
-                        <c:if test="${not empty train and train.forecastPresent}">
-                            <%-- check to see if split is after this location --%>
-                            <c:forEach var="point" items="${train.forecastEntries}">
-                                <c:if test="${point.tpl eq assoc.tpl and point.getPTT().isAfter(result.time.getPTT())}">
-                                    &amp;
-                                    <d:tiploc value="${train.dest}" link="false"/>
-                                    <c:if test="${train.schedulePresent}">
-                                        <span class="ldbVia"><d:via value="${train.schedule.via}"/></span>
-                                    </c:if>
+                <c:if test="${not empty result.assoc}">
+                    <ldb:train rid="${result.assoc}" var="train"/>
+                    <c:if test="${not empty train and train.forecastPresent}">
+                        <%-- check to see if split is after this location --%>
+                        <c:forEach var="point" items="${train.forecastEntries}">
+                            <c:if test="${point.tpl eq result.assoctpl and point.getPTT().isAfter(result.getPTT())}">
+                                &amp;
+                                <d:tiploc value="${train.dest}" link="false"/>
+                                <c:if test="${train.schedulePresent}">
+                                    <span class="ldbVia"><d:via value="${train.schedule.via}"/></span>
                                 </c:if>
-                            </c:forEach>
-                        </c:if>
+                            </c:if>
+                        </c:forEach>
                     </c:if>
-                </c:forEach>
+                </c:if>
 
             </td>
             <td valign="top" class="rttTableSep center ${style}">
@@ -103,27 +104,27 @@
                     <c:when test="${canc}">
                         Cancelled
                     </c:when>
-                    <c:when test="${result.time.platsup or not result.time.cisplatsup}">
-                        ${result.time.plat}
+                    <c:when test="${result.platsup or not result.cisplatsup}">
+                        ${result.plat}
                     </c:when>
                     <c:otherwise>
                     </c:otherwise>
                 </c:choose>
             </td>
             <td valign="top" class="rttTableSep">
-                <t:time value="${result.time.pta}"/>
+                <t:time value="${result.pta}"/>
             </td>
             <td valign="top">
-                <t:time value="${result.time.ptd}"/>
+                <t:time value="${result.ptd}"/>
             </td>
             <td valign="top" class="rttTableSep">
-                <t:time value="${result.time.wta}" working="true"/>
+                <t:time value="${result.wta}" working="true"/>
             </td>
             <td valign="top">
-                <t:time value="${result.time.wtd}" working="true"/>
+                <t:time value="${result.wtd}" working="true"/>
             </td>
             <td valign="top">
-                <t:time value="${result.time.wtp}" working="true"/>
+                <t:time value="${result.wtp}" working="true"/>
             </td>
         </tr>
     </c:forEach>

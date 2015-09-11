@@ -13,7 +13,6 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -68,9 +67,9 @@ public class StationMessageManager
      * <p>
      * @return Stream of StationMessages, may be empty but never null
      */
-    public Stream<StationMessage> getMessages( String crs )
+    public Collection<StationMessage> getMessages( String crs )
     {
-        return stationMessageCache.getMessages( crs ).stream();
+        return stationMessageCache.getMessages( crs );
     }
 
     public StationMessage getMessage( int id )

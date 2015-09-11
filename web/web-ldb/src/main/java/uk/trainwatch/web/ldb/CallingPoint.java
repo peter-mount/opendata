@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.sql.ResultSet;
 import java.time.LocalTime;
 import java.util.Objects;
+import javax.json.JsonArray;
 import uk.trainwatch.nre.darwin.reference.DarwinReferenceManager;
 import uk.trainwatch.nrod.location.TrainLocation;
 import uk.trainwatch.util.TimeUtils;
@@ -44,6 +45,11 @@ public class CallingPoint
     private final boolean canc;
     private final String crs;
     private final String location;
+
+    public CallingPoint( JsonArray o )
+    {
+        this( o.getString( 0 ), TimeUtils.getLocalTime( o.getString( 1 ) ), false, false, null );
+    }
 
     public CallingPoint( String tpl, LocalTime time, boolean report, boolean canc, TrainLocation loc )
     {

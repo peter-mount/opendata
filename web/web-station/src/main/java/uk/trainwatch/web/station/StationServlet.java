@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -27,7 +26,7 @@ import uk.trainwatch.web.servlet.ApplicationRequest;
  * <p>
  * @author Peter T Mount
  */
-@WebServlet( name = "StationServlet", urlPatterns = "/station/*" )
+@WebServlet(name = "StationServlet", urlPatterns = "/station/*")
 public class StationServlet
         extends AbstractServlet
 {
@@ -46,24 +45,20 @@ public class StationServlet
         String crs = request.getPathInfo().substring( 1 ).toUpperCase();
 
         TrainLocation loc = trainLocationFactory.getTrainLocationByCrs( crs );
-        if( loc == null )
-        {
+        if( loc == null ) {
             // See if they have used an alternate code
             loc = trainLocationFactory.resolveTrainLocation( crs );
 
-            if( loc == null )
-            {
+            if( loc == null ) {
                 request.sendError( HttpServletResponse.SC_NOT_FOUND );
             }
-            else
-            {
+            else {
                 // Redirect to the correct page
                 request.getResponse().
                         sendRedirect( "/station/" + loc.getCrs() );
             }
         }
-        else
-        {
+        else {
             show( request, loc );
         }
     }
@@ -75,14 +70,13 @@ public class StationServlet
         Map<String, Object> req = request.getRequestScope();
         req.put( "location", loc );
         req.put( "pageTitle", loc.getLocation() );
-        try
-        {
+        try {
             getMessages( req, loc );
             showMap( req, loc );
 
             request.renderTile( "station.info" );
-        } catch( SQLException ex )
-        {
+        }
+        catch( SQLException ex ) {
             log( "show " + loc, ex );
             request.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
         }
@@ -98,9 +92,7 @@ public class StationServlet
     private void getMessages( Map<String, Object> req, TrainLocation loc )
             throws SQLException
     {
-        req.put( "stationMessages",
-                 stationMessageManager.getMessages( loc.getCrs() ).
-                 collect( Collectors.toList() ) );
+        req.put( "stationMessages", stationMessageManager.getMessages( loc.getCrs() ) );
     }
 
     /**
@@ -116,8 +108,7 @@ public class StationServlet
     {
 
         List<StationPosition> stationPosition = StationPositionManager.INSTANCE.findCrs( loc.getCrs() );
-        if( !stationPosition.isEmpty() )
-        {
+        if( !stationPosition.isEmpty() ) {
             StationPosition station = stationPosition.get( 0 );
             req.put( "stationPosition", station );
             req.put( "nearBy", StationPositionManager.INSTANCE.nearby( station, 3 ) );

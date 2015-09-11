@@ -531,19 +531,20 @@ BEGIN
     
     -- ---------------------------------------------------------------------------
     -- Alarms
-    FOREACH axml IN ARRAY xpath('//pport:alarm/alarm:set',pxml,ns)
-    LOOP
-        SELECT  (xpath('/alarm:set/@id',axml,ns))[1]::TEXT AS id,
-                (xpath('name(/alarm:set/*)',axml,ns))[1]::TEXT AS type
-            INTO arec LIMIT 1;
-
-        INSERT INTO darwin.alarms (aid,setts,type,xml) VALUES (arec.id,arec.type,ats,array_to_string(axml,''));
-    END LOOP;
-
-    FOREACH axml IN ARRAY xpath('//pport:alarm/alarm:clear/text()',pxml,ns)
-    LOOP
-        UPDATE darwin.alarms SET cleared=true, clearedts=ats WHERE aid=axml::TEXT;
-    END LOOP;
+-- Commented out 2015 Aug 25 as was causing failures over night
+--     FOREACH axml IN ARRAY xpath('//pport:alarm/alarm:set',pxml,ns)
+--     LOOP
+--         SELECT  (xpath('/alarm:set/@id',axml,ns))[1]::TEXT AS id,
+--                 (xpath('name(/alarm:set/*)',axml,ns))[1]::TEXT AS type
+--             INTO arec LIMIT 1;
+-- 
+--         INSERT INTO darwin.alarms (aid,setts,type,xml) VALUES (arec.id,arec.type,ats,array_to_string(axml,''));
+--     END LOOP;
+-- 
+--     FOREACH axml IN ARRAY xpath('//pport:alarm/alarm:clear/text()',pxml,ns)
+--     LOOP
+--         UPDATE darwin.alarms SET cleared=true, clearedts=ats WHERE aid=axml::TEXT;
+--     END LOOP;
 
     -- ---------------------------------------------------------------------------
     -- Train order
