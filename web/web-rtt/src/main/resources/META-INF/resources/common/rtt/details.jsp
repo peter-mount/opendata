@@ -8,10 +8,6 @@
 
 <div class="ldbWrapper">
 
-    <div class="center">
-        <img class="logo-nre" src="/images/NRE_Powered_logo.jpg"/>
-    </div>
-
     <div id="trainTop">
         <c:if test="${train.originForecastPresent}">
             <t:time value="${train.originForecast.getPTT()}"/>
@@ -584,6 +580,11 @@
             </c:if>
 
         </table>
+    </div>
+
+    <div class="center">
+        <img class="logo-nre" src="/images/NRE_Powered_logo.jpg"/>
+        Also contains Network Rail data
     </div>
 
 </div>

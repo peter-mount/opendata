@@ -7,7 +7,9 @@
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
     <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
     <head>
+        <%-- Commented out, needs to be made optional dependent on the page otherwise some pages just dont work on mobile 
         <meta name=viewport content="width=device-width, initial-scale=1">
+        --%>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>
             <c:choose>

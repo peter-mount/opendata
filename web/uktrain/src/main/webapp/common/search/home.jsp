@@ -39,6 +39,7 @@
     Alternatively use the <a href="/timetable/">Timetable</a> or <a href="/rtt/">Train tracker</a> tools.
 </div>
 
+    <%-- Hide station search for now, reinstate post release
 <div class="homebox">
     <h2>Search for stations</h2>
     Search for a station by name or Post Code
@@ -54,5 +55,6 @@
 
         Alternatively you can use the <a href="/station/">Station Index</a>
 </div>
+    --%>
 
 <div class="clear"></div>
