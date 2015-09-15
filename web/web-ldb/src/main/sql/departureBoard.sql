@@ -164,7 +164,7 @@ BEGIN
                         LEFT OUTER JOIN darwin.tiploc sat ON sa.tpl=sat.id
                     WHERE l.crs=crsid AND f.ssd=pssd
                         AND e.wtp IS NULL
-                        AND ( e.ptd BETWEEN ps AND pe OR e.pta BETWEEN ps AND pe)
+                        AND COALESCE( e.dep, e.etdep, e.ptd, e.arr, e.etarr, e.pta) BETWEEN ps AND pe
                 )
                 SELECT * FROM departures ORDER BY ptm;
         END IF;
