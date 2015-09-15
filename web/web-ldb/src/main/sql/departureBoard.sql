@@ -142,7 +142,7 @@ BEGIN
                         COALESCE( e.term, false ),
                         f.rid,
                         s.via,
-                        COALESCE( e.ptd, e.pta ) AS ptm,
+                        COALESCE( e.dep, e.etdep, e.arr, e.etarr, e.ptd, e.pta ) AS ptm,
                         -- main calling points
                         darwin.callingPoints(f.rid, COALESCE( e.ptd, e.pta )),
                         darwin.lastreport(f.rid),
