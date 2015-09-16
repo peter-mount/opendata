@@ -11,3 +11,12 @@ dim_date.sql        Defines the datetime.dim_date table which is used to
 dim_time.sql        A static normalisation table which maps time of day to the
                     minute.
 
+
+Full schema dump:
+
+rail.sql	This file contains the occasional Schema dump of the live database.
+
+This is generated using:
+$ pg_dump -d rail -c  -s >rail.sql
+
+
