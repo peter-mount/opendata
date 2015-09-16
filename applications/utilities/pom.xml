@@ -102,6 +102,34 @@
             <version>9.3-1100-jdbc41</version>
         </dependency>
         
+        <!-- JSR353 Java API for JSON processing - not yet in the JDK -->
+        <dependency>
+            <groupId>javax.json</groupId>
+            <artifactId>javax.json-api</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
+            <version>1.0.4</version>
+        </dependency>
+        
+        <!-- Servlet api -->
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-web-api</artifactId>
+            <version>7.0</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <!-- JBoss/Weld Refrence Implementation for CDI on a Servlet Container -->
+        <dependency>
+            <groupId>org.jboss.weld.se</groupId>
+            <artifactId>weld-se-shaded</artifactId>
+            <version>3.0.0.Alpha13</version>
+        </dependency>
+
+        
     </dependencies>
 
     <build>

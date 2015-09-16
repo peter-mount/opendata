@@ -24,6 +24,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.apache.commons.cli.BasicParser;
@@ -33,6 +35,10 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import uk.trainwatch.util.sql.UncheckedSQLException;
 import uk.trainwatch.util.app.BaseApplication;
+import org.jboss.weld.environment.se.Weld;
+import org.jboss.weld.environment.se.WeldContainer;
+import org.jboss.weld.environment.util.Collections;
+import uk.trainwatch.util.CDIUtils;
 
 /**
  *
@@ -42,9 +48,44 @@ public class Main
         extends BaseApplication
 {
 
+    private static final Logger LOG = Logger.getLogger( "main" );
+
     public static void main( String... args )
             throws Exception
     {
+        System.setProperty( "org.jboss.logging.provider", "jdk" );
+        System.setProperty( "hazelcast.logging.type", "jdk" );
+        setLevel( Level.INFO );
+        LOG.info( "Initializing utilities..." );
+
+        setLevel( Level.SEVERE );
+        Weld weld = new Weld();
+        WeldContainer container = weld.initialize();
+
+        setLevel( Level.INFO );
+        int rc = 1;
+        try {
+            rc = run( args );
+        }
+        finally {
+            setLevel( Level.SEVERE );
+            weld.shutdown();
+        }
+        System.exit( rc );
+    }
+
+    // Limit all loggers to the specified level - useful to keep a lot of log spam out of the console
+    private static void setLevel( Level level )
+    {
+        for( String n: Collections.asList( LogManager.getLogManager().getLoggerNames() ) ) {
+            Logger.getLogger( n ).setLevel( level );
+        }
+    }
+
+    private static int run( String... args )
+            throws Exception
+    {
+
         // Load all of the utility implementations
         ServiceLoader<Utility> loader = ServiceLoader.load( Utility.class );
         Map<String, Utility> tools = StreamSupport.stream( loader.spliterator(), false ).
@@ -57,16 +98,14 @@ public class Main
 
         Consumer<Utility> showHelp = u -> new HelpFormatter().printHelp( u.getName(), u.getOptions() );
 
-        if( args.length == 0 )
-        {
+        if( args.length == 0 ) {
             LOG.log( Level.INFO, toolNames );
-            System.exit( 1 );
+            return 1;
         }
 
         String toolName = args[0];
 
-        if( "-?".equals( toolName ) || "--help".equals( toolName ) )
-        {
+        if( "-?".equals( toolName ) || "--help".equals( toolName ) ) {
             HelpFormatter hf = new HelpFormatter();
             tools.keySet().
                     stream().
@@ -75,59 +114,54 @@ public class Main
                     filter( Objects::nonNull ).
                     forEach( showHelp );
         }
-        else
-        {
+        else {
+            Utility util = getUtility( tools, toolNames, toolName );
+            if( util != null ) {
 
-            Utility util = tools.get( toolName );
-            if( util == null )
-            {
-                LOG.log( Level.SEVERE, () -> "No utility called " + toolName );
-                LOG.log( Level.INFO, toolNames );
-                return;
-            }
+                String toolArgs[] = Arrays.copyOfRange( args, 1, args.length );
 
-            String toolArgs[] = Arrays.copyOfRange( args, 1, args.length );
-
-            if( toolArgs.length == 0 || "-?".equals( toolArgs[0] ) || "--help".equals( toolArgs[0] ) )
-            {
-                new HelpFormatter().printHelp( util.getName(), util.getOptions() );
-            }
-            else
-            {
-                try
-                {
-                    CommandLineParser parser = new BasicParser();
-                    CommandLine cmd = parser.parse( util.getOptions(), toolArgs );
-                    if( util.parseArgs( cmd ) )
-                    {
-                        util.call();
-
-                        // Exit with return code 0
-                        System.exit( 0 );
+                if( toolArgs.length == 0 || "-?".equals( toolArgs[0] ) || "--help".equals( toolArgs[0] ) ) {
+                    new HelpFormatter().printHelp( util.getName(), util.getOptions() );
+                }
+                else {
+                    try {
+                        CommandLineParser parser = new BasicParser();
+                        CommandLine cmd = parser.parse( util.getOptions(), toolArgs );
+                        if( util.parseArgs( cmd ) ) {
+                            CDIUtils.inject( util );
+                            util.call();
+                            return 0;
+                        }
+                        else {
+                            LOG.log( Level.WARNING, () -> "Failed to parse args " + cmd );
+                            showHelp.accept( util );
+                        }
                     }
-                    else
-                    {
-                        LOG.log( Level.WARNING, () -> "Failed to parse args " + cmd );
+                    catch( UnrecognizedOptionException ex ) {
+                        LOG.log( Level.WARNING, ex, ex::getMessage );
                         showHelp.accept( util );
                     }
-                }
-                catch( UnrecognizedOptionException ex )
-                {
-                    LOG.log( Level.WARNING, ex, ex::getMessage );
-                    showHelp.accept( util );
-                }
-                catch( UncheckedSQLException ex )
-                {
-                    LOG.log( Level.SEVERE, null, ex.getCause() );
-                }
-                catch( Exception ex )
-                {
-                    LOG.log( Level.SEVERE, null, ex );
+                    catch( UncheckedSQLException ex ) {
+                        LOG.log( Level.SEVERE, null, ex.getCause() );
+                    }
+                    catch( Exception ex ) {
+                        LOG.log( Level.SEVERE, null, ex );
+                    }
                 }
             }
         }
-
-        System.exit( 1 );
+        return 1;
     }
 
+    private static Utility getUtility( Map<String, Utility> tools, Supplier<String> toolNames, String toolName )
+    {
+        Utility util = tools.get( toolName );
+        if( util == null ) {
+            LOG.log( Level.SEVERE, () -> "No utility called " + toolName );
+            LOG.log( Level.INFO, toolNames );
+            return null;
+        }
+
+        return util;
+    }
 }
