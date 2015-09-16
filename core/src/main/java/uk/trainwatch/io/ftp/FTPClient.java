@@ -204,12 +204,16 @@ public interface FTPClient
      * @param target  Target directory, the file's name will be used
      * @param options CopyOption's
      * <p>
+     * @return Path of file retrieved
+     * <p>
      * @throws IOException
      */
-    default void retrieve( FTPFile f, Path target, CopyOption... options )
+    default Path retrieve( FTPFile f, Path target, CopyOption... options )
             throws IOException
     {
-        retrieve( f.getName(), target.resolve( f.getName() ), options );
+        Path path = target.resolve( f.getName() );
+        retrieve( f.getName(), path, options );
+        return path;
     }
 
     /**
@@ -455,8 +459,7 @@ public interface FTPClient
     /**
      * List all files in a directory
      * <p>
-     * @param pathname directory name
-     * @param filter   Filter to use
+     * @param filter Filter to use
      * <p>
      * @return collection of entries
      * <p>

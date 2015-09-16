@@ -24,7 +24,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -37,8 +36,8 @@ import uk.trainwatch.util.sql.UncheckedSQLException;
 import uk.trainwatch.util.app.BaseApplication;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
-import org.jboss.weld.environment.util.Collections;
 import uk.trainwatch.util.CDIUtils;
+import uk.trainwatch.util.LoggingUtils;
 
 /**
  *
@@ -55,31 +54,28 @@ public class Main
     {
         System.setProperty( "org.jboss.logging.provider", "jdk" );
         System.setProperty( "hazelcast.logging.type", "jdk" );
-        setLevel( Level.INFO );
+        LoggingUtils.setLevel( Level.INFO );
         LOG.info( "Initializing utilities..." );
 
-        setLevel( Level.SEVERE );
+        LoggingUtils.setLevel( Level.SEVERE );
         Weld weld = new Weld();
         WeldContainer container = weld.initialize();
 
-        setLevel( Level.INFO );
+        LoggingUtils.setLevel( Level.INFO );
         int rc = 1;
         try {
             rc = run( args );
         }
         finally {
-            setLevel( Level.SEVERE );
+            LOG.log( Level.INFO, "Return code: {0}", rc );
+            LoggingUtils.setLevel( Level.SEVERE );
             weld.shutdown();
         }
-        System.exit( rc );
-    }
 
-    // Limit all loggers to the specified level - useful to keep a lot of log spam out of the console
-    private static void setLevel( Level level )
-    {
-        for( String n: Collections.asList( LogManager.getLogManager().getLoggerNames() ) ) {
-            Logger.getLogger( n ).setLevel( level );
-        }
+        LoggingUtils.setLevel( Level.INFO );
+        LOG.log( Level.INFO, "Exiting" );
+
+        System.exit( rc );
     }
 
     private static int run( String... args )
@@ -128,9 +124,16 @@ public class Main
                         CommandLineParser parser = new BasicParser();
                         CommandLine cmd = parser.parse( util.getOptions(), toolArgs );
                         if( util.parseArgs( cmd ) ) {
-                            CDIUtils.inject( util );
-                            util.call();
-                            return 0;
+                            // Simple banner for identifying whats being run
+                            LoggingUtils.logBanner( "Utility: " + util.getName() );
+                            try {
+                                CDIUtils.inject( util );
+                                util.call();
+                                return 0;
+                            }
+                            finally {
+                                LoggingUtils.logBanner( "End run of " + util.getName() );
+                            }
                         }
                         else {
                             LOG.log( Level.WARNING, () -> "Failed to parse args " + cmd );
