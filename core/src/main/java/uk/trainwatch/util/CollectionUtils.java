@@ -16,6 +16,7 @@
 package uk.trainwatch.util;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -281,4 +282,10 @@ public class CollectionUtils
                 collect( Collectors.toMap( Map.Entry::getValue, Map.Entry::getKey ) );
     }
 
+    public static <T> void forEach( Collection<T> col, Consumer<T> c )
+    {
+        if( col != null && !col.isEmpty() ) {
+            col.forEach( c );
+        }
+    }
 }
