@@ -22,7 +22,7 @@ var SignalAreaMap = (function () {
     }
 
     SignalAreaMap.width = 14.5;
-    SignalAreaMap.height = 50;
+    SignalAreaMap.height = 44;
 
     SignalAreaMap.plot = function (map) {
 
@@ -267,18 +267,21 @@ var SignalAreaMap = (function () {
         a = SignalMap.line([],0,y1,10,y1);
         a = SignalMap.line(a,0,y2,10,y2);
 
-        a = SignalMap.line(a,3,y1-6,10,y1-6);
-        a = SignalMap.line(a,3,y1-5,10,y1-5);
-        
+        a = SignalMap.line(a,3,y1-5,11,y1-5);
         a = SignalMap.line(a,2.75,y1-4,3,y1-5);
         a = SignalMap.line(a,2.75,y1-4,2.75,y1-3);
         a = SignalMap.line(a,2.75,y1-3,3,y1-2);
         a = SignalMap.line(a,3,y1-2,5,y1-2);
+        a = SignalMap.line(a,5,y1-2,5.5,y1);
         
-        a = SignalMap.line(a,2.5,y1-5,3,y1-6);
-        a = SignalMap.line(a,2.5,y1-5,2.5,y1-2);
-        a = SignalMap.line(a,2.5,y1-2,3,y1-1);
-        a = SignalMap.line(a,3,y1-1,5,y1-1);
+        a = SignalMap.line(a,2.75,y1-6,11,y1-6);
+        a = SignalMap.line(a,2.25,y1-4,2.75,y1-6);
+        a = SignalMap.line(a,2.25,y1-4,2.25,y1-3);
+        a = SignalMap.line(a,2.25,y1-3,2.75,y1-1);
+        a = SignalMap.line(a,2.75,y1-1,5,y1-1);
+        a = SignalMap.line(a,5,y1-1,5.5,y2);
+        
+        a = SignalMap.line(a,7,y2-6,7.25,y1-6);
         
         map.path(a);
 
@@ -288,7 +291,7 @@ var SignalAreaMap = (function () {
         map.platform(0.5,y1-.5,2,'','');
         map.platform(0.5,y2+0.5,2,'','');
         map.berthl(1,y1,'1372');
-        map.berthl(2,y1,'1377');
+        map.berthr(2,y1,'1377');
         map.berthl(1,y2,'1370');
         
         map.berthr(4,y1-6,'1417');
@@ -297,6 +300,137 @@ var SignalAreaMap = (function () {
         map.berthl(4,y1-1,'1415');
         map.berthr(4,y1,'1379');
         map.berthl(4,y2,'1374');
+        
+        map.berthr(6.5,y1,'1385');
+        map.berthl(6.5,y2,'1376');
+        
+        map.station(8.5,y1-0.5,'Hampden Park');
+        map.platform(7.5,y1-.5,2,'','');
+        map.platform(7.5,y2+0.5,2,'','');
+        map.berthr(9,y1,'1387');
+        map.berthl(8,y2,'1378');
+        map.berthr(9,y2,'1389');
+        
+        map.station(10,y1+1.25,'E');
+        
+        map.station(5.5,y1-6,'Pevensey & Westham');
+        map.platform(4.5,y1-6.5,2,'','');
+        map.platform(4.5,y2-5.5,2,'','');
+        map.berthl(5,y2-6,'1418');
+        map.berthr(6,y2-6,'1421');
+        
+        map.berthl(8,y1-6,'1420');
+        
+        map.station(9.5,y1-6,'Pevensey Bay');
+        map.platform(9,y1-6.5,1,'','');
+        map.platform(9,y2-5.5,1,'','');
+        map.berthr(9.5,y1-6,'1423');
+        
+        map.station(11,y1-4.75,'F');
+        
+        y1 = y1+4;
+        y2 = y1 + 1;
+
+        a = SignalMap.line([],0,y1,10.75,y1);
+        a = SignalMap.line(a,0,y2,10.75,y2);
+        a = SignalMap.line(a,1,y2,1.25,y1);
+        
+        a = SignalMap.line(a,8,y1,8.25,y2);
+        a = SignalMap.line(a,7,y1,7.25,y2);
+        a = SignalMap.line(a,7.5,y2,7.75,y1);
+        // Eastbourne P1
+        a = SignalMap.line(a,8,y2,8.25,y2+1);
+        a = SignalMap.line(a,8.25,y2+1,10.75,y2+1);
+        
+        a = SignalMap.buffer(a,10.75,y1);
+        a = SignalMap.buffer(a,10.75,y2);
+        a = SignalMap.buffer(a,10.75,y2+1);
+        
+        // Eastbourne sidings
+        a = SignalMap.line(a,6.25,y2+2,6.75,y2);
+        a = SignalMap.line(a,4.75,y2+2,7.75,y2+2);
+        
+        map.path(a);
+        
+        map.station(0,y1+1.25,'E');
+        
+        map.berthl(2,y1,'1380');
+        map.berthr(3,y1,'0101');
+        map.berthl(3,y2,'1382');
+        
+        map.berthr(4,y1,'0103');
+        map.berthl(4,y2,'0102');
+        
+        map.berthr(5,y1,'0105');
+        map.berthl(5,y2,'0104');
+        
+        map.berthl(6,y2,'0106');
+        
+        map.station(9.5,y1-0.5,'Eastbourne');
+        map.platform(8.5,y1-.5,2,'','3');
+        map.platform(8.5,y2+0.5,2,'2','1');
+        map.berthl(9,y1,'0108');
+        map.berth(10,y1,'R108');
+        map.berthl(9,y2,'0110');
+        map.berth(10,y2,'R110');
+        map.berthl(9,y2+1,'0112');
+        map.berth(10,y2+1,'R112');
+        
+        // Eastbourne sidings
+        map.berthr(5.5,y2+2,'0501');
+        map.berthl(7,y2+2,'0502');
+        
+        // Normans Bay ->
+        y1 = y1+5;
+        y2 = y1 + 1;
+
+        a = SignalMap.line([],0,y1,12.75,y1);
+        a = SignalMap.line(a,0,y2,12.75,y2);
+        a = SignalMap.line(a,7.625,y2,7.825,y1);
+        a = SignalMap.line(a,10,y2,10.25,y1);
+        
+        map.path(a);
+        
+        map.station(0,y1+1.25,'F');
+        
+        map.berthr(1,y1,'1427');
+        map.berthl(1,y2,'1422');
+        
+        map.station(2,y1,'Normans Bay');
+        map.platform(1.5,y1-.5,1,'','');
+        map.platform(1.5,y2+.5,1,'','');
+        map.berthr(2,y1,'1429');
+        map.berthl(2,y2,'1426');
+        
+        map.berthr(3,y1,'1431');
+        map.berthl(3,y2,'1428');
+        
+        map.station(4,y1,'Cooden Beach');
+        map.platform(3.5,y1-.5,1,'','');
+        map.platform(3.5,y2+.5,1,'','');
+        map.berthr(5,y1,'1433');
+        map.berthl(4,y2,'1430');
+        
+        map.station(6,y1,'Collington');
+        map.platform(5.5,y1-.5,1,'','');
+        map.platform(5.5,y2+.5,1,'','');
+        map.berthl(6,y2,'1432');
+        map.berthr(7,y2,'1435');
+        
+        
+        map.station(9,y1,'Bexhill');
+        map.platform(8,y1-.5,2,'','');
+        map.platform(8,y2+.5,2,'','');
+        map.berthl(8.5,y1,'1436');
+        map.berthr(9.5,y1,'1437');
+        map.berthl(8.5,y2,'1434');
+
+        map.berthr(11,y1,'1437');
+        map.berthr(12,y1,'1437');
+        map.berthl(11.5,y2,'1440');
+        map.station(12.75,y1+1.25,'A3');
+        
+        map.station(0,y1+2.5,'ZE 15/10/09 data 15/07/27');
     };
 
     return SignalAreaMap;
