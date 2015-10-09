@@ -21,12 +21,11 @@ var SignalAreaMap = (function () {
     function SignalAreaMap() {
     }
 
-    SignalAreaMap.width = 13;
-    SignalAreaMap.height = 30;
+    SignalAreaMap.width = 14.5;
+    SignalAreaMap.height = 50;
 
     SignalAreaMap.plot = function (map) {
 
-        // Down line
         var y1, y2, a;
 
         y1 = 0;
@@ -34,290 +33,270 @@ var SignalAreaMap = (function () {
 
         a = SignalMap.down([], 0, y1);
         a = SignalMap.up(a, 0, y2);
-        a = SignalMap.down(a, 7, y1);
-        a = SignalMap.up(a, 7, y2);
-        a = SignalMap.line(a,0,y1,7,y1);
-        a = SignalMap.line(a,0,y2,7,y2);
-        a = SignalMap.line(a,6,y2,6.25,y1);
+        a = SignalMap.line(a,0,y1,13,y1);
+        a = SignalMap.line(a,0,y2,13,y2);
 
+        // Falmer to Lewes
+        a = SignalMap.down(a, 0, y2+2);
+        a = SignalMap.up(a, 0, y2+3);
+        a = SignalMap.line(a,0,y2+2,10.75,y2+2);
+        a = SignalMap.line(a,10.75,y2+2,11.5,y1);
+        
+        a = SignalMap.line(a,0,y2+3,11.5,y2+3);
+        a = SignalMap.line(a,11,y2+3,11.75,y2);
+        
+        // P5
+        a = SignalMap.line(a,7.5,y2+2,7.75,y2+3);
+        a = SignalMap.line(a,8,y2+3,8.25,y2+4);
+        a = SignalMap.line(a,8.25,y2+4,11.25,y2+4);
+        a = SignalMap.line(a,11.25,y2+4,12.25,y2);
+        a = SignalMap.line(a,12.5,y2,12.75,y1);
+        
+        a = SignalMap.buffer(a,9.25,y2+5);
+        a = SignalMap.line(a,9.25,y2+5,10.75,y2+5);
+        a = SignalMap.line(a,10.75,y2+5,11,y2+4);
+        
+        // Plumpton/cooksbridge
+        a = SignalMap.line(a,3.75,y2,4.25,y1);
+        
+        // Lewis
+        a = SignalMap.buffer(a,10.25,y1-1);
+        a = SignalMap.line(a,10.25,y1-1,11.75,y1-1);
+        a = SignalMap.line(a,11.75,y1-1,12,y1);
         map.path(a);
         
-        map.station(-0.2, y1 + 1.3, 'A');
-
-        map.berthl(1,y2,'1414');
+        map.berthr(1,y1,'T641');
+        map.berthr(2,y1,'T643');
         
-        map.berthr(2.5,y1,'1415');
-        map.berthl(2.5,y2,'1416');
+        map.station(3,y1-0.5,'Plumpton');
+        map.platform(2.5,y1-0.5,1,'','');
+        map.platform(2.5,y2+0.5,1,'','');
+        map.berthr(3,y1,'T645');
         
-        map.station(4.5,y1-0.5,'Pevensey &\nWestham');
-        map.platform(3.5,y1-0.5,2,'','2');
-        map.platform(3.5,y2+0.5,2,'1','');
-        map.berthr(5,y1,'1417');
-        map.berthl(4,y2,'1418');
-        map.berthr(5,y2,'1421');
+        map.berthr(5,y1,'T647');
+        
+        map.station(6,y1-0.5,'Cooksbridge');
+        map.platform(5.5,y1-0.5,1,'','');
+        map.platform(5.5,y2+0.5,1,'','');
+        
+        map.berthr(6,y1,'LW93');
+        map.berthl(6,y2,'T648');
 
-        map.berthr(6,y1+0.5,'1420');
-        map.station(7.2, y1 + 1.3, 'B');
+        map.berthr(7,y1,'LW91');
+        map.berthl(7,y2,'LW92');
 
-        y1 = y1+4;
+        map.berthr(8,y1,'LW01');
+        map.berthl(8,y2,'LW90');
+
+        map.station(9.5,y1-0.5,'Lewes');
+        map.platform(8.5,y1-0.5,2,'','1');
+        map.platform(8.5,y2+0.5,2,'2','');
+        map.platform(8.5,y2+1.5,2,'','3');
+        map.platform(8.5,y2+3.5,2,'4','5');
+        
+        map.berthl(9,y2,'LW02');
+        map.berthl(9,y2+3,'LW10');
+        map.berthl(9,y2+4,'LW12');
+
+        map.berthr(10,y1,'LW03');
+        map.berthr(10,y2,'LW52');
+        map.berthr(10,y2+2,'LW09');
+        map.berthr(10,y2+3,'LW55');
+        map.berthr(10,y2+4,'LW11');
+        map.berthr(10,y2+5,'LW57');
+        map.berthr(11,y1-1,'LW04');
+
+        map.station(13,y1+1.25,'A');
+        
+        // 7 Falmer to Lewes
+        map.berthr(1,y2+2,'T705');
+        
+        map.station(2,y2+1.75,'Falmer');
+        map.platform(1.5,y2+1.5,1,'','');
+        map.platform(1.5,y2+3.5,1,'','');
+        map.berthr(2,y2+2,'T709');
+        
+        map.berthr(4,y2+2,'LW05');
+        map.berthl(5,y2+3,'T714');
+        
+        map.berthr(6,y2+2,'LW07');
+        map.berthl(7,y2+3,'LW08');
+        
+        y1 = y1+8;
         y2 = y1 + 1;
 
-        a = SignalMap.down([], 0, y1);
-        a = SignalMap.up(a, 0, y2);
-        a = SignalMap.down(a, 10, y1);
-        a = SignalMap.up(a, 10, y2);
-        a = SignalMap.line(a,0,y1,10,y1);
+        a = SignalMap.line([],0,y1,10,y1);
         a = SignalMap.line(a,0,y2,10,y2);
 
-        map.path(a);
-        map.station(-0.2, y1 + 1.3, 'B');
-
-        map.station(1,y1,'Pevensey Bay');
-        map.platform(0.5,y1-0.5,1,'','2');
-        map.platform(0.5,y2+0.5,1,'1','');
-        map.berthl(1,y2,'1422');
+        a = SignalMap.line(a,3,y1,4,y2+2);
+        a = SignalMap.line(a,4,y2+2,8,y2+2);
         
-        map.berthr(2,y1,'1423');
-        map.berthl(3,y2,'1426');
-        
-        map.station(5,y1-0.5,'Normans Bay');
-        map.platform(4.5,y1-0.5,1,'','2');
-        map.platform(4.5,y2+0.5,1,'1','');
-        map.berthr(5,y1,'1427');
-        map.berthl(5,y2,'1428');
-
-        map.berthr(7,y1,'1429');
-        map.berthl(7,y2,'1430');
-        
-        map.station(8,y1,'Cooden Beach');
-        map.platform(7.5,y1-0.5,1,'','2');
-        map.platform(7.5,y2+0.5,1,'1','');
-        map.berthr(8,y1,'1431');
-        map.berthl(8,y2,'1432');
-
-        map.berthr(9.25,y1,'1433');
-        map.station(10.2, y1 + 1.3, 'C');
-        
-        y1 = y1+4;
-        y2 = y1 + 1;
-
-        a = SignalMap.down([], 0, y1);
-        a = SignalMap.up(a, 0, y2);
-        a = SignalMap.down(a, 10, y1);
-        a = SignalMap.up(a, 10, y2);
-        a = SignalMap.line(a,0,y1,10,y1);
-        a = SignalMap.line(a,0,y2,10,y2);
-        a = SignalMap.line(a,1.75,y2,2,y1);
-        a = SignalMap.line(a,8.65,y1,8.8,y2);
-
-        map.path(a);
-
-        a = SignalMap.line([],7.5,y1-1,7.5,y2+1);
-        map.path(a).attr({
-            fill: '#f66',
-            stroke: '#f66',
-            'stroke-dasharray': '5,5'
-        });
-        map.station(7.5, y1-0.5, 'ZE - A3').attr({
-            fill: '#f66'
-        });
-        
-        map.station(-0.2, y1 + 1.3, 'C');
-        
-        map.station(1,y1,'Collington');
-        map.platform(0.5,y1-0.5,1,'','2');
-        map.platform(0.5,y2+0.5,1,'1','');
-        
-        // TBC, not in new map but in feed
-        map.berthr(1,y1,'1437');
-        map.berthl(1,y2,'1434');
-        
-        map.berthl(2,y1+0.5,'1435');
-        
-        map.station(4.5,y1,'Bexhill');
-        map.platform(3.5,y1-0.5,2,'','2');
-        map.platform(3.5,y2+0.5,2,'1','');
-        map.berthl(4,y1,'1436');
-        map.berthr(5,y1,'1439');
-        map.berthl(4,y2,'1440');
-        
-        //map.berthl(6.5,y2+1,'BJAP');
-        // A3
-        map.berthr(8,y1,'BJ41');
-        map.berthl(9.5,y2,'BJ42');
-        map.station(10.2, y1 + 1.3, 'A3');
-        
-        // Willingdon Jn
-        y1=y1+4+2;
-        y2 = y1 + 1;
-
-        a = SignalMap.down([], 0, y1);
-        a = SignalMap.up(a, 0, y2);
-        a = SignalMap.down(a, 0, y1-1);
-        a = SignalMap.up(a, 0, y1-2);
-        a = SignalMap.down(a, 10, y1);
-        a = SignalMap.up(a, 10, y2);
-        
-        a = SignalMap.line(a,0,y1,10,y1);
-        a = SignalMap.line(a,0,y2,10,y2);
-
-        a = SignalMap.line(a,0,y1-2,2.75,y1-2);
-        a = SignalMap.line(a,2.75,y1-2,3.25,y1);
-        a = SignalMap.line(a,0,y1-1,2.5,y1-1);
-        a = SignalMap.line(a,2.5,y1-1,3,y2);
-        
-        a = SignalMap.line(a,8,y2,8.25,y1);
-        map.path(a);
-        
-        map.station(-0.2, y1 - 0.7, 'A');
-        map.station(1,y1-2,'to Bexhill');
-        
-        // DB20 is on map but appears to be old bexhill not new panel
-        //map.berthr(1,y1-2,'DB20');
-        
-        map.station(-0.2, y1 + 1.3, 'D');
-        map.station(1,y2+2,'to Polegate');
-        map.berthr(1,y1,'1379');
-        map.berthr(1,y2,'1374');
-        
-        map.station(4,y1,'Willingdon Jn');
-        map.berthr(4,y1,'1385');
-        map.berthl(4,y2,'1376');
-        
-        map.station(6.5,y1,'Hampden Park');
-        map.platform(5.5,y1-0.5,2,'','2');
-        map.platform(5.5,y2+0.5,2,'1','');
-        map.berthr(7,y1,'1387');
-        map.berthl(6,y2,'1378');
-        map.berthr(7,y2,'1389');
-        
-        map.station(10.2, y1 + 1.3, '#');
-        map.station(10,y1,'to Eastbourne');
-        map.berthl(9,y2,'1382');
-        
-        y1=y1+4;
-        y2 = y1 + 1;
-
-        a = SignalMap.down([], 0, y1);
-        a = SignalMap.up(a, 0, y2);
-        a = SignalMap.down(a, 10, y1);
-        a = SignalMap.up(a, 10, y2);
-        
-        a = SignalMap.line(a,0,y1,10,y1);
-        a = SignalMap.line(a,0,y2,10,y2);
-        
-        a = SignalMap.line(a,3,y2,3.25,y1);
-        a = SignalMap.line(a,7,y2,7.25,y1);
-        map.path(a);
-        
-        map.station(-0.2, y1 +1.3, 'E');
-        
-        map.station(1.5,y1,'Berwick');
-        map.platform(0.5,y1-0.5,2,'','2');
-        map.platform(0.5,y2+0.5,2,'1','');
-        map.berthr(1,y1,'1361');
-        map.berthl(2,y1,'1362');
-        map.berthr(1,y2,'1363');
-        map.berthl(2,y2,'1360');
-        
-        map.berthr(4,y1,'1365');
-        map.berthl(4.5,y2,'1364');
-        map.berthr(5,y1,'1369');
-        map.berthl(5.5,y2,'1366');
-        map.berthr(6,y1,'1371');
-        
-        map.station(8.5,y1,'Polegate');
-        map.platform(7.5,y1-0.5,2,'','2');
-        map.platform(7.5,y2+0.5,2,'1','');
-        map.berthl(7,y1+0.5,'1373');
-        map.berthl(8,y1,'1372');
-        map.berthl(8,y2,'1370');
-        map.berthr(9,y1,'1377');
-        
-        map.station(10.2, y1+1.3, 'D');
-        
-        y1=y1+4;
-        y2 = y1 + 1;
-
-        a = SignalMap.down([], 0, y1);
-        a = SignalMap.up(a, 0, y2);
-        a = SignalMap.down(a, 10, y1);
-        a = SignalMap.up(a, 10, y2);
-        
-        a = SignalMap.line(a,0,y1,10,y1);
-        a = SignalMap.line(a,0,y2,10,y2);
-        
-        // Southerham Jn
-        a = SignalMap.line(a,2.75,y1,3.5,y2+2);
-        a = SignalMap.line(a,3.5,y2+2,7,y2+2);
-        a = SignalMap.up(a, 7, y2+2);
-        
-        a = SignalMap.line(a,2.5,y2,3.25,y2+3);
-        a = SignalMap.line(a,3.25,y2+3,7,y2+3);
-        a = SignalMap.up(a, 7, y2+3);
+        a = SignalMap.line(a,2.75,y2,3.75,y2+3);
+        a = SignalMap.line(a,3.75,y2+3,8,y2+3);
         
         map.path(a);
-        
-        map.station(-0.2, y1 +1.3, '#');
-        map.station(0,y1,'to Lewes');
 
-        map.station(3,y1,'Southerham Junction');
+        map.station(0,y1+1.25,'A');
+        
+        map.berthl(1,y1,'LW13');
+        map.berthl(1,y2,'LW14');
+                
         map.berthr(2,y1,'LW15');
-        map.berthl(1,y2,'LW16');
-        map.berthl(4,y2,'LW40');
-        map.berthr(4.25,y2+2,'LW17');
-        map.berthl(4.25,y2+3,'LW18');
+        map.berthr(2,y2,'LW16');
         
-        // Southeast to 
-        map.station(6,y2+2,'Southease');
-        map.platform(5.5,y2+1.5,1,'','2');
-        map.platform(5.5,y2+3.5,1,'1','');
-        map.berthl(6,y2+3,'LW20');
-        
-        map.station(8.5,y2+3.3,'to Newhaven Town');
-        map.station(7.2, y2+3.3, '#');
-        
-        // glynde to polegate
-        map.station(5,y1,'Glynde');
-        map.platform(4.5,y1-0.5,1,'','2');
-        map.platform(4.5,y2+0.5,1,'1','');
         map.berthr(5,y1,'1351');
-        map.berthl(5,y2,'1356');
+        map.berthl(5,y2,'LW40');
         
+        map.berthr(5,y2+2,'LW17');
+        map.berthl(5,y2+3,'LW18');
+        
+        map.station(6,y1-0.5,'Glynde');
+        map.platform(5.5,y1-.5,1,'','');
+        map.platform(5.5,y2+0.5,1,'','');
         map.berthr(6,y1,'1353');
-        
+        map.berthl(6,y2,'1354');
+
+        map.station(6,y2+1.75,'Southease');
+        map.platform(5.5,y2+1.5,1,'','');
+        map.platform(5.5,y2+3.5,1,'','');
+
         map.berthr(7,y1,'1355');
+        map.berthr(7,y2+2,'NT73');
+        map.berth(7,y2+3,'LW20');
+        map.station(8,y2+3.25,'C');
+
+        map.berthr(8,y1,'1357');
+
+        map.station(10,y1+1.25,'B');
         
-        map.berthr(8,y1,'1367');
+        y1 = y1+6;
+        y2 = y1 + 1;
+
+        a = SignalMap.line([],0,y1,10,y1);
+        a = SignalMap.line(a,0,y2,10,y2);
+        a = SignalMap.line(a,3.825,y2,4.125,y1);
+        a = SignalMap.line(a,9.625,y2,9.825,y1);
+
+        map.path(a);
+
+        map.station(0,y1+1.25,'B');
+
+        map.berthr(1,y1,'1359');
         
-        map.berthr(9,y1,'1359');
-        map.berthl(9,y2,'1358');
+        map.station(2.5,y1-0.5,'Berwick');
+        map.platform(1.5,y1-.5,2,'','');
+        map.platform(1.5,y2+0.5,2,'','');
+        map.berthr(3,y1,'1361');
+        map.berthl(2,y2,'1358');
+        map.berthr(3,y2,'1363');
+
+        map.berthl(5,y1,'1362');
+        map.berthl(5,y2,'1360');
+
+        map.berthr(6,y1,'1365');
+
+        map.berthr(7,y1,'1369');
+        map.berthl(7,y2,'1364');
+
+        map.berthr(8,y1,'1371');
+        map.berthl(8,y2,'1366');
         
-        map.station(10.2, y1 +1.3, 'E');
+        map.berthl(9,y2,'1373');
+
+        map.station(10,y1+1.25,'D');
         
-//        y1 = y1+4;
-//        y2 = y1 + 1;
-//
-//        a = SignalMap.down([], 0, y1);
-//        a = SignalMap.up(a, 0, y2);
-//        a = SignalMap.buffer(a, 10, y1);
-//        a = SignalMap.buffer(a, 10, y2);
-//        a = SignalMap.buffer(a, 10, y2+1);
-//        a = SignalMap.buffer(a, 10, y2+2);
-//        a = SignalMap.line(a,0,y1,10,y1);
-//        a = SignalMap.line(a,0,y2,10,y2);
-//        a = SignalMap.line(a,7,y2+1,10,y2+1);
-//        a = SignalMap.line(a,6,y2+2,10,y2+2);
-//
-//        map.path(a);
-//
-//        map.station(8.5,y1,'???');
-//        map.platform(7.5,y1-0.5,2,'','3');
-//        map.platform(7.5,y2+0.5,2,'2','1');
-//        map.berth(9,y1,'EB3R');
-//        map.berth(9,y2,'EB2R');
-//        map.berth(9,y2+1,'EB1R');
+        y1 = y1+4;
+        y2 = y1 + 1;
+
+        a = SignalMap.line([],0,y1,5.125,y1);
         
+        a = SignalMap.line(a,0,y2,10.75,y2);
+        a = SignalMap.buffer(a,10.75,y2);
+        a = SignalMap.line(a,0.25,y1,0.5,y2);
+        a = SignalMap.line(a,3,y2,3.25,y1);
+        
+        // To Newhaven Marine
+        a = SignalMap.line(a,5.125,y1,5.375,y2);
+        a = SignalMap.line(a,5,y1,6,y2+3);
+        a = SignalMap.line(a,4.75,y2,5.25,y2+2);
+        a = SignalMap.line(a,5.25,y2+2,5.75,y2+2);
+        a = SignalMap.line(a,6.75,y2+3,7,y2+2);
+        a = SignalMap.line(a,7,y2+2,8.75,y2+2);
+        a = SignalMap.buffer(a,8.75,y2+2);
+        
+        a = SignalMap.line(a,6,y2+3,8.75,y2+3);
+        a = SignalMap.buffer(a,8.75,y2+3);
+
+        map.path(a);
+
+        map.station(0,y1+1.25,'C');
+
+        map.berthr(1,y1,'NT77');
+
+        map.station(2,y1-0.5,'Newhaven Town');
+        map.platform(1.5,y1-.5,1,'','');
+        map.platform(1.5,y2+0.5,1,'','');
+        map.berthr(2,y1,'NT79');
+        map.berthl(2,y2,'NT78');
+
+        map.station(4,y1-0.5,'Newhaven Harbour');
+        map.platform(3.5,y1-.5,1,'','');
+        map.platform(3.5,y2+0.5,1,'','');
+        map.berth(4,y1,'NH05');
+        map.berth(4,y2,'NH39');
+
+        map.berth(6,y2,'NH40');
+        
+        map.station(7.5,y2,'Bishopstone');
+        map.platform(6.5,y2+0.5,2,'','');
+        map.berthl(7,y2,'N102');
+        map.berthr(8,y2,'NX42');
+        
+        map.station(10,y2,'Seaford');
+        map.platform(9.5,y2+0.5,1,'','');
+        map.berthl(10,y2,'NH42');
+        
+        map.station(8,y2+2,'Newhaven Marine');
+        map.platform(7.5,y2+3.5,1,'','');
+        map.berthl(8,y2+2,'NH24');
+        map.berthl(8,y2+3,'NH35');
+        
+        y1 = y1+6+6; // extra 6 for branch on top
+        y2 = y1 + 1;
+
+        a = SignalMap.line([],0,y1,10,y1);
+        a = SignalMap.line(a,0,y2,10,y2);
+
+        a = SignalMap.line(a,3,y1-6,10,y1-6);
+        a = SignalMap.line(a,3,y1-5,10,y1-5);
+        
+        a = SignalMap.line(a,2.75,y1-4,3,y1-5);
+        a = SignalMap.line(a,2.75,y1-4,2.75,y1-3);
+        a = SignalMap.line(a,2.75,y1-3,3,y1-2);
+        a = SignalMap.line(a,3,y1-2,5,y1-2);
+        
+        a = SignalMap.line(a,2.5,y1-5,3,y1-6);
+        a = SignalMap.line(a,2.5,y1-5,2.5,y1-2);
+        a = SignalMap.line(a,2.5,y1-2,3,y1-1);
+        a = SignalMap.line(a,3,y1-1,5,y1-1);
+        
+        map.path(a);
+
+        map.station(0,y1+1.25,'D');
+
+        map.station(1.5,y1-0.5,'Polegate');
+        map.platform(0.5,y1-.5,2,'','');
+        map.platform(0.5,y2+0.5,2,'','');
+        map.berthl(1,y1,'1372');
+        map.berthl(2,y1,'1377');
+        map.berthl(1,y2,'1370');
+        
+        map.berthr(4,y1-6,'1417');
+        map.berthl(4,y1-5,'1416');
+        map.berthr(4,y1-2,'1414');
+        map.berthl(4,y1-1,'1415');
+        map.berthr(4,y1,'1379');
+        map.berthl(4,y2,'1374');
     };
 
     return SignalAreaMap;
