@@ -40,14 +40,15 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a,0,y2+1,4.25,y2+1);
         a = SignalMap.line(a,0,y2+2,4,y2+2);
         
-        a = SignalMap.line(a,5.75,y1,23,y1);
-        a = SignalMap.line(a,5.5,y2,23,y2);
+        a = SignalMap.line(a,5.75,y1,17.625,y1);
+        a = SignalMap.line(a,17.625,y1,18.325,y1+3);
+        
+        // Bridge break
+        a = SignalMap.line(a,5.5,y2,17.625,y2);
+        a = SignalMap.line(a,18.125,y2,23,y2);
+        
         a = SignalMap.line(a,5.25,y2+1,23,y2+1);
         a = SignalMap.line(a,5,y2+2,23,y2+2);
-        
-        // bridge
-        a = SignalMap.line(a,4,y2+3,5.25,y1-1);
-        a = SignalMap.line(a,4.75,y2+3,6-0.0625,y1-0.75);
 
         // VC
         a = SignalMap.down(a, 0, y2+4);
@@ -106,6 +107,29 @@ var SignalAreaMap = (function () {
 
         map.path(a);
         
+        // =======================================================
+        // bridges
+        // 
+        // Norwood JN
+        a = SignalMap.line([],3.75,y2+3,4,y2+3);
+        a = SignalMap.line(a,4,y2+3,5.25,y1-1);
+        a = SignalMap.line(a,5.25,y1-1,5.125,y1-1.5);
+        a = SignalMap.line(a,4.825,y2+3.5,4.75,y2+3);
+        a = SignalMap.line(a,4.75,y2+3,6-0.0625,y1-0.75);
+        a = SignalMap.line(a,6-0.0625,y1-0.75,6.25-0.0625,y1-0.75);
+        
+        // 0081 - 0087?
+        a = SignalMap.line(a,17.25,y2-0.5,17.5,y2-0.5);
+        a = SignalMap.line(a,17.5,y2-0.5,18.25,y2+2.5);
+        a = SignalMap.line(a,18.25,y2+2.5,18.125,y2+2.75);
+        a = SignalMap.line(a,18.125,y2-0.625,18,y2-0.5);
+        a = SignalMap.line(a,18,y2-0.5,18.75,y2+2.5);
+        a = SignalMap.line(a,18.75,y2+2.5,19,y2+2.75);
+        
+        map.path(a).attr({fill: '#333',stroke: '#333'});
+        
+        // =======================================================
+        // TD borders
         a = SignalMap.line([],1.75,y1-1.25,1.75,y2+2.5);
         a = SignalMap.line(a,1.75,y2+3.5,1.75,y2+5.5);
         a = SignalMap.line(a,3,y2+8,3,y2+13);
