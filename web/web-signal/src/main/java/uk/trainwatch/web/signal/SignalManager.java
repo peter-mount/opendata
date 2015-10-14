@@ -12,7 +12,6 @@ import java.sql.Statement;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.sql.DataSource;
@@ -21,6 +20,7 @@ import uk.trainwatch.nrod.td.berth.BerthMap;
 import uk.trainwatch.nrod.td.berth.RecentAreaMap;
 import uk.trainwatch.nrod.td.model.TDMessage;
 import uk.trainwatch.util.RecentList;
+import uk.trainwatch.util.sql.Database;
 import uk.trainwatch.util.sql.SQL;
 
 /**
@@ -35,7 +35,7 @@ public class SignalManager
     private static final String SQL_ALL_AREAS = SQL_SELECT + " ORDER BY area";
     private static final String SQL_AREA = SQL_SELECT + " WHERE area=?";
 
-    @Resource(name = "jdbc/rail")
+    @Database("rail") @Inject
     private DataSource dataSource;
 
     @Inject

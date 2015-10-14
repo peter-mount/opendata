@@ -19,7 +19,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,10 +29,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.sql.DataSource;
 import uk.trainwatch.util.DaemonThreadFactory;
+import uk.trainwatch.util.sql.Database;
 import uk.trainwatch.util.sql.SQL;
 import uk.trainwatch.util.sql.SQLBiConsumer;
 
@@ -48,7 +48,7 @@ public class RateStatistics
 
     private static final Logger LOG = Logger.getLogger( RateStatistics.class.getName() );
 
-    @Resource(name = "jdbc/rail")
+    @Database("rail") @Inject
     private DataSource dataSource;
 
     private ScheduledFuture<?> scheduledFuture;

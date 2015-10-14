@@ -10,13 +10,14 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
 import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheResult;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.sql.DataSource;
 import uk.trainwatch.util.TimeUtils;
+import uk.trainwatch.util.sql.Database;
 import uk.trainwatch.util.sql.SQL;
 import uk.trainwatch.web.ldb.LDB;
 import uk.trainwatch.web.ldb.LDBTFL;
@@ -72,7 +73,8 @@ public class LDBDepartureCache
                                              + " INNER JOIN tfl.station s ON sp.stationid=s.id"
                                              + " LEFT OUTER JOIN tfl.station sd ON b.dest = sd.id"
                                              + " WHERE s.naptan LIKE ?";
-    @Resource(name = "jdbc/rail")
+    @Database("rail")
+    @Inject
     private DataSource dataSource;
 
     @CacheResult

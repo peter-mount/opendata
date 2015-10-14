@@ -10,7 +10,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Resource;
 import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheResult;
@@ -20,6 +19,7 @@ import javax.sql.DataSource;
 import uk.trainwatch.tfl.model.Line;
 import uk.trainwatch.tfl.model.Platform;
 import uk.trainwatch.tfl.model.Station;
+import uk.trainwatch.util.sql.Database;
 import uk.trainwatch.util.sql.SQL;
 import uk.trainwatch.util.sql.SQLFunction;
 import uk.trainwatch.util.sql.SQLResultSetHandler;
@@ -39,7 +39,8 @@ public class StationCache
             rs.getString( "name" )
     );
 
-    @Resource(name = "jdbc/rail")
+    @Database("rail")
+    @Inject
     private DataSource dataSource;
 
     @Inject

@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Resource;
 import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheResult;
@@ -24,6 +23,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 import uk.trainwatch.util.Predicates;
+import uk.trainwatch.util.sql.Database;
 import uk.trainwatch.util.sql.SQL;
 import uk.trainwatch.web.ldb.model.SearchResult;
 
@@ -41,7 +41,8 @@ public class SearchDeparturesCache
 
     private static final String SEARCH_SQL = "SELECT * FROM darwin.searchDepartures(?,?,?);";
 
-    @Resource(name = "jdbc/rail")
+    @Database("rail")
+    @Inject
     private DataSource dataSource;
 
     @Inject

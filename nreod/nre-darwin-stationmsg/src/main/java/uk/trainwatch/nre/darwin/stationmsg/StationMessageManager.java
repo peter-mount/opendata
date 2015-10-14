@@ -13,12 +13,12 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 import uk.trainwatch.nre.darwin.model.ppt.stationmessages.StationMessage;
 import uk.trainwatch.nre.darwin.parser.DarwinJaxbContext;
+import uk.trainwatch.util.sql.Database;
 import uk.trainwatch.util.sql.SQL;
 
 /**
@@ -31,7 +31,8 @@ public class StationMessageManager
 
     private static final Logger log = Logger.getLogger( StationMessageManager.class.getName() );
 
-    @Resource(name = "jdbc/rail")
+    @Database("rail")
+    @Inject
     private DataSource dataSource;
 
     @Inject

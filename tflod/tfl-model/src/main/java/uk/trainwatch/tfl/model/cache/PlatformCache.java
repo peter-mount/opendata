@@ -8,13 +8,14 @@ package uk.trainwatch.tfl.model.cache;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import javax.annotation.Resource;
 import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheResult;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.sql.DataSource;
 import uk.trainwatch.tfl.model.Platform;
+import uk.trainwatch.util.sql.Database;
 import uk.trainwatch.util.sql.SQL;
 import uk.trainwatch.util.sql.SQLResultSetHandler;
 
@@ -28,13 +29,14 @@ public class PlatformCache
 {
 
     private static final SQLResultSetHandler<Platform> FROM_SQL = rs -> new Platform(
-            rs.getInt( "id"),
+            rs.getInt( "id" ),
             rs.getInt( "plat" ),
             rs.getString( "name" ),
             rs.getString( "fullname" )
     );
 
-    @Resource(name = "jdbc/rail")
+    @Database("rail")
+    @Inject
     private DataSource dataSource;
 
     private Platform get( String field, Object key )

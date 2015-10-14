@@ -13,12 +13,13 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
 import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheResult;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.sql.DataSource;
+import uk.trainwatch.util.sql.Database;
 import uk.trainwatch.util.sql.SQL;
 
 /**
@@ -38,7 +39,8 @@ public class CrsTiplocCache
                                              + " INNER JOIN darwin.crs c ON l.crs=c.id"
                                              + " WHERE c.crs=?";
 
-    @Resource(name = "jdbc/rail")
+    @Database("rail")
+    @Inject
     private DataSource dataSource;
 
     @CacheResult

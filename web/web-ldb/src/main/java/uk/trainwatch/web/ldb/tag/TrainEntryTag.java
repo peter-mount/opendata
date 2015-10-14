@@ -7,32 +7,27 @@ package uk.trainwatch.web.ldb.tag;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import javax.sql.DataSource;
 import uk.trainwatch.util.CDIUtils;
 import uk.trainwatch.util.Streams;
+import uk.trainwatch.util.sql.Database;
 import uk.trainwatch.util.sql.SQL;
 import uk.trainwatch.util.sql.SQLFunction;
 import uk.trainwatch.web.ldb.cache.TrainCache;
 import uk.trainwatch.web.ldb.model.Association;
-import uk.trainwatch.web.ldb.model.ForecastEntry;
 import uk.trainwatch.web.ldb.model.Train;
 import uk.trainwatch.web.ldb.model.TrainEntry;
 
@@ -52,7 +47,8 @@ public class TrainEntryTag
     @Inject
     private TrainCache trainCache;
 
-    @Resource(name = "jdbc/rail")
+    @Database("rail")
+    @Inject
     private DataSource dataSource;
 
     @SuppressWarnings("LeakingThisInConstructor")

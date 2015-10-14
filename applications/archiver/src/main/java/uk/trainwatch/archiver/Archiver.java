@@ -18,7 +18,6 @@ package uk.trainwatch.archiver;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -33,6 +32,7 @@ import uk.trainwatch.rabbitmq.Rabbit;
 import uk.trainwatch.rabbitmq.RabbitMQ;
 import uk.trainwatch.util.Consumers;
 import uk.trainwatch.util.JsonUtils;
+import uk.trainwatch.util.sql.Database;
 
 /**
  *
@@ -49,7 +49,8 @@ public class Archiver
     @Inject
     private Rabbit rabbit;
 
-    @Resource(name = "jdbc/rail")
+    @Database("rail")
+    @Inject
     private DataSource dataSource;
 
     @Override

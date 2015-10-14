@@ -20,13 +20,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import javax.annotation.Resource;
 import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheResult;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.sql.DataSource;
 import uk.trainwatch.util.MinMaxStatistics;
+import uk.trainwatch.util.sql.Database;
 
 /**
  * Cache requests for the calendar.
@@ -38,7 +39,8 @@ import uk.trainwatch.util.MinMaxStatistics;
 public class CalendarDayPPMCache
 {
 
-    @Resource(name = "jdbc/rail")
+    @Database("rail")
+    @Inject
     private DataSource dataSource;
 
     /**

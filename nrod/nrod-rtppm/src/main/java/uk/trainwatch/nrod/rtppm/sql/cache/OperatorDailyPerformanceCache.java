@@ -21,14 +21,15 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
 import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheResult;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.sql.DataSource;
 import uk.trainwatch.nrod.rtppm.sql.OperatorDailyPerformance;
 import uk.trainwatch.util.TimeUtils;
+import uk.trainwatch.util.sql.Database;
 import uk.trainwatch.util.sql.SQL;
 
 /**
@@ -40,7 +41,8 @@ import uk.trainwatch.util.sql.SQL;
 public class OperatorDailyPerformanceCache
 {
 
-    @Resource(name = "jdbc/rail")
+    @Database("rail")
+    @Inject
     private DataSource dataSource;
 
     @CacheResult

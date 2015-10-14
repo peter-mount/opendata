@@ -5,13 +5,9 @@
  */
 package uk.trainwatch.web.svgmap.tpnm;
 
-import uk.trainwatch.web.svgmap.tpnm.SignalRenderer;
-import uk.trainwatch.web.svgmap.tpnm.GraphicTextRenderer;
-import uk.trainwatch.web.svgmap.tpnm.GraphicVectorRenderer;
 import uk.trainwatch.gis.svg.SvgBounds;
 import java.sql.Connection;
 import java.sql.SQLException;
-import javax.annotation.Resource;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.sql.DataSource;
@@ -20,6 +16,7 @@ import javax.xml.stream.XMLStreamWriter;
 import org.apache.tomcat.dbcp.dbcp2.DelegatingConnection;
 import uk.trainwatch.gis.PostGISUtils;
 import uk.trainwatch.gis.svg.SvgRenderer;
+import uk.trainwatch.util.sql.Database;
 
 /**
  *
@@ -30,7 +27,8 @@ public class TPNMRenderer
         implements SvgRenderer
 {
 
-    @Resource(name = "jdbc/postgis")
+    @Database("postgis")
+    @Inject
     private DataSource dataSource;
 
     @Inject

@@ -15,7 +15,6 @@
  */
 package uk.trainwatch.nre.darwin;
 
-import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.servlet.ServletContextEvent;
@@ -27,6 +26,7 @@ import uk.trainwatch.io.FileRecorder;
 import uk.trainwatch.rabbitmq.Rabbit;
 import uk.trainwatch.rabbitmq.RabbitMQ;
 import uk.trainwatch.util.Consumers;
+import uk.trainwatch.util.sql.Database;
 import uk.trainwatch.util.sql.SQLConsumer;
 
 /**
@@ -45,7 +45,8 @@ public class DarwinDBImport
     @Inject
     private Rabbit rabbit;
 
-    @Resource(name = "jdbc/rail")
+    @Database("rail")
+    @Inject
     private DataSource dataSource;
 
     @Override

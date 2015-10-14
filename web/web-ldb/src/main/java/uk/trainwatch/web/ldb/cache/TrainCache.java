@@ -7,12 +7,10 @@ package uk.trainwatch.web.ldb.cache;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Resource;
 import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheRemove;
@@ -21,6 +19,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 import uk.trainwatch.util.Predicates;
+import uk.trainwatch.util.sql.Database;
 import uk.trainwatch.web.ldb.model.Association;
 import uk.trainwatch.web.ldb.model.Forecast;
 import uk.trainwatch.web.ldb.model.ForecastEntry;
@@ -42,7 +41,8 @@ public class TrainCache
 
     private static final Logger LOG = Logger.getLogger( TrainCache.class.getName() );
 
-    @Resource(name = "jdbc/rail")
+    @Database("rail")
+    @Inject
     private DataSource dataSource;
 
     @Inject
@@ -79,7 +79,6 @@ public class TrainCache
 //            if( train.getForecastEntries() != null ) {
 //                Collections.sort( train.getForecastEntries() );
 //            }
-
             if( train.isForecastPresent() && train.isSchedulePresent() ) {
                 // Now link forecast & schedule entries - otherwise we'll have no idea of cancelled stops
                 train.getForecastEntries().forEach( f -> {

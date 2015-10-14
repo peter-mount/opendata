@@ -19,7 +19,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.servlet.ServletContextEvent;
@@ -33,6 +32,7 @@ import uk.trainwatch.nrod.rtppm.model.RTPPMDataMsg;
 import uk.trainwatch.nrod.rtppm.sql.OperatorPPMSQL;
 import uk.trainwatch.rabbitmq.Rabbit;
 import uk.trainwatch.rabbitmq.RabbitMQ;
+import uk.trainwatch.util.sql.Database;
 import uk.trainwatch.util.sql.SQLConsumer;
 import uk.trainwatch.util.sql.UncheckedSQLException;
 
@@ -49,7 +49,8 @@ public class Analyser
     @Inject
     private Rabbit rabbit;
 
-    @Resource(name = "jdbc/rail")
+    @Database("rail")
+    @Inject
     private DataSource dataSource;
 
     @Inject
