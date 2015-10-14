@@ -42,10 +42,10 @@ public class DataSourceProducer
 
     private static final Logger LOG = Logger.getAnonymousLogger();
 
-    private final boolean useJndi;
+    private static boolean useJndi;
     private final Map<String, DataSource> dataSources = new ConcurrentHashMap<>();
 
-    private Factory factory;
+    private static Factory factory;
 
     public DataSourceProducer()
     {
@@ -70,12 +70,17 @@ public class DataSourceProducer
         return instance;
     }
 
-    public void setFactory( Properties p )
+    public static void setUseJndi( boolean useJndi )
     {
-        if( this.factory != null ) {
+        DataSourceProducer.useJndi = useJndi;
+    }
+
+    public static void setFactory( Properties p )
+    {
+        if( factory != null ) {
             throw new IllegalStateException( "DataSource Factory already defined" );
         }
-        this.factory = new Factory( p );
+        factory = new Factory( p );
     }
 
     @PostConstruct

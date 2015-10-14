@@ -20,8 +20,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
+import javax.inject.Inject;
 import javax.json.JsonStructure;
+import org.apache.commons.configuration.Configuration;
 import uk.trainwatch.util.Consumers;
+import uk.trainwatch.util.config.PrivateConfiguration;
 
 /**
  *
@@ -32,6 +35,10 @@ public class Rabbit
 {
 
     private volatile RabbitConnection connection;
+
+    @Inject
+    @PrivateConfiguration("rabbit")
+    private Configuration configuration;
 
     public boolean isDev()
     {
@@ -44,7 +51,10 @@ public class Rabbit
         if( connection == null ) {
             synchronized( this ) {
                 if( connection == null ) {
-                    connection = RabbitMQ.createJNDIConnection( "rabbit/uktrain" );
+                    //connection = RabbitMQ.createJNDIConnection( "rabbit/uktrain" );
+                    connection = new RabbitConnection( configuration.getString( "username" ),
+                                                       configuration.getString( "password" ),
+                                                       configuration.getString( "host" ) );
                 }
             }
         }
