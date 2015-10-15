@@ -22,7 +22,7 @@ var SignalAreaMap = (function () {
     }
 
     SignalAreaMap.width = 30;
-    SignalAreaMap.height = 44;
+    SignalAreaMap.height = 64; // 44 purley
 
     SignalAreaMap.plot = function (map) {
 
@@ -465,8 +465,8 @@ var SignalAreaMap = (function () {
         
         map.path(a);
         
-        map.station(17,y2+.3,'D');
-        map.station(17,y2+2.3,'D');
+        map.station(0,y2+.3,'D');
+        map.station(0,y2+2.3,'D');
         
         map.station(1.5,y1,'South Croydon');
         map.platform(0.5,y2-0.5,2,'5','4');
@@ -526,6 +526,9 @@ var SignalAreaMap = (function () {
         map.berthr(15,y2+2,'0159');
         map.berthl(14,y2+3,'0168');
         
+        map.station(17,y2+.3,'F');
+        map.station(17,y2+2.3,'F');
+        
         // via Sanderstead
         map.berthr(6.25,y1-5,'0535');
         map.berthl(6.25,y1-4,'0150');
@@ -563,6 +566,189 @@ var SignalAreaMap = (function () {
         
         map.station(17,y1-3.7,'E');
 
+        // Purley to Couldson South
+        y1=y1+7+2;
+        y2=y1+1;
+        
+        // SCroy to sanderstead
+        a = SignalMap.line([],0,y1,13,y1);
+        a = SignalMap.line(a,0,y2,13,y2);
+        
+        // Branch through cross under
+        a = SignalMap.line(a,0,y2+1,3,y2+1);
+        a = SignalMap.line(a,3,y2+1,3.25,y2+2);
+        a = SignalMap.line(a,3.25,y2+2,6,y2+2);
+        a = SignalMap.line(a,6,y2+2,6.375,y2+0.5);
+        a = SignalMap.line(a,6.375+0.5,y1-0.5,6.375+.875,y1-2);
+        a = SignalMap.line(a,6.375+.875,y1-2,13,y1-2);
+        
+        a = SignalMap.line(a,0,y2+2,2.75,y2+2);
+        a = SignalMap.line(a,2.75,y2+2,3,y2+3);
+        a = SignalMap.line(a,3,y2+3,6.25,y2+3);
+        a = SignalMap.line(a,6.25,y2+3,6.5+0.375,y2+0.5);
+        a = SignalMap.line(a,6.25+0.75+0.375,y1-0.5,6.25+0.375+.875,y1-1);
+        a = SignalMap.line(a,6.25+0.375+.875,y1-1,13,y1-1);
+        
+        map.path(a);
+        
+        map.station(0,y2+.3,'F');
+        map.station(0,y2+2.3,'F');
+        
+        // TODO points at 1
+        
+        map.berthr(2,y1,'0461');
+        map.berthl(2,y2,'0184');
+        map.berthr(2,y2+1,'0175');
+        map.berthl(2,y2+2,'0182');
+        
+        map.station(4,y1,'Couldson South');
+        map.platform(3.5,y1-0.5,1,'','2');
+        map.platform(3.5,y2+0.5,1,'1','');
+        map.berthr(4,y1,'0463');
+        map.berthl(4,y2,'0462');
+        
+        map.berthr(5,y1,'0465');
+        map.berthl(5,y2,'0464');
+        
+        map.berthl(8,y2,'0466');
+        
+        map.berthr(9,y1,'0467');
+        map.berthl(9,y2,'0468');
+        
+        map.berthr(10,y1,'0469');
+        map.berthl(10,y2,'0470');
+        
+        map.berthr(11,y1,'0471');
+        map.berthl(11,y2,'0472');
+        
+        // Branch off to cross under
+        map.berthr(4,y2+2,'0177');
+        map.berthl(4,y2+3,'0166');
+        
+        map.station(13,y1-1+.3,'G');
+        map.station(13,y2+.3,'G');
+        
+        // A & B (leads to A & C on original)
+        y1=y1+7;
+        y2=y1+1;
+        
+        a = SignalMap.line([],0,y1,23,y1);
+        a = SignalMap.line(a,0,y2,23,y2);
+        
+        a = SignalMap.line(a,0,y2+3,23,y2+3);
+        a = SignalMap.line(a,0,y2+4,23,y2+4);
+        a = SignalMap.line(a,5,y2+3,5.25,y2+4);
+        a = SignalMap.line(a,5.5,y2+4,5.75,y2+5);
+        
+        a = SignalMap.buffer(a,5,y2+5);
+        a = SignalMap.line(a,5,y2+5,13.25,y2+5);
+        a = SignalMap.line(a,13,y2+6,13.5,y2+4);
+        a = SignalMap.line(a,13,y2+5,13.25,y2+6);
+        
+        // Redhill
+        // Post Office
+        a = SignalMap.buffer(a,10.75,y2+1);
+        a = SignalMap.line(a,9.25,y2+1,10.75,y2+1);
+        a = SignalMap.line(a,9,y2+2,9.25,y2+1);
+        // P3
+        a = SignalMap.buffer(a,8,y2+2);
+        a = SignalMap.line(a,8,y2+2,13,y2+2);
+        a = SignalMap.line(a,8.5,y2+3,8.75,y2+2);
+        a = SignalMap.line(a,9,y2+3,9.25,y2+2);
+        a = SignalMap.line(a,13,y2+2,13.25,y2+3);
+        a = SignalMap.line(a,12.75,y2+2,13.75,y2+6);
+        a = SignalMap.line(a,13.75,y2+6,20,y2+6);
+        
+        a = SignalMap.line(a,8,y2+4,8.25,y2+3);
+        a = SignalMap.line(a,8.5,y2+4,8.75,y2+5);
+        a = SignalMap.line(a,9,y2+4,9.25,y2+5);
+        
+        // P1/2
+        a = SignalMap.line(a,9,y2+5,9.25,y2+6);
+        a = SignalMap.line(a,9.25,y2+6,13.5,y2+6);
+        a = SignalMap.line(a,13.5,y2+6,13.75,y2+7);
+        a = SignalMap.line(a,13.75,y2+7,20,y2+7);
+        
+        map.path(a);
+        
+        a = SignalMap.line([],16,y2+4.75,16,y2+8.25);
+        map.path(a).attr({fill: '#f66',stroke: '#f66','stroke-dasharray': '5,5'});
+        
+        map.station(0,y2+.3,'A');
+        map.station(0,y2+4.3,'A');
+        
+        map.berthr(1,y1,'0179');
+        map.berthl(1,y2,'0188');
+        map.berthr(1,y2+3,'0475');
+        map.berthl(1,y2+4,'0474');
+        
+        map.berthr(2,y1,'0181');
+        map.berthl(2,y2,'0190');
+        map.station(2,y2+3,'Merstham');
+        map.platform(1.5,y2+2.5,1,'','2');
+        map.platform(1.5,y2+4.5,1,'1','');
+        map.berthr(2,y2+3,'0477');
+        map.berthl(2,y2+4,'0476');
+        
+        map.berthr(3.5,y1,'0183');
+        map.berthl(3.5,y2,'0192');
+        map.berthr(3,y2+3,'0479');
+        map.berthl(3,y2+4,'0478');
+        
+        map.berthl(4,y2+4,'0480');
+        
+        map.berthr(5,y1,'0185');
+        map.berthl(5,y2,'0194');
+        
+        map.berthr(5,y1,'0185');
+        map.berthl(5,y2,'0194');
+        
+        map.berthr(7,y1,'0187');
+        map.berthl(7,y2,'0196');
+        map.berthr(7,y2+3,'0481');
+        map.berthl(7,y2+4,'0483');
+        map.berthl(7,y2+5,'1308');
+
+        map.berthr(8,y1,'0189');
+        map.berthl(8,y2,'0198');
+        map.berthr(8,y2+5,'1315');
+        
+        map.berthr(9,y1,'0191');
+        map.berthl(9,y2,'0200');
+        
+        map.station(10.5,y2+8,'Redhill');
+        map.platform(9.5,y2+1.5,3,'','3');
+        map.platform(9.5,y2+5.5,3,'1','2');
+        map.berthr(10,y1,'0193');
+        map.berthl(10,y2,'0202');
+        map.berthl(10,y2+1,'1310'); // Post Office
+        map.station(11.25,y2+1.75,"Post Office");
+        map.berthl(10,y2+2,'0484');
+        map.berthl(10,y2+4,'0486');
+        map.berthl(10,y2+5,'0488');
+        map.berthl(10,y2+6,'0490');
+        
+        map.berthr(11,y2+6,'0491');
+        
+        map.berthr(12,y1,'0195');
+        map.berthl(12,y2,'0204');
+        map.berthr(12,y2+2,'0485');
+        map.berthr(12,y2+3,'0487');
+        map.berthr(12,y2+5,'0489');
+        map.berthr(12,y2+6,'0493');
+        
+        // Reigate/ZH
+        map.berthl(15,y2+7,'0492');
+        map.berthr(17,y2+6,'0511');
+        map.berthl(17,y2+7,'0510');
+        map.berthr(18,y2+6,'R023');
+        map.station(19,y2+6,'Reigate');
+        map.platform(18.5,y2+5.5,1,'','2');
+        map.platform(18.5,y2+7.5,1,'1','');
+        map.berthl(19,y2+7,'R005');
+        map.station(20,y2+7.3,'ZH').attr({fill: '#f66'});
+        map.station(16,y2+9.3,'TB-ZH').attr({fill: '#f66'});
+        
         //map.station(0,y1+2.5,'ZE 15/10/09 data 15/07/27');
     };
 
