@@ -356,13 +356,18 @@ var SignalAreaMap = (function () {
         y1=y1+5;
         y2=y1+1;
         
-        a = SignalMap.line([],0,y1,13,y1);
-        a = SignalMap.line(a,0,y2,13,y2);
-        a = SignalMap.line(a,0,y2+1,13,y2+1);
-        a = SignalMap.line(a,0,y2+2,13,y2+2);
+        a = SignalMap.line([],0,y1,17,y1);
+        a = SignalMap.line(a,0,y2,17,y2);
+        a = SignalMap.line(a,0,y2+1,17,y2+1);
+        a = SignalMap.line(a,0,y2+2,17,y2+2);
         a = SignalMap.line(a,1.125,y2+2,1.375,y2+3);
-        a = SignalMap.line(a,1.25,y2+3,13,y2+3);
 
+        a = SignalMap.line(a,1.25,y2+3,11.75,y2+3);
+        a = SignalMap.line(a,11.75,y2+3,12,y2+2);
+
+        a = SignalMap.line(a,5,y1,5.25,y1-1);
+        a = SignalMap.line(a,5.25,y1-1,17,y1-1);
+        
         a = SignalMap.line(a,0,y2+4,0.5,y2+4);
         a = SignalMap.line(a,0.5,y2+4,1,y2+2);
         a = SignalMap.line(a,0,y2+5,0.75,y2+5);
@@ -380,6 +385,184 @@ var SignalAreaMap = (function () {
         map.berthl(2,y2+2,'0092');
         map.berthl(2,y2+3,'0090');
         
+        map.berthr(3,y2+2,'0093');
+
+        // TODO 4 has some points work to be donw
+        
+        map.berthr(6,y1-1,'0111');
+        map.berthr(6,y1,'0109');
+        map.berthr(6,y2,'0107');
+        map.berthr(6,y2+1,'0105');
+        map.berthr(6,y2+2,'0103');
+        
+        map.station(8.5,y1-1,'East Croydon');
+        map.platform(7.5,y1-0.5,2,'6','5');
+        map.platform(7.5,y2+0.5,2,'4','3');
+        map.platform(7.5,y2+2.5,2,'2','1');
+        map.berthl(8,y1,'0108');
+        map.berthl(8,y2,'0106');
+        map.berthl(8,y2+1,'0104');
+        map.berthl(8,y2+2,'0102');
+        map.berthl(8,y2+3,'0100');
+
+        map.berthr(9,y1-1,'0123');
+        map.berthr(9,y1,'0121');
+        map.berthr(9,y2,'0119');
+        map.berthr(9,y2+1,'0117');
+        map.berthr(9,y2+2,'0115');
+        
+        map.berthl(11,y1,'0120');
+        map.berthl(11,y2,'0118');
+        map.berthl(11,y2+1,'0116');
+        map.berthl(11,y2+2,'0114');
+        map.berthl(11,y2+3,'0112');
+        
+        // TODO 12 has some point work
+        
+        map.berthl(14,y1,'0128');
+        map.berthl(14,y2,'0126');
+        map.berthl(14,y2+2,'0124');
+        
+        map.berthr(15,y1-1,'0131');
+        map.berthr(15,y1,'0129');
+        map.berthr(15,y2+1,'0127');
+        
+        map.berthl(16,y1,'0136');
+        map.berthl(16,y2,'0134');
+
+        map.station(17,y2+.3,'D');
+        map.station(17,y2+2.3,'D');
+        
+        // S Croydon
+        y1=y1+8+5; // 5 for upper loop
+        y2=y1+1;
+        
+        // SCroy to sanderstead
+        a = SignalMap.line([],0,y1,4,y1);
+        a = SignalMap.line(a,3.75,y2,5.25,y1-5);
+        a = SignalMap.line(a,5.25,y1-5,17,y1-5);
+        a = SignalMap.line(a,4,y2+1,5.5,y1-4);
+        a = SignalMap.line(a,5.5,y1-4,17,y1-4);
+
+        // xover SCroy P4/5 
+        a = SignalMap.line(a,3.5,y1,4.5,y2);
+        a = SignalMap.line(a,3.5,y2,4.5,y2+1);
+
+        // SCroy to purley oaks
+        a = SignalMap.buffer(a,7.75,y1);
+        a = SignalMap.line(a,7.75,y1,17,y1);
+        a = SignalMap.line(a,0,y2,17,y2);
+        a = SignalMap.line(a,0,y2+1,17,y2+1);
+        a = SignalMap.line(a,0,y2+2,17,y2+2);
+        a = SignalMap.line(a,0,y2+3,17,y2+3);
+        
+        // purley P6
+        a = SignalMap.buffer(a,13,y1-1);
+        a = SignalMap.line(a,13,y1-1,17,y1-1);
+        a = SignalMap.line(a,13,y1,13.25,y1-1);
+        a = SignalMap.line(a,16,y1,16.25,y1-1);
+        a = SignalMap.line(a,16,y2,16.25,y1);
+        
+        map.path(a);
+        
+        map.station(17,y2+.3,'D');
+        map.station(17,y2+2.3,'D');
+        
+        map.station(1.5,y1,'South Croydon');
+        map.platform(0.5,y2-0.5,2,'5','4');
+        map.platform(0.5,y2+1.5,2,'3','2');
+        map.platform(0.5,y2+3.5,2,'1','');
+        
+        map.berthl(1,y2,'0142');
+        map.berthl(1,y2+1,'0140');
+        map.berthl(1,y2+3,'0132');
+        
+        map.berthr(2,y1,'0137');
+        map.berthr(2,y2,'0136');
+        map.berthr(2,y2+2,'0133');
+        
+        // via Purley Oaks
+        map.berthr(5.25,y2,'0143');
+        map.berthl(5.25,y2+1,'0148');
+        map.berthr(5.25,y2+2,'0141');
+        map.berthl(5.25,y2+3,'0146');
+        
+        map.berthr(6.25,y2,'0147');
+        map.berthl(6.25,y2+1,'0154');
+        map.berthr(6.25,y2+2,'0145');
+        
+        map.berthl(7.75,y2+1,'0158');
+        
+        map.station(9,y1,'Purley Oaks');
+        map.platform(8.5,y2-0.5,1,'','4');
+        map.platform(8.5,y2+1.5,1,'3','2');
+        map.platform(8.5,y2+3.5,1,'1','');
+        map.berthr(9,y2,'0151');
+        map.berthl(9,y2+1,'0160');
+        map.berthr(9,y2+2,'0149');
+        map.berthl(9,y2+3,'0156');
+        
+        map.berthl(10.25,y2+1,'0158');
+        
+        map.berthr(11.5,y2,'0155');
+        map.berthl(11.5,y2+1,'0166');
+        map.berthr(11.5,y2+2,'0153');
+        map.berthl(11.5,y2+3,'0162');
+        
+        // todo 12 needs point work
+
+        map.station(14.5,y1-1,'Purley');
+        map.platform(13.5,y1-1.5,2,'','6');
+        map.platform(13.5,y2-0.5,2,'5','4');
+        map.platform(13.5,y2+1.5,2,'3','2');
+        map.platform(13.5,y2+3.5,2,'1','');
+        map.berthl(14,y1-1,'0176');
+        map.berthr(15,y1-1,'0167');
+        map.berthl(14,y1,'0174');
+        map.berthr(15,y1,'0165');
+        map.berthl(14,y2,'0172');
+        map.berthr(15,y2,'0163');
+        map.berthl(14,y2+1,'0170');
+        map.berthr(15,y2+2,'0159');
+        map.berthl(14,y2+3,'0168');
+        
+        // via Sanderstead
+        map.berthr(6.25,y1-5,'0535');
+        map.berthl(6.25,y1-4,'0150');
+        
+        map.station(8,y1-5,'Sanderstead');
+        map.platform(7.5,y1-5.5,1,'','2');
+        map.platform(7.5,y1-3.5,1,'1','');
+        map.berthr(8,y1-5,'0541');
+        
+        map.berthr(10,y1-5,'0545');
+        map.berthl(10,y1-4,'0544');
+        
+        map.station(11,y1-5,'Riddlesdown');
+        map.platform(10.5,y1-5.5,1,'','2');
+        map.platform(10.5,y1-3.5,1,'1','');
+        
+        map.berthr(12,y1-5,'0547');
+        map.berthl(12,y1-4,'0548');
+        
+        map.station(13,y1-5,'Upper Warlingham');
+        map.platform(12.5,y1-5.5,1,'','2');
+        map.platform(12.5,y1-3.5,1,'1','');
+        map.berthr(13,y1-5,'X001');
+        map.berthl(13,y1-4,'0550');
+        
+        map.berthr(14,y1-5,'X003');
+        map.berthl(14,y1-4,'X002');
+        
+        map.station(15,y1-5,'Woldingham');
+        map.platform(14.5,y1-5.5,1,'','2');
+        map.platform(14.5,y1-3.5,1,'1','');
+        
+        map.berthr(16,y1-5,'X005');
+        map.berthl(16,y1-4,'X004');
+        
+        map.station(17,y1-3.7,'E');
+
         //map.station(0,y1+2.5,'ZE 15/10/09 data 15/07/27');
     };
 
