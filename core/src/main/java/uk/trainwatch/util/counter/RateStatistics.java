@@ -58,10 +58,11 @@ public class RateStatistics
 
     private String getHostName()
     {
-        try {
+        try
+        {
             return InetAddress.getLocalHost().getHostName();
-        }
-        catch( UnknownHostException ex ) {
+        } catch( UnknownHostException ex )
+        {
             return "localHost";
         }
     }
@@ -70,8 +71,6 @@ public class RateStatistics
     void start()
     {
         hostname = getHostName();
-        LOG.log( Level.INFO, () -> "Hostname" + hostname );
-
         scheduledFuture = DaemonThreadFactory.INSTANCE.scheduleAtFixedRate( this, 1L, 1L, TimeUnit.MINUTES );
     }
 
@@ -84,15 +83,22 @@ public class RateStatistics
     @Override
     public void run()
     {
+        if( dataSource == null )
+        {
+            return;
+        }
+        
         LOG.log( Level.INFO, () -> "Running persistence " + stats );
         try( Connection con = dataSource.getConnection();
-             PreparedStatement ps = SQL.prepare( con, "INSERT INTO report.stats (tm,name,value,host) VALUES (now(),?,?,?)" ) ) {
-            stats.forEach( SQLBiConsumer.guard( ( label, value ) -> {
+                PreparedStatement ps = SQL.prepare( con, "INSERT INTO report.stats (tm,name,value,host) VALUES (now(),?,?,?)" ) )
+        {
+            stats.forEach( SQLBiConsumer.guard( ( label, value ) ->
+            {
                 SQL.executeUpdate( ps, label, value, hostname );
                 LOG.log( Level.INFO, () -> label + "=" + value );
             } ) );
-        }
-        catch( Throwable ex ) {
+        } catch( Throwable ex )
+        {
             LOG.log( Level.SEVERE, null, ex );
         }
     }
@@ -100,10 +106,12 @@ public class RateStatistics
     void submit( String label, int lastCount )
     {
         int i = label.indexOf( '[' );
-        if( i > -1 ) {
+        if( i > -1 )
+        {
             label = label.substring( 0, i );
         }
-        if( !label.isEmpty() ) {
+        if( !label.isEmpty() )
+        {
             stats.put( label, lastCount );
         }
     }
