@@ -828,11 +828,113 @@ var SignalAreaMap = (function () {
         map.station(23,y2+.3,'H');
         map.station(23,y2+2.3,'H');
         
-        y1=y1+10;
+        y1=y1+13;
         y2=y1+1;
         
-        map.station(0,y2+.3,'G');
-        map.station(0,y2+4.3,'G');
+        a = SignalMap.line([],0,y1,23,y1);
+        a = SignalMap.line(a,0,y2,23,y2);
+        a = SignalMap.line(a,0,y2+1,23,y2+1);
+        a = SignalMap.line(a,0,y2+2,23,y2+2);
+        
+        a = SignalMap.line(a,2.875,y2+3,3.125,y2+2);
+        a = SignalMap.line(a,3.25,y2+2,3.5,y2+1);
+        
+        // Gatwick
+        a = SignalMap.line(a,8.75,y1,9,y2);
+        a = SignalMap.line(a,9.125,y2,9.375,y2+1);
+        a = SignalMap.line(a,9.5,y2+1,9.75,y2+2);
+        
+        a = SignalMap.line(a,9,y1,9.25,y2);
+        a = SignalMap.line(a,9.375,y2,9.625,y2+1);
+        a = SignalMap.line(a,9.75,y2+1,10,y2+2);
+        
+        a = SignalMap.line(a,9.5,y2,9.75,y1);
+        // P7
+        a = SignalMap.line(a,9.5,y1,10,y1-2);
+        a = SignalMap.line(a,10,y1-2,13,y1-2);
+        a = SignalMap.line(a,13,y1-2,13.5,y1);
+        // P6
+        a = SignalMap.line(a,10,y1,10.25,y1-1);
+        a = SignalMap.line(a,10.25,y1-1,12.75,y1-1);
+        a = SignalMap.line(a,12.75,y1-1,13,y1);
+        // P1
+        a = SignalMap.line(a,9.825,y2+2,9.825+.25,y2+3);
+        a = SignalMap.line(a,9,y2+3,16-.25,y2+3);
+        a = SignalMap.line(a,13-.25,y2+3,13,y2+2);
+        a = SignalMap.line(a,16-.25,y2+3,16,y2+2);
+        
+        map.path(a);
+        
+        map.station(0,y2+.3,'H');
+        map.station(0,y2+2.3,'H');
+        
+        map.berthr(1,y1,'0213');
+        map.berthl(1,y2,'0218');
+        map.berthr(1,y2+1,'0215');
+        map.berthl(1,y2+2,'0220');
+        
+        map.station(2,y2+3.5,'Salfords');
+        map.platform(1.5,y2+.5,1,'','2');
+        map.platform(1.5,y2+2.5,1,'1','');
+        map.berthr(2,y1,'0217');
+        map.berthl(2,y2,'0222');
+        map.berthr(2,y2+1,'0219');
+        map.berthl(2,y2+2,'0224');
+        
+        map.berthr(4,y2+1,'0225');
+        map.berthl(4,y2+2,'0230');
+        
+        map.berthr(5,y1,'0223');
+        map.berthl(5,y2,'0228');
+        map.berthr(5,y2+1,'0229');
+        map.berthl(5,y2+2,'0234');
+        
+        map.berthr(6,y1,'0227');
+        map.berthl(6,y2,'0232');
+        map.berthr(6,y2+1,'0233');
+        
+        map.station(7,y2+3.5,'Horley');
+        map.platform(6.5,y1-.5,1,'','4');
+        map.platform(6.5,y2+.5,1,'3','2');
+        map.platform(6.5,y2+2.5,1,'1','');
+        map.berthr(7,y1,'0231');
+        map.berthl(7,y2,'0236');
+        map.berthr(7,y2+1,'0239');
+        map.berthl(7,y2+2,'0238');
+        
+        map.berthr(8,y1,'0237');
+        map.berthl(8,y2,'0240');
+        map.berthl(8,y2+2,'0242');
+        
+        // Gatwick
+        map.station(11.5,y1-2,'Gatwick');
+        map.platform(10.5,y1-2.5,2,'','7');
+        map.platform(10.5,y1-.5,2,'6','5');
+        map.platform(10.5,y2+.5,2,'4','3');
+        map.platform(10.5,y2+2.5,2,'2','1');
+        
+        map.berthl(11,y1-2,'R246');
+        map.berthl(11,y1-1,'0244');
+        map.berthl(11,y1,'0246');
+        map.berthl(11,y2,'F248');
+        map.berthl(11,y2+1,'0250');
+        map.berthl(11,y2+2,'0252');
+        map.berthl(11,y2+3,'0254');
+        
+        map.berthr(12,y1-2,'F246');
+        map.berthr(12,y1-1,'0241');
+        map.berthr(12,y1,'0243');
+        map.berthr(12,y2,'R248');
+        map.berthr(12,y2+1,'0247');
+        map.berthr(12,y2+2,'0249');
+        map.berthr(12,y2+3,'0251');
+        
+        map.berthr(15,y1,'0253');
+        map.berthl(15,y2,'0256');
+        map.berthr(15,y2+1,'0257');
+        map.berthl(15,y2+2,'0260');
+        map.berthl(15,y2+3,'0262');
+        
         
         //map.station(0,y1+2.5,'ZE 15/10/09 data 15/07/27');
     };
