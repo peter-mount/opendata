@@ -566,6 +566,139 @@ var SignalAreaMap = (function () {
         
         map.station(17,y1-3.7,'E');
 
+        // Oxted
+        y1=y1+7+2;
+        y2=y1+1;
+
+        a = SignalMap.line([],0,y1,16.75,y1);
+        a = SignalMap.line(a,0,y2,17.5,y2);
+        a = SignalMap.line(a,16.75,y1,17,y2);
+        a = SignalMap.buffer(a,17.5,y2);
+        
+        // Oxted
+        a = SignalMap.line(a,3,y1-1,4.75,y1-1);
+        a = SignalMap.line(a,4.75,y1-1,5,y1);
+        a = SignalMap.line(a,5,y2,5.25,y1);
+        a = SignalMap.line(a,4.75,y2,5,y2+1);
+        a = SignalMap.line(a,4,y2+1,6,y2+1);
+        
+        // to Edenbridge
+        a = SignalMap.line(a,8.75,y1,9.5,y1-3);
+        a = SignalMap.line(a,9.5,y1-3,15,y1-3);
+        a = SignalMap.line(a,15,y1-3,15.25,y1-2);
+        
+        a = SignalMap.line(a,9,y2,9.75,y1-2);
+        a = SignalMap.line(a,9.75,y1-2,19.25,y1-2);
+        a = SignalMap.line(a,16.5,y1-2,16.75,y1-1);
+        a = SignalMap.line(a,19.25,y1-2,19.5,y1-1);
+        a = SignalMap.line(a,16.75,y1-1,25,y1-1);
+
+        // Crowborough
+        a = SignalMap.line(a,22,y1-1,22.25,y1-2);
+        a = SignalMap.line(a,22.25,y1-2,28.75,y1-2);
+        a = SignalMap.line(a,25,y1-1,25.25,y1-2);
+        a = SignalMap.line(a,23,y1-3,24.75,y1-3);
+        a = SignalMap.line(a,24.75,y1-3,25,y1-2);
+        
+        a = SignalMap.buffer(a,28.75,y1-2);
+        map.path(a);
+        
+        map.station(0,y2+.3,'E');
+        
+        map.berthr(1,y1,'X007');
+        map.berthl(1,y2,'X006');
+        
+        map.station(3.5,y1-1,'Oxted');
+        map.platform(2.5,y1-0.5,2,'3','2');
+        map.platform(2.5,y2+0.5,2,'1','');
+        map.berth(3,y1-1,'XR13');
+        map.berthl(3,y1,'X010');
+        map.berthl(3,y2,'X008');
+        map.berthr(4,y1-1,'XF13');
+        map.berthr(4,y1,'X011');
+        map.berthr(4,y2,'X305');
+        
+        map.berthr(6,y1,'X012');
+        map.berthl(6,y2,'X015');
+        map.berthl(6,y2+1,'X304');
+        
+        map.station(8,y1-1,'Hurst Green');
+        map.platform(7.5,y1-0.5,1,'','2');
+        map.platform(7.5,y2+0.5,1,'1','');
+        map.berthr(8,y1,'X021');
+        map.berthl(8,y2,'X020');
+        
+        map.berthr(10.5,y1-3,'X051');
+        map.berthl(10.5,y1-2,'X022');
+        map.berthr(10,y1,'X025');
+        map.berthl(10,y2,'X024');
+        
+        map.station(12,y1-3,'Edenbridge Town');
+        map.platform(11.5,y1-3.5,1,'','2');
+        map.platform(11.5,y1-1.5,1,'1','');
+        
+        map.berthl(12.5,y1-2,'X054');
+        
+        map.station(14,y1-3,'Hever');
+        map.platform(13.5,y1-3.5,1,'','2');
+        map.platform(13.5,y1-1.5,1,'1','');
+        map.berthr(14,y1-3,'X055');
+        map.berthl(14,y1-2,'XR54');
+        
+        map.station(16,y1-2,'Cowden');
+        map.platform(15.5,y1-2.5,1,'','1');
+        
+        map.station(18,y1-2,'Ashurst');
+        map.platform(17,y1-2.5,2,'','2');
+        map.platform(17,y1-0.5,2,'1','');
+        map.berthr(17.5,y1-2,'XR59');
+        map.berthl(17.5,y1-1,'X058');
+        map.berthr(18.5,y1-2,'X059');
+        map.berthl(18.5,y1-1,'XR58');
+        
+        map.station(20,y1-1,'Eridge');
+        map.platform(19.5,y1-0.5,1,'1','');
+        map.berthr(21,y1-1,'X061');
+        
+        map.station(23.5,y1-2,'Crowborough');
+        map.platform(22.5,y1-2.5,2,'','2');
+        map.platform(22.5,y1-0.5,2,'1','');
+        map.berthl(23,y1-2,'X062');
+        map.berthr(24,y1-2,'X067');
+        map.berthl(23,y1-1,'X064');
+        
+        map.berthl(26,y1-2,'X068');
+        map.station(26.5,y1-2,'Buxted');
+        map.platform(26,y1-2.5,1,'','1');
+        
+        map.berth(27.5,y1-2,'XR68');
+        
+        map.station(28.25,y1-2,'Uckfield');
+        map.platform(27.75,y1-2.5,1,'','1');
+        
+        // Lingfield - East Grinstead
+        
+        map.station(11.5,y1,'Lingfield');
+        map.platform(11,y1-0.5,1,'','2');
+        map.platform(11,y2+0.5,1,'1','');
+        map.berthr(11.5,y1,'X033');
+        
+        map.station(12.75,y1,'Dormans');
+        map.platform(12.25,y1-0.5,1,'','2');
+        map.platform(12.25,y2+0.5,1,'1','');
+        map.berthr(12.75,y1,'X037');
+        map.berthl(12.75,y2,'X034');
+        
+        map.berthr(13.875,y1,'X039');
+        
+        map.station(15.5,y1,'East Grinstead');
+        map.platform(14.5,y1-0.5,2,'','2');
+        map.platform(14.5,y2+0.5,2,'1','');
+        map.berthr(15,y1,'XF42');
+        map.berthl(15,y2,'XF40');
+        map.berthr(16,y1,'XR42');
+        map.berthl(16,y2,'XR40');
+        
         // Purley to Couldson South
         y1=y1+7+2;
         y2=y1+1;
@@ -863,6 +996,12 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a,13-.25,y2+3,13,y2+2);
         a = SignalMap.line(a,16-.25,y2+3,16,y2+2);
         
+        // Gatwick sidings
+        a = SignalMap.line(a,14,y2+3,14.75,y2+6);
+        a = SignalMap.line(a,14.25,y2+4,16,y2+4);
+        a = SignalMap.line(a,14.5,y2+5,16,y2+5);
+        a = SignalMap.line(a,14.75,y2+6,16,y2+6);
+        
         map.path(a);
         
         map.station(0,y2+.3,'H');
@@ -935,6 +1074,25 @@ var SignalAreaMap = (function () {
         map.berthl(15,y2+2,'0260');
         map.berthl(15,y2+3,'0262');
         
+        map.berthl(16,y2+4,'1174');
+        map.berthl(16,y2+5,'1172');
+        map.berthl(16,y2+6,'1170');
+        
+        map.berthr(18,y1,'0261');
+        map.berthl(18,y2,'0264');
+        map.berthr(18,y2+1,'0263');
+        map.berthl(18,y2+2,'0266');
+        
+        map.berthr(20,y1,'0265');
+        map.berthr(20,y2+1,'0267');
+        
+        map.berthr(22,y1,'0269');
+        map.berthl(22,y2,'0268');
+        map.berthr(22,y2+1,'0267');
+        map.berthl(22,y2+2,'0270');
+
+        map.station(23,y2+.3,'J');
+        map.station(23,y2+2.3,'J');
         
         //map.station(0,y1+2.5,'ZE 15/10/09 data 15/07/27');
     };
