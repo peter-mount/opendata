@@ -22,7 +22,7 @@ var SignalAreaMap = (function () {
     }
 
     SignalAreaMap.width = 30;
-    SignalAreaMap.height = 64; // 44 purley
+    SignalAreaMap.height = 90; // 44 purley
 
     SignalAreaMap.plot = function (map) {
 
@@ -635,8 +635,21 @@ var SignalAreaMap = (function () {
         a = SignalMap.line([],0,y1,23,y1);
         a = SignalMap.line(a,0,y2,23,y2);
         
-        a = SignalMap.line(a,0,y2+3,23,y2+3);
-        a = SignalMap.line(a,0,y2+4,23,y2+4);
+        a = SignalMap.line(a,0,y2+3,16.25,y2+3);
+        a = SignalMap.line(a,16.25,y2+3,16.75,y2+1);
+        a = SignalMap.line(a,16.75,y2+1,23,y2+1);
+        a = SignalMap.line(a,0,y2+4,16.5,y2+4);
+        a = SignalMap.line(a,16.5,y2+4,17,y2+2);
+        a = SignalMap.line(a,17,y2+2,23,y2+2);
+
+        a = SignalMap.line(a,17.125,y2+2,17.375,y2+1);
+        a = SignalMap.line(a,17.5,y2+1,17.75,y2);
+        a = SignalMap.line(a,17.825,y2,18.125,y1);
+
+        a = SignalMap.line(a,20.625,y1,20.825,y2);
+        a = SignalMap.line(a,21,y2,21.25,y2+1);
+        a = SignalMap.line(a,21.375,y2+1,21.625,y2+2);
+        
         a = SignalMap.line(a,5,y2+3,5.25,y2+4);
         a = SignalMap.line(a,5.5,y2+4,5.75,y2+5);
         
@@ -668,14 +681,33 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a,9.25,y2+6,13.5,y2+6);
         a = SignalMap.line(a,13.5,y2+6,13.75,y2+7);
         a = SignalMap.line(a,13.75,y2+7,20,y2+7);
+
+        // Cross under to Nutfield/AD
+        
+        a = SignalMap.line(a,14,y2+3,14.75+0.125,y2+0.5);
+        a = SignalMap.line(a,15.325,y1-0.5,16.5,y1-4);
+        a = SignalMap.line(a,16.5,y1-4,23,y1-4);
+        
+        a = SignalMap.line(a,14.25,y2+4,15.25+0.125,y2+0.5);
+        a = SignalMap.line(a,15.825,y1-0.5,16.75,y1-3);
+        a = SignalMap.line(a,16.75,y1-3,23,y1-3);
+        a = SignalMap.line(a,17.25,y1-3,17.5,y1-4);
+        
+        // Nutfield sidings
+        a = SignalMap.line(a,17,y1-3,17.5,y1-1);
+        a = SignalMap.line(a,17.25,y1-2,19,y1-2);
+        a = SignalMap.line(a,17.5,y1-1,19,y1-1);
+        a = SignalMap.buffer(a,19,y1-2);
+        a = SignalMap.buffer(a,19,y1-1);
         
         map.path(a);
         
         a = SignalMap.line([],16,y2+4.75,16,y2+8.25);
+        a = SignalMap.line(a,21.25,y1-1.5,21.25,y1-5.5);
         map.path(a).attr({fill: '#f66',stroke: '#f66','stroke-dasharray': '5,5'});
         
-        map.station(0,y2+.3,'A');
-        map.station(0,y2+4.3,'A');
+        map.station(0,y2+.3,'G');
+        map.station(0,y2+4.3,'G');
         
         map.berthr(1,y1,'0179');
         map.berthl(1,y2,'0188');
@@ -748,6 +780,59 @@ var SignalAreaMap = (function () {
         map.berthl(19,y2+7,'R005');
         map.station(20,y2+7.3,'ZH').attr({fill: '#f66'});
         map.station(16,y2+9.3,'TB-ZH').attr({fill: '#f66'});
+        
+        // Nutfield-Godstone
+        map.berthr(18.25,y1-4,'0495');
+        map.berthl(18.25,y1-3,'0502');
+        map.berthl(18.5,y1-2,'0500');
+        map.berthl(18.5,y1-1,'1318');
+        map.station(17.8,y1-0.7,'Sidings');
+        
+        map.station(19.5,y1-4,'Nutfield');
+        map.platform(19,y1-4.5,1,'','2');
+        map.platform(19,y1-2.5,1,'1','');
+        map.berthr(19.5,y1-4,'0501');
+        map.berthl(19.5,y1-3,'0504');
+        
+        map.berthr(20.5,y1-4,'0503');
+        map.berthl(20.5,y1-3,'0506');
+        
+        map.station(22.25,y1-4,'Godstone');
+        map.platform(21.75,y1-4.5,1,'','2');
+        map.platform(21.75,y1-2.5,1,'1','');
+        map.berthr(22.25,y1-4,'A505');
+        map.berthl(22.25,y1-3,'0508');
+        
+        map.station(23,y1-2.7,'AD').attr({fill: '#f66'});
+        map.station(21.25,y1-5,'TB-AD').attr({fill: '#f66'});
+        
+        // Earlswood
+        map.berthr(15.5,y2+3,'0197');
+        map.berthl(15.5,y2+4,'0496');
+        
+        map.station(19.5,y2+3.5,'Earlswood');
+        map.platform(18.5,y2+.5,2,'','2');
+        map.platform(18.5,y2+2.5,2,'1','');
+        map.berthl(19,y1,'0206');
+        map.berthl(19,y2+1,'0210');
+        map.berthr(20,y1,'0201');
+        map.berthl(20,y2,'0208');
+        map.berthr(20,y2+1,'0205');
+        map.berthl(20,y2+2,'0212');
+        
+        map.berthr(22.25,y1,'0209');
+        map.berthl(22.25,y2,'0214');
+        map.berthr(22.25,y2+1,'0211');
+        map.berthl(22.25,y2+2,'0216');
+
+        map.station(23,y2+.3,'H');
+        map.station(23,y2+2.3,'H');
+        
+        y1=y1+10;
+        y2=y1+1;
+        
+        map.station(0,y2+.3,'G');
+        map.station(0,y2+4.3,'G');
         
         //map.station(0,y1+2.5,'ZE 15/10/09 data 15/07/27');
     };
