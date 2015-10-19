@@ -25,8 +25,7 @@ public abstract class CachingSQLResultSetHandler<T>
     public final ResultSetMetaData getResultSetMetaData( ResultSet rs )
             throws SQLException
     {
-        if( metaData == null )
-        {
+        if( metaData == null ) {
             metaData = rs.getMetaData();
         }
         return metaData;

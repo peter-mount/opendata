@@ -18,6 +18,11 @@ package uk.trainwatch.util.sql;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  *
@@ -40,9 +45,47 @@ public interface SQLResultSetHandler<T>
     {
         ResultSetMetaData meta = getResultSetMetaData( rs );
         int s = meta.getColumnCount();
-        for( int i = 1; i <= s; i++ )
-        {
+        for( int i = 1; i <= s; i++ ) {
             c.accept( meta.getColumnName( i ), rs.getObject( i ) );
         }
+    }
+
+    default List<String> getColumnNames( ResultSet rs )
+            throws SQLException
+    {
+        ResultSetMetaData rsmd = getResultSetMetaData( rs );
+        int colCount = rsmd.getColumnCount();
+        List<String> columns = new ArrayList<>( colCount );
+        for( int i = 1; i <= colCount; i++ ) {
+            columns.add( rsmd.getColumnName( i ) );
+        }
+        return columns;
+    }
+
+    default Stream<String> getColumnNameStream( ResultSet rs )
+            throws SQLException
+    {
+        return getColumnNames( rs ).stream();
+    }
+
+    static SQLFunction<ResultSet, Map<String, Object>> toMap( )
+            throws SQLException
+    {
+        return new CachingSQLResultSetHandler<Map<String, Object>>()
+        {
+
+            @Override
+            public Map<String, Object> apply( ResultSet rs )
+                    throws SQLException
+            {
+                Map<String, Object> map = new LinkedHashMap<>();
+
+                for( String n: getColumnNames( rs ) ) {
+                    map.put( n, rs.getObject( n ) );
+                }
+
+                return map;
+            }
+        };
     }
 }
