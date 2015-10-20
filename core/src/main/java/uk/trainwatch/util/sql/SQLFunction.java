@@ -6,6 +6,7 @@
 package uk.trainwatch.util.sql;
 
 import java.sql.BatchUpdateException;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Objects;
 import java.util.function.Function;
@@ -77,17 +78,14 @@ public interface SQLFunction<T, R>
      */
     static <T, R> Function<T, R> guard( SQLFunction<T, R> f )
     {
-        return t ->
-        {
-            try
-            {
+        return t -> {
+            try {
                 return f.apply( t );
             }
             catch( BatchUpdateException ex ) {
                 throw new UncheckedSQLException( ex.getNextException() );
             }
-            catch( SQLException ex )
-            {
+            catch( SQLException ex ) {
                 throw new UncheckedSQLException( ex );
             }
         };
@@ -118,16 +116,22 @@ public interface SQLFunction<T, R>
     static <T, R> SQLFunction<T, R> compose( Function<T, R> f )
             throws SQLException
     {
-        return t ->
-        {
-            try
-            {
+        return t -> {
+            try {
                 return f.apply( t );
             }
-            catch( UncheckedSQLException ex )
-            {
+            catch( UncheckedSQLException ex ) {
                 throw ex.getCause();
             }
         };
+    }
+
+    /**
+     * Returns a SQLFunction that returns the ResultSet
+     * @return 
+     */
+    static SQLFunction<ResultSet, ResultSet> identity()
+    {
+        return r -> r;
     }
 }

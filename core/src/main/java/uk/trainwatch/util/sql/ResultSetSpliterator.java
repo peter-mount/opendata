@@ -25,7 +25,7 @@ import java.util.function.Function;
  *
  * @author Peter T Mount
  */
-class ResultSetSpliterator<T>
+public class ResultSetSpliterator<T>
         extends AbstractSpliterator<T>
 {
 
