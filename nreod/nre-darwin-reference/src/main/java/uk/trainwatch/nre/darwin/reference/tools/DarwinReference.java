@@ -30,6 +30,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -478,6 +479,7 @@ public class DarwinReference
             String dest;
             String loc1;
             String loc2;
+            String text;
 
             V( ResultSet rs )
                     throws SQLException
@@ -486,6 +488,7 @@ public class DarwinReference
                 dest = rs.getString( "dest" );
                 loc1 = rs.getString( "loc1" );
                 loc2 = rs.getString( "loc2" );
+                text = rs.getString( "text" );
             }
 
             V( Via v )
@@ -494,6 +497,7 @@ public class DarwinReference
                 dest = v.getDest();
                 loc1 = v.getLoc1();
                 loc2 = v.getLoc2();
+                text = v.getViatext();
             }
 
             @Override
@@ -514,6 +518,15 @@ public class DarwinReference
                 }
                 return false;
             }
+
+            public boolean equalVia( Via o )
+            {
+                return Objects.equals( at, o.getAt() )
+                       && Objects.equals( dest, o.getDest() )
+                       && Objects.equals( loc1, o.getLoc1() )
+                       && Objects.equals( loc2, o.getLoc2() )
+                       && Objects.equals( text, o.getViatext() );
+            }
         }
 
         if( full ) {
@@ -521,7 +534,7 @@ public class DarwinReference
         }
 
         Set<V> existing;
-        try( PreparedStatement ps = SQL.prepare( con, "SELECT a.crs AS at, d.tpl AS dest, l1.tpl AS loc1, l2.tpl AS loc2"
+        try( PreparedStatement ps = SQL.prepare( con, "SELECT a.crs AS at, d.tpl AS dest, l1.tpl AS loc1, l2.tpl AS loc2, v.text"
                                                       + " FROM darwin.via v"
                                                       + " INNER JOIN darwin.crs a ON v.at=a.id"
                                                       + " INNER JOIN darwin.tiploc d ON v.dest=d.id"
@@ -549,20 +562,32 @@ public class DarwinReference
 
         LOG.log( Level.INFO, () -> "Imported " + inserts.size() + " vias" );
 
-        List<Via> updates = partition.getOrDefault( true, Collections.emptyList() );
+        List<Via> updates = new ArrayList<>( partition.getOrDefault( true, Collections.emptyList() ) );
+        LOG.log( Level.INFO, () -> "Found " + updates.size() + " vias" );
+
+        updates.removeAll( existing.stream()
+                .flatMap( f -> updates.stream().filter( v -> f.equalVia( v ) ) )
+                .collect( Collectors.toList() )
+        );
+
         LOG.log( Level.INFO, () -> "Updating " + updates.size() + " vias" );
 
         try( PreparedStatement ps = SQL.prepare( con,
                                                  "UPDATE darwin.via"
                                                  + " SET text=?"
                                                  + " WHERE at=darwin.crs(?) AND dest=darwin.tiploc(?) AND loc1=darwin.tiploc(?) AND loc2=darwin.tiploc(?)" ) ) {
-            updates.forEach( SQLConsumer.guard( l -> SQL.executeUpdate( ps,
-                                                                        l.getViatext(),
-                                                                        l.getAt(),
-                                                                        l.getDest(),
-                                                                        l.getLoc1(),
-                                                                        l.getLoc2()
-            ) ) );
+            updates.forEach( SQLConsumer.guard( l -> {
+                SQL.executeUpdate( ps,
+                                   l.getViatext(),
+                                   l.getAt(),
+                                   l.getDest(),
+                                   l.getLoc1(),
+                                   l.getLoc2()
+                );
+                LOG.
+                        log( Level.INFO, () -> "at=" + l.getAt() + " dest=" + l.getDest() + " l1=" + l.getLoc1() + " l2=" + l.getLoc2() + " text=" + l.
+                             getViatext() );
+            } ) );
         }
 
         LOG.log( Level.INFO, () -> "Updated " + updates.size() + " vias" );
