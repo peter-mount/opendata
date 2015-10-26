@@ -5,7 +5,6 @@
  */
 package uk.trainwatch.nre.darwin.reference.tools;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -83,6 +82,7 @@ public class DarwinImport
                             }
                         }
                         );
+                con.commit();
             }
             catch( IOException ex ) {
                 throw new UncheckedIOException( ex );
