@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.LongAccumulator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -49,7 +50,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.net.ftp.FTPFile;
 import org.kohsuke.MetaInfServices;
-import static org.omg.IOP.IORHelper.insert;
 import uk.trainwatch.io.ftp.FTPClient;
 import uk.trainwatch.io.ftp.FTPClientBuilder;
 import uk.trainwatch.nre.darwin.model.ctt.referenceschema.CISSource;
@@ -66,6 +66,7 @@ import uk.trainwatch.util.app.FTPUtilityHelper;
 import uk.trainwatch.util.app.Utility;
 import uk.trainwatch.util.sql.SQL;
 import uk.trainwatch.util.sql.SQLConsumer;
+import uk.trainwatch.util.sql.UncheckedSQLException;
 
 /**
  * Imports/Updates darwin reference data
@@ -276,7 +277,7 @@ public class DarwinReference
             throw new RuntimeException( ex );
         }
         finally {
-            LOG.log( Level.INFO, "Completed importing " + p.toString() );
+            LOG.log( Level.INFO, () -> "Completed importing " + p.toString() );
         }
     }
 
@@ -290,7 +291,7 @@ public class DarwinReference
         LOG.log( Level.INFO, () -> "Importing cissource" );
 
         Set<String> existing;
-        try( PreparedStatement ps = SQL.prepare( con, "SELECT code FROM " + SCHEMA + ".cissource" ) ) {
+        try( PreparedStatement ps = SQL.prepare( con, "SELECT code FROM darwin.cissource" ) ) {
             existing = SQL.stream( ps, SQL.STRING_LOOKUP ).collect( Collectors.toSet() );
         }
 
@@ -299,7 +300,7 @@ public class DarwinReference
                 filter( l -> !existing.contains( l.getCode() ) ).
                 collect( Collectors.toList() );
 
-        try( PreparedStatement ps = SQL.prepare( con, "INSERT INTO " + SCHEMA + ".cissource (code,name) VALUES (?,?)" ) ) {
+        try( PreparedStatement ps = SQL.prepare( con, "INSERT INTO darwin.cissource (code,name) VALUES (?,?)" ) ) {
             src.forEach( SQLConsumer.guard( l -> SQL.executeUpdate( ps, l.getCode(), l.getName() ) ) );
         }
 
@@ -310,90 +311,95 @@ public class DarwinReference
     private void parseLocation( Connection con, List<LocationRef> locs, Map<String, Integer> tocs )
             throws SQLException
     {
-        class Entry
-        {
-
-            String tpl;
-            String crs;
-
-            public Entry( ResultSet rs )
-                    throws SQLException
-            {
-                this.tpl = rs.getString( "tpl" );
-                this.crs = rs.getString( "crs" );
-            }
-
-            public Entry( LocationRef l )
-            {
-                this.tpl = l.getTpl();
-                this.crs = l.getCrs();
-            }
-
-            @Override
-            public int hashCode()
-            {
-                return Objects.hash( tpl, crs );
-            }
-
-            @Override
-            public boolean equals( Object obj )
-            {
-                if( obj instanceof Entry ) {
-                    Entry e = (Entry) obj;
-                    return Objects.equals( tpl, e.tpl ) && Objects.equals( crs, e.crs );
-                }
-                return false;
-            }
-
-        }
-
         if( full ) {
             SQL.deleteIdTable( con, SCHEMA, "location" );
         }
 
         LOG.log( Level.INFO, () -> "Importing location" );
 
-        Set<Entry> existing;
-        try( PreparedStatement ps = SQL.prepare( con, "SELECT tpl,crs FROM " + SCHEMA + ".location" ) ) {
-            existing = SQL.stream( ps, rs -> new Entry( rs ) ).collect( Collectors.toSet() );
+        Set<String> existing;
+        try( PreparedStatement ps = SQL.prepare( con, "SELECT t.tpl FROM darwin.location l INNER JOIN darwin.tiploc t ON l.tpl=t.id" ) ) {
+            existing = SQL.stream( ps, SQL.STRING_LOOKUP ).collect( Collectors.toSet() );
         }
+        LOG.log( Level.INFO, () -> "Found " + existing.size() + " existing entries" );
 
         Map<Boolean, List<LocationRef>> partition = locs.stream().
-                collect( Collectors.partitioningBy( l -> existing.contains( new Entry( l ) ) ) );
+                collect( Collectors.partitioningBy( l -> existing.contains( l.getTpl() ) ) );
 
         // Insert new entries
         List<LocationRef> inserts = partition.getOrDefault( false, Collections.emptyList() );
-        if( !inserts.isEmpty() ) {
-            try( PreparedStatement ps = SQL.prepare( con,
-                                                     "INSERT INTO " + SCHEMA + ".location"
-                                                     + " (tpl,crs,toc,name)"
-                                                     + " VALUES (darwin.tiploc(?),darwin.crs(?),?,?)" ) ) {
-                inserts.forEach( SQLConsumer.guard( l -> SQL.executeUpdate( ps,
-                                                                            l.getTpl(),
-                                                                            l.getCrs(),
-                                                                            tocs.get( l.getToc() ),
-                                                                            l.getLocname()
-                ) ) );
-            }
+        LOG.log( Level.INFO, () -> "Importing " + inserts.size() + " new locations" );
+        try( PreparedStatement ps = SQL.prepare( con,
+                                                 "INSERT INTO darwin.location"
+                                                 + " (tpl,crs,toc,name)"
+                                                 + " VALUES (darwin.tiploc(?),darwin.crs(?),?,?)" ) ) {
+            inserts.forEach( SQLConsumer.guard( l -> SQL.executeUpdate( ps,
+                                                                        l.getTpl(),
+                                                                        l.getCrs(),
+                                                                        tocs.get( l.getToc() ),
+                                                                        l.getLocname()
+            ) ) );
             LOG.log( Level.INFO, () -> "Imported " + inserts.size() + " locations" );
+            con.commit();
         }
 
-        // Update existing entries
+        // Update existing entries. Filter out any that are the same
         List<LocationRef> updates = partition.getOrDefault( true, Collections.emptyList() );
-        if( !updates.isEmpty() ) {
-            try( PreparedStatement ps = SQL.prepare( con,
-                                                     "UPDATE " + SCHEMA + ".location"
-                                                     + " SET toc=?,name?"
-                                                     + " WHERE tpl=darwin.tiploc(?) AND crs=darwin.crs(?)" ) ) {
-                updates.forEach( SQLConsumer.guard( l -> SQL.executeUpdate( ps,
-                                                                            tocs.get( l.getToc() ),
-                                                                            l.getLocname(),
-                                                                            l.getTpl(),
-                                                                            l.getCrs()
-                ) ) );
-            }
-            LOG.log( Level.INFO, () -> "Updated " + updates.size() + " locations" );
+        try( PreparedStatement ps = SQL.prepare( con, "SELECT t.tpl AS tpl, c.crs AS crs, o.code AS code, l.name AS name"
+                                                      + " FROM darwin.location l"
+                                                      + " INNER JOIN darwin.tiploc t ON l.tpl=t.id"
+                                                      + " LEFT OUTER JOIN darwin.crs c ON l.crs=c.id"
+                                                      + " LEFT OUTER JOIN darwin.toc o ON l.toc=o.id"
+        ) ) {
+            SQL.stream( ps, r -> new Object()
+            {
+                String tpl = r.getString( "tpl" );
+                String crs = r.getString( "crs" );
+                String toc = r.getString( "code" );
+                String name = r.getString( "name" );
+            } )
+                    .forEach( o -> updates.removeIf(
+                                    l -> Objects.equals( l.getTpl(), o.tpl )
+                                         && Objects.equals( l.getCrs(), o.crs )
+                                         && Objects.equals( l.getToc(), o.toc )
+                                         && Objects.equals( l.getLocname(), o.name )
+                            ) );
         }
+        long usize = updates.size();
+        long ustep = Math.max( 100L, usize / 10L );
+        LOG.log( Level.INFO, () -> "Updating " + usize + " locations" );
+        LongAccumulator c = new LongAccumulator( ( a, b ) -> {
+            try {
+                long v = a + b;
+                if( (v % ustep) == 0 ) {
+                    LOG.log( Level.INFO, () -> "Updated " + v + " " + (v * 100 / usize) + "%" );
+                    con.commit();
+                }
+                return v;
+            }
+            catch( SQLException ex ) {
+                throw new UncheckedSQLException( ex );
+            }
+        }, 0L );
+        try( PreparedStatement ps = SQL.prepare( con,
+                                                 "UPDATE darwin.location"
+                                                 + " SET toc=?,name=?,crs=darwin.crs(?)"
+                                                 + " WHERE tpl=darwin.tiploc(?)" ) ) {
+            updates.forEach( SQLConsumer.guard( l -> {
+                SQL.executeUpdate( ps,
+                                   tocs.get( l.getToc() ),
+                                   l.getLocname(),
+                                   l.getCrs(),
+                                   l.getTpl()
+                );
+                c.accumulate( 1L );
+            } ) );
+        }
+
+        LOG.log( Level.INFO,
+                 () -> "Updated " + updates.size() + " locations" );
+
+        con.commit();
     }
 
     private void parseReasons( Connection con, List<Reason> reasons, String table )
@@ -406,17 +412,17 @@ public class DarwinReference
         LOG.log( Level.INFO, () -> "Importing " + table );
 
         Set<Integer> existing;
-        try( PreparedStatement ps = SQL.prepare( con, "SELECT id FROM " + SCHEMA + "." + table ) ) {
+        try( PreparedStatement ps = SQL.prepare( con, "SELECT id FROM darwin." + table ) ) {
             existing = SQL.stream( ps, SQL.INT_LOOKUP ).collect( Collectors.toSet() );
         }
 
-        try( PreparedStatement ps = SQL.prepare( con, "INSERT INTO " + SCHEMA + "." + table + "(id,name) VALUES (?,?)" ) ) {
+        try( PreparedStatement ps = SQL.prepare( con, "INSERT INTO darwin." + table + "(id,name) VALUES (?,?)" ) ) {
             reasons.stream().
                     filter( r -> !existing.contains( r.getCode() ) ).
                     forEach( SQLConsumer.guard( l -> SQL.executeUpdate( ps, l.getCode(), l.getReasontext() ) ) );
         }
 
-        try( PreparedStatement ps = SQL.prepare( con, "UPDATE " + SCHEMA + "." + table + " SET name=? WHERE id=?" ) ) {
+        try( PreparedStatement ps = SQL.prepare( con, "UPDATE darwin." + table + " SET name=? WHERE id=?" ) ) {
             reasons.stream().
                     filter( r -> existing.contains( r.getCode() ) ).
                     forEach( SQLConsumer.guard( l -> SQL.executeUpdate( ps, l.getReasontext(), l.getCode() ) ) );
@@ -433,23 +439,25 @@ public class DarwinReference
         LOG.log( Level.INFO, () -> "Importing toc" );
 
         Set<String> existing;
-        try( PreparedStatement ps = SQL.prepare( con, "SELECT code FROM " + SCHEMA + ".toc" ) ) {
+        try( PreparedStatement ps = SQL.prepare( con, "SELECT code FROM darwin.toc" ) ) {
             existing = SQL.stream( ps, SQL.STRING_LOOKUP ).collect( Collectors.toSet() );
         }
 
-        try( PreparedStatement ps = SQL.prepare( con, "INSERT INTO " + SCHEMA + ".toc (code,name,url) VALUES (?,?,?)" ) ) {
+        try( PreparedStatement ps = SQL.prepare( con, "INSERT INTO darwin.toc (code,name,url) VALUES (?,?,?)" ) ) {
             tocs.stream().
                     filter( t -> !existing.contains( t.getToc() ) ).
                     forEach( SQLConsumer.guard( l -> SQL.executeUpdate( ps, l.getToc(), l.getTocname(), l.getUrl() ) ) );
         }
 
-        try( PreparedStatement ps = SQL.prepare( con, "UPDATE " + SCHEMA + ".toc SET name=?, url=? WHERE code=?" ) ) {
+        try( PreparedStatement ps = SQL.prepare( con, "UPDATE darwin.toc SET name=?, url=? WHERE code=?" ) ) {
             tocs.stream().
                     filter( t -> existing.contains( t.getToc() ) ).
                     forEach( SQLConsumer.guard( l -> SQL.executeUpdate( ps, l.getTocname(), l.getUrl(), l.getToc() ) ) );
         }
 
-        try( PreparedStatement ps = SQL.prepare( con, "SELECT id,code FROM " + SCHEMA + ".toc" ) ) {
+        con.commit();
+
+        try( PreparedStatement ps = SQL.prepare( con, "SELECT id,code FROM darwin.toc" ) ) {
             return SQL.stream( ps,
                                rs -> new Object()
                                {
@@ -512,52 +520,51 @@ public class DarwinReference
             SQL.deleteIdTable( con, SCHEMA, "via" );
         }
 
-        LOG.log( Level.INFO, () -> "Importing via" );
-
         Set<V> existing;
-        try( PreparedStatement ps = SQL.prepare( con, "SELECT * FROM " + SCHEMA + ".via" ) ) {
+        try( PreparedStatement ps = SQL.prepare( con, "SELECT a.crs AS at, d.tpl AS dest, l1.tpl AS loc1, l2.tpl AS loc2"
+                                                      + " FROM darwin.via v"
+                                                      + " INNER JOIN darwin.crs a ON v.at=a.id"
+                                                      + " INNER JOIN darwin.tiploc d ON v.dest=d.id"
+                                                      + " INNER JOIN darwin.tiploc l1 ON v.loc1=l1.id"
+                                                      + " LEFT OUTER JOIN darwin.tiploc l2 ON v.loc2=l2.id" ) ) {
             existing = SQL.stream( ps, rs -> new V( rs ) ).collect( Collectors.toSet() );
         }
 
         Map<Boolean, List<Via>> partition = vias.stream().collect( Collectors.partitioningBy( v -> existing.contains( new V( v ) ) ) );
 
         List<Via> inserts = partition.getOrDefault( false, Collections.emptyList() );
-        if( !inserts.isEmpty() ) {
-            LOG.log( Level.INFO, () -> "Importing " + inserts.size() + " vias" );
-            try( PreparedStatement ps = SQL.prepare( con,
-                                                     "INSERT INTO " + SCHEMA + ".via"
-                                                     + " (at,dest,loc1,loc2,text)"
-                                                     + " VALUES (darwin.crs(?),darwin.tiploc(?),darwin.tiploc(?),darwin.tiploc(?),?)" ) ) {
-                inserts.forEach( SQLConsumer.guard( l -> SQL.executeUpdate( ps,
-                                                                            l.getAt(),
-                                                                            l.getDest(),
-                                                                            l.getLoc1(),
-                                                                            l.getLoc2(),
-                                                                            l.getViatext()
-                ) ) );
-            }
-
-            LOG.log( Level.INFO, () -> "Imported " + inserts.size() + " vias" );
+        LOG.log( Level.INFO, () -> "Importing " + inserts.size() + " vias" );
+        try( PreparedStatement ps = SQL.prepare( con,
+                                                 "INSERT INTO darwin.via"
+                                                 + " (at,dest,loc1,loc2,text)"
+                                                 + " VALUES (darwin.crs(?),darwin.tiploc(?),darwin.tiploc(?),darwin.tiploc(?),?)" ) ) {
+            inserts.forEach( SQLConsumer.guard( l -> SQL.executeUpdate( ps,
+                                                                        l.getAt(),
+                                                                        l.getDest(),
+                                                                        l.getLoc1(),
+                                                                        l.getLoc2(),
+                                                                        l.getViatext()
+            ) ) );
         }
+
+        LOG.log( Level.INFO, () -> "Imported " + inserts.size() + " vias" );
 
         List<Via> updates = partition.getOrDefault( true, Collections.emptyList() );
-        if( !inserts.isEmpty() ) {
-            LOG.log( Level.INFO, () -> "Updating " + updates.size() + " vias" );
-            
-            try( PreparedStatement ps = SQL.prepare( con,
-                                                     "UPDATE " + SCHEMA + ".via"
-                                                     + " SET text=?"
-                                                     + " WHERE at=darwin.crs(?) AND dest=darwin.tiploc(?) AND loc1=darwin.tiploc(?) AND loc2=darwin.tiploc(?)" ) ) {
-                updates.forEach( SQLConsumer.guard( l -> SQL.executeUpdate( ps,
-                                                                            l.getViatext(),
-                                                                            l.getAt(),
-                                                                            l.getDest(),
-                                                                            l.getLoc1(),
-                                                                            l.getLoc2()
-                ) ) );
-            }
+        LOG.log( Level.INFO, () -> "Updating " + updates.size() + " vias" );
 
-            LOG.log( Level.INFO, () -> "Updated " + updates.size() + " vias" );
+        try( PreparedStatement ps = SQL.prepare( con,
+                                                 "UPDATE darwin.via"
+                                                 + " SET text=?"
+                                                 + " WHERE at=darwin.crs(?) AND dest=darwin.tiploc(?) AND loc1=darwin.tiploc(?) AND loc2=darwin.tiploc(?)" ) ) {
+            updates.forEach( SQLConsumer.guard( l -> SQL.executeUpdate( ps,
+                                                                        l.getViatext(),
+                                                                        l.getAt(),
+                                                                        l.getDest(),
+                                                                        l.getLoc1(),
+                                                                        l.getLoc2()
+            ) ) );
         }
+
+        LOG.log( Level.INFO, () -> "Updated " + updates.size() + " vias" );
     }
 }
