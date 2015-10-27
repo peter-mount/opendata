@@ -223,7 +223,7 @@ public class Rabbit
 
     public Consumer<byte[]> publish( String topic, String routingKey )
     {
-        return new RabbitConsumer( connection, topic, routingKey );
+        return new RabbitConsumer( getConnection(), topic, routingKey );
     }
 
     public <T> Consumer<T> publish( String routingKey, Function<T, byte[]> mapper )
