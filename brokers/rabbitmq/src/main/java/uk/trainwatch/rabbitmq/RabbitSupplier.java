@@ -29,6 +29,14 @@ public class RabbitSupplier
         implements BlockingSupplier<byte[]>
 {
 
+    /**
+     * When durable, enforce a 5 minute ttl for all messages unless specified. This is a safety net so that we don't cause the server to fill up with messages
+     * on a dead durable queue.
+     * 
+     * NB: Since 2015/10/27 default to 20 minutes to allow certain queues to hold data during heavy load, especially the daily darwin snapshot import
+     */
+    private static final int DEFAULT_TTL = 20 * 60000;
+
     private static final Logger LOG = Logger.getLogger( RabbitSupplier.class.getName() );
     private final RabbitConnection connection;
     private final String queueName;
@@ -69,13 +77,11 @@ public class RabbitSupplier
 
         this.optionalConsumer = optionalConsumer;
         supplier = optionalConsumer == null ? new BlockingSupplierConsumer<>( 1 ) : null;
-        
+
         if( durable ) {
             this.queueProperties = queueProperties == null ? new HashMap<>() : queueProperties;
 
-            // When durable, enforce a 5 minute ttl for all messages unless specified. This is a safety net so that we
-            // don't cause the server to fill up with messages on a dead durable queue
-            this.queueProperties.putIfAbsent( "x-message-ttl", 300000 );
+            this.queueProperties.putIfAbsent( "x-message-ttl", DEFAULT_TTL );
         }
         else {
             // queue properties are optiona, so null is valid. If empty then replace with null
