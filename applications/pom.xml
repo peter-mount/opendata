@@ -18,13 +18,13 @@
     </description>
     
     <modules>
-        <module>archiver</module>
-        <module>analysis</module>
         <module>darwin</module>
         <module>nationalrail</module> 
         <module>networkrail</module>
         <module>signalanalyser</module>
+        <!--
         <module>signalmapeditor</module>
+        -->
         <module>tfl</module>
         <module>utilities</module>
     </modules>
