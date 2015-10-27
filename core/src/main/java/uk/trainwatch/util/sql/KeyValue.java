@@ -17,7 +17,9 @@ package uk.trainwatch.util.sql;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -95,6 +97,20 @@ public class KeyValue<K, V>
     public static <K, U> Collector<KeyValue<K, U>, ?, Map<K, U>> toMap()
     {
         return Collectors.toMap( KeyValue::getKey, KeyValue::getValue );
+    }
+
+    /**
+     * Returns a collector that will produce a {@link Map} from a Stream of KeyValue's.
+     * <p>
+     * @param <K> Type of Key
+     * @param <U> Type of Value
+     * <p>
+     * @return Collector
+     */
+    public static <K, U> Collector<KeyValue<K, U>, ?, Map<K, U>> toTreeMap()
+    {
+        BinaryOperator<U> combiner = ( a, b ) -> a;
+        return Collectors.toMap( KeyValue::getKey, KeyValue::getValue, combiner, TreeMap::new );
     }
 
     /**

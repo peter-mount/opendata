@@ -19,50 +19,62 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Deque;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
+import java.util.function.BinaryOperator;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 import javax.sql.DataSource;
-import uk.trainwatch.util.DaemonThreadFactory;
+import uk.trainwatch.util.TimeUtils;
 import uk.trainwatch.util.sql.Database;
 import uk.trainwatch.util.sql.SQL;
-import uk.trainwatch.util.sql.SQLBiConsumer;
 
 /**
  *
  * @author peter
  */
 @ApplicationScoped
+@WebListener
 public class RateStatistics
-        implements Runnable
+        implements ServletContextListener
 {
 
     private static final Logger LOG = Logger.getLogger( RateStatistics.class.getName() );
 
-    @Database("rail") @Inject
+    @Database("rail")
+    @Inject
     private DataSource dataSource;
 
     private ScheduledFuture<?> scheduledFuture;
 
-    private final Map<String, Integer> stats = new ConcurrentHashMap<>();
+    private final Map<String, Stat> stats = new ConcurrentHashMap<>();
     private String hostname;
+    private String title;
 
     private String getHostName()
     {
-        try
-        {
+        try {
             return InetAddress.getLocalHost().getHostName();
-        } catch( UnknownHostException ex )
-        {
+        }
+        catch( UnknownHostException ex ) {
             return "localHost";
         }
     }
@@ -71,7 +83,21 @@ public class RateStatistics
     void start()
     {
         hostname = getHostName();
-        scheduledFuture = DaemonThreadFactory.INSTANCE.scheduleAtFixedRate( this, 1L, 1L, TimeUnit.MINUTES );
+    }
+
+    @Override
+    public synchronized void contextInitialized( ServletContextEvent sce )
+    {
+        // On webapps set it to a default title based on the name
+        if( title == null ) {
+            ServletContext ctx = sce.getServletContext();
+            setTitle( ctx.getContextPath() + " on " + hostname );
+        }
+    }
+
+    @Override
+    public void contextDestroyed( ServletContextEvent sce )
+    {
     }
 
     @PreDestroy
@@ -80,39 +106,15 @@ public class RateStatistics
         scheduledFuture.cancel( true );
     }
 
-    @Override
-    public void run()
+    private void persist( Stat stat, int value )
     {
-        if( dataSource == null )
-        {
-            return;
-        }
-        
-        LOG.log( Level.INFO, () -> "Running persistence " + stats );
         try( Connection con = dataSource.getConnection();
-                PreparedStatement ps = SQL.prepare( con, "INSERT INTO report.stats (tm,name,value,host) VALUES (now(),?,?,?)" ) )
-        {
-            stats.forEach( SQLBiConsumer.guard( ( label, value ) ->
-            {
-                SQL.executeUpdate( ps, label, value, hostname );
-                LOG.log( Level.INFO, () -> label + "=" + value );
-            } ) );
-        } catch( Throwable ex )
-        {
+             PreparedStatement ps = SQL.prepare( con, "INSERT INTO report.stats (tm,name,value,host) VALUES (now(),?,?,?)" ) ) {
+            SQL.executeUpdate( ps, stat.getName(), value, hostname );
+            LOG.log( Level.INFO, () -> stat.getName() + "=" + value );
+        }
+        catch( Throwable ex ) {
             LOG.log( Level.SEVERE, null, ex );
-        }
-    }
-
-    void submit( String label, int lastCount )
-    {
-        int i = label.indexOf( '[' );
-        if( i > -1 )
-        {
-            label = label.substring( 0, i );
-        }
-        if( !label.isEmpty() )
-        {
-            stats.put( label, lastCount );
         }
     }
 
@@ -126,29 +128,213 @@ public class RateStatistics
         return stats.isEmpty();
     }
 
-    public Integer get( String key )
-    {
-        return stats.get( key );
-    }
-
     public void clear()
     {
         stats.clear();
     }
 
-    public Set<String> keySet()
+    public Consumer<Integer> getConsumer( String label )
     {
-        return stats.keySet();
+        String l = label;
+        int i = label.indexOf( '[' );
+        if( i > 0 ) {
+            l = label.substring( 0, i );
+        }
+        return stats.computeIfAbsent( l, Stat::new );
     }
 
-    public Set<Map.Entry<String, Integer>> entrySet()
+    public Stream<Stat> stream()
     {
-        return stats.entrySet();
+        return stats.values().stream();
     }
 
-    public void forEach( BiConsumer<? super String, ? super Integer> action )
+    public synchronized String getTitle()
     {
-        stats.forEach( action );
+        if( title == null ) {
+            return "Rate statistics on " + hostname;
+        }
+        return title;
     }
 
+    public synchronized void setTitle( String title )
+    {
+        this.title = title;
+    }
+
+    public static final class BoundedDeque
+            implements Consumer<Integer>
+    {
+
+        private final int maxSize;
+        private final Deque<Integer> deque;
+        private LocalDateTime lastTime;
+        private int lowAlarm = 0;
+        private int highAlarm = Integer.MAX_VALUE;
+        private int lastValue;
+        private int total;
+
+        public BoundedDeque( int maxSize )
+        {
+            this.maxSize = maxSize;
+            this.deque = new ConcurrentLinkedDeque<>();
+            // Ensures we have some data
+            accept( 0 );
+        }
+
+        @Override
+        public synchronized void accept( Integer t )
+        {
+            lastTime = TimeUtils.getLocalDateTime();
+            lastValue = t;
+            total += t;
+            deque.offerLast( t );
+            while( deque.size() > maxSize ) {
+                deque.pollFirst();
+            }
+        }
+
+        public JsonArrayBuilder toArray()
+        {
+            JsonArrayBuilder a = Json.createArrayBuilder();
+            deque.forEach( a::add );
+            return a;
+        }
+
+        public synchronized LocalDateTime getLastTime()
+        {
+            return lastTime;
+        }
+
+        public synchronized int getTotal()
+        {
+            return total;
+        }
+
+        public synchronized void reset()
+        {
+            total = 0;
+        }
+
+        public synchronized void reset( Consumer<Integer> c )
+        {
+            c.accept( total );
+            total = 0;
+        }
+
+        public synchronized int getHighAlarm()
+        {
+            return highAlarm;
+        }
+
+        public synchronized void setHighAlarm( int highAlarm )
+        {
+            this.highAlarm = highAlarm;
+        }
+
+        public synchronized int getLowAlarm()
+        {
+            return lowAlarm;
+        }
+
+        public synchronized void setLowAlarm( int lowAlarm )
+        {
+            this.lowAlarm = lowAlarm;
+        }
+
+        public synchronized boolean isLow()
+        {
+            return lastValue < lowAlarm;
+        }
+
+        public synchronized boolean isHigh()
+        {
+            return lastValue > highAlarm;
+        }
+
+        public synchronized int getLastValue()
+        {
+            return lastValue;
+        }
+
+        public int get( BinaryOperator<Integer> f )
+        {
+            return deque.stream().reduce( f ).orElse( 0 );
+        }
+
+        public synchronized JsonObjectBuilder toJsonObjectBuilder()
+        {
+            return Json.createObjectBuilder()
+                    .add( "time", lastTime.toString() )
+                    .add( "low", isLow() )
+                    .add( "high", isHigh() )
+                    .add( "lowValue", getLowAlarm() )
+                    .add( "highvalue", getHighAlarm() )
+                    .add( "values", toArray() )
+                    .add( "current", getLastValue() )
+                    .add( "min", get( Math::min ) )
+                    .add( "max", get( Math::max ) );
+        }
+    }
+
+    public final class Stat
+            implements Consumer<Integer>,
+                       Comparable<Stat>
+    {
+
+        private final String name;
+        /**
+         * The last hour, so up to 60 entries
+         */
+        private final BoundedDeque lastHour = new BoundedDeque( 60 );
+        /**
+         * The last day, one for every 15 minutes, max 96 elements
+         */
+        private final BoundedDeque lastDay = new BoundedDeque( 96 );
+
+        Stat( String name )
+        {
+            this.name = name;
+        }
+
+        public String getName()
+        {
+            return name;
+        }
+
+        public BoundedDeque getLastHour()
+        {
+            return lastHour;
+        }
+
+        public BoundedDeque getLastDay()
+        {
+            return lastDay;
+        }
+
+        @Override
+        public void accept( Integer t )
+        {
+            if( t != null ) {
+                // Update within the lock
+                update( t );
+                // persist outside - otherwise we could deadlock if the db is busy
+                persist( this, t );
+            }
+        }
+
+        private synchronized void update( int t )
+        {
+            lastHour.accept( t );
+
+            if( Duration.between( lastDay.getLastTime(), lastHour.getLastTime() ).toMinutes() >= 15 ) {
+                lastHour.reset( lastDay );
+            }
+        }
+
+        @Override
+        public int compareTo( Stat o )
+        {
+            return String.CASE_INSENSITIVE_ORDER.compare( name, o.getName() );
+        }
+    }
 }

@@ -86,7 +86,7 @@ public class RateMonitor<T>
                 this.log.log( level, () -> label + ' ' + lastCount );
             }
 
-            rateStatistics.submit( label, lastCount );
+            rateStatistics.getConsumer( label ).accept( lastCount );
         }, 1L, 1L, TimeUnit.MINUTES );
 
         CDIUtils.inject( this );

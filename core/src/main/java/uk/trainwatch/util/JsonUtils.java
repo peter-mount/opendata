@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -182,6 +183,44 @@ public class JsonUtils
     public static <T extends JsonValue> Stream<T> stream( JsonObject o, String n )
     {
         return stream( o.getJsonArray( n ) );
+    }
+
+    public static void forEachJsonArray( JsonArray a, Consumer<? super JsonArray> c )
+    {
+        a.forEach( o -> {
+            if( o instanceof JsonArray ) {
+                c.accept( (JsonArray) o );
+            }
+        } );
+    }
+
+    public static void forEachJsonArray( JsonObject a, Consumer<? super JsonArray> c )
+    {
+        a.values()
+                .forEach( o -> {
+                    if( o instanceof JsonArray ) {
+                        c.accept( (JsonArray) o );
+                    }
+                } );
+    }
+
+    public static void forEachJsonObject( JsonArray a, Consumer<? super JsonObject> c )
+    {
+        a.forEach( o -> {
+            if( o instanceof JsonObject ) {
+                c.accept( (JsonObject) o );
+            }
+        } );
+    }
+
+    public static void forEachJsonObject( JsonObject a, Consumer<? super JsonObject> c )
+    {
+        a.values()
+                .forEach( o -> {
+                    if( o instanceof JsonObject ) {
+                        c.accept( (JsonObject) o );
+                    }
+                } );
     }
 
     public static int getInt( JsonObject o, String n )
