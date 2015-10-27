@@ -21,7 +21,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.sql.DataSource;
+import uk.trainwatch.util.sql.Database;
 import uk.trainwatch.util.sql.SQL;
 import uk.trainwatch.util.sql.SQLConsumer;
 
@@ -29,6 +32,7 @@ import uk.trainwatch.util.sql.SQLConsumer;
  *
  * @author peter
  */
+@ApplicationScoped
 public class DarwinImport
         implements SQLConsumer<String>
 {
@@ -37,29 +41,24 @@ public class DarwinImport
 
     private static final String IMPORT_SQL = "SELECT darwin.darwinimport(?::xml)";
 
-    private final DataSource dataSource;
-
-    public DarwinImport( DataSource dataSource )
-    {
-        this.dataSource = dataSource;
-    }
+    @Database("rail")
+    @Inject
+    private DataSource dataSource;
 
     @Override
     public void accept( String xml )
             throws SQLException
     {
         try( Connection con = dataSource.getConnection();
-                PreparedStatement ps = SQL.prepare( con, IMPORT_SQL ) )
-        {
+             PreparedStatement ps = SQL.prepare( con, IMPORT_SQL ) ) {
             {
                 ps.setString( 1, xml );
-                try( ResultSet rs = ps.executeQuery() )
-                {
+                try( ResultSet rs = ps.executeQuery() ) {
 
                 }
             }
-        } catch( Throwable t )
-        {
+        }
+        catch( Throwable t ) {
             // Catch everything that fails, log it so we can verify again later
             LOG.log( Level.SEVERE, t, () -> "Failed to import:\n" + xml );
         }

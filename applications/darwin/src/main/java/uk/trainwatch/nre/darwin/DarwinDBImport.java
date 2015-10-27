@@ -20,13 +20,8 @@ import javax.inject.Inject;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-import javax.sql.DataSource;
-import uk.trainwatch.io.DatePathMapper;
-import uk.trainwatch.io.FileRecorder;
 import uk.trainwatch.rabbitmq.Rabbit;
 import uk.trainwatch.rabbitmq.RabbitMQ;
-import uk.trainwatch.util.Consumers;
-import uk.trainwatch.util.sql.Database;
 import uk.trainwatch.util.sql.SQLConsumer;
 
 /**
@@ -45,18 +40,17 @@ public class DarwinDBImport
     @Inject
     private Rabbit rabbit;
 
-    @Database("rail")
     @Inject
-    private DataSource dataSource;
+    private DarwinImport darwinImport;
+
+    @Inject
+    DarwinArchiver darwinArchiver;
 
     @Override
     public void contextInitialized( ServletContextEvent sce )
     {
         rabbit.queueDurableConsumer( QUEUE, ROUTING_KEY, RabbitMQ.toString,
-                                     SQLConsumer.guard( new DarwinImport( dataSource ) ).
-                                     andThen( Consumers.guard( FileRecorder.recordTo(
-                                                             new DatePathMapper( "/usr/local/networkrail/darwin", "pport", true )
-                                                     ) ) )
+                                     SQLConsumer.guard( darwinImport ).andThen( darwinArchiver )
         );
     }
 
