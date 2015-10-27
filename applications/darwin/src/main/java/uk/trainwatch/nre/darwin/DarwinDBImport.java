@@ -24,8 +24,10 @@ import javax.inject.Inject;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
+import static uk.trainwatch.nre.darwin.DarwinArchiver.LOG;
 import uk.trainwatch.rabbitmq.Rabbit;
 import uk.trainwatch.rabbitmq.RabbitMQ;
+import uk.trainwatch.util.counter.RateMonitor;
 
 /**
  *
@@ -52,10 +54,24 @@ public class DarwinDBImport
     @Inject
     DarwinArchiver darwinArchiver;
 
+    private Consumer<String> monitor;
+
     @Override
     public void contextInitialized( ServletContextEvent sce )
     {
-        rabbit.queueDurableConsumer( QUEUE, ROUTING_KEY, RabbitMQ.toString, this );
+        LOG.log( Level.WARNING, "******************* Started Darwin ");
+        
+        try {
+            monitor = RateMonitor.log( LOG, "nre.push" );
+            rabbit.queueDurableConsumer( QUEUE, ROUTING_KEY, RabbitMQ.toString, this );
+
+            monitor.accept( null );
+            darwinArchiver.accept( null );
+            darwinImport.accept( null );
+        }
+        catch( SQLException ex ) {
+            LOG.log( Level.SEVERE, null, ex );
+        }
     }
 
     @Override
@@ -67,10 +83,11 @@ public class DarwinDBImport
     public void accept( String t )
     {
         try {
+            monitor.accept( t );
             darwinArchiver.accept( t );
             darwinImport.accept( t );
         }
-        catch( SQLException ex ) {
+        catch( Throwable ex ) {
             LOG.log( Level.SEVERE, null, ex );
         }
     }

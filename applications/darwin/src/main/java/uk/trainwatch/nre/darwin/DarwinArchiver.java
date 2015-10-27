@@ -25,10 +25,8 @@ import javax.inject.Inject;
 import uk.trainwatch.io.DatePathMapper;
 import uk.trainwatch.io.FileRecorder;
 import uk.trainwatch.rabbitmq.Rabbit;
-import uk.trainwatch.rabbitmq.RabbitConnection;
 import uk.trainwatch.rabbitmq.RabbitMQ;
 import uk.trainwatch.util.Consumers;
-import uk.trainwatch.util.counter.RateMonitor;
 
 @ApplicationScoped
 public class DarwinArchiver
@@ -40,16 +38,13 @@ public class DarwinArchiver
     @Inject
     private Rabbit rabbit;
 
-    private Consumer<String> monitor;
     private Consumer<String> logger;
 
     @PostConstruct
-    public void setup( RabbitConnection rabbitmq )
+    public void setup()
     {
-        monitor = RateMonitor.log( LOG, "record nre.push" );
-
         Function<String, Path> pathMapper = new DatePathMapper( "/usr/local/networkrail/darwin", "pport", true );
-        logger = monitor.andThen( Consumers.guard( LOG, FileRecorder.recordTo( pathMapper ) ) );
+        logger = Consumers.guard( LOG, FileRecorder.recordTo( pathMapper ) );
 
         rabbit.queueDurableConsumer( "archiver.nre.push", "nre.push", RabbitMQ.toString, this );
     }
@@ -59,7 +54,6 @@ public class DarwinArchiver
     {
         if( t != null ) {
             logger.accept( t );
-            monitor.accept( t );
         }
     }
 

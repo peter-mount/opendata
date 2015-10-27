@@ -100,11 +100,6 @@ public class TdFeed
     private Consumer<? super JsonStructure> newPublisher( String area )
     {
         String key = "nr.td.area." + area;
-        Consumer<? super JsonStructure> pub = rabbit.publishJson( key );
-        Consumer<? super JsonStructure> mon = RateMonitor.log( LOG, key );
-        return o -> {
-            pub.accept( o );
-            mon.accept( o );
-        };
+        return rabbit.publishJson( key );
     }
 }

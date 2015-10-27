@@ -35,7 +35,7 @@ public class RabbitSupplier
      * 
      * NB: Since 2015/10/27 default to 20 minutes to allow certain queues to hold data during heavy load, especially the daily darwin snapshot import
      */
-    private static final int DEFAULT_TTL = 20 * 60000;
+    private static final int DEFAULT_TTL = 300000;
 
     private static final Logger LOG = Logger.getLogger( RabbitSupplier.class.getName() );
     private final RabbitConnection connection;

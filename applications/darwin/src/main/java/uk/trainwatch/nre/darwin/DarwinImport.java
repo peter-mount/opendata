@@ -49,18 +49,22 @@ public class DarwinImport
     public void accept( String xml )
             throws SQLException
     {
-        try( Connection con = dataSource.getConnection();
-             PreparedStatement ps = SQL.prepare( con, IMPORT_SQL ) ) {
-            {
-                ps.setString( 1, xml );
-                try( ResultSet rs = ps.executeQuery() ) {
+        if( xml != null ) {
+            try {
+                try( Connection con = dataSource.getConnection();
+                     PreparedStatement ps = SQL.prepare( con, IMPORT_SQL ) ) {
+                    {
+                        ps.setString( 1, xml );
+                        try( ResultSet rs = ps.executeQuery() ) {
 
+                        }
+                    }
                 }
             }
-        }
-        catch( Throwable t ) {
-            // Catch everything that fails, log it so we can verify again later
-            LOG.log( Level.SEVERE, t, () -> "Failed to import:\n" + xml );
+            catch( Throwable t ) {
+                // Catch everything that fails, log it so we can verify again later
+                LOG.log( Level.SEVERE, t, () -> "Failed to import:\n" + xml );
+            }
         }
     }
 
