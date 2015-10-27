@@ -15,6 +15,10 @@
  */
 package uk.trainwatch.nre.darwin;
 
+import java.sql.SQLException;
+import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.servlet.ServletContextEvent;
@@ -22,7 +26,6 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 import uk.trainwatch.rabbitmq.Rabbit;
 import uk.trainwatch.rabbitmq.RabbitMQ;
-import uk.trainwatch.util.sql.SQLConsumer;
 
 /**
  *
@@ -31,8 +34,11 @@ import uk.trainwatch.util.sql.SQLConsumer;
 @WebListener
 @ApplicationScoped
 public class DarwinDBImport
-        implements ServletContextListener
+        implements ServletContextListener,
+                   Consumer<String>
 {
+
+    private static final Logger LOG = Logger.getLogger( DarwinDBImport.class.getName() );
 
     private static final String QUEUE = "darwin.db";
     private static final String ROUTING_KEY = "nre.push";
@@ -49,14 +55,24 @@ public class DarwinDBImport
     @Override
     public void contextInitialized( ServletContextEvent sce )
     {
-        rabbit.queueDurableConsumer( QUEUE, ROUTING_KEY, RabbitMQ.toString,
-                                     SQLConsumer.guard( darwinImport ).andThen( darwinArchiver )
-        );
+        rabbit.queueDurableConsumer( QUEUE, ROUTING_KEY, RabbitMQ.toString, this );
     }
 
     @Override
     public void contextDestroyed( ServletContextEvent sce )
     {
+    }
+
+    @Override
+    public void accept( String t )
+    {
+        try {
+            darwinArchiver.accept( t );
+            darwinImport.accept( t );
+        }
+        catch( SQLException ex ) {
+            LOG.log( Level.SEVERE, null, ex );
+        }
     }
 
 }

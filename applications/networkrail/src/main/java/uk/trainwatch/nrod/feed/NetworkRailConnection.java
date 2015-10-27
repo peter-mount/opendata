@@ -20,8 +20,11 @@ import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.jms.Message;
+import org.apache.commons.configuration.Configuration;
 import uk.trainwatch.apachemq.RemoteActiveMQConnection;
+import uk.trainwatch.util.config.ConfigurationService;
 
 /**
  *
@@ -31,12 +34,23 @@ import uk.trainwatch.apachemq.RemoteActiveMQConnection;
 public class NetworkRailConnection
 {
 
+    @Inject
+    private ConfigurationService configurationService;
+
     private RemoteActiveMQConnection activemq;
 
     @PostConstruct
     public void start()
     {
-        activemq = RemoteActiveMQConnection.getJNDIConnection( "nrod" );
+        Configuration config = configurationService.getPrivateConfiguration( "networkrail" );
+
+        activemq = new RemoteActiveMQConnection( config.getString( "server" ),
+                                                 config.getInt( "port" ),
+                                                 config.getString( "clientid" ),
+                                                 config.getString( "username" ),
+                                                 config.getString( "password" )
+        );
+
         activemq.start();
     }
 

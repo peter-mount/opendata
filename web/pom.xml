@@ -16,6 +16,7 @@
     
     <modules>
         <module>departureboards</module>
+        <module>feeds</module>
         <module>uktrain</module>
         <module>web-cms</module> 
         <module>web-core</module>
