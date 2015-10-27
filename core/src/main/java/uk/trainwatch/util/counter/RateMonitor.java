@@ -75,7 +75,10 @@ public class RateMonitor<T>
     {
         this.log = log == null ? Logger.getLogger( RateMonitor.class.getName() ) : log;
         this.label = label;
-        scheduledFuture = DaemonThreadFactory.INSTANCE.scheduleAtFixedRate( () -> {
+
+        CDIUtils.inject( this );
+
+        Runnable task = () -> {
             // Read & reset the count. Don't put it in the logger as we use a supplier & won't be invoked if the logger
             // isn't showing the required level
             lastCount = counter.getAndSet( 0 );
@@ -87,9 +90,10 @@ public class RateMonitor<T>
             }
 
             rateStatistics.getConsumer( label ).accept( lastCount );
-        }, 1L, 1L, TimeUnit.MINUTES );
-
-        CDIUtils.inject( this );
+        };
+        
+        scheduledFuture = DaemonThreadFactory.INSTANCE.scheduleAtFixedRate( task, 1L, 1L, TimeUnit.MINUTES );
+        task.run();
     }
 
     @Override
