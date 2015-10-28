@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Deque;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -265,6 +266,7 @@ public class RateStatistics
         {
             return Json.createObjectBuilder()
                     .add( "time", lastTime.toString() )
+                    .add( "millis", lastTime.toInstant( ZoneOffset.UTC ).toEpochMilli() )
                     .add( "low", isLow() )
                     .add( "high", isHigh() )
                     .add( "lowValue", getLowAlarm() )
