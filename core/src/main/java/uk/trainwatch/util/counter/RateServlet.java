@@ -118,6 +118,7 @@ public class RateServlet
 
         resp.setContentType( MediaType.APPLICATION_JSON );
         resp.setContentLength( b.length );
+        resp.addHeader( "Access-Control-Allow-Origin", "*" );
 
         resp.getOutputStream().write( b );
     }
