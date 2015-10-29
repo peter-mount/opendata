@@ -50,7 +50,7 @@ public class RtppmFeed
     private Rabbit rabbit;
 
     @Inject
-    private RtppmReporter rtppmReporter;
+    private RtppmLogger rtppmLogger;
 
     @Inject
     private RtppmArchiver rtppmArchiver;
@@ -66,28 +66,17 @@ public class RtppmFeed
         monitor = RateMonitor.log( LOG, ROUTING_KEY );
 
         networkRailFeed.registerTopicConsumer( "RTPPM_ALL", JMS.toText, this );
+
+        rtppmArchiver.start();
+        rtppmLogger.start();
     }
 
     @Override
     public void accept( String t )
     {
         if( t != null ) {
-            rtppmArchiver.accept( t );
-
             monitor.accept( t );
             publisher.accept( t );
-
-            // Store the ppm in the database
-            JsonObject o = JsonUtils.parseJsonObject.apply( t );
-            if( o != null ) {
-                try {
-                    RTPPMDataMsg msg = RTPPMDataMsgFactory.INSTANCE.apply( o );
-                    rtppmReporter.accept( msg );
-                }
-                catch( SQLException ex ) {
-                    LOG.log( Level.SEVERE, null, ex );
-                }
-            }
         }
     }
 

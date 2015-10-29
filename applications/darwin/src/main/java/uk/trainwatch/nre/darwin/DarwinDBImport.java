@@ -15,19 +15,11 @@
  */
 package uk.trainwatch.nre.darwin;
 
-import java.sql.SQLException;
-import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-import static uk.trainwatch.nre.darwin.DarwinArchiver.LOG;
-import uk.trainwatch.rabbitmq.Rabbit;
-import uk.trainwatch.rabbitmq.RabbitMQ;
-import uk.trainwatch.util.counter.RateMonitor;
 
 /**
  *
@@ -36,17 +28,8 @@ import uk.trainwatch.util.counter.RateMonitor;
 @WebListener
 @ApplicationScoped
 public class DarwinDBImport
-        implements ServletContextListener,
-                   Consumer<String>
+        implements ServletContextListener
 {
-
-    private static final Logger LOG = Logger.getLogger( DarwinDBImport.class.getName() );
-
-    private static final String QUEUE = "darwin.db";
-    private static final String ROUTING_KEY = "nre.push";
-
-    @Inject
-    private Rabbit rabbit;
 
     @Inject
     private DarwinImport darwinImport;
@@ -54,42 +37,16 @@ public class DarwinDBImport
     @Inject
     DarwinArchiver darwinArchiver;
 
-    private Consumer<String> monitor;
-
     @Override
     public void contextInitialized( ServletContextEvent sce )
     {
-        LOG.log( Level.WARNING, "******************* Started Darwin ");
-        
-        try {
-            monitor = RateMonitor.log( LOG, "nre.push" );
-            rabbit.queueDurableConsumer( QUEUE, ROUTING_KEY, RabbitMQ.toString, this );
-
-            monitor.accept( null );
-            darwinArchiver.accept( null );
-            darwinImport.accept( null );
-        }
-        catch( SQLException ex ) {
-            LOG.log( Level.SEVERE, null, ex );
-        }
+        darwinArchiver.setup();
+        darwinImport.start();
     }
 
     @Override
     public void contextDestroyed( ServletContextEvent sce )
     {
-    }
-
-    @Override
-    public void accept( String t )
-    {
-        try {
-            monitor.accept( t );
-            darwinArchiver.accept( t );
-            darwinImport.accept( t );
-        }
-        catch( Throwable ex ) {
-            LOG.log( Level.SEVERE, null, ex );
-        }
     }
 
 }

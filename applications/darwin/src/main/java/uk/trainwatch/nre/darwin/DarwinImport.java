@@ -18,15 +18,18 @@ package uk.trainwatch.nre.darwin;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.sql.DataSource;
+import uk.trainwatch.rabbitmq.Rabbit;
+import uk.trainwatch.rabbitmq.RabbitMQ;
+import uk.trainwatch.util.counter.RateMonitor;
 import uk.trainwatch.util.sql.Database;
 import uk.trainwatch.util.sql.SQL;
-import uk.trainwatch.util.sql.SQLConsumer;
 
 /**
  *
@@ -34,20 +37,34 @@ import uk.trainwatch.util.sql.SQLConsumer;
  */
 @ApplicationScoped
 public class DarwinImport
-        implements SQLConsumer<String>
+        implements Consumer<String>
 {
 
     private static final Logger LOG = Logger.getLogger( DarwinImport.class.getName() );
 
+    private static final String QUEUE = "db.darwin";
+    private static final String ROUTING_KEY = "nre.push";
+
     private static final String IMPORT_SQL = "SELECT darwin.darwinimport(?::xml)";
+
+    @Inject
+    private Rabbit rabbit;
 
     @Database("rail")
     @Inject
     private DataSource dataSource;
 
+    private Consumer<String> monitor;
+
+    @PostConstruct
+    public void start()
+    {
+        monitor = RateMonitor.log( LOG, "darwin.db" );
+        rabbit.queueDurableConsumer( QUEUE, ROUTING_KEY, RabbitMQ.toString, this );
+    }
+
     @Override
     public void accept( String xml )
-            throws SQLException
     {
         if( xml != null ) {
             try {
@@ -60,6 +77,8 @@ public class DarwinImport
                         }
                     }
                 }
+
+                monitor.accept( xml );
             }
             catch( Throwable t ) {
                 // Catch everything that fails, log it so we can verify again later

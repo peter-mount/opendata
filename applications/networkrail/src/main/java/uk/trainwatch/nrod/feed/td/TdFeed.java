@@ -54,16 +54,18 @@ public class TdFeed
     private TdArchiver tdArchiver;
 
     private Consumer<String> publisher;
-    private Consumer<String> monitor;
+    private Consumer<JsonObject> monitor;
 
     @PostConstruct
     public void start()
     {
         publisher = rabbit.publishString( ALL_ROUTING_KEY );
 
-        monitor = RateMonitor.log( LOG, "rtppm" );
+        monitor = RateMonitor.log( LOG, "nr.td" );
 
         networkRailFeed.registerTopicConsumer( "TD_ALL_SIG_AREA", JMS.toText, this );
+
+        tdArchiver.start();
     }
     private static final String ALL_ROUTING_KEY = "nr.td.all";
 
@@ -73,10 +75,6 @@ public class TdFeed
         if( t == null ) {
             return;
         }
-
-        tdArchiver.accept( t );
-
-        monitor.accept( t );
 
         // Publish entire message
         publisher.accept( t );
@@ -88,6 +86,7 @@ public class TdFeed
                 .flatMap( JsonUtils::<JsonObject>stream )
                 .map( JsonUtils.getObject )
                 .filter( Objects::nonNull )
+                .peek( monitor )
                 // Route to the individual signalling area
                 .forEach( td -> toArea( td ).accept( td ) );
     }

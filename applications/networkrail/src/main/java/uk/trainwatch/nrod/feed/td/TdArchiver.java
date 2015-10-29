@@ -19,11 +19,14 @@ import java.nio.file.Path;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import uk.trainwatch.io.DatePathMapper;
 import uk.trainwatch.io.FileRecorder;
+import uk.trainwatch.rabbitmq.Rabbit;
+import uk.trainwatch.rabbitmq.RabbitMQ;
 import uk.trainwatch.util.Consumers;
+import uk.trainwatch.util.counter.RateMonitor;
 
 @ApplicationScoped
 public class TdArchiver
@@ -32,18 +35,28 @@ public class TdArchiver
 
     protected static final Logger LOG = Logger.getLogger( TdArchiver.class.getName() );
 
+    private static final String ALL_ROUTING_KEY = "nr.td.all";
+
+    private Consumer<String> monitor;
+
+    @Inject
+    private Rabbit rabbit;
+
     private Consumer<String> logger;
 
-    @PostConstruct
-    public void setup()
+    public void start()
     {
         Function<String, Path> pathMapper = new DatePathMapper( "/usr/local/networkrail", "td", true );
         logger = Consumers.guard( LOG, FileRecorder.recordTo( pathMapper ) );
+
+        monitor = RateMonitor.log( LOG, ALL_ROUTING_KEY );
+        rabbit.queueDurableConsumer( "archive." + ALL_ROUTING_KEY, ALL_ROUTING_KEY, RabbitMQ.toString, this );
     }
 
     @Override
     public void accept( String t )
     {
+        monitor.accept( t );
         logger.accept( t );
     }
 

@@ -15,8 +15,6 @@
  */
 package uk.trainwatch.nrod.feed;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import uk.trainwatch.nrod.feed.trust.TrustFeed;
 import uk.trainwatch.nrod.feed.rtppm.RtppmFeed;
 import uk.trainwatch.nrod.feed.td.TdFeed;
@@ -37,7 +35,6 @@ public class NetworkRailFeed
         implements ServletContextListener
 {
 
-    private static final Logger LOG = Logger.getLogger( NetworkRailFeed.class.getName() );
     @Inject
     private RtppmFeed rtppmFeed;
 
@@ -53,8 +50,6 @@ public class NetworkRailFeed
         rtppmFeed.accept( null );
         tdFeed.accept( null );
         trustFeed.accept( null );
-
-        LOG.log( Level.WARNING, "******************* Started NetworkRail" );
     }
 
     @Override

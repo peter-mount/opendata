@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Peter T Mount.
+ * Copyright 2015 peter.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,45 +15,44 @@
  */
 package uk.trainwatch.nrod.feed.rtppm;
 
-import java.nio.file.Path;
+import java.sql.SQLException;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import uk.trainwatch.io.DatePathMapper;
-import uk.trainwatch.io.FileRecorder;
+import javax.json.JsonObject;
+import uk.trainwatch.nrod.rtppm.factory.RTPPMDataMsgFactory;
+import uk.trainwatch.nrod.rtppm.model.RTPPMDataMsg;
 import uk.trainwatch.rabbitmq.Rabbit;
 import uk.trainwatch.rabbitmq.RabbitMQ;
-import uk.trainwatch.util.Consumers;
+import uk.trainwatch.util.JsonUtils;
 import uk.trainwatch.util.counter.RateMonitor;
 
 /**
- * Archives the raw RTPPM feed to disk
- * <p>
- * @author Peter T Mount
+ *
+ * @author peter
  */
 @ApplicationScoped
-public class RtppmArchiver
+public class RtppmLogger
         implements Consumer<String>
 {
 
     protected static final Logger LOG = Logger.getLogger( RtppmArchiver.class.getName() );
     private static final String ROUTING_KEY = "nr.rtppm";
-    private static final String QUEUE_NAME = "archive." + ROUTING_KEY;
+    private static final String QUEUE_NAME = "db." + ROUTING_KEY;
+
+    @Inject
+    private RtppmReporter rtppmReporter;
+
     @Inject
     private Rabbit rabbit;
 
-    private Consumer<String> logger;
     private Consumer<String> monitor;
 
     public void start()
     {
         monitor = RateMonitor.log( LOG, QUEUE_NAME );
-
-        Function<String, Path> rtppmMapper = new DatePathMapper( "/usr/local/networkrail", "rtppm/raw" );
-
-        logger = Consumers.guard( LOG, FileRecorder.recordTo( rtppmMapper ) );
 
         rabbit.queueDurableConsumer( QUEUE_NAME, ROUTING_KEY, RabbitMQ.toString, this );
     }
@@ -61,8 +60,21 @@ public class RtppmArchiver
     @Override
     public void accept( String t )
     {
-        logger.accept( t );
-        monitor.accept( t );
+        if( t != null ) {
+            monitor.accept( t );
+
+            // Store the ppm in the database
+            JsonObject o = JsonUtils.parseJsonObject.apply( t );
+            if( o != null ) {
+                try {
+                    RTPPMDataMsg msg = RTPPMDataMsgFactory.INSTANCE.apply( o );
+                    rtppmReporter.accept( msg );
+                }
+                catch( SQLException ex ) {
+                    LOG.log( Level.SEVERE, null, ex );
+                }
+            }
+        }
     }
 
 }
