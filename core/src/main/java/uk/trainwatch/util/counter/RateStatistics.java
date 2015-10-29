@@ -29,6 +29,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ScheduledFuture;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.IntSupplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -136,12 +138,17 @@ public class RateStatistics
 
     public Consumer<Integer> getConsumer( String label )
     {
+        return getConsumer( label, BoundedDeque::getTotal );
+    }
+
+    public Consumer<Integer> getConsumer( String label, Function<BoundedDeque, Integer> aggregator )
+    {
         String l = label;
         int i = label.indexOf( '[' );
         if( i > 0 ) {
             l = label.substring( 0, i );
         }
-        return stats.computeIfAbsent( l, Stat::new );
+        return stats.computeIfAbsent( l, k -> new Stat( label, aggregator ) );
     }
 
     public Stream<Stat> stream()
@@ -162,121 +169,6 @@ public class RateStatistics
         this.title = title;
     }
 
-    public static final class BoundedDeque
-            implements Consumer<Integer>
-    {
-
-        private final int maxSize;
-        private final Deque<Integer> deque;
-        private LocalDateTime lastTime;
-        private int lowAlarm = 0;
-        private int highAlarm = Integer.MAX_VALUE;
-        private int lastValue;
-        private int total;
-
-        public BoundedDeque( int maxSize )
-        {
-            this.maxSize = maxSize;
-            this.deque = new ConcurrentLinkedDeque<>();
-            // Ensures we have some data
-            accept( 0 );
-        }
-
-        @Override
-        public synchronized void accept( Integer t )
-        {
-            lastTime = TimeUtils.getLocalDateTime();
-            lastValue = t;
-            total += t;
-            deque.offerLast( t );
-            while( deque.size() > maxSize ) {
-                deque.pollFirst();
-            }
-        }
-
-        public JsonArrayBuilder toArray()
-        {
-            JsonArrayBuilder a = Json.createArrayBuilder();
-            deque.forEach( a::add );
-            return a;
-        }
-
-        public synchronized LocalDateTime getLastTime()
-        {
-            return lastTime;
-        }
-
-        public synchronized int getTotal()
-        {
-            return total;
-        }
-
-        public synchronized void reset()
-        {
-            total = 0;
-        }
-
-        public synchronized void reset( Consumer<Integer> c )
-        {
-            c.accept( total );
-            total = 0;
-        }
-
-        public synchronized int getHighAlarm()
-        {
-            return highAlarm;
-        }
-
-        public synchronized void setHighAlarm( int highAlarm )
-        {
-            this.highAlarm = highAlarm;
-        }
-
-        public synchronized int getLowAlarm()
-        {
-            return lowAlarm;
-        }
-
-        public synchronized void setLowAlarm( int lowAlarm )
-        {
-            this.lowAlarm = lowAlarm;
-        }
-
-        public synchronized boolean isLow()
-        {
-            return lastValue < lowAlarm;
-        }
-
-        public synchronized boolean isHigh()
-        {
-            return lastValue > highAlarm;
-        }
-
-        public synchronized int getLastValue()
-        {
-            return lastValue;
-        }
-
-        public int get( BinaryOperator<Integer> f )
-        {
-            return deque.stream().reduce( f ).orElse( 0 );
-        }
-
-        public synchronized JsonObjectBuilder toJsonObjectBuilder()
-        {
-            return Json.createObjectBuilder()
-                    .add( "time", lastTime.toString() )
-                    .add( "millis", lastTime.toInstant( ZoneOffset.UTC ).toEpochMilli() )
-                    .add( "low", isLow() )
-                    .add( "high", isHigh() )
-                    .add( "lowValue", getLowAlarm() )
-                    .add( "highvalue", getHighAlarm() )
-                    .add( "values", toArray() )
-                    .add( "current", getLastValue() )
-                    .add( "min", get( Math::min ) )
-                    .add( "max", get( Math::max ) );
-        }
-    }
 
     public final class Stat
             implements Consumer<Integer>,
@@ -287,15 +179,17 @@ public class RateStatistics
         /**
          * The last hour, so up to 60 entries
          */
-        private final BoundedDeque lastHour = new BoundedDeque( 60 );
+        private final BoundedDeque lastHour;
         /**
          * The last day, one for every 15 minutes, max 96 elements
          */
-        private final BoundedDeque lastDay = new BoundedDeque( 96 );
+        private final BoundedDeque lastDay;
 
-        Stat( String name )
+        Stat( String name, Function<BoundedDeque, Integer> aggregator )
         {
             this.name = name;
+            lastHour = new BoundedDeque( 60, aggregator );
+            lastDay = new BoundedDeque( 96, aggregator );
         }
 
         public String getName()
