@@ -10,6 +10,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
@@ -49,6 +50,34 @@ public class RateMonitor<T>
     private final String label;
     private int lastCount;
     private long total;
+
+    public static <T> Consumer<T> consumer( String label )
+    {
+        return log( label );
+    }
+
+    public static <T> Consumer<T> consumer( String label, Consumer<T> c )
+    {
+        RateMonitor<T> m = log( label );
+        return v -> {
+            if( v != null ) {
+                c.accept( v );
+                m.accept( v );
+            }
+        };
+    }
+
+    public static <T> Supplier<T> supplier( String label, Supplier<T> s )
+    {
+        RateMonitor<T> m = log( label );
+        return () -> {
+            T v = s.get();
+            if( v != null ) {
+                m.accept( v );
+            }
+            return v;
+        };
+    }
 
     public static <T> RateMonitor<T> log( String label )
     {
@@ -91,7 +120,7 @@ public class RateMonitor<T>
 
             rateStatistics.getConsumer( label ).accept( lastCount );
         };
-        
+
         scheduledFuture = DaemonThreadFactory.INSTANCE.scheduleAtFixedRate( task, 1L, 1L, TimeUnit.MINUTES );
         task.run();
     }
