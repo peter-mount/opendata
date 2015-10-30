@@ -15,11 +15,18 @@
  */
 package uk.trainwatch.util;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Set;
+import java.util.function.Supplier;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.InjectionTarget;
+import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import uk.trainwatch.util.cdi.MutableAnnotatedType;
 
 /**
  * Some utility methods to support CDI
@@ -55,5 +62,54 @@ public class CDIUtils
         CreationalContext ctx = beanManager.createCreationalContext( null );
         injectionTarget.inject( bean, ctx );
         return bean;
+    }
+
+    public static <T> Bean<T> getBean( String name )
+    {
+        BeanManager beanManager = getBeanManager();
+        Set beans = beanManager.getBeans( name );
+        return beanManager.resolve( beans );
+    }
+
+    public static <T> Bean<T> getBean( Type type, Annotation... qualifiers )
+    {
+        BeanManager beanManager = getBeanManager();
+        Set beans = beanManager.getBeans( type, qualifiers );
+        return beanManager.resolve( beans );
+    }
+
+    public static <T> T getInstance( Bean<T> bean, Class<T> clazz )
+    {
+        BeanManager beanManager = getBeanManager();
+        CreationalContext<T> ctx = beanManager.createCreationalContext( bean );
+        return (T) beanManager.getReference( bean, clazz, ctx );
+    }
+
+    /**
+     * Ensure we have an annotation present
+     * <p>
+     * @param <T>
+     * @param pat
+     * @param clazz
+     * @param s
+     * <p>
+     * @return
+     */
+    public static <T> AnnotatedType<T> addTypeAnnotation( ProcessAnnotatedType<T> pat, Class<? extends Annotation> clazz, Supplier<Annotation> s )
+    {
+        AnnotatedType<T> t = pat.getAnnotatedType();
+        if( !t.isAnnotationPresent( clazz ) ) {
+            MutableAnnotatedType<T> mat;
+            if( t instanceof MutableAnnotatedType ) {
+                mat = (MutableAnnotatedType<T>) t;
+            }
+            else {
+                mat = new MutableAnnotatedType<>( t );
+                pat.setAnnotatedType( mat );
+            }
+            mat.add( s.get() );
+            return mat;
+        }
+        return t;
     }
 }

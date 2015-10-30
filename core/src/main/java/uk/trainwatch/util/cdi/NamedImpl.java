@@ -13,23 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.trainwatch.scheduler;
+package uk.trainwatch.util.cdi;
 
-import java.lang.annotation.Documented;
-import static java.lang.annotation.ElementType.*;
-import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.lang.annotation.Target;
+import java.lang.annotation.Annotation;
+import javax.inject.Named;
 
 /**
- *
+ * Allows for injection of a Named annotation against a bean
+ * <p>
  * @author peter
  */
-@Target({METHOD, TYPE})
-@Retention(RUNTIME)
-@Documented
-public @interface Cron
+@SuppressWarnings("AnnotationAsSuperInterface")
+public class NamedImpl
+        implements Named
 {
 
-    String value();
+    private final String value;
+
+    public NamedImpl( String value )
+    {
+        this.value = value;
+    }
+
+    @Override
+    public Class<? extends Annotation> annotationType()
+    {
+        return Named.class;
+    }
+
+    @Override
+    public String value()
+    {
+        return value;
+    }
+
 }

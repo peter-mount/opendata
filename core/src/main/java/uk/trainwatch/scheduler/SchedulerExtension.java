@@ -15,6 +15,7 @@
  */
 package uk.trainwatch.scheduler;
 
+import uk.trainwatch.util.cdi.NamedImpl;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -24,6 +25,7 @@ import javax.enterprise.context.Initialized;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
@@ -31,15 +33,18 @@ import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
+import javax.inject.Named;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
+import uk.trainwatch.util.CDIUtils;
 
 /**
  *
@@ -52,7 +57,8 @@ public class SchedulerExtension
     private static final Logger LOG = Logger.getLogger( SchedulerExtension.class.getName() );
 
     private Scheduler scheduler;
-    private final Set<Class<Job>> jobClasses = new HashSet<>();
+    private final Set<Class<?>> jobClasses = new HashSet<>();
+    private int id = 0, jid;
 
     void beforeBeanDiscovery( @Observes BeforeBeanDiscovery type )
             throws SchedulerException
@@ -62,13 +68,26 @@ public class SchedulerExtension
         scheduler = fact.getScheduler();
     }
 
-    <T> void findJobs( @Observes @WithAnnotations({Cron.class}) ProcessAnnotatedType<T> part, BeanManager beanManager )
+    <T> void findJobs( @Observes @WithAnnotations({Cron.class}) ProcessAnnotatedType<T> pat, BeanManager beanManager )
     {
-        AnnotatedType type = part.getAnnotatedType();
+        // Ensure we are named otherwise job won't fire as we can't locate it
+        AnnotatedType<?> type = pat.getAnnotatedType();
+        Class<?> clazz = type.getJavaClass();
+        CDIUtils.addTypeAnnotation( pat, Named.class, () -> new NamedImpl( "Schedule_" + (id++) ) );
+
         if( type.isAnnotationPresent( Cron.class ) ) {
-            Class<?> clazz = type.getJavaClass();
             if( Job.class.isAssignableFrom( clazz ) ) {
-                jobClasses.add( (Class<Job>) clazz );
+                jobClasses.add( clazz );
+            }
+            else {
+                throw new UnsupportedOperationException( "@Cron on type must implement Job" );
+            }
+        }
+        else {
+            for( AnnotatedMethod<?> meth: type.getMethods() ) {
+                if( meth.isAnnotationPresent( Cron.class ) ) {
+                    jobClasses.add( clazz );
+                }
             }
         }
     }
@@ -76,7 +95,25 @@ public class SchedulerExtension
     void scheduleJobs( @Observes AfterBeanDiscovery afterBeanDiscovery, BeanManager beanManager )
             throws SchedulerException
     {
-        scheduleCronJobs();
+        for( Class<?> clazz: jobClasses ) {
+            for( AnnotatedType<?> type: afterBeanDiscovery.getAnnotatedTypes( clazz ) ) {
+                String name = type.getAnnotation( Named.class ).value();
+                if( type.isAnnotationPresent( Cron.class ) ) {
+                    Cron cron = type.getAnnotation( Cron.class );
+                    schedule( cron.value(), name, JobAdapter.class, null );
+                }
+                else {
+                    for( AnnotatedMethod meth: type.getMethods() ) {
+                        if( meth.isAnnotationPresent( Cron.class ) ) {
+                            Cron cron = meth.getAnnotation( Cron.class );
+                            JobDataMap m = new JobDataMap();
+                            m.put( "method", meth.getJavaMember() );
+                            schedule( cron.value(), name, MethodAdapter.class, m );
+                        }
+                    }
+                }
+            }
+        }
     }
 
     void start( @Observes @Initialized(ApplicationScoped.class) Object o )
@@ -110,27 +147,28 @@ public class SchedulerExtension
         return scheduler;
     }
 
-    private void scheduleCronJobs()
+    private void schedule( String expr, String name, Class<? extends Job> jobClass, JobDataMap m )
             throws SchedulerException
     {
-        for( Class<Job> clazz: jobClasses ) {
-            Cron cron = clazz.getAnnotation( Cron.class );
-            if( cron != null ) {
-                String name = clazz.getName();
-                Trigger trigger = TriggerBuilder.newTrigger()
-                        .withSchedule( CronScheduleBuilder.cronSchedule( cron.value() ) )
-                        .withIdentity( name )
-                        .build();
+        JobDataMap map = m == null ? new JobDataMap() : m;
+        map.put( "bean", name );
 
-                JobDetail detail = JobBuilder.newJob()
-                        .ofType( clazz )
-                        .withIdentity( name )
-                        .build();
+        String uid = name + ":" + (jid++);
 
-                scheduler.scheduleJob( detail, trigger );
+        Trigger trigger = TriggerBuilder.newTrigger()
+                .withSchedule( CronScheduleBuilder.cronSchedule( expr ) )
+                .withIdentity( uid )
+                .build();
 
-                LOG.log( Level.INFO, () -> "Scheduled " + name + " with cron " + cron.value() );
-            }
-        }
+        JobDetail detail = JobBuilder.newJob()
+                .ofType( jobClass )
+                .withIdentity( uid )
+                .usingJobData( map )
+                .build();
+
+        scheduler.scheduleJob( detail, trigger );
+
+        LOG.log( Level.INFO, () -> "Scheduled " + name + " with cron " + expr );
     }
+
 }
