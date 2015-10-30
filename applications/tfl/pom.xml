@@ -32,60 +32,48 @@
         </dependency>
         
         <dependency>
+            <groupId>uk.trainwatch.brokers</groupId>
+            <artifactId>brokers-rabbitmq</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        
+        <dependency>
             <groupId>uk.trainwatch.tfl</groupId>
             <artifactId>tfl-model</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-    
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>9.3-1102-jdbc41</version>
-        </dependency>
         
+        <!-- Delta Spike for Scheduling -->
+        <dependency>
+            <groupId>org.apache.deltaspike.modules</groupId>
+            <artifactId>deltaspike-scheduler-module-api</artifactId>
+            <version>1.5.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.deltaspike.modules</groupId>
+            <artifactId>deltaspike-scheduler-module-impl</artifactId>
+            <version>1.5.1</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz</artifactId>
+            <version>2.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.deltaspike.cdictrl</groupId>
+            <artifactId>deltaspike-cdictrl-api</artifactId>
+            <version>1.5.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.deltaspike.cdictrl</groupId>
+            <artifactId>deltaspike-cdictrl-weld</artifactId>
+            <version>1.5.1</version>
+            <scope>compile</scope>        
+        </dependency>
+
     </dependencies>
-
-    <build>
-        <plugins>
-            
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <archive>
-                        <index>true</index>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <mainClass>uk.trainwatch.tfl.feeds.Main</mainClass>
-                        </manifest>
-                        <manifestEntries>
-                            <mode>development</mode>
-                            <url>${project.url}</url>
-                            <key>value</key>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <descriptors>
-                        <descriptor>src/main/assembly/assembly.xml</descriptor>
-                    </descriptors>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
     
 </project>

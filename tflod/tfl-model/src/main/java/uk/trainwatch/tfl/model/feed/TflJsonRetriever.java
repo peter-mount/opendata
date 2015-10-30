@@ -36,9 +36,15 @@ public class TflJsonRetriever
             throws URISyntaxException,
                    MalformedURLException
     {
+        this( endPoint, p.getProperty( "app_id" ), p.getProperty( "app_key" ) );
+    }
+
+    public TflJsonRetriever( String endPoint, String appId, String appKey )
+            throws URISyntaxException,
+                   MalformedURLException
+    {
         path = "https://api.tfl.gov.uk/" + endPoint;
-        url = new URI( String.format( "%s?app_id=%s&app_key=%s", path, p.getProperty( "app_id" ), p.getProperty( "app_key" ) ) ).
-                toURL();
+        url = new URI( String.format( "%s?app_id=%s&app_key=%s", path, appId, appKey ) ).toURL();
     }
 
     @Override
