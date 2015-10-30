@@ -106,9 +106,7 @@ public class RateStatistics
     @PreDestroy
     void stop()
     {
-        if( scheduledFuture != null ) {
-            scheduledFuture.cancel( true );
-        }
+        scheduledFuture.cancel( true );
     }
 
     private void persist( Stat stat, int value )
@@ -170,6 +168,7 @@ public class RateStatistics
     {
         this.title = title;
     }
+
 
     public final class Stat
             implements Consumer<Integer>,
