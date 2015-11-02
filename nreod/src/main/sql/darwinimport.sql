@@ -46,24 +46,42 @@ BEGIN
 
     -- Now archive the schedule
     INSERT INTO darwin.schedulearc
-        SELECT * FROM darwin.schedule WHERE id=id2;
+        SELECT * FROM darwin.schedule WHERE rid=tid;
+
     INSERT INTO darwin.schedule_entryarc
-        SELECT * FROM darwin.schedule_entry WHERE schedule=id2;
+        SELECT *
+            FROM darwin.schedule_entry
+            WHERE schedule IN (SELECT id FROM darwin.schedule WHERE rid=tid);
+
     INSERT INTO darwin.schedule_assocarc
-        SELECT * FROM darwin.schedule_assoc WHERE mainid=id2 OR associd=id2;
+        SELECT *
+            FROM darwin.schedule_assoc
+                WHERE mainid IN (SELECT id FROM darwin.schedule WHERE rid=tid)
+                    OR associd IN (SELECT id FROM darwin.schedule WHERE rid=tid);
 
     -- archive the forecasts
     INSERT INTO darwin.forecastarc
-        SELECT * FROM darwin.forecast WHERE id=id3;
+        SELECT * FROM darwin.forecast WHERE rid=tid;
+
     INSERT INTO darwin.forecast_entryarc
-        SELECT * FROM darwin.forecast_entry WHERE fid=id3;
+        SELECT *
+            FROM darwin.forecast_entry
+            WHERE fid IN (SELECT id FROM darwin.forecast WHERE rid=tid);
 
     -- Now remove data from from the live tables
-    DELETE FROM darwin.forecast_entry WHERE fid=id3;
-    DELETE FROM darwin.forecast WHERE id=id3;
-    DELETE FROM darwin.schedule_entry WHERE schedule=id2;
-    DELETE FROM darwin.schedule_assoc WHERE mainid=id2 OR associd=id2;
-    DELETE FROM darwin.schedule WHERE id=id2;
+    DELETE FROM darwin.forecast_entry
+        WHERE fid IN (SELECT id FROM darwin.forecast WHERE rid=tid);
+
+    DELETE FROM darwin.forecast WHERE rid=tid;
+
+    DELETE FROM darwin.schedule_entry
+        WHERE schedule IN (SELECT id FROM darwin.schedule WHERE rid=tid);
+
+    DELETE FROM darwin.schedule_assoc
+        WHERE mainid IN (SELECT id FROM darwin.schedule WHERE rid=tid)
+          OR associd IN (SELECT id FROM darwin.schedule WHERE rid=tid);
+
+    DELETE FROM darwin.schedule WHERE rid=tid;
 
 END;
 $$ LANGUAGE plpgsql;
