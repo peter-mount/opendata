@@ -1365,6 +1365,75 @@ var SignalAreaMap = (function () {
         map.station(16,y2+.3,'LA').attr({fill: '#f66'});
         map.station(14,y1-.25,'ZH-LA').attr({fill: '#f66'});
         
+        // M - Wivelsfield - Plumpton & Burgess Hill
+        y1=y1+5+3;
+        y2=y1+1;
+        
+        a = SignalMap.line([],0,y1,16,y1);
+        a = SignalMap.line(a,0,y2,16,y2);
+        
+        // to Lewes via Plumpton
+        a = SignalMap.line(a,6,y1,6.75,y1-3);
+        a = SignalMap.line(a,6.75,y1-3,17,y1-3);
+        a = SignalMap.line(a,6.25,y2,7,y1-2);
+        a = SignalMap.line(a,7,y1-2,17,y1-2);
+        
+        map.path(a);
+        
+        map.station(0,y2+.3,'M');
+        
+        map.berthr(1,y1,'0357');
+        map.berthl(1,y2,'0356');
+        
+        map.berthr(2,y1,'0361');
+        map.berthl(2,y2,'0360');
+        
+        map.berthr(3,y1,'0365');
+        map.berthl(3,y2,'0367');
+        
+        map.station(4.5,y2+2,'Wivelsfield');
+        map.platform(3.5,y1-.5,2,'','2');
+        map.platform(3.5,y2+.5,2,'1','');
+        map.berthr(5,y1,'0369');
+        map.berthl(4,y2,'0364');
+        map.berthr(5,y2,'0371');
+
+        // Plumpton branch
+        map.berthl(8,y1-2,'0640');
+        
+        map.berthr(9,y1-3,'0641');
+        map.berthl(9,y1-2,'0642');
+        
+        map.station(10,y1-3,'Plumpton');
+        map.platform(9.5,y1-3.5,1,'','2');
+        map.platform(9.5,y1-1.5,1,'1','');
+        map.berthr(10,y1-3,'0643');
+        map.berthl(10,y1-2,'0644');
+        
+        map.berthr(11,y1-3,'0645');
+        map.berthl(11,y1-2,'0646');
+        
+        map.station(12,y1-3,'Cooksbridge');
+        map.platform(11.5,y1-3.5,1,'','2');
+        map.platform(11.5,y1-1.5,1,'1','');
+        map.berthr(12,y1-3,'0647');
+        map.berthl(12,y1-2,'0648');
+        
+        a = SignalMap.line([],13,y1-3.75,13,y1-1);
+        map.path(a).attr({fill: '#f66',stroke: '#f66','stroke-dasharray': '5,5'});
+        map.station(13,y1-3.25,'TB-ZE').attr({fill: '#f66'});
+        
+        map.berthr(14,y1-3,'E093');
+        map.berthl(14,y1-2,'E092');
+        
+        map.berthl(15,y1-2,'E090');
+        
+        map.station(16,y1-3,'Lewes');
+        map.platform(15.5,y1-3.5,1,'','2');
+        map.platform(15.5,y1-1.5,1,'1','');
+        map.berthl(16,y1-2,'E002');
+        map.station(17,y1-2+.3,'ZE').attr({fill: '#f66'});
+        
     };
 
     return SignalAreaMap;
