@@ -22,7 +22,7 @@ var SignalAreaMap = (function () {
     }
 
     SignalAreaMap.width = 30;
-    SignalAreaMap.height = 90; // 44 purley
+    SignalAreaMap.height = 120; // 44 purley
 
     SignalAreaMap.plot = function (map) {
 
@@ -1235,7 +1235,136 @@ var SignalAreaMap = (function () {
         map.berthr(25.5,y2+4,'0867');
         map.berthl(24.5,y2+5,'0864');
         map.berthl(25.5,y2+5,'0869');
-        //map.station(0,y1+2.5,'ZE 15/10/09 data 15/07/27');
+        map.station(27,y2+.3,'K');
+        map.station(27,y2+5.3,'L');
+        
+        // K Balcome -> Haywards Heath
+        y1=y1+10;
+        y2=y1+1;
+        
+        a = SignalMap.line([],0,y1,18,y1);
+        a = SignalMap.line(a,0,y2,18,y2);
+        // Ardingly Sidings
+        a = SignalMap.line(a,5,y1-1,14,y1-1);
+        a = SignalMap.buffer(a,14,y1-1);
+        a = SignalMap.line(a,13.75,y1-1,14,y1);
+        a = SignalMap.line(a,13.5,y2,13.75,y1);
+        a = SignalMap.line(a,14.25,y1,14.5,y2);
+        
+        // Copyhold Jn
+        a = SignalMap.line(a,7,y1,7.25,y2);
+        a = SignalMap.line(a,7.5,y2,7.75,y1);
+        a = SignalMap.line(a,8,y1,8.25,y1-1);
+        a = SignalMap.line(a,8,y2,8.25,y2+1);
+        a = SignalMap.line(a,8.25,y2+1,13,y2+1);
+        a = SignalMap.line(a,13,y2+1,13.25,y2);
+        
+        map.path(a);
+        
+        map.station(0,y2+.3,'K');
+        map.berthl(1,y2,'0310');
+        
+        map.berthr(1.5,y1,'0319');
+        map.berthl(2,y2,'0314');
+        
+        map.berthr(3,y1,'0323');
+        map.berthl(3,y2,'0318');
+        
+        map.berthr(4.5,y1,'0327');
+        map.berthl(4,y2,'0322');
+        map.berthl(5,y2,'0326');
+        
+        map.station(6,y1-1,'Ardingly Sidings');
+        map.berthr(6,y1-1,'0331');
+        map.berthr(6,y1,'0333');
+        map.berthr(6,y2,'0335');
+        
+        map.station(7,y2+2,'Copyhold Jn');
+        
+        map.berthl(9,y1-1,'0336');
+        map.berthl(9,y2,'0332');
+        map.berthl(9,y2+1,'0330');
+        
+        map.berthr(10,y1-1,'0337');
+        map.berthr(10,y1,'0339');
+        map.berthr(10,y2+1,'0343');
+        
+        map.station(11.5,y2+3,'Haywards Heath');
+        map.platform(10.5,y1-.5,2,'1','2');
+        map.platform(10.5,y2+.5,2,'3','4');
+        map.berthl(11,y1-1,'0344');
+        map.berthl(11,y1,'0342');
+        map.berthl(11,y2,'0340');
+        map.berthl(11,y2+1,'0338');
+        
+        map.berthr(12,y1-1,'0345');
+        map.berthr(12,y1,'0347');
+        map.berthr(12,y2,'0349');
+        map.berthr(12,y2+1,'0351');
+        
+        map.berthl(16,y1,'0350');
+        map.berthl(16,y2,'0348');
+        map.berthr(17,y1,'0353');
+        map.berthr(17,y2,'0352');
+        map.station(18,y2+.3,'M');
+        
+        // L - Billingshurst to Amberley
+        y1=y1+5;
+        y2=y1+1;
+        
+        a = SignalMap.line([],0,y1,16,y1);
+        a = SignalMap.line(a,0,y2,16,y2);
+        
+        map.path(a);
+        
+        map.station(0,y2+.3,'L');
+        
+        map.berthr(1.5,y1,'0871');
+        map.berthl(1,y2,'0866');
+        
+        map.berthr(2.5,y1,'0873');
+        map.berthl(2,y2,'0868');
+        
+        map.berthr(3.5,y1,'0875');
+        map.berthl(3,y2,'0870');
+        
+        map.berthr(4.5,y1,'0877');
+        map.berthl(4,y2,'0872');
+        
+        map.berthl(5,y2,'0874');
+        
+        map.station(6.5,y2+2,'Pulborough');
+        map.platform(5.5,y1-.5,2,'','2');
+        map.platform(5.5,y2+.5,2,'1','');
+        map.berthl(6,y1,'0878');
+        map.berthl(6,y2,'0876');
+        map.berthr(7,y1,'0979');
+        
+        map.berthr(8,y1,'0981');
+        map.berthl(8.5,y2,'0980');
+        
+        map.berthr(9,y1,'0983');
+        map.berthl(9.5,y2,'0982');
+        
+        map.berthr(10,y1,'0985');
+        
+        map.station(11,y2+2,'Amberley');
+        map.platform(10.5,y1-.5,1,'','2');
+        map.platform(10.5,y2+.5,1,'1','');
+        map.berthr(11,y1,'0987');
+        map.berthl(11,y2,'0984');
+                
+        map.berthr(12.5,y1,'0989');
+        map.berthl(12,y2,'0986');
+        map.berthl(13,y2,'0988');
+
+        a = SignalMap.line([],14,y2+.75,14,y1-0.75);
+        map.path(a).attr({fill: '#f66',stroke: '#f66','stroke-dasharray': '5,5'});
+        map.berthr(15,y1,'AR01');
+        map.berthl(15,y2,'AR02');
+        map.station(16,y2+.3,'LA').attr({fill: '#f66'});
+        map.station(14,y1-.25,'ZH-LA').attr({fill: '#f66'});
+        
     };
 
     return SignalAreaMap;
