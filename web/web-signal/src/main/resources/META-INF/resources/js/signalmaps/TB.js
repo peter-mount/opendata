@@ -700,7 +700,7 @@ var SignalAreaMap = (function () {
         map.berthl(16,y2,'XR40');
         
         // Purley to Couldson South
-        y1=y1+7+2;
+        y1=y1+6;
         y2=y1+1;
         
         // SCroy to sanderstead
@@ -1093,6 +1093,83 @@ var SignalAreaMap = (function () {
 
         map.station(23,y2+.3,'J');
         map.station(23,y2+2.3,'J');
+        
+        // Three Bridges
+        y1=y1+9;
+        y2=y1+1;
+        
+        a = SignalMap.line([],0,y1,23,y1);
+        a = SignalMap.line(a,0,y2,23,y2);
+        a = SignalMap.line(a,0,y2+1,23,y2+1);
+        a = SignalMap.line(a,0,y2+2,23,y2+2);
+        a = SignalMap.buffer(a,1,y2+3);
+        
+        a = SignalMap.line(a,1.25,y1,1.5,y2);
+        a = SignalMap.line(a,1.25,y2+1,1.5,y2+2);
+        a = SignalMap.line(a,1.75,y2,2,y2+1);
+        a = SignalMap.line(a,2.25,y2+1,2.5,y2+2);
+        a = SignalMap.line(a,3,y2+2,3.25,y2+1);
+        a = SignalMap.line(a,2.75,y2+2,3,y2+3);
+        a = SignalMap.line(a,1,y2+3,6,y2+3);
+        
+        a = SignalMap.line(a,5.75,y2,6,y1);
+        a = SignalMap.line(a,2.75,y2+3,3,y2+4);
+        a = SignalMap.line(a,3,y2+4,6.25,y2+4);
+        // Via crawley
+        a = SignalMap.line(a,6.25,y2+1,7,y2+4);
+        a = SignalMap.line(a,7,y2+4,23,y2+4);
+        a = SignalMap.line(a,5.75,y2+2,6.5,y2+5);
+        a = SignalMap.line(a,6.5,y2+5,23,y2+5);
+
+        // 1198 siding
+        a = SignalMap.line(a,6.75,y2+3,8.75,y2+3);
+        a = SignalMap.buffer(a,8.75,y2+3);
+        
+        a = SignalMap.line(a,7,y2+2,7.25,y2+1);
+        a = SignalMap.line(a,7,y2+5,7.25,y2+4);
+        a = SignalMap.line(a,9,y2+5,9.25,y2+4);
+        
+        map.path(a);
+        
+        map.station(0,y2+.3,'J');
+        map.station(0,y2+2.3,'J');
+        
+        map.berthr(2,y2+3,'1191');
+        
+        map.station(4.5,y2+5.5,'Three Bridges');
+        map.platform(3.5,y1-.5,2,'','5');
+        map.platform(3.5,y2+.5,2,'4','3');
+        map.platform(3.5,y2+2.5,2,'2','1');
+        
+        map.berthr(5,y1,'0273');
+        map.berthl(4,y2,'0274');
+        map.berthl(4,y2+1,'0276');
+        map.berthr(5,y2+1,'0277');
+        map.berthl(4,y2+2,'0278');
+        map.berthr(5,y2+2,'0279');
+        map.berthl(4,y2+3,'0280');
+        map.berthr(5,y2+3,'0281');
+        map.berthr(5,y2+4,'1195');
+        
+        map.berthr(8,y1,'0287');
+        map.berthl(8,y2,'0282');
+        map.berthr(8,y2+1,'0289');
+        map.berthl(8,y2+2,'0284');
+        map.berthl(8,y2+3,'1198');
+        map.berthr(8,y2+4,'0621');
+        map.berthl(8,y2+5,'0620');
+        
+        map.berthr(10,y1,'0291');
+        map.berthl(10,y2,'0286');
+        map.berthr(10,y2+1,'0293');
+        map.berthl(10,y2+2,'0288');
+
+        map.station(10.5,y2+6.5,'Crawley');
+        map.platform(9.5,y2+3.5,2,'','2');
+        map.platform(9.5,y2+5.5,2,'1','');
+        map.berthl(10,y2+4,'0624');
+        map.berthr(11,y2+4,'0625');
+        map.berthl(10,y2+5,'0622');
         
         //map.station(0,y1+2.5,'ZE 15/10/09 data 15/07/27');
     };
