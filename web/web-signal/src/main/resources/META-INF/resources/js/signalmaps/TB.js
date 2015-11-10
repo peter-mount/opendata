@@ -1098,12 +1098,16 @@ var SignalAreaMap = (function () {
         y1=y1+9;
         y2=y1+1;
         
-        a = SignalMap.line([],0,y1,23,y1);
-        a = SignalMap.line(a,0,y2,23,y2);
-        a = SignalMap.line(a,0,y2+1,23,y2+1);
-        a = SignalMap.line(a,0,y2+2,23,y2+2);
-        a = SignalMap.buffer(a,1,y2+3);
+        a = SignalMap.line([],0,y1,27,y1);
+        a = SignalMap.line(a,0,y2,27,y2);
+        a = SignalMap.line(a,0,y2+1,14,y2+1);
+        a = SignalMap.line(a,14,y2+1,14.5,y1);
+        a = SignalMap.line(a,0,y2+2,15,y2+2);
+        a = SignalMap.line(a,11,y2+2,11.25,y2+1);
+        a = SignalMap.line(a,14.25,y2+2,14.75,y2);
+        a = SignalMap.buffer(a,15,y2+2);
         
+        a = SignalMap.buffer(a,1,y2+3);
         a = SignalMap.line(a,1.25,y1,1.5,y2);
         a = SignalMap.line(a,1.25,y2+1,1.5,y2+2);
         a = SignalMap.line(a,1.75,y2,2,y2+1);
@@ -1117,9 +1121,9 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a,3,y2+4,6.25,y2+4);
         // Via crawley
         a = SignalMap.line(a,6.25,y2+1,7,y2+4);
-        a = SignalMap.line(a,7,y2+4,23,y2+4);
+        a = SignalMap.line(a,7,y2+4,27,y2+4);
         a = SignalMap.line(a,5.75,y2+2,6.5,y2+5);
-        a = SignalMap.line(a,6.5,y2+5,23,y2+5);
+        a = SignalMap.line(a,6.5,y2+5,27,y2+5);
 
         // 1198 siding
         a = SignalMap.line(a,6.75,y2+3,8.75,y2+3);
@@ -1170,7 +1174,67 @@ var SignalAreaMap = (function () {
         map.berthl(10,y2+4,'0624');
         map.berthr(11,y2+4,'0625');
         map.berthl(10,y2+5,'0622');
+        map.berthl(12,y2+5,'0626');
         
+        map.berthr(13,y1,'0295');
+        map.berthl(13,y2,'0280');
+        map.berthr(13,y2+1,'0297');
+        map.berthl(13,y2+2,'0282');
+
+        map.station(13,y2+6.5,'Ifield');
+        map.platform(12.5,y2+3.5,1,'','2');
+        map.platform(12.5,y2+5.5,1,'1','');
+        map.berthr(13,y2+4,'0627');
+        map.berthl(13,y2+5,'0628');
+        
+        map.berthr(14,y2+4,'0629');
+        map.berthl(14,y2+5,'0630');
+        
+        map.berthr(15,y2+4,'0885');
+        map.berthl(15,y2+5,'0632');
+        
+        map.berthr(16,y1,'0299');
+        map.berthl(16,y2+5,'0892');
+        
+        map.berthl(17.5,y2+5,'0850');
+        
+        map.berthl(18.5,y2+5,'0852');
+        
+        map.station(19.5,y2+6.5,'Christs Hospital');
+        map.platform(19,y2+3.5,1,'','2');
+        map.platform(19,y2+5.5,1,'1','');
+        map.berthr(19.5,y2+4,'0857');
+        map.berthl(19.5,y2+5,'0856');
+        
+        map.berthl(20.5,y1,'0296');
+        map.berthl(20.5,y2,'0284');
+        map.berthr(21.5,y1,'0303');
+        map.berthl(22,y2,'0298');
+        map.berthr(22.5,y1,'0307');
+        map.berthl(23,y2,'0302');
+        map.berthr(23.5,y1,'0311');
+        
+        map.station(25,y2+2,'Balcombe');
+        map.platform(24.5,y1-.5,1,'','5');
+        map.platform(24.5,y2+.5,1,'4','3');
+        map.berthr(25,y1,'0315');
+        map.berthl(25,y2,'0306');
+        
+        map.berthr(20.5,y2+4,'0859');
+        map.berthl(21,y2+5,'0858');
+        map.berthl(21.5,y2+4,'0861');
+        map.berthl(22,y2+5,'0860');
+        map.berthl(22.5,y2+4,'0863');
+        map.berthl(23,y2+5,'0862');
+        
+        map.berthl(23.5,y2+4,'0865');
+        
+        map.station(25,y2+6.5,'Billingshurst');
+        map.platform(24,y2+3.5,2,'','2');
+        map.platform(24,y2+5.5,2,'1','');
+        map.berthr(25.5,y2+4,'0867');
+        map.berthl(24.5,y2+5,'0864');
+        map.berthl(25.5,y2+5,'0869');
         //map.station(0,y1+2.5,'ZE 15/10/09 data 15/07/27');
     };
 
