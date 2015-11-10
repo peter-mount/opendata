@@ -1369,8 +1369,8 @@ var SignalAreaMap = (function () {
         y1=y1+5+3;
         y2=y1+1;
         
-        a = SignalMap.line([],0,y1,16,y1);
-        a = SignalMap.line(a,0,y2,16,y2);
+        a = SignalMap.line([],0,y1,19,y1);
+        a = SignalMap.line(a,0,y2,19,y2);
         
         // to Lewes via Plumpton
         a = SignalMap.line(a,6,y1,6.75,y1-3);
@@ -1434,6 +1434,73 @@ var SignalAreaMap = (function () {
         map.berthl(16,y1-2,'E002');
         map.station(17,y1-2+.3,'ZE').attr({fill: '#f66'});
         
+        // Keymer jn towards Brighton
+        map.berthl(7.5,y1,'0370');
+        map.berthl(7.5,y2,'0368');
+        
+        map.berthr(8.5,y1,'0373');
+        
+        map.station(10,y2+2,'Burgess Hill');
+        map.platform(9.5,y1-.5,1,'','2');
+        map.platform(9.5,y2+.5,1,'1','');
+        
+        map.berthr(11,y1,'0377');
+        map.berthl(11,y2,'0372');
+        
+        map.berthr(12,y1,'0381');
+        map.berthl(12,y2,'0376');
+        
+        map.berthr(13,y1,'0385');
+        map.berthl(13,y2,'0380');
+        
+        map.station(14,y2+2,'Hassocks');
+        map.platform(13.5,y1-.5,1,'','2');
+        map.platform(13.5,y2+.5,1,'1','');
+        map.berthr(14,y1,'0389');
+        map.berthl(14,y2,'0384');
+        
+        map.berthr(15,y1,'0393');
+        map.berthl(15,y2,'0388');
+        
+        map.berthr(16,y1,'0397');
+        map.berthl(16,y2,'0392');
+        
+        map.berthr(17,y1,'0401');
+        map.berthl(17,y2,'0396');
+        
+        map.berthr(18,y1,'0405');
+        map.berthl(18,y2,'0400');
+        
+        map.station(19,y2+.3,'N');
+        
+        // N Hassocks towards Brighton
+        y1=y1+5;
+        y2=y1+1;
+        
+        a = SignalMap.line([],0,y1,19,y1);
+        a = SignalMap.line(a,0,y2,19,y2);
+        
+        map.path(a);
+        
+        map.station(0,y2+.3,'N');
+        
+        map.berthr(1,y1,'0409');
+        map.berthl(1,y2,'0404');
+        
+        map.berthr(2,y1,'0413');
+        map.berthl(2,y2,'0408');
+        
+        map.berthr(3,y1,'0417');
+        map.berthl(3,y2,'0412');
+        
+        map.berthr(4,y1,'0421');
+        map.berthl(4,y2,'0416');
+        
+        map.berthr(5,y2,'0423');
+        
+        map.berthr(6,y2+1,'1241');
+        
+        // TODO preston Park
     };
 
     return SignalAreaMap;
