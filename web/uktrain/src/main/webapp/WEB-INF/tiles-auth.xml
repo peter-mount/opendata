@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+<tiles-definitions>
+    
+    <!-- The Login, Registration and User Admin pages -->
+    
+    <!-- Login -->
+    <definition name="home.login" extends="layout.main">
+        <put-attribute name="title" value="UKTrain Home" />
+        <put-attribute name="body" value=".home.login" />
+    </definition>
+    <definition name=".home.login" extends="layout.1col">
+        <put-attribute name="center" value=".home.login.main" />
+    </definition>
+    <definition name=".home.login.main" template="/common/auth/login.jsp"/>
+
+    <!-- User logged in home -->
+    <definition name="home.logged" extends="layout.main">
+        <put-attribute name="title" value="UKTrain Home" />
+        <put-attribute name="body" value=".home.logged" />
+    </definition>
+    <definition name=".home.logged" extends="layout.1col">
+        <put-attribute name="center" value=".home.logged.main" />
+    </definition>
+    <definition name=".home.logged.main" template="/common/auth/home.jsp"/>
+    
+</tiles-definitions>

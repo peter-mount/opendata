@@ -81,12 +81,12 @@ public class RateMonitor<T>
 
     public static <T> RateMonitor<T> log( String label )
     {
-        return new RateMonitor<>( null, Level.INFO, label );
+        return new RateMonitor<>( null, Level.FINE, label );
     }
 
     public static <T> RateMonitor<T> log( Logger log, String label )
     {
-        return new RateMonitor<>( log, Level.INFO, label );
+        return new RateMonitor<>( log, Level.FINE, label );
     }
 
     public static <T> RateMonitor<T> log( Level level, String label )

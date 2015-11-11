@@ -15,25 +15,32 @@
  */
 package uk.trainwatch.web;
 
-import uk.trainwatch.web.servlet.AbstractHomeServlet;
-import javax.servlet.annotation.WebInitParam;
+import java.io.IOException;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
+import uk.trainwatch.web.servlet.AbstractServlet;
+import uk.trainwatch.web.servlet.ApplicationRequest;
 
 /**
  *
  * @author Peter T Mount
  */
-@WebServlet( name = "HomeServlet", urlPatterns =
-     {
-         // The uri's to map
-         "/home"
-}, initParams =
-     {
-         // The uri -> tile mapping
-         @WebInitParam( name = "/home", value = "homepage" )
-} )
+@WebServlet(name = "HomeServlet", urlPatterns = "/home")
 public class HomeServlet
-        extends AbstractHomeServlet
+        extends AbstractServlet
 {
+
+    @Override
+    protected void doGet( ApplicationRequest request )
+            throws ServletException,
+                   IOException
+    {
+        if( request.isSecure() ) {
+            request.renderTile( request.isAuthenticated() ? "home.logged" : "home.unlogged" );
+        }
+        else {
+            request.renderTile( "homepage" );
+        }
+    }
 
 }

@@ -19,6 +19,7 @@
         <module>feeds</module>
         <module>status</module>
         <module>uktrain</module>
+        <module>web-auth</module> 
         <module>web-cms</module> 
         <module>web-core</module>
         <module>web-ldb</module>

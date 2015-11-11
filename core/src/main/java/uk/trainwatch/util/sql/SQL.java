@@ -15,6 +15,11 @@
  */
 package uk.trainwatch.util.sql;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Date;
@@ -171,6 +176,33 @@ public class SQL
             }
         }
         return ps;
+    }
+
+    public static <T> T getSerializable( ResultSet rs, int col )
+            throws SQLException
+    {
+        try( ObjectInputStream is = new ObjectInputStream( rs.getBinaryStream( col ) ) ) {
+            return (T) is.readObject();
+        }
+        catch( IOException |
+               ClassNotFoundException ex ) {
+            throw new SQLException( ex );
+        }
+    }
+
+    public static void setBytes( PreparedStatement ps, int i, Serializable obj )
+            throws SQLException
+    {
+        try( ByteArrayOutputStream baos = new ByteArrayOutputStream() ) {
+            try( ObjectOutputStream os = new ObjectOutputStream( baos ) ) {
+                os.writeObject( obj );
+                os.flush();
+            }
+            ps.setBytes( i, baos.toByteArray() );
+        }
+        catch( IOException ex ) {
+            throw new SQLException( ex );
+        }
     }
 
     public static CallableStatement setParameters( CallableStatement ps, Object... args )

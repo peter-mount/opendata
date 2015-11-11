@@ -19,14 +19,13 @@ public class AbstractServlet
         extends HttpServlet
 {
 
-    @Override
-    protected final void doGet( HttpServletRequest request, HttpServletResponse response )
+    protected final void invoke( HttpServletRequest request, HttpServletResponse response, ServletTask task )
             throws ServletException,
                    IOException
     {
         ApplicationRequest req = new ApplicationRequest( getServletContext(), request, response );
         try {
-            doGet( req );
+            task.execute( req );
         }
         catch( HttpResponseException ex ) {
             ex.sendError( req );
@@ -35,6 +34,14 @@ public class AbstractServlet
             log( ex.getMessage(), ex );
             req.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage() );
         }
+    }
+
+    @Override
+    protected final void doGet( HttpServletRequest request, HttpServletResponse response )
+            throws ServletException,
+                   IOException
+    {
+        invoke( request, response, this::doGet );
     }
 
     protected void doGet( ApplicationRequest request )
@@ -49,17 +56,7 @@ public class AbstractServlet
             throws ServletException,
                    IOException
     {
-        ApplicationRequest req = new ApplicationRequest( getServletContext(), request, response );
-        try {
-            doPost( req );
-        }
-        catch( HttpResponseException ex ) {
-            ex.sendError( req );
-        }
-        catch( Exception ex ) {
-            log( ex.getMessage(), ex );
-            req.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage() );
-        }
+        invoke( request, response, this::doPost );
     }
 
     protected void doPost( ApplicationRequest request )
@@ -74,17 +71,7 @@ public class AbstractServlet
             throws ServletException,
                    IOException
     {
-        ApplicationRequest req = new ApplicationRequest( getServletContext(), request, response );
-        try {
-            doGet( req );
-        }
-        catch( HttpResponseException ex ) {
-            ex.sendError( req );
-        }
-        catch( Exception ex ) {
-            log( ex.getMessage(), ex );
-            req.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage() );
-        }
+        invoke( request, response, this::doHead );
     }
 
     protected void doHead( ApplicationRequest request )
@@ -92,6 +79,66 @@ public class AbstractServlet
                    IOException
     {
         doGet( request );
+    }
+
+    @Override
+    protected final void doPut( HttpServletRequest request, HttpServletResponse response )
+            throws ServletException,
+                   IOException
+    {
+        invoke( request, response, this::doPut );
+    }
+
+    protected void doPut( ApplicationRequest request )
+            throws ServletException,
+                   IOException
+    {
+        request.sendError( HttpServletResponse.SC_BAD_REQUEST );
+    }
+
+    @Override
+    protected final void doDelete( HttpServletRequest request, HttpServletResponse response )
+            throws ServletException,
+                   IOException
+    {
+        invoke( request, response, this::doDelete );
+    }
+
+    protected void doDelete( ApplicationRequest request )
+            throws ServletException,
+                   IOException
+    {
+        request.sendError( HttpServletResponse.SC_BAD_REQUEST );
+    }
+
+    @Override
+    protected final void doOptions( HttpServletRequest request, HttpServletResponse response )
+            throws ServletException,
+                   IOException
+    {
+        invoke( request, response, this::doOptions );
+    }
+
+    protected void doOptions( ApplicationRequest request )
+            throws ServletException,
+                   IOException
+    {
+        request.sendError( HttpServletResponse.SC_BAD_REQUEST );
+    }
+
+    @Override
+    protected final void doTrace( HttpServletRequest request, HttpServletResponse response )
+            throws ServletException,
+                   IOException
+    {
+        invoke( request, response, this::doTrace );
+    }
+
+    protected void doTrace( ApplicationRequest request )
+            throws ServletException,
+                   IOException
+    {
+        request.sendError( HttpServletResponse.SC_BAD_REQUEST );
     }
 
 }

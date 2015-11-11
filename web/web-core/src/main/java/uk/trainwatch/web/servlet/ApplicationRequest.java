@@ -6,20 +6,26 @@
 package uk.trainwatch.web.servlet;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.logging.Logger;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.apache.tiles.Definition;
 import org.apache.tiles.access.TilesAccess;
 import org.apache.tiles.request.ApplicationContext;
 import org.apache.tiles.request.servlet.ServletRequest;
 import org.apache.tiles.request.servlet.ServletUtil;
+import uk.trainwatch.util.CDIUtils;
 import uk.trainwatch.util.TimeUtils;
 
 /**
@@ -30,11 +36,15 @@ public class ApplicationRequest
         extends ServletRequest
 {
 
+    private static final Logger LOG = Logger.getLogger( ApplicationRequest.class.getName() );
+
+    @SuppressWarnings("LeakingThisInConstructor")
     public ApplicationRequest( ApplicationContext applicationContext,
                                HttpServletRequest request,
                                HttpServletResponse response )
     {
         super( applicationContext, request, response );
+        CDIUtils.inject( this );
     }
 
     public ApplicationRequest( ServletContext servletContext,
@@ -57,8 +67,37 @@ public class ApplicationRequest
      */
     public final boolean isSecure()
     {
-        return getRequest().
-                isSecure();
+        return getRequest().isSecure();
+    }
+
+    public final void ifSecure( ServletTask task )
+            throws ServletException,
+                   IOException
+    {
+        if( isSecure() ) {
+            task.execute( this );
+        }
+    }
+
+    public final void ifInsecure( ServletTask task )
+            throws ServletException,
+                   IOException
+    {
+        if( !isSecure() ) {
+            task.execute( this );
+        }
+    }
+
+    public final void ifSecureOrRedirect( ServletTask task )
+            throws ServletException,
+                   IOException
+    {
+        if( isSecure() ) {
+            task.execute( this );
+        }
+        else {
+            redirect( true );
+        }
     }
 
     /**
@@ -71,7 +110,11 @@ public class ApplicationRequest
     @Override
     public boolean isUserInRole( String role )
     {
-        return isSecure() && super.isUserInRole( role );
+        if( isSecure() ) {
+            User user = getUser();
+            return user != null && user.isUserInRole( role );
+        }
+        return false;
     }
 
     /**
@@ -83,23 +126,79 @@ public class ApplicationRequest
      */
     public final boolean isAuthenticated()
     {
-        return isSecure() && getRequest().
-                getUserPrincipal() != null;
+        // Disallow if not secure
+        if( !isSecure() ) {
+            return false;
+        }
+
+        HttpSession session = getRequest().getSession( false );
+        return session != null && session.getAttribute( User.KEY ) != null;
+    }
+
+    public final void ifAuthenticated( ServletTask task )
+            throws ServletException,
+                   IOException
+    {
+        if( isAuthenticated() ) {
+            task.execute( this );
+        }
+    }
+
+    public User getUser()
+    {
+        HttpSession session = getRequest().getSession( false );
+        return session == null ? null : (User) session.getAttribute( User.KEY );
+    }
+
+    public User login( User user )
+    {
+        if( isSecure() ) {
+            HttpSession session = getRequest().getSession( true );
+            session.setAttribute( User.KEY, user );
+            return user;
+        }
+        return null;
+    }
+
+    public void logout( HttpSession session )
+    {
+        if( isSecure() ) {
+            session.removeAttribute( User.KEY );
+        }
     }
 
     public final void redirect( String path )
             throws IOException
     {
-        StringBuilder s = new StringBuilder();
-        if( isSecure() ) {
-            s.append( "https://" ).
-                    append( getServerName() );
-        }
-        s.append( getContextPath() ).
-                append( path );
+        getResponse().sendRedirect( path );
+    }
 
-        getResponse().
-                sendRedirect( s.toString() );
+    public final void redirect( boolean secure )
+            throws IOException
+    {
+        redirect( getRequest().getRequestURL().toString(), secure );
+    }
+
+    public final void redirect( String path, boolean secure )
+            throws IOException
+    {
+        try {
+            String p = path;
+
+            if( p.startsWith( "http:" ) || p.startsWith( "https:" ) ) {
+                URI uri = new URI( path );
+                p = uri.getPath();
+            }
+
+            if( p.startsWith( getContextPath() ) ) {
+                p = p.substring( getContextPath().length() );
+            }
+
+            redirect( new URI( secure ? "https" : "http", getServerName(), p, null ).toString() );
+        }
+        catch( URISyntaxException ex ) {
+            throw new IOException( ex );
+        }
     }
 
     public final String getContextPath()

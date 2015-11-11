@@ -1,0 +1,7 @@
+<hazelcast>
+    <cache name="UserCache">
+        <statistics-enabled>true</statistics-enabled>
+        <management-enabled>false</management-enabled>
+        <expiry-policy-factory class-name="uk.trainwatch.web.auth.UserExpiryPolicyFactory"/>
+    </cache>
+</hazelcast>

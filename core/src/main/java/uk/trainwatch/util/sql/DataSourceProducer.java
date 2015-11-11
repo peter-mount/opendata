@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -39,8 +38,6 @@ public class DataSourceProducer
 {
 
     private static volatile DataSourceProducer instance;
-
-    private static final Logger LOG = Logger.getAnonymousLogger();
 
     private static boolean useJndi;
     private final Map<String, DataSource> dataSources = new ConcurrentHashMap<>();
@@ -93,9 +90,7 @@ public class DataSourceProducer
     @Database("")
     DataSource getDataSource( InjectionPoint injectionPoint )
     {
-        LOG.severe( injectionPoint.toString() );
         for( Annotation a: injectionPoint.getQualifiers() ) {
-            LOG.severe( a.toString() );
             if( a instanceof Database ) {
                 return getDataSource( ((Database) a).value() );
             }

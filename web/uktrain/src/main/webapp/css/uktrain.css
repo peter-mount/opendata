@@ -484,7 +484,8 @@ div.homebox .ui-widget label {
     text-align: right;
 }
 
-div.homebox .ui-widget input[type="text"] {
+div.homebox .ui-widget input[type="text"],
+div.homebox .ui-widget input[type="password"] {
     display: inline-block;
     width: 12em;
     max-width: 12em;

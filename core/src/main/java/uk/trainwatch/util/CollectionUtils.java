@@ -19,7 +19,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -288,4 +290,45 @@ public class CollectionUtils
             col.forEach( c );
         }
     }
+
+    /**
+     * Wrap a legacy {@link Enumeration} into an Iterable.
+     * <p>
+     * @param <T>
+     * @param e
+     * <p>
+     * @return
+     */
+    public static <T> Iterable<T> iterable( Enumeration<T> e )
+    {
+        return () -> iterator( e );
+    }
+
+    /**
+     * Wrap a legacy {@link Enumeration} into an Iterator
+     * <p>
+     * @param <T>
+     * @param e
+     * <p>
+     * @return
+     */
+    public static <T> Iterator<T> iterator( Enumeration<T> e )
+    {
+        return new Iterator<T>()
+        {
+
+            @Override
+            public boolean hasNext()
+            {
+                return e.hasMoreElements();
+            }
+
+            @Override
+            public T next()
+            {
+                return e.nextElement();
+            }
+        };
+    }
+
 }
