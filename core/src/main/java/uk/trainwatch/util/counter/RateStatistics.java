@@ -20,17 +20,11 @@ import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Deque;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ScheduledFuture;
-import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.IntSupplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -38,15 +32,11 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 import javax.sql.DataSource;
-import uk.trainwatch.util.TimeUtils;
 import uk.trainwatch.util.sql.Database;
 import uk.trainwatch.util.sql.SQL;
 
@@ -113,13 +103,15 @@ public class RateStatistics
 
     private void persist( Stat stat, int value )
     {
-        try( Connection con = dataSource.getConnection();
-             PreparedStatement ps = SQL.prepare( con, "INSERT INTO report.stats (tm,name,value,host) VALUES (now(),?,?,?)" ) ) {
-            SQL.executeUpdate( ps, stat.getName(), value, hostname );
-            LOG.log( Level.INFO, () -> stat.getName() + "=" + value );
-        }
-        catch( Throwable ex ) {
-            LOG.log( Level.SEVERE, null, ex );
+        LOG.log( Level.FINE, () -> stat.getName() + "=" + value );
+        if( value > 0 ) {
+            try( Connection con = dataSource.getConnection();
+                 PreparedStatement ps = SQL.prepare( con, "INSERT INTO report.stats (tm,name,value,host) VALUES (now(),?,?,?)" ) ) {
+                SQL.executeUpdate( ps, stat.getName(), value, hostname );
+            }
+            catch( Throwable ex ) {
+                LOG.log( Level.SEVERE, null, ex );
+            }
         }
     }
 
