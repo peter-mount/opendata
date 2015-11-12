@@ -1477,13 +1477,13 @@ var SignalAreaMap = (function () {
         y1=y1+5;
         y2=y1+1;
         
-        a = SignalMap.line([],0,y1,19,y1);
-        a = SignalMap.line(a,0,y2,19,y2);
+        a = SignalMap.line([],0,y1,29,y1);
+        a = SignalMap.line(a,0,y2,29,y2);
         // preston pk
         a = SignalMap.line(a,6.25,y1,6.5,y2);
         a = SignalMap.line(a,6.75,y2,7,y2+1);
         a = SignalMap.buffer(a,5,y2+1);
-        a = SignalMap.line(a,5,y2+1,19,y2+1);
+        a = SignalMap.line(a,5,y2+1,29,y2+1);
         a = SignalMap.line(a,10,y1,10.25,y2);
         a = SignalMap.line(a,10.25,y2+1,10.5,y2);
         a = SignalMap.line(a,10.75,y2,11,y2+1);
@@ -1544,6 +1544,19 @@ var SignalAreaMap = (function () {
         // 1255
         a = SignalMap.line(a,20,y2+2,20.75,y2+2);
         a = SignalMap.line(a,20.75,y2+2,21,y2+1);
+        
+        // Brighton to Falmer & ZE
+        a = SignalMap.line(a,20,y1-6,28,y1-6);
+        a = SignalMap.line(a,19.5,y1-4,20,y1-6);
+        a = SignalMap.line(a,19.5,y1-4,19.5,y1-3);
+        a = SignalMap.line(a,19.5,y1-3,20,y1-1);
+        a = SignalMap.line(a,20,y1-1,28,y1-1);
+        
+        a = SignalMap.line(a,20.25,y1-5,28,y1-5);
+        a = SignalMap.line(a,20,y1-4,20.25,y1-5);
+        a = SignalMap.line(a,20,y1-3,20,y1-4);
+        a = SignalMap.line(a,20,y1-3,20.25,y1-2);
+        a = SignalMap.line(a,20.25,y1-2,28,y1-2);
         
         map.path(a);
         
@@ -1644,6 +1657,49 @@ var SignalAreaMap = (function () {
         map.berth(20,y2+5,'K279');
         map.berthr(20,y2+6,'0670');
         map.berthl(20,y2+7,'0669');
+        
+        // Brighton
+        map.berthr(21,y1-2,'0700');
+        
+        map.berthl(22,y2+1,'1262');
+        map.berthr(22,y2+4,'1277');
+        map.berthr(22,y2+6,'0668');
+        
+        map.berthr(23,y2+1,'1267');
+        
+        // Brighton to Falmer & ZE
+        map.station(21,y1-3.5,'London Road');
+        map.platform(20.5,y1-6.5,1,'','2');
+        map.platform(20.5,y1-4.5,1,'1','');
+        map.berthr(21,y1-6,'0701');
+        map.berthl(21,y1-5,'0702');
+        
+        map.station(22.25,y1-3.5,'Moulsecoomb');
+        map.platform(21.75,y1-6.5,1,'','2');
+        map.platform(21.75,y1-4.5,1,'1','');
+        map.berthr(22.25,y1-6,'0705');
+        map.berthl(22.25,y1-5,'0704');
+        
+        map.station(23.75,y1-3.5,'Falmer');
+        map.platform(23.25,y1-6.5,1,'','2');
+        map.platform(23.25,y1-4.5,1,'1','');
+        map.berthr(23.75,y1-6,'0709');
+        map.berthl(23.75,y1-5,'0708');
+        
+        map.berthl(24.75,y1-5,'0710');
+        map.berthl(25.75,y1-5,'0714');
+        
+        a = SignalMap.line([],26.375,y1-6.75,26.375,y1-4.5);
+        map.path(a).attr({fill: '#f66',stroke: '#f66','stroke-dasharray': '5,5'});
+        map.station(28,y1-4.7,'ZE').attr({fill: '#f66'});
+        map.station(26.375,y1-6.3,'TB-ZE').attr({fill: '#f66'});
+        
+        map.berthr(27,y1-6,'E005');
+        map.berthl(27,y1-5,'E008');
+        
+//        a=[];
+  //      map.path(a);
+        
     };
 
     return SignalAreaMap;
