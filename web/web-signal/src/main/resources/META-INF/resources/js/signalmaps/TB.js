@@ -1479,6 +1479,37 @@ var SignalAreaMap = (function () {
         
         a = SignalMap.line([],0,y1,19,y1);
         a = SignalMap.line(a,0,y2,19,y2);
+        // preston pk
+        a = SignalMap.line(a,6.25,y1,6.5,y2);
+        a = SignalMap.line(a,6.75,y2,7,y2+1);
+        a = SignalMap.buffer(a,5,y2+1);
+        a = SignalMap.line(a,5,y2+1,19,y2+1);
+        a = SignalMap.line(a,10,y1,10.25,y2);
+        a = SignalMap.line(a,10.25,y2+1,10.5,y2);
+        a = SignalMap.line(a,10.75,y2,11,y2+1);
+        a = SignalMap.line(a,11,y2,11.25,y1);
+        
+        // branch towards Hove
+        a = SignalMap.line(a,11.5,y2,12,y2+2);
+        a = SignalMap.line(a,12,y2+2,14,y2+2);
+        a = SignalMap.line(a,14,y2+2,14.25,y2+3);
+        a = SignalMap.line(a,14.25,y2+3,14.25,y2+4);
+        a = SignalMap.line(a,14.25,y2+4,14,y2+5);
+        a = SignalMap.line(a,14,y2+5,7.25,y2+5);
+        a = SignalMap.buffer(a,7.25,y2+5);
+        
+        a = SignalMap.line(a,11.25,y2+1,11.75,y2+3);
+        a = SignalMap.line(a,11.75,y2+3,13.75,y2+3);
+        a = SignalMap.line(a,13.75,y2+3,14,y2+3.5);
+        a = SignalMap.line(a,14,y2+3.5,13.75,y2+4);
+        a = SignalMap.line(a,13.75,y2+4,12,y2+4);
+        a = SignalMap.line(a,12,y2+4,11.75,y2+5);
+        
+        // Portslade to hove
+        a = SignalMap.line(a,2,y2+6,20,y2+6);
+        a = SignalMap.line(a,2,y2+7,20,y2+7);
+        a = SignalMap.line(a,7.75,y2+6,8,y2+5);
+        a = SignalMap.line(a,7.25,y2+7,7.5,y2+6);
         
         map.path(a);
         
@@ -1500,7 +1531,49 @@ var SignalAreaMap = (function () {
         
         map.berthr(6,y2+1,'1241');
         
-        // TODO preston Park
+        map.station(8.5,y2+2.5,'Preston Park');
+        map.platform(7.5,y1-.5,2,'','3');
+        map.platform(7.5,y2+.5,2,'2','1');
+        map.berthl(8,y2,'0422');
+        map.berthl(8,y2+1,'0420');
+        map.berthr(9,y1,'0425');
+        map.berthr(9,y2,'0427');
+        map.berthr(9,y2+1,'0429');
+        
+        // branch towards hove
+        map.berthl(13,y2+3,'0426');
+        map.berthr(13,y2+4,'0674');
+        map.berthl(13,y2+5,'0675');
+        
+        // Portslade to Hove
+        map.station(3,y2+8.5,'Portslade');
+        map.platform(2.5,y2+5.5,1,'','1');
+        map.platform(2.5,y2+7.5,1,'2','');
+        map.berthr(3,y2+6,'N002');
+        map.berthl(3,y2+7,'N001');
+        a = SignalMap.line([],4,y2+4.75,4,y2+7.75);
+        map.path(a).attr({fill: '#f66',stroke: '#f66','stroke-dasharray': '5,5'});
+        map.station(2,y2+7.3,'LA').attr({fill: '#f66'});
+        map.station(4,y2+5.25,'LA-TB').attr({fill: '#f66'});
+
+        map.berthr(4.75,y2+6,'0686');
+
+        map.station(6.25,y2+8.5,'Aldrington');
+        map.platform(5.75,y2+5.5,1,'','1');
+        map.platform(5.75,y2+7.5,1,'2','');
+        map.berthr(6.25,y2+6,'0684');
+        
+        map.station(9.5,y2+8.5,'Hove');
+        map.platform(8.5,y2+5.5,2,'1','2');
+        map.platform(8.5,y2+7.5,2,'3','');
+        map.berthl(9,y2+5,'0681');
+        map.berthl(9,y2+6,'0679');
+        map.berthl(9,y2+7,'0677');
+        map.berthr(10,y2+4,'0676');
+        map.berthr(10,y2+5,'0678');
+        map.berthr(10,y2+6,'0680');
+        map.berthr(10,y2+7,'0682');
+        
     };
 
     return SignalAreaMap;
