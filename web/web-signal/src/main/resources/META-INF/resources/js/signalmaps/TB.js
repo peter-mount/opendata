@@ -22,7 +22,7 @@ var SignalAreaMap = (function () {
     }
 
     SignalAreaMap.width = 30;
-    SignalAreaMap.height = 120; // 44 purley
+    SignalAreaMap.height = 130;
 
     SignalAreaMap.plot = function (map) {
 
@@ -1505,11 +1505,45 @@ var SignalAreaMap = (function () {
         a = SignalMap.line(a,13.75,y2+4,12,y2+4);
         a = SignalMap.line(a,12,y2+4,11.75,y2+5);
         
+        a = SignalMap.line(a,11,y2+6,11.25,y2+5);
+        a = SignalMap.line(a,11.5,y2+5,11.75,y2+6);
+        a = SignalMap.line(a,11.5,y2+6,11.25,y2+7);
+        a = SignalMap.line(a,12,y2+6,12.25,y2+5);
+        a = SignalMap.line(a,12.25,y2+6,12.5,y2+7);
+        
+        // Hove yard
+        a = SignalMap.line(a,10.75,y2+4,11,y2+5);
+        a = SignalMap.line(a,8.5,y2+4,10.75,y2+4);
+        
         // Portslade to hove
         a = SignalMap.line(a,2,y2+6,20,y2+6);
         a = SignalMap.line(a,2,y2+7,20,y2+7);
         a = SignalMap.line(a,7.75,y2+6,8,y2+5);
         a = SignalMap.line(a,7.25,y2+7,7.5,y2+6);
+        
+        // Lovers Walk Depot
+        a = SignalMap.buffer(a,11.25,y1-1);
+        a = SignalMap.line(a,11.25,y1-1,19.75,y1-1);
+        a = SignalMap.buffer(a,19.75,y1-1);
+        
+        a = SignalMap.buffer(a,12.25,y1-2);
+        a = SignalMap.line(a,12.25,y1-2,13.75,y1-2);
+        a = SignalMap.line(a,13.75,y1-2,14,y1-1);
+        a = SignalMap.line(a,14,y2,14.25,y1);
+        a = SignalMap.line(a,14.5,y1,14.75,y1-1);
+        a = SignalMap.line(a,17.75,y1-1,18,y1);
+        
+        // 1246
+        a = SignalMap.line(a,15,y2+1,15.25,y2+2);
+        a = SignalMap.line(a,15.25,y2+2,16,y2+2);
+        
+        // 1247
+        a = SignalMap.line(a,17,y2+2,17.75,y2+2);
+        a = SignalMap.line(a,17.75,y2+2,18,y2+1);
+        
+        // 1255
+        a = SignalMap.line(a,20,y2+2,20.75,y2+2);
+        a = SignalMap.line(a,20.75,y2+2,21,y2+1);
         
         map.path(a);
         
@@ -1563,6 +1597,7 @@ var SignalAreaMap = (function () {
         map.platform(5.75,y2+7.5,1,'2','');
         map.berthr(6.25,y2+6,'0684');
         
+        map.station(8,y2+4.3,'Hove Yard');
         map.station(9.5,y2+8.5,'Hove');
         map.platform(8.5,y2+5.5,2,'1','2');
         map.platform(8.5,y2+7.5,2,'3','');
@@ -1573,7 +1608,42 @@ var SignalAreaMap = (function () {
         map.berthr(10,y2+5,'0678');
         map.berthr(10,y2+6,'0680');
         map.berthr(10,y2+7,'0682');
+
+        // Lovers Walk Depot
+        map.station(17.5,y2+5,'Lovers Walk Depot');
+        map.berthr(12,y1-1,'1251');
         
+        map.berthr(13,y1-2,'1259');
+        map.berthr(13,y1-1,'1253');
+        map.berthr(13,y1,'0431');
+        map.berthl(13,y2,'0430');
+        map.berthl(13,y2+1,'1242');
+        
+        map.berthr(14,y2+1,'1243');
+        
+        map.berthl(16,y1,'0436');
+        map.berthl(16,y2,'0434');
+        map.berthl(16,y2+2,'1246');
+        map.berth(16,y2+3,'K246');
+        
+        map.berthr(17,y1-1,'1263');
+        map.berthr(17,y1,'0436');
+        map.berthr(17,y2+2,'1247');
+        map.berth(17,y2+3,'K247');
+        map.berthr(17,y2+6,'0672');
+        map.berthl(17,y2+7,'0673');
+        
+        map.berthl(19,y1-1,'1264');
+        map.berthl(19,y2+1,'1250');
+
+        map.berthr(20,y2+1,'1257');
+        map.berthr(20,y2+2,'1255');
+        map.berth(20,y2+3,'K255');
+        
+        map.berthr(20,y2+4,'1279');
+        map.berth(20,y2+5,'K279');
+        map.berthr(20,y2+6,'0670');
+        map.berthl(20,y2+7,'0669');
     };
 
     return SignalAreaMap;
