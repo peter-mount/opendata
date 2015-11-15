@@ -5,12 +5,14 @@
 --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<c:choose>
-    <c:when test="${not empty sessionScope.user}">
-        Welcome <a href="/home">${sessionScope.user.name}</a>
-        <a href="/logout">Logout</a>
-    </c:when>
-    <c:otherwise>
-        <a href="/login">Login</a>
-    </c:otherwise>
-</c:choose>
+<c:if test="${pageContext.request.secure}">
+    <c:choose>
+        <c:when test="${not empty sessionScope.user}">
+            Welcome <a href="/home">${sessionScope.user.name}</a>
+            <a href="/logout">Logout</a>
+        </c:when>
+        <c:otherwise>
+            <a href="/login">Login</a>
+        </c:otherwise>
+    </c:choose>
+</c:if>
