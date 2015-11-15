@@ -264,7 +264,7 @@
 
     <div class="ldb-row">
         <div class="ldb-label">RID</div>
-        <div class="ldb-value">${train.rid}</div>
+        <div class="ldb-value"><a href="//uktra.in/rtt/train/${train.rid}">${train.rid}</a></div>
     </div>
 
 </div>
