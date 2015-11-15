@@ -1,0 +1,39 @@
+svg path {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+svg path.berth {
+    fill: #fff;
+}
+
+svg path.berthoccupied {
+    fill: #ff0;
+}
+
+svg text {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    text-anchor: middle;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: normal;
+    font-stretch: normal;
+    font-size: 10px;
+    line-height: normal;
+    font-family: Arial;
+}
+
+svg tspan {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.sig10 {font-size: 10px;}
+.sig8 {font-size: 8px;}
+.sig7 {font-size: 7px;}
+
+svg text.berth {
+    fill: #999;
+}
+
+svg text.berthoccupied {
+    fill: #000;
+}

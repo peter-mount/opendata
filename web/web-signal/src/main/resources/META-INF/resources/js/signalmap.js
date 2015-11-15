@@ -30,6 +30,13 @@ var Berth = (function () {
         //ary = ary.concat(['L', x1 - w, y1 - 8]);
         this.rect = paper.path(ary.concat(['Z']));
         this.text = paper.text(x1, y1, name).attr('font-size', '10px');
+        
+        this.rect.node.setAttribute('id','b_'+name);
+        this.rect.node.setAttribute('class','berth');
+        
+        this.text.node.setAttribute('id','t_'+name);
+        this.text.node.setAttribute('def',name);
+        this.text.node.setAttribute('class','berth');
         this.clear();
     }
 
