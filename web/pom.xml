@@ -30,7 +30,6 @@
         <module>web-taglib</module>
         <module>web-timetable</module>
         <module>web-train</module>
-        <module>web-workbench</module>
         <module>web-rest</module>
         <module>web-rtt</module>
         <module>web-reference</module>
