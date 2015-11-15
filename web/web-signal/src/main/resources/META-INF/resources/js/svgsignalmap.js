@@ -46,8 +46,8 @@ var SignalMap = (function () {
             // substr(2) to strip t_ from ID's
             var id = v.id.substr(2);
             map.text[id].empty().append(id);
-            map.berths[id].attr('berth berthempty');
-            map.rect[id].attr('berth berthempty');
+            map.berths[id].attr('class', 'berth berthempty');
+            map.rect[id].attr('class', 'berth berthempty');
         });
 
         // Plot current berths
