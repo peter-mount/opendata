@@ -6,10 +6,22 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<div id="map">
-    <c:if  test="${empty param.js}">
-        <c:import url="/common/signal/svg/${area.area}.svg"/>
-    </c:if>
+<div class="center">
+    <table class="wikitable">
+        <tr>
+            <th style="text-align: right">Signal Map Area</th>
+            <td>${area.area}</td>
+        </tr>
+        <tr>
+            <th style="text-align: right">Name</th>
+            <td>${area.comment}</td>
+        </tr>
+    </table>
+    <div id="map">
+        <c:if  test="${empty param.js}">
+            <c:import url="/common/signal/svg/${area.area}.svg"/>
+        </c:if>
+    </div>
 </div>
 <c:choose>
     <c:when test="${not empty param.js}">
@@ -53,7 +65,7 @@
                 $('#map svg path').each(fix);
                 $('#map svg text').each(fix);
                 $('#map svg rect').each(fix);
-                $('#map svg tspan').attr('style','');
+                $('#map svg tspan').attr('style', '');
                 // Run mode, ?js=test will run with live data, otherwise just show the map
             <c:choose>
                 <c:when test="${param.js eq 'test'}">map.update(map);</c:when>
