@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -691,4 +692,14 @@ public class JsonUtils
 
         };
     }
+
+    /**
+     * Combine two JsonArrayBuilders - used in {@link Stream#reduce(java.lang.Object, java.util.function.BiFunction, java.util.function.BinaryOperator)}
+     * operations.
+     */
+    public static BinaryOperator<JsonArrayBuilder> ARRAY_COMBINER = ( a, b ) -> {
+        b.build().forEach( a::add );
+        return a;
+    };
+
 }

@@ -60,3 +60,9 @@
 /web/feeds/target/
 /web/status/target/
 /web/web-auth/target/
+/web/web-cms-persistence/target/
+/web/cms/web-cms/target/
+/web/cms/web-mediawiki/target/
+/web/cms/web-cms-retriever/target/
+/web/cms/web-cms-persistence/target/
+/web/cms/web-static/target/

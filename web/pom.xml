@@ -15,15 +15,14 @@
     <description>Various web applications that use the open data</description>
     
     <modules>
+        <module>cms</module> 
         <module>departureboards</module>
         <module>feeds</module>
         <module>status</module>
         <module>uktrain</module>
         <module>web-auth</module> 
-        <module>web-cms</module> 
         <module>web-core</module>
         <module>web-ldb</module>
-        <module>web-mediawiki</module>
         <module>web-performance</module>
         <module>web-signal</module>
         <module>web-station</module>
