@@ -30,13 +30,15 @@ public class LinkFixer
                             replaceAll( "href=\"/cms/index.php/", "href=\"/" ).
                             // Remove nofollow tag
                             replaceAll( " rel=\"nofollow\"", "" ).
-                            // Remove unavailable page links leaving the text present
-                            replaceAll( "<a href=\"/cms/index.php?.+?>(.+?)</a>", "$1" ).
+                            // Remove unavailable page links leaving just the text present
                             replaceAll( "<a href=\"/.+?&amp;.*?action=edit.*?>(.+?)</a>", "$1" ).
                             // Fix images links
                             replaceAll( "src=\"/cms/images", "src=\"/images" ).
                             // Strip image links
-                            replaceAll( "<a href=\"/File:.+?>(.+?)</a>", "$1" )
+                            replaceAll( "<a href=\"/File:.+?>(.+?)</a>", "$1" ).
+                            // Fix links that appear to use index.php
+                            replaceAll( "<a href=\"/index.php[/\\?](.+?)\".*?>(.+?)</a>", "<a href=\"$1\">$2</a>" ).
+                            replaceAll( "<a href=\"/cms/index.php[/\\?](.+?)\".*?>(.+?)</a>", "<a href=\"$1\">$2</a>" )
                     ).
                     collect( Collectors.toList() )
             );

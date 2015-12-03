@@ -58,6 +58,43 @@ mw.loader.load(["mediawiki.page.startup","mediawiki.legacy.wikibits","mediawiki.
 <p><a href="/cms/index.php?title=PI/About" >About</a></p>
 <p><a href="/cms/index.php/PI/About" >About</a></p>
 <p><a href="/cms/index.php?title=PI/About" >About</a></p>
+<!-- Sometimes we get /index.php instead -->
+<p><a href="/index.php?title=PI/About" >About</a></p>
+<p><a href="/index.php/PI/About" >About</a></p>
+<p><a href="/index.php?title=PI/About" >About</a></p>
+
+<!-- This entire table fails -->
+<table class="wikitable">
+
+<tr>
+<th> Section name </th>
+<th> Description
+</th></tr>
+<tr>
+<td> <a href="/index.php?title=PI/Doc/ref/configuration/annotation&amp;action=edit&amp;redlink=1" class="new" title="PI/Doc/ref/configuration/annotation (page does not exist)">annotation</a> </td>
+<td> Defines the text, font &amp; colours used when annotating images
+</td></tr>
+<tr>
+<td> <a href="/index.php?title=PI/Doc/ref/configuration/camera&amp;action=edit&amp;redlink=1" class="new" title="PI/Doc/ref/configuration/camera (page does not exist)">camera</a> </td>
+<td> Configures the camera
+</td></tr>
+<tr>
+<td> <a href="/index.php?title=PI/Doc/ref/configuration/clouds&amp;action=edit&amp;redlink=1" class="new" title="PI/Doc/ref/configuration/clouds (page does not exist)">clouds</a> </td>
+<td> Configures the cloud sensor works
+</td></tr>
+<tr>
+<td> <a href="/index.php?title=PI/Doc/ref/configuration/logging&amp;action=edit&amp;redlink=1" class="new" title="PI/Doc/ref/configuration/logging (page does not exist)">logging</a> </td>
+<td> Configures logging
+</td></tr>
+<tr>
+<td> <a href="/index.php/PI/Doc/ref/configuration/observatory" title="PI/Doc/ref/configuration/observatory">observatory</a> </td>
+<td> Defines the weather stations location
+</td></tr>
+<tr>
+<td> <a href="/index.php?title=PI/Doc/ref/configuration/webserver&amp;action=edit&amp;redlink=1" class="new" title="PI/Doc/ref/configuration/webserver (page does not exist)">webserver</a> </td>
+<td> Configures the embedded webserver
+</td></tr></table>
+
 <!-- 
 NewPP limit report
 Preprocessor visited node count: 1/1000000
