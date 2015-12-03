@@ -8,6 +8,8 @@ package uk.trainwatch.web.cms;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -19,11 +21,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.inject.Inject;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
-import uk.trainwatch.util.config.Configuration;
-import uk.trainwatch.util.config.JNDIConfig;
+import org.apache.commons.configuration.Configuration;
+import uk.trainwatch.util.CDIUtils;
+import uk.trainwatch.util.config.ConfigurationService;
 import uk.trainwatch.web.util.CacheControl;
 import uk.trainwatch.web.util.ImageUtils;
 
@@ -36,6 +40,9 @@ public enum StaticContentManager
 {
 
     INSTANCE;
+
+    @Inject
+    private ConfigurationService configurationService;
 
     private static final String FILE = "File:";
     private static final int FILE_LENGTH = FILE.length();
@@ -56,7 +63,10 @@ public enum StaticContentManager
      */
     public static final String PAGE_FILE = "pageFile";
     // FIXME remove this hardcoding
-    protected final File baseDirectory;
+    protected File baseDirectory;
+    private Configuration config;
+    private String hostname;
+
     /**
      * Pattern to extract page title
      */
@@ -73,12 +83,32 @@ public enum StaticContentManager
         catch( Exception ex ) {
             // Do nothing?
         }
+
+        CDIUtils.inject( this );
+        this.config = configurationService.getPrivateConfiguration( "cms" );
+
+        hostname = getHostname();
+        baseDirectory = new File( getHostString( "basedir" ) );
     }
 
-    private StaticContentManager()
+    private static String getHostname()
     {
-        Configuration config = JNDIConfig.INSTANCE;
-        baseDirectory = new File( config.get( "mediawiki.basedir" ) );
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        }
+        catch( UnknownHostException ex ) {
+            return "localHost";
+        }
+    }
+
+    public String getString( String k )
+    {
+        return config.getString( k );
+    }
+
+    public String getHostString( String k )
+    {
+        return config.getString( k + "." + hostname, getString( k ) );
     }
 
     private String getPage( File f )

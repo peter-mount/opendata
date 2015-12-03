@@ -43,6 +43,7 @@
 
         <!-- The various "Applications" that are now deployed here via CDI -->
         <!--
+        -->
         <dependency>
             <groupId>uk.trainwatch.apps</groupId>
             <artifactId>darwin</artifactId>
@@ -54,7 +55,6 @@
             <artifactId>networkrail</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        -->
         
         <dependency>
             <groupId>uk.trainwatch.apps</groupId>
