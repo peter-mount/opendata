@@ -57,10 +57,10 @@ public class LinkFixerTest
                 .andThen( new LinkFixer() );
 
         // To enable debugging then add this which will dump the final result to the console
-//        pipeline = pipeline.andThen( page -> {
-//            page.getContent().forEach( System.out::println );
-//            return page;
-//        } );
+        pipeline = pipeline.andThen( page -> {
+            page.getContent().forEach( System.out::println );
+            return page;
+        } );
     }
 
     /**
@@ -98,7 +98,7 @@ public class LinkFixerTest
             throws Exception
     {
         testStrip( badlink );
-        testStrip( document );
+//        testStrip( document );
     }
 
     private void testStrip( String doc )

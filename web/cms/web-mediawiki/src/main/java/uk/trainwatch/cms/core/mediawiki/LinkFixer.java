@@ -26,6 +26,8 @@ public class LinkFixer
                     map( l -> l.
                             // Remove MediaWiki view prefix
                             replaceAll( "href=\"/cms/index.php\\?title=", "href=\"/" ).
+                            replaceAll( "href=\"/cms/index.php&amp;title=", "href=\"/" ).
+                            replaceAll( "href=\"/cms/index.php/", "href=\"/" ).
                             // Remove nofollow tag
                             replaceAll( " rel=\"nofollow\"", "" ).
                             // Remove unavailable page links leaving the text present

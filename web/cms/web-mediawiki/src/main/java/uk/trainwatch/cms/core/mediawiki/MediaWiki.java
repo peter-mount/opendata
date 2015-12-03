@@ -7,6 +7,7 @@ package uk.trainwatch.cms.core.mediawiki;
 
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import javax.enterprise.context.ApplicationScoped;
 import uk.trainwatch.cms.CmsComponent;
 import uk.trainwatch.cms.core.Image;
@@ -65,8 +66,16 @@ public class MediaWiki
 
         rabbit.queueDurableConsumer( CMS_CLEAN_PAGE, CMS_CLEAN_PAGE, properties,
                                      Page.read
+                                     // Log what page we are processing
+                                     .andThen( p -> {
+                                         LOG.log( Level.INFO, () -> "Processing " + p.getName() );
+                                         return p;
+                                     } )
+                                     // These populate the page
                                      .andThen( new TitleExtractor() )
                                      .andThen( new ContentExtractor() )
+                                     // Process the extracted content
+                                     .andThen( new CommentStripper() )
                                      .andThen( new ArticleFormat() )
                                      .andThen( new LinkFixer() ),
                                      pagePublisher

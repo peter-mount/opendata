@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.BodyTagSupport;
@@ -29,6 +31,8 @@ public class PageTag
     private String page;
     private boolean strip = true;
 
+    private static final Logger LOG = Logger.getLogger( PageTag.class.getName() );
+
     @Override
     public void release()
     {
@@ -45,19 +49,21 @@ public class PageTag
 
             Map<String, Object> req = new HashMap<>();
             if( StaticContentManager.INSTANCE.getPage( page, req ) ) {
-                String page = Objects.toString( req.get( StaticContentManager.PAGE ), "" );
+                String content = Objects.toString( req.get( StaticContentManager.PAGE ), "" );
 
                 // Usually enabled, strip article elements as this is usually not the default article in the page.
                 if( strip ) {
-                    if( page.startsWith( STRIP_START ) ) {
-                        page = page.substring( STRIP_START_LENGTH );
+                    if( content.startsWith( STRIP_START ) ) {
+                        content = content.substring( STRIP_START_LENGTH );
                     }
-                    if( page.endsWith( STRIP_END ) ) {
-                        page = page.substring( 0, page.length() - STRIP_END_LENGTH );
+                    if( content.endsWith( STRIP_END ) ) {
+                        content = content.substring( 0, content.length() - STRIP_END_LENGTH );
                     }
                 }
 
-                w.write( page );
+                LOG.log( Level.INFO, content );
+
+                w.write( content );
             }
         }
         catch( IOException ex ) {

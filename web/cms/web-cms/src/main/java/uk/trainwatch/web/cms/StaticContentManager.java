@@ -74,7 +74,7 @@ public enum StaticContentManager
      */
     private final Pattern titlePattern = Pattern.compile( "<title>(.+)</title>" );
 
-    private volatile Properties p;
+    volatile Properties p;
     private ServletContext servletContext;
 
     public void init( ServletConfig servletConfig )
@@ -149,7 +149,7 @@ public enum StaticContentManager
      * Retrieve a static page from the cms
      * <p>
      * @param requestedPath Page name
-     * @param req  Map to store the page
+     * @param req           Map to store the page
      * <p>
      * @return true if the page was found & rendered, false if not found
      * <p>
@@ -158,38 +158,48 @@ public enum StaticContentManager
     public boolean getPage( String requestedPath, Map<String, Object> req )
             throws IOException
     {
-        final String path = getProperty( "cms.prefix", "" ) + requestedPath;
+        final String prefix = getProperty( "cms.prefix", "" );
+        final String path = prefix + requestedPath;
         File f = new File( baseDirectory, path.substring( 0, 1 ) + "/" + path + "/index.shtml" );
 
         LOG.log( Level.FINE, () -> "getPage \"" + path + "\" = " + f.getPath() );
 
         if( f.exists() && f.isFile() && f.canRead() ) {
             LOG.log( Level.FINE, () -> "getPage \"" + path + "\" found" );
+            req.put( PAGE_FILE, f );
 
             String page = getPage( f );
 
             Matcher m = titlePattern.matcher( page );
             req.put( PAGE_TITLE, m.matches() ? m.group( 1 ) : f.getParentFile().getName() );
 
-            int i = page.indexOf( ARTICLE_START );
-            int j = page.indexOf( ARTICLE_END );
-            if( i > 0 ) {
-                page = page.substring( i, j + ARTICLE_END_LENGTH );
-            }
-
-            // Fix external links in the cms that points to it so we point to the real site
-            page = page.replaceAll( "//((.+?trainwatch\\.im)|(.+?\\.uktra\\.in)|(uktra\\.in))/", "/" );
-
-            req.put( PAGE, page );
-
-            req.put( PAGE_FILE, f );
-
+            processPage( prefix, page, req );
             return true;
         }
         else {
             LOG.log( Level.FINE, () -> "getPage \"" + path + "\" not found" );
             return false;
         }
+    }
+
+    void processPage( String prefix, String page, Map<String, Object> req )
+            throws IOException
+    {
+        int i = page.indexOf( ARTICLE_START );
+        int j = page.indexOf( ARTICLE_END );
+        if( i > 0 ) {
+            page = page.substring( i, j + ARTICLE_END_LENGTH );
+        }
+
+        // Fix external links in the cms that points to it so we point to the real site
+        page = page.replaceAll( "//((.+?trainwatch\\.im)|(.+?\\.uktra\\.in)|(uktra\\.in))/", "/" );
+
+        // If we have a prefix then remove it from all links
+        if( !prefix.isEmpty() ) {
+            page = page.replaceAll( "href=\"/" + prefix, "href=\"/" );
+        }
+
+        req.put( PAGE, page );
     }
 
     public boolean getImage( String path, HttpServletResponse response )
