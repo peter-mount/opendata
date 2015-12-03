@@ -27,12 +27,14 @@ public class LinkFixerTest
 
     private String badlink;
     private String document;
+    private String config;
     private Function<String, Page> pipeline;
 
     private static String readPage( String name )
             throws IOException
     {
-        try( BufferedReader r = new BufferedReader( new InputStreamReader( LinkFixerTest.class.getResourceAsStream( name ) ) ) ) {
+        try( BufferedReader r = new BufferedReader( new InputStreamReader( LinkFixerTest.class.getResourceAsStream( name ) ) ) )
+        {
             return r.lines().collect( Collectors.joining( "\n" ) );
         }
     }
@@ -43,8 +45,10 @@ public class LinkFixerTest
     {
         badlink = readPage( "badlink.html" );
         document = readPage( "document.html" );
+        config = readPage( "config.html" );
 
-        pipeline = s -> {
+        pipeline = s ->
+        {
             Page p = new Page( "test" );
             p.setContent( new ArrayList<>( Arrays.asList( s.split( "\n" ) ) ) );
             return p;
@@ -57,22 +61,40 @@ public class LinkFixerTest
                 .andThen( new LinkFixer() );
 
         // To enable debugging then add this which will dump the final result to the console
-        pipeline = pipeline.andThen( page -> {
-            page.getContent().forEach( System.out::println );
-            return page;
-        } );
+//        pipeline = pipeline.andThen( page -> {
+//            page.getContent().forEach( System.out::println );
+//            return page;
+//        } );
     }
 
     /**
      * Test we strip out bad links.
      * <p>
-     * Here we have a page linking to a non-existent page. In this instance we should not have
-     * the anchor present
+     * Here we have a page linking to a non-existent page. In this instance we should not have the anchor present
      * <p>
      * @throws Exception
      */
     @Test
     public void testStripBadLink()
+            throws Exception
+    {
+        testStripBadLink( badlink );
+    }
+
+    /**
+     * Like {@link #testStripBadLink()} but on a problematic page where nested content is common
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testStripBadLink_nested()
+            throws Exception
+    {
+        Page page = testStripBadLink( config );
+        //page.getContent().forEach( System.out::println );
+    }
+
+    private Page testStripBadLink( String doc )
             throws Exception
     {
         Page page = pipeline.apply( badlink );
@@ -84,6 +106,8 @@ public class LinkFixerTest
                 .filter( s -> s.contains( "action=edit" ) || s.contains( "redlink=1" ) )
                 .findAny()
                 .ifPresent( Assert::fail );
+
+        return page;
     }
 
     /**
@@ -98,7 +122,7 @@ public class LinkFixerTest
             throws Exception
     {
         testStrip( badlink );
-//        testStrip( document );
+        testStrip( document );
     }
 
     private void testStrip( String doc )

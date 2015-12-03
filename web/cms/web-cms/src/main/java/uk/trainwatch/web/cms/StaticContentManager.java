@@ -96,19 +96,25 @@ public enum StaticContentManager
 
     private Properties getProperties()
     {
-        if( p == null ) {
-            synchronized( this ) {
-                if( p == null ) {
+        if( p == null )
+        {
+            synchronized( this )
+            {
+                if( p == null )
+                {
                     p = new Properties();
-                    try( InputStream is = servletContext.getResourceAsStream( "/WEB-INF/cms.properties" ) ) {
-                        if( is == null ) {
+                    try( InputStream is = servletContext.getResourceAsStream( "/WEB-INF/cms.properties" ) )
+                    {
+                        if( is == null )
+                        {
                             LOG.log( Level.WARNING, "Cannot find WEB-INF/cms.properties, using defaults" );
                         }
-                        else {
+                        else
+                        {
                             p.load( is );
                         }
-                    }
-                    catch( Exception ex ) {
+                    } catch( Exception ex )
+                    {
                         // Do nothing?
                     }
                 }
@@ -119,10 +125,11 @@ public enum StaticContentManager
 
     private static String getHostname()
     {
-        try {
+        try
+        {
             return InetAddress.getLocalHost().getHostName();
-        }
-        catch( UnknownHostException ex ) {
+        } catch( UnknownHostException ex )
+        {
             return "localHost";
         }
     }
@@ -140,7 +147,8 @@ public enum StaticContentManager
     private String getPage( File f )
             throws IOException
     {
-        try( Stream<String> lines = Files.lines( f.toPath() ) ) {
+        try( Stream<String> lines = Files.lines( f.toPath() ) )
+        {
             return lines.collect( Collectors.joining( "\n" ) );
         }
     }
@@ -164,7 +172,8 @@ public enum StaticContentManager
 
         LOG.log( Level.FINE, () -> "getPage \"" + path + "\" = " + f.getPath() );
 
-        if( f.exists() && f.isFile() && f.canRead() ) {
+        if( f.exists() && f.isFile() && f.canRead() )
+        {
             LOG.log( Level.FINE, () -> "getPage \"" + path + "\" found" );
             req.put( PAGE_FILE, f );
 
@@ -176,7 +185,8 @@ public enum StaticContentManager
             processPage( prefix, page, req );
             return true;
         }
-        else {
+        else
+        {
             LOG.log( Level.FINE, () -> "getPage \"" + path + "\" not found" );
             return false;
         }
@@ -187,7 +197,8 @@ public enum StaticContentManager
     {
         int i = page.indexOf( ARTICLE_START );
         int j = page.indexOf( ARTICLE_END );
-        if( i > 0 ) {
+        if( i > 0 )
+        {
             page = page.substring( i, j + ARTICLE_END_LENGTH );
         }
 
@@ -195,8 +206,10 @@ public enum StaticContentManager
         page = page.replaceAll( "//((.+?trainwatch\\.im)|(.+?\\.uktra\\.in)|(uktra\\.in))/", "/" );
 
         // If we have a prefix then remove it from all links
-        if( !prefix.isEmpty() ) {
-            page = page.replaceAll( "href=\"/" + prefix, "href=\"/" );
+        if( !prefix.isEmpty() )
+        {
+            page = page.replace( "href=\"/" + prefix, "href=\"/" )
+                    .replace( "href=\"" + prefix, "href=\"/" );
         }
 
         req.put( PAGE, page );
@@ -206,11 +219,13 @@ public enum StaticContentManager
             throws IOException
     {
         File f = new File( baseDirectory, getRealImagePath( path ) );
-        if( f.exists() && f.isFile() && f.canRead() ) {
+        if( f.exists() && f.isFile() && f.canRead() )
+        {
             ImageUtils.sendFile( f.toPath(), CacheControl.TWO_HOURS, response );
             return true;
         }
-        else {
+        else
+        {
             response.sendError( HttpServletResponse.SC_NOT_FOUND, path );
             return false;
         }
@@ -234,12 +249,14 @@ public enum StaticContentManager
     public String getRealImagePath( String s )
     {
         String name = s == null ? "" : s;
-        if( name.startsWith( FILE ) ) {
+        if( name.startsWith( FILE ) )
+        {
             name = name.substring( FILE_LENGTH );
         }
         byte b[] = md5( name );
         String p = Integer.toHexString( Byte.toUnsignedInt( b[0] ) );
-        if( p.length() == 1 ) {
+        if( p.length() == 1 )
+        {
             p = '0' + p;
         }
         return String.join( "/", "/images", p.substring( 0, 1 ), p, name );
@@ -248,16 +265,16 @@ public enum StaticContentManager
     /**
      * Get the MD5 of a string
      * <p>
-     * @param s
-     *          <p>
+     * @param s <p>
      * @return
      */
     public byte[] md5( String s )
     {
-        try {
+        try
+        {
             return MessageDigest.getInstance( "MD5" ).digest( s.getBytes() );
-        }
-        catch( NoSuchAlgorithmException ex ) {
+        } catch( NoSuchAlgorithmException ex )
+        {
             Logger.getLogger( StaticContentManager.class.getName() ).log( Level.SEVERE, null, ex );
             throw new IllegalStateException( ex );
         }

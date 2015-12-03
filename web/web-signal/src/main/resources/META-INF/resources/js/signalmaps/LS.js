@@ -31,8 +31,26 @@ var SignalAreaMap = (function () {
 
         y1 = 0;
         y2 = y1 + 1;
-        a = SignalMap.down([], 0, y1);
-        a = SignalMap.up(a, 0, y2);
+        
+        // Liverpool St P9 Forms base of top row of map
+        var y9=y1+8, y10=y9+1;
+        a = SignalMap.line([], 0, y9, 13, y9);
+        a = SignalMap.line(a, 0, y10, 13, y10);
+        
+        // P6
+        a = SignalMap.line(a, 0, y9-2, 6.75, y9-2);
+        a = SignalMap.line(a, 6.75, y9-2, 7.25, y9);
+        a = SignalMap.line(a, 5.75, y9-2, 6, y9-1);
+        a = SignalMap.line(a, 6.25, y9-1, 6.5, y9-2);
+        
+        // P7
+        a = SignalMap.line(a, 0, y9-1, 6.5, y9-1);
+        a = SignalMap.line(a, 6.5, y9-1, 7, y10);
+        
+        // Buffers on P1-18
+        for(var i=0;i<18;i++)
+            a=SignalMap.buffer(a,0,y1+i);
+
         map.path(a);
         
         map.station(3,y1,'Liverpool Street');
@@ -98,12 +116,14 @@ var SignalAreaMap = (function () {
         map.berth(3,y1+8,'FB25');
         map.berth(4,y1+8,'FA25');
         map.berthr(5,y1+8,'F025');
+        map.berthr(6,y9,'0027');
         
         map.berth(1,y1+9,'R029');
         map.berth(2,y1+9,'FC29');
         map.berth(3,y1+9,'FB29');
         map.berth(4,y1+9,'FA29');
         map.berthr(5,y1+9,'F029');
+        map.berthr(6,y10,'0031');
         
         map.platform(0.5,y1+9.5,5,'10','11');
         
@@ -112,12 +132,14 @@ var SignalAreaMap = (function () {
         map.berth(3,y1+10,'FB33');
         map.berth(4,y1+10,'FA33');
         map.berthr(5,y1+10,'F033');
+        map.berthr(6,y1+10,'0035');
         
         map.berth(1,y1+11,'R037');
         map.berth(2,y1+11,'FC37');
         map.berth(3,y1+11,'FB37');
         map.berth(4,y1+11,'FA37');
         map.berthr(5,y1+11,'F037');
+        map.berthr(6,y1+11,'0039');
         
         map.platform(0.5,y1+11.5,5,'12','13');
         

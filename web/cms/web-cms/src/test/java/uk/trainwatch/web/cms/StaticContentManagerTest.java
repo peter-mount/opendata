@@ -36,14 +36,16 @@ public class StaticContentManagerTest
     private static String readPage( String name )
             throws IOException
     {
-        try( BufferedReader r = new BufferedReader( new InputStreamReader( StaticContentManagerTest.class.getResourceAsStream( name ) ) ) ) {
+        try( BufferedReader r = new BufferedReader( new InputStreamReader( StaticContentManagerTest.class.getResourceAsStream( name ) ) ) )
+        {
             return r.lines().collect( Collectors.joining( "\n" ) );
         }
     }
 
     /**
      * Test that we strip out the cms prefix correctly from links
-     * @throws Exception 
+     *
+     * @throws Exception
      */
     @Test
     public void processPage()
@@ -59,6 +61,23 @@ public class StaticContentManagerTest
 
         // Main reason for this test, when prefix is /PI it's not removing the prefix from url's
         assertFalse( content.contains( "href=\"/PI/About" ) );
+    }
+
+    @Test
+    public void processPage_Nested()
+            throws Exception
+    {
+        String page = readPage( "config.html" );
+
+        Map<String, Object> req = new HashMap<>();
+        StaticContentManager.INSTANCE.processPage( PREFIX, page, req );
+
+        String content = (String) req.get( StaticContentManager.PAGE );
+        assertNotNull( content );
+
+        // Main reason for this test, the url gets munged up
+        // should read /Doc/ref/configuration/observatory without the prefix
+        assertFalse( content.contains( "href=\"/Doc/ref/PI/Doc/ref/configuration/observatory" ) );
     }
 
 }
