@@ -30,6 +30,7 @@ public class LinkFixer
                             replaceAll( " rel=\"nofollow\"", "" ).
                             // Remove unavailable page links leaving the text present
                             replaceAll( "<a href=\"/cms/index.php?.+?>(.+?)</a>", "$1" ).
+                            replaceAll( "<a href=\"/.+?&amp;.*?action=edit.*?>(.+?)</a>", "$1" ).
                             // Fix images links
                             replaceAll( "src=\"/cms/images", "src=\"/images" ).
                             // Strip image links
