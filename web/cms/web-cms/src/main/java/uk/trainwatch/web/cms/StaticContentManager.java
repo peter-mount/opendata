@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.configuration.Configuration;
@@ -40,6 +41,7 @@ public enum StaticContentManager
 {
 
     INSTANCE;
+    private static final Logger LOG = Logger.getLogger( StaticContentManager.class.getName() );
 
     @Inject
     private ConfigurationService configurationService;
@@ -72,23 +74,47 @@ public enum StaticContentManager
      */
     private final Pattern titlePattern = Pattern.compile( "<title>(.+)</title>" );
 
-    private final Properties p = new Properties();
+    private volatile Properties p;
+    private ServletContext servletContext;
 
-    public void init( ServletConfig config )
+    public void init( ServletConfig servletConfig )
             throws ServletException
     {
-        try( InputStream is = config.getServletContext().getResourceAsStream( "/WEB-INF/cms.properties" ) ) {
-            p.load( is );
-        }
-        catch( Exception ex ) {
-            // Do nothing?
-        }
+        servletContext = servletConfig.getServletContext();
 
         CDIUtils.inject( this );
         this.config = configurationService.getPrivateConfiguration( "cms" );
 
         hostname = getHostname();
         baseDirectory = new File( getHostString( "basedir" ) );
+    }
+
+    private String getProperty( String k, String d )
+    {
+        return getProperties().getProperty( k, d );
+    }
+
+    private Properties getProperties()
+    {
+        if( p == null ) {
+            synchronized( this ) {
+                if( p == null ) {
+                    p = new Properties();
+                    try( InputStream is = servletContext.getResourceAsStream( "/WEB-INF/cms.properties" ) ) {
+                        if( is == null ) {
+                            LOG.log( Level.WARNING, "Cannot find WEB-INF/cms.properties, using defaults" );
+                        }
+                        else {
+                            p.load( is );
+                        }
+                    }
+                    catch( Exception ex ) {
+                        // Do nothing?
+                    }
+                }
+            }
+        }
+        return p;
     }
 
     private static String getHostname()
@@ -122,18 +148,24 @@ public enum StaticContentManager
     /**
      * Retrieve a static page from the cms
      * <p>
-     * @param path Page name
+     * @param requestedPath Page name
      * @param req  Map to store the page
      * <p>
      * @return true if the page was found & rendered, false if not found
      * <p>
      * @throws IOException If the page could not be read
      */
-    public boolean getPage( String path, Map<String, Object> req )
+    public boolean getPage( String requestedPath, Map<String, Object> req )
             throws IOException
     {
-        File f = new File( baseDirectory, p.getProperty( "cms.prefix", "" ) + path.substring( 0, 1 ) + "/" + path + "/index.shtml" );
+        final String path = getProperty( "cms.prefix", "" ) + requestedPath;
+        File f = new File( baseDirectory, path.substring( 0, 1 ) + "/" + path + "/index.shtml" );
+
+        LOG.log( Level.FINE, () -> "getPage \"" + path + "\" = " + f.getPath() );
+
         if( f.exists() && f.isFile() && f.canRead() ) {
+            LOG.log( Level.FINE, () -> "getPage \"" + path + "\" found" );
+
             String page = getPage( f );
 
             Matcher m = titlePattern.matcher( page );
@@ -155,6 +187,7 @@ public enum StaticContentManager
             return true;
         }
         else {
+            LOG.log( Level.FINE, () -> "getPage \"" + path + "\" not found" );
             return false;
         }
     }

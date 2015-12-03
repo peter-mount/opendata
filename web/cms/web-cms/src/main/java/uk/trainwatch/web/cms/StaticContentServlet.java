@@ -7,9 +7,7 @@ package uk.trainwatch.web.cms;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
-import java.util.Properties;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -43,6 +41,7 @@ public class StaticContentServlet
         Map<String, Object> req = request.getRequestScope();
         if( StaticContentManager.INSTANCE.getPage( path, req ) ) {
             HttpServletResponse response = request.getResponse();
+
             // Cache page for 1 hour
             CacheControl.HOUR.addHeaders( response );
 
@@ -51,6 +50,9 @@ public class StaticContentServlet
             if( file != null ) {
                 ImageUtils.addLastModified( file, response );
             }
+
+            // breadcrumb
+            request.getRequestScope().put( "breadcrumb", path.split( "/" ) );
 
             request.renderTile( "cms.page" );
         }

@@ -2,8 +2,6 @@
 <meta charset="UTF-8" />
 <meta name="generator" content="area51.onl" />
 <link rel="shortcut icon" href="/favicon.ico" />
-<link rel="copyright" href="http://creativecommons.org/licenses/by-sa/3.0/" />
-<link rel="stylesheet" href="/css/mediawiki.legacy.commonPrint.css" />
 <meta name="ResourceLoaderDynamicStyles" content="" />
 <%--
 <link rel="stylesheet" href="/css/main.css" />
