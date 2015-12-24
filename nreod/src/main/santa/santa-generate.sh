@@ -30,7 +30,6 @@ mkdir -p $BASEDIR
 # Query the database to get a list of stations
 TIPLOCS=$BASEDIR/tiplocs
 PGPASSWORD='password-goes-here' psql rail -A -t \
-    -h errapus.area51.onl \
     -c "select t.tpl from darwin.tiploc t inner join darwin.location l on t.id=l.tpl inner join darwin.crs c on l.crs=c.id  where c.crs not like 'X%'" \
     >$TIPLOCS
 

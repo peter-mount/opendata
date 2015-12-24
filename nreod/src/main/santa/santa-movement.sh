@@ -17,7 +17,7 @@ then
 
     TEMP=/tmp/sql$$
     echo "SELECT darwin.import('$(<$FILE)');" >$TEMP
-    PGPASSWORD='password-goes-here' psql rail -h errapus.area51.onl -f $TEMP
+    PGPASSWORD='password-goes-here' psql rail -f $TEMP
 else
     echo "$FILE not found"
     ls -l $FILE
