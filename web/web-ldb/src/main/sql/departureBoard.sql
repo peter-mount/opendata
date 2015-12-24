@@ -73,10 +73,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- DROP FUNCTION darwin.departureBoard( pcrs TEXT );
+-- Return type of departureboards
 
-CREATE OR REPLACE FUNCTION darwin.departureBoard( pcrs TEXT )
-RETURNS TABLE(
+CREATE TYPE departureboard AS (
     type        CHAR(1),
     dest        VARCHAR(16),
     -- Platforms
@@ -111,14 +110,20 @@ RETURNS TABLE(
     assoccp     TEXT,
     -- Ordering
     tmord       TIME WITHOUT TIME ZONE
-) AS $$
+);
+
+-- DROP FUNCTION darwin.departureBoard( pcrs TEXT );
+
+CREATE OR REPLACE FUNCTION darwin.departureBoard( pcrs TEXT )
+RETURNS SETOF departureboard  AS $$
 DECLARE
     crsid   INTEGER;
-    rec     RECORD;
+    rec     departureboard%rowtype;
     pnow    TIMESTAMP WITHOUT TIME ZONE;
     pssd    DATE;
     ps      TIME WITHOUT TIME ZONE;
     pe      TIME WITHOUT TIME ZONE;
+    recdone BOOLEAN = false;
 BEGIN
     --pnow    = '2015-12-24 23:05:00'::TIMESTAMP WITHOUT TIME ZONE;--now();
     pnow    = now();
@@ -131,7 +136,7 @@ BEGIN
         IF crsid IS NOT NULL THEN
             IF ps < pe THEN
                 -- Normal query, not crossing midnight
-                RETURN QUERY
+                FOR rec IN
                     WITH departures AS (
                         SELECT DISTINCT ON (f.rid)
                             'D'::CHAR,
@@ -177,10 +182,14 @@ BEGIN
                             AND e.wtp IS NULL
                             AND COALESCE( e.dep, e.etdep, e.ptd, e.arr, e.etarr, e.pta) BETWEEN ps AND pe
                     )
-                    SELECT * FROM departures ORDER BY ptm;
+                    SELECT * FROM departures ORDER BY ptm
+                LOOP
+                    recdone=TRUE;
+                    RETURN NEXT rec;
+                END LOOP;
             ELSE
                 -- Crossing Midnight
-                RETURN QUERY
+                FOR rec IN
                     WITH departures1 AS (
                         SELECT DISTINCT ON (f.rid)
                             'D'::CHAR,
@@ -270,8 +279,68 @@ BEGIN
                             AND e.wtp IS NULL
                             AND COALESCE( e.dep, e.etdep, e.ptd, e.arr, e.etarr, e.pta) BETWEEN '00:00'::TIME AND pe
                     )
-                    SELECT * FROM departures1 UNION SELECT * FROM departures2 ORDER BY tord;
+                    SELECT * FROM departures1 UNION SELECT * FROM departures2 ORDER BY tord
+                LOOP
+                    recdone=TRUE;
+                    RETURN NEXT rec;
+                END LOOP;
             END IF;
+
+            -- Still nothing then look for the next service
+            IF NOT recdone THEN
+                FOR rec IN
+                    WITH departures AS (
+                        SELECT DISTINCT ON (f.rid)
+                            'D'::CHAR,
+                            t.tpl,
+                            e.plat,
+                            e.platsup,
+                            e.cisplatsup,
+                            e.pta,
+                            e.ptd,
+                            e.etarr,
+                            e.etdep,
+                            e.arr IS NOT NULL,
+                            e.dep IS NOT NULL,
+                            COALESCE( e.etdepdel, etarrdel, FALSE),
+                            f.latereason,
+                            COALESCE( se.can, false ),
+                            COALESCE( s.cancreason, 0 ),
+                            COALESCE( e.term, false ),
+                            f.rid,
+                            s.via,
+                            COALESCE( e.dep, e.etdep, e.arr, e.etarr, e.ptd, e.pta ) AS ptm,
+                            -- main calling points
+                            darwin.callingPoints(f.rid, COALESCE( e.ptd, e.pta )),
+                            darwin.lastreport(f.rid),
+                            COALESCE( e.length, 0 ),
+                            s.toc,
+                            -- association
+                            sas.rid,
+                            sat.tpl,
+                            darwin.callingPoints(sas.rid),
+                            COALESCE( e.dep, e.etdep, e.arr, e.etarr, e.ptd, e.pta ) AS tord
+                        FROM darwin.forecast f
+                            INNER JOIN darwin.forecast_entry e ON f.id=e.fid
+                            INNER JOIN darwin.location l ON e.tpl=l.tpl
+                            LEFT OUTER JOIN darwin.schedule s ON f.schedule=s.id
+                            LEFT OUTER JOIN darwin.tiploc t ON s.dest=t.id
+                            LEFT OUTER JOIN darwin.schedule_entry se ON se.schedule=f.schedule AND se.tpl=e.tpl
+                            LEFT OUTER JOIN darwin.location sl ON s.dest=sl.tpl
+                            LEFT OUTER JOIN darwin.schedule_assoc sa ON f.schedule=sa.mainid AND sa.cat='VV'
+                            LEFT OUTER JOIN darwin.schedule sas ON sa.associd = sas.id
+                            LEFT OUTER JOIN darwin.tiploc sat ON sa.tpl=sat.id
+                        WHERE l.crs=crsid AND f.ssd=pssd
+                            AND e.wtp IS NULL
+                            AND COALESCE( e.dep, e.etdep, e.ptd, e.arr, e.etarr, e.pta) > ps
+                    )
+                    SELECT * FROM departures ORDER BY ptm LIMIT 2
+                LOOP
+                    recdone=TRUE;
+                    RETURN NEXT rec;
+                END LOOP;
+            END IF;
+
         END IF;
     ELSE
         -- TODO add TFL, LUxxx for Tube, DLxxx for DVR
@@ -280,4 +349,4 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-select * from darwin.departureboard('MDE');
+--select * from darwin.departureboard('MDE');
