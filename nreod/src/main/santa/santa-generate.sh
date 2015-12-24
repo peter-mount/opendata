@@ -77,14 +77,14 @@ SCHEDULE=$BASEDIR/schedule.sql
     echo "  <Journey rid=\"$RID\" uid=\"$TUID\" trainId=\"$HEADCODE\" ssd=\"$SSD\" toc=\"$TOC\">"
     
     # Origin. Move forward so next station is 1 minute away
-    echo "    <OR tpl=\"NPLEINT\" ACT=\"TB\" plat=\"1\" ptd=\"$(railtime)\" wtd=\"$(railtime)\"/>"
+    echo "    <OR tpl=\"NPLEINT\" act=\"TB\" plat=\"1\" ptd=\"$(railtime)\" wtd=\"$(railtime)\"/>"
     moveforward
 
     # Now run through the tiplocs
     CNT=0;
     for TIPLOC in $(<$TIPLOCS)
     do
-        echo "    <IP tpl=\"$TIPLOC\" ACT=\"T \" plat=\"Sky\" pta=\"$(railtime)\" ptd=\"$(railtime)\" wta=\"$(railtime)\" wtd=\"$(railtime)\"/>"
+        echo "    <IP tpl=\"$TIPLOC\" act=\"T \" plat=\"Sky\" pta=\"$(railtime)\" ptd=\"$(railtime)\" wta=\"$(railtime)\" wtd=\"$(railtime)\"/>"
         CNT=$(($CNT+1))
         if [ $CNT -gt $TD ]
         then
@@ -95,7 +95,7 @@ SCHEDULE=$BASEDIR/schedule.sql
 
     # Move forward a minute
     moveforward
-    echo "    <DT tpl=\"NPLEINT\" ACT=\"TF\" plat=\"1\" pta=\"$(railtime)\" wta=\"$(railtime)\"/>"
+    echo "    <DT tpl=\"NPLEINT\" act=\"TF\" plat=\"1\" pta=\"$(railtime)\" wta=\"$(railtime)\"/>"
     echo '  </Journey>'
     echo "</PportTimetable>'::XML);"
 ) >$SCHEDULE

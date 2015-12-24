@@ -26,3 +26,18 @@ create your cron job with the following two entries:
 where
 * the first line runs from 23:40 to 23:59 on the 24th and the second from 00:00 to 00:31 on the 25th. Double check these match the settings in stanta-generate.sh as there should be an associated move-HH-MM.xml file for these time ranges.
 * the script path is correct
+
+Known bugs:
+
+When importing the schedule it doesn't set ldb and tm fields so it doesn't show correctly, so you also need to do after importing the SQL:
+
+Get the forecast id
+* select * from darwin.forecast where rid='20151224SANTA';
+This returns an id, 7124819 in this instance.
+
+Update the forecasts:
+* begin;
+* update darwin.forecast_entry set ldb=true, tm=coalesce(ptd,pta),term=false, delay='00:00:00', etarr=pta, etdep=pta where fid=7124819;
+* commit;
+
+This might show an underlying bug that I've not spotted before.
