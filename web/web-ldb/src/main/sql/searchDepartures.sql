@@ -53,7 +53,7 @@ RETURNS TABLE(
 DECLARE
     crsid   INTEGER;
     rec     RECORD;
-    pe      TIME WITHOUT TIME ZONE = ps + '1 hour'::INTERVAL;
+    pe      TIME WITHOUT TIME ZONE = ps + '59 minutes 59 seconds'::INTERVAL;
 BEGIN
     crsid = darwin.crs(pcrs);
     IF crsid IS NOT NULL THEN
