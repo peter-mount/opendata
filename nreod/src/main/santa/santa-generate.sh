@@ -108,7 +108,7 @@ function header {
     (
         echo '<?xml version="1.0" encoding="UTF-8"?>'
         echo "<Pport xmlns=\"http://www.thalesgroup.com/rtti/PushPort/v12\" xmlns:ns3=\"http://www.thalesgroup.com/rtti/PushPort/Forecasts/v2\" ts=\"$(printf %04d-12-%02dT%02d:%02d:05.5506227Z $YEAR $DT $TH $TM)\" version=\"12.0\">"
-        echo "<uR requestID=\"9${YEAR}000000$(printf %05d $FID)\" requestSource=\"zz99\" updateOrigin=\"DMY\"><TS rid=\"$RID\" ssd=\"$SSD\" uid=\"$TUID\">"
+        echo "<uR requestID=\"9${YEAR}000000$(printf %05d $FID)\" requestSource=\"zz99\" updateOrigin=\"DMY\">"
     ) >$OUT
 }
 

@@ -16,7 +16,7 @@ then
     echo "Importing $FILE"
 
     TEMP=/tmp/sql$$
-    echo "SELECT darwin.import('$(<$FILE)');" >$TEMP
+    echo "SELECT darwin.darwinimport('$(<$FILE)'::XML);" >$TEMP
     PGPASSWORD='password-goes-here' psql rail -f $TEMP
 else
     echo "$FILE not found"
