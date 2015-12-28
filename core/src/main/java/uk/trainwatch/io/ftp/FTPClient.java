@@ -177,6 +177,21 @@ public interface FTPClient
      * <p>
      * @throws IOException
      */
+    default void retrieve( FTPFile remote, File file, CopyOption... options )
+            throws IOException
+    {
+        retrieve( remote, file.toPath(), options );
+    }
+
+    /**
+     * Retrieve a remote file
+     * <p>
+     * @param remote  file name
+     * @param file    file to create
+     * @param options CopyOptions to use
+     * <p>
+     * @throws IOException
+     */
     default void retrieve( String remote, File file, CopyOption... options )
             throws IOException
     {
