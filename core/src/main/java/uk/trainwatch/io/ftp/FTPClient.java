@@ -115,6 +115,12 @@ public interface FTPClient
     boolean appendFile( String remote, InputStream local )
             throws IOException;
 
+    default boolean appendFile( FTPFile remote, InputStream local )
+            throws IOException
+    {
+        return appendFile( remote.getName(), local );
+    }
+
     /**
      * Return an OutputStream to append to a remote file
      * <p>
@@ -154,6 +160,12 @@ public interface FTPClient
      */
     boolean retrieveFile( String remote, OutputStream local )
             throws IOException;
+
+    default boolean retrieveFile( FTPFile remote, OutputStream local )
+            throws IOException
+    {
+        return retrieveFile( remote.getName(), local );
+    }
 
     /**
      * Retrieve a remote file
@@ -267,6 +279,12 @@ public interface FTPClient
     InputStream retrieveFileStream( String remote )
             throws IOException;
 
+    default InputStream retrieveFileStream( FTPFile remote )
+            throws IOException
+    {
+        return retrieveFileStream( remote.getName() );
+    }
+
     /**
      * Return a Reader containing the contents of a remote file
      * <p>
@@ -278,6 +296,12 @@ public interface FTPClient
      */
     Reader retrieveReader( String remote )
             throws IOException;
+
+    default Reader retrieveReader( FTPFile remote )
+            throws IOException
+    {
+        return retrieveReader( remote.getName() );
+    }
 
     /**
      * Store the contents of an InputStream on the remote server
@@ -754,5 +778,22 @@ public interface FTPClient
      */
     boolean changeWorkingDirectory( String pathname )
             throws IOException;
+
+    /**
+     * Simple test to see if a remote file should be retrieved.
+     * <p>
+     * This returns true if file does not exist, if the lengths don't match or the remote file's date is newer than the local file
+     * <p>
+     * @param file
+     * @param ftp
+     *             <p>
+     * @return
+     */
+    default boolean isFileRetrievable( File file, FTPFile ftp )
+    {
+        return !file.exists()
+               || file.length() != ftp.getSize()
+               || file.lastModified() < ftp.getTimestamp().getTimeInMillis();
+    }
 
 }
