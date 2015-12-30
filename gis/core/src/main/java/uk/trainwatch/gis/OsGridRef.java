@@ -15,4 +15,19 @@ public interface OsGridRef
     int getEasting();
 
     int getNorthing();
+
+    static OsGridRef of( int easting, int northing )
+    {
+        return new BasicOsGridRef( easting, northing );
+    }
+
+    static OsGridRef from( Coordinate c )
+    {
+        return GIS.toOsGridRef( c );
+    }
+
+    default Coordinate toCoordinate()
+    {
+        return GIS.osgbToLatLong( this );
+    }
 }

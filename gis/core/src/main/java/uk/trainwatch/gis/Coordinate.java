@@ -26,4 +26,27 @@ public interface Coordinate
      */
     double getLatitude();
 
+    /**
+     * Return an instance
+     * <p>
+     * @param λ Longitude
+     * @param φ Latitude
+     * <p>
+     * @return
+     */
+    static Coordinate of( double λ, double φ )
+    {
+        return new BasicCoordinate( λ, φ );
+    }
+
+    default OsGridRef toOsGridRef()
+    {
+        return GIS.toOsGridRef( this );
+    }
+
+    default DistanceCoordinate distanceFrom( Coordinate origin )
+    {
+        return new BasicDistanceCoordinate( getLongitude(), getLatitude(), GIS.KM_TO_MILES * GIS.distance( origin, this ) );
+    }
+
 }
