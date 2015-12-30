@@ -30,6 +30,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPFileFilter;
 import uk.trainwatch.io.IOConsumer;
@@ -399,8 +400,20 @@ public interface FTPClient
     Collection<String> listNames( String pathname )
             throws IOException;
 
+    default Stream<String> names( String pathname )
+            throws IOException
+    {
+        return listNames( pathname ).stream();
+    }
+
     Collection<String> listNames()
             throws IOException;
+
+    default Stream<String> names()
+            throws IOException
+    {
+        return listNames().stream();
+    }
 
     default void forEachName( Consumer<String> c )
             throws IOException
@@ -424,6 +437,12 @@ public interface FTPClient
     Collection<FTPFile> listDirectories()
             throws IOException;
 
+    default Stream<FTPFile> directories()
+            throws IOException
+    {
+        return listDirectories().stream();
+    }
+
     /**
      * List all directories in a directory
      * <p>
@@ -435,6 +454,12 @@ public interface FTPClient
      */
     Collection<FTPFile> listDirectories( String parent )
             throws IOException;
+
+    default Stream<FTPFile> directories( String parent )
+            throws IOException
+    {
+        return listDirectories( parent ).stream();
+    }
 
     /**
      * List all files in a directory
@@ -448,6 +473,12 @@ public interface FTPClient
     Collection<FTPFile> listFiles( String pathname )
             throws IOException;
 
+    default Stream<FTPFile> files( String pathname )
+            throws IOException
+    {
+        return listFiles( pathname ).stream();
+    }
+
     /**
      * List all files in the current directory
      * <p>
@@ -457,6 +488,12 @@ public interface FTPClient
      */
     Collection<FTPFile> listFiles()
             throws IOException;
+
+    default Stream<FTPFile> files()
+            throws IOException
+    {
+        return listFiles().stream();
+    }
 
     /**
      * List all files in a directory
@@ -471,6 +508,12 @@ public interface FTPClient
     Collection<FTPFile> listFiles( String pathname, FTPFileFilter filter )
             throws IOException;
 
+    default Stream<FTPFile> files( String pathname, FTPFileFilter filter )
+            throws IOException
+    {
+        return listFiles( pathname, filter ).stream();
+    }
+
     /**
      * List all files in a directory
      * <p>
@@ -484,6 +527,12 @@ public interface FTPClient
             throws IOException
     {
         return listFiles( null, filter );
+    }
+
+    default Stream<FTPFile> files( FTPFileFilter filter )
+            throws IOException
+    {
+        return listFiles( filter ).stream();
     }
 
     /**
