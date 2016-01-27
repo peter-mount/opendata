@@ -29,8 +29,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -39,6 +41,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import org.postgresql.util.PGInterval;
 import uk.trainwatch.util.TimeUtils;
 
 /**
@@ -463,4 +466,25 @@ public class SQL
         return stream( s, factory ).collect( Collectors.toList() );
     }
 
+    public static Duration getDuration( String n )
+            throws SQLException
+    {
+        PGInterval interval = new PGInterval( n );
+        return Duration.of( interval.getMonths(), ChronoUnit.MONTHS )
+                .plus( interval.getDays(), ChronoUnit.DAYS )
+                .plus( interval.getHours(), ChronoUnit.HOURS )
+                .plus( interval.getMinutes(), ChronoUnit.MINUTES );
+    }
+
+    public static Duration getDuration( ResultSet rs, int i )
+            throws SQLException
+    {
+        return getDuration( rs.getString( i ) );
+    }
+
+    public static Duration getDuration( ResultSet rs, String n )
+            throws SQLException
+    {
+        return getDuration( rs.getString( n ) );
+    }
 }
