@@ -491,4 +491,17 @@ public final class Consumers
         return Consumers.fork( DaemonThreadFactory.INSTANCE.getWorkExecutor(), c );
     }
 
+    /**
+     * Wraps a consumer so that it's passed on to an Executor
+     *
+     * @param <T> Type of payload
+     * @param e   Executor to use
+     * @param c   Consumer to wrap
+     *
+     * @return new consumer
+     */
+    public static <T> Consumer<T> executeWith( Executor e, Consumer<T> c )
+    {
+        return v -> e.execute( () -> c.accept( v ) );
+    }
 }

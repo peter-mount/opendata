@@ -8,6 +8,7 @@ package uk.trainwatch.util;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.Time;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
@@ -701,5 +703,74 @@ public class JsonUtils
         b.build().forEach( a::add );
         return a;
     };
+
+    /**
+     * Create a JsonObjectBuilder from a Map
+     *
+     * @param args Map. May be null
+     *
+     * @return JsonObjectBuilder. Never null but may be empty
+     */
+    public static JsonObjectBuilder createObjectBuilder( Map<String, Object> args )
+    {
+        JsonObjectBuilder b = Json.createObjectBuilder();
+        if( args != null ) {
+            args.forEach( ( k, v ) -> add( b, k, v ) );
+        }
+        return b;
+    }
+
+    /**
+     * Add an object to a JsonObjectBuilder.
+     * <p>
+     * This will attempt to resolve the Json type
+     *
+     * @param b builder
+     * @param k key
+     * @param v value
+     *
+     * @return builder
+     *
+     * @throws NullPointerException if either builder or key is null.
+     */
+    public static JsonObjectBuilder add( JsonObjectBuilder b, String k, Object v )
+    {
+        Objects.requireNonNull( b );
+        Objects.requireNonNull( k );
+        if( v == null ) {
+            b.addNull( k );
+        }
+        else if( v instanceof CharSequence ) {
+            b.add( k, String.valueOf( v ) );
+        }
+        else if( v instanceof Number ) {
+            Number n = (Number) v;
+            if( v instanceof Integer ) {
+                b.add( k, n.intValue() );
+            }
+            else if( v instanceof Double || v instanceof Float ) {
+                b.add( k, n.doubleValue() );
+            }
+            else if( v instanceof Long ) {
+                b.add( k, n.longValue() );
+            }
+            else if( v instanceof Integer ) {
+                b.add( k, n.intValue() );
+            }
+            else if( v instanceof BigDecimal ) {
+                b.add( k, (BigDecimal) v );
+            }
+            else if( v instanceof BigInteger ) {
+                b.add( k, (BigInteger) v );
+            }
+        }
+        else if( v instanceof Boolean ) {
+            b.add( k, (Boolean) v );
+        }
+        else if( v instanceof char[] ) {
+            b.add( k, String.valueOf( (char[]) v ) );
+        }
+        return b;
+    }
 
 }

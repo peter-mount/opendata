@@ -22,6 +22,8 @@ import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -29,6 +31,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.IntBinaryOperator;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -296,7 +299,7 @@ public class CollectionUtils
      * <p>
      * @param <T>
      * @param e
-     * <p>
+     *            <p>
      * @return
      */
     public static <T> Iterable<T> iterable( Enumeration<T> e )
@@ -309,7 +312,7 @@ public class CollectionUtils
      * <p>
      * @param <T>
      * @param e
-     * <p>
+     *            <p>
      * @return
      */
     public static <T> Iterator<T> iterator( Enumeration<T> e )
@@ -331,4 +334,206 @@ public class CollectionUtils
         };
     }
 
+    /**
+     * An unmodifiable list of a generic collection
+     *
+     * @param <T>
+     * @param c Collection
+     *
+     * @return Empty list if c is null or empty, unmodifiable if c is a list otherwise a simple wrapper around c
+     */
+    public static <T> List<T> unmodifiableList( Collection<T> c )
+    {
+        if( c == null || c.isEmpty() ) {
+            return Collections.emptyList();
+        }
+
+        if( c instanceof List ) {
+            return Collections.unmodifiableList( ((List<T>) c) );
+        }
+
+        return new List<T>()
+        {
+            @Override
+            public int size()
+            {
+                return c.size();
+            }
+
+            @Override
+            public boolean isEmpty()
+            {
+                return c.isEmpty();
+            }
+
+            @Override
+            public boolean contains( Object o )
+            {
+                return c.contains( o );
+            }
+
+            @Override
+            public Iterator<T> iterator()
+            {
+                Iterator<T> it = c.iterator();
+                return new Iterator<T>()
+                {
+                    @Override
+                    public boolean hasNext()
+                    {
+                        return it.hasNext();
+                    }
+
+                    @Override
+                    public T next()
+                    {
+                        return it.next();
+                    }
+                };
+            }
+
+            @Override
+            public Object[] toArray()
+            {
+                return c.toArray();
+            }
+
+            @Override
+            public <T> T[] toArray( T[] a )
+            {
+                return c.toArray( a );
+            }
+
+            @Override
+            public boolean add( T e )
+            {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean remove( Object o )
+            {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean containsAll( Collection<?> c1 )
+            {
+                return c.contains( c1 );
+            }
+
+            @Override
+            public boolean addAll( Collection<? extends T> c )
+            {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean addAll( int index, Collection<? extends T> c )
+            {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean removeAll( Collection<?> c )
+            {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean retainAll( Collection<?> c )
+            {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void clear()
+            {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public T get( int index )
+            {
+                // Inefficient
+                Iterator<T> t = c.iterator();
+                for( int i = 0; t.hasNext() && i < index; i++ ) {
+                    T v = t.next();
+                    if( i == index ) {
+                        return v;
+                    }
+                }
+                throw new IndexOutOfBoundsException();
+            }
+
+            @Override
+            public T set( int index, T element )
+            {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void add( int index, T element )
+            {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public T remove( int index )
+            {
+                throw new UnsupportedOperationException();
+            }
+
+            /**
+             *
+             * @param o    Object for equality
+             * @param f    function (i,r) -> returns new value of r
+             * @param slow true then run through entire list, false then first r >0
+             *
+             * @return
+             */
+            private int scan( Object o, IntBinaryOperator f, boolean slow )
+            {
+                int r = -1;
+                Iterator<T> t = c.iterator();
+                for( int i = 0; t.hasNext() && (slow || r == -1); i++ ) {
+                    T v = t.next();
+                    if( (v == null && o == null) || (v != null && v.equals( o )) ) {
+                        r = f.applyAsInt( i, r );
+                    }
+                }
+                return r;
+            }
+
+            @Override
+            public int indexOf( Object o )
+            {
+                return scan( o, ( i, r ) -> i, true );
+            }
+
+            @Override
+            public int lastIndexOf( Object o )
+            {
+                return scan( o, Integer::max, false );
+            }
+
+            @Override
+            public ListIterator<T> listIterator()
+            {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public ListIterator<T> listIterator( int index )
+            {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public List<T> subList( int fromIndex, int toIndex )
+            {
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
 }
