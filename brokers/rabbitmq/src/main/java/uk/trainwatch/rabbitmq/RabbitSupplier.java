@@ -1,12 +1,23 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2015 peter.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package uk.trainwatch.rabbitmq;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
+import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ShutdownSignalException;
 import java.io.IOException;
 import java.util.HashMap;
@@ -32,7 +43,7 @@ public class RabbitSupplier
     /**
      * When durable, enforce a 5 minute ttl for all messages unless specified. This is a safety net so that we don't cause the server to fill up with messages
      * on a dead durable queue.
-     * 
+     * <p>
      * NB: Since 2015/10/27 default to 20 minutes to allow certain queues to hold data during heavy load, especially the daily darwin snapshot import
      */
     private static final int DEFAULT_TTL = 300000;
@@ -54,18 +65,11 @@ public class RabbitSupplier
      * Only allow a single message to be queued
      */
     private final BlockingSupplierConsumer<byte[]> supplier;
-    private final Consumer<byte[]> optionalConsumer;
+    private final Consumer<Delivery> optionalConsumer;
     private Thread thread;
 
     RabbitSupplier( RabbitConnection connection, String queueName, String bindTopic, String bindRoutingKey,
-                    boolean durable,
-                    Map<String, Object> queueProperties )
-    {
-        this( connection, queueName, bindTopic, bindRoutingKey, null, durable, queueProperties );
-    }
-
-    RabbitSupplier( RabbitConnection connection, String queueName, String bindTopic, String bindRoutingKey,
-                    Consumer<byte[]> optionalConsumer,
+                    Consumer<Delivery> optionalConsumer,
                     boolean durable,
                     Map<String, Object> queueProperties )
     {
@@ -239,7 +243,7 @@ public class RabbitSupplier
                 supplier.accept( delivery.getBody() );
             }
             else {
-                optionalConsumer.accept( delivery.getBody() );
+                optionalConsumer.accept( delivery );
             }
 
             // ack as we have handled it safely
@@ -285,10 +289,7 @@ public class RabbitSupplier
             return false;
         }
         final RabbitSupplier other = (RabbitSupplier) obj;
-        if( !Objects.equals( this.queueName, other.queueName ) ) {
-            return false;
-        }
-        return true;
+        return Objects.equals( this.queueName, other.queueName );
     }
 
 }

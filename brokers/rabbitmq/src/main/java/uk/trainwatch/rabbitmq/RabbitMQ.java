@@ -1,24 +1,56 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2015 peter.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package uk.trainwatch.rabbitmq;
 
+import com.rabbitmq.client.LongString;
+import com.rabbitmq.client.QueueingConsumer;
+import com.rabbitmq.client.impl.MethodArgumentReader;
+import com.rabbitmq.client.impl.MethodArgumentWriter;
+import com.rabbitmq.client.impl.ValueReader;
+import com.rabbitmq.client.impl.ValueWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.enterprise.event.Event;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonStructure;
+import uk.trainwatch.util.CollectionUtils;
 import uk.trainwatch.util.Consumers;
 import uk.trainwatch.util.JsonUtils;
 import uk.trainwatch.util.Streams;
@@ -34,6 +66,7 @@ public class RabbitMQ
 {
 
     private static final Logger LOG = Logger.getLogger( RabbitMQ.class.getName() );
+    private static final AtomicInteger correlationID = new AtomicInteger();
 
     public static final String DEFAULT_TOPIC = "amq.topic";
     public static final Charset UTF8 = Charset.forName( "UTF-8" );
@@ -223,7 +256,8 @@ public class RabbitMQ
                                           Function<byte[], T> mapper,
                                           Consumer<T> consumer )
     {
-        queueConsumer( connection, queueName, topic, routingKey, false, properties, Consumers.consumeIfNotNull( mapper, consumer ) );
+        Consumer<byte[]> c = Consumers.consumeIfNotNull( mapper, consumer );
+        queueConsumer( connection, queueName, topic, routingKey, false, properties, d -> c.accept( d.getBody() ) );
     }
 
     public static <T> void queueDurableConsumer( RabbitConnection connection, String queueName, String routingKey,
@@ -253,7 +287,8 @@ public class RabbitMQ
                                                  Function<byte[], T> mapper,
                                                  Consumer<T> consumer )
     {
-        queueConsumer( connection, queueName, topic, routingKey, true, properties, Consumers.consumeIfNotNull( mapper, consumer ) );
+        Consumer<byte[]> c = Consumers.consumeIfNotNull( mapper, consumer );
+        queueConsumer( connection, queueName, topic, routingKey, true, properties, d -> c.accept( d.getBody() ) );
     }
 
     /**
@@ -467,17 +502,17 @@ public class RabbitMQ
                                      Consumer<Stream<byte[]>> factory )
     {
         String realQueue = getRealQueue( queueName, properties );
-        RabbitSupplier supplier = new RabbitSupplier( connection, realQueue, topic, routingKey, durable, properties );
+        RabbitSupplier supplier = new RabbitSupplier( connection, realQueue, topic, routingKey, null, durable, properties );
         Streams.supplierStream( supplier, factory );
         supplier.start();
     }
 
-    private static void queueConsumer( RabbitConnection connection,
-                                       String queueName,
-                                       String topic, String routingKey,
-                                       boolean durable,
-                                       Map<String, Object> properties,
-                                       Consumer<byte[]> consumer )
+    public static void queueConsumer( RabbitConnection connection,
+                                      String queueName,
+                                      String topic, String routingKey,
+                                      boolean durable,
+                                      Map<String, Object> properties,
+                                      Consumer<QueueingConsumer.Delivery> consumer )
     {
         new RabbitSupplier( connection,
                             getRealQueue( queueName, properties ),
@@ -571,5 +606,126 @@ public class RabbitMQ
                 config.get( jndiPrefix + "/password" ),
                 config.get( jndiPrefix + "/host" )
         );
+    }
+
+    /**
+     * Convert a map to an AMQP table
+     *
+     * @param args
+     *
+     * @return
+     */
+    public static byte[] toAMQPTable( Map<String, Object> args )
+    {
+        try {
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            MethodArgumentWriter writer = new MethodArgumentWriter( new ValueWriter( new DataOutputStream( buffer ) ) );
+
+            Map<String, Object> table = args == null ? Collections.emptyMap() : fixAMQPTable( args );
+            writer.writeTable( fixAMQPTable( args ) );
+            writer.flush();
+            return buffer.toByteArray();
+        }
+        catch( IOException ex ) {
+            throw new UncheckedIOException( ex );
+        }
+    }
+
+    /**
+     * Convert an AMQP table to a map
+     *
+     * @param reply
+     *
+     * @return
+     */
+    public static Map<String, Object> fromAMQPTable( byte[] reply )
+    {
+        try {
+            return fixAMQPTable(
+                    new MethodArgumentReader( new ValueReader( new DataInputStream( new ByteArrayInputStream( reply ) ) ) )
+                    .readTable()
+            );
+        }
+        catch( IOException ex ) {
+            throw new UncheckedIOException( ex );
+        }
+    }
+
+    /**
+     * Fixes a map so that we have valid data present
+     *
+     * @param m
+     *
+     * @return
+     */
+    public static Map<String, Object> fixAMQPTable( Map<String, Object> m )
+    {
+        if( m == null ) {
+            return Collections.emptyMap();
+        }
+
+        if( !m.isEmpty() ) {
+            Iterator<Map.Entry<String, Object>> it = m.entrySet().iterator();
+            while( it.hasNext() ) {
+                Map.Entry<String, Object> e = it.next();
+                Object value = e.getValue();
+                // Convert certain types to supported ones otherwise
+                if( value instanceof LongString ) {
+                    e.setValue( value.toString() );
+                }
+                else if( value instanceof BigInteger ) {
+                    // wrap in a decimal
+                    e.setValue( new BigDecimal( (BigInteger) value ) );
+                }
+                else if( value instanceof Map ) {
+                    // Recurse
+                    e.setValue( fixAMQPTable( (Map<String, Object>) value ) );
+                }
+                else if( value instanceof Collection ) {
+                    e.setValue( CollectionUtils.unmodifiableList( (Collection) value ) );
+                }
+                else if( !(value == null
+                           || value instanceof String
+                           || value instanceof Integer
+                           || value instanceof BigDecimal
+                           || value instanceof Date
+                           || value instanceof Byte
+                           || value instanceof Double
+                           || value instanceof Float
+                           || value instanceof Long
+                           || value instanceof Short
+                           || value instanceof Boolean
+                           || value instanceof byte[]
+                           || value instanceof List
+                           || value instanceof Object[]) ) {
+                    // Not one of the remaining valid types then remove it
+                    it.remove();
+                }
+            }
+        }
+
+        return m;
+    }
+
+    public static void rpcConsumer( RabbitConnection connection, String topic, Map<String, Object> properties,
+                                    String callName,
+                                    UnaryOperator<Map<String, Object>> call )
+    {
+        // Queue name must start with "rpc". We also use the same for the routing key
+        Objects.requireNonNull( callName );
+        String queueName = "rpc." + callName;
+
+        Map<String, Object> props = properties == null ? new HashMap<>() : properties;
+
+        // Ensure we don't have a host name - i.e. one server responds to a message
+        props.put( NO_HOSTNAME, true );
+
+        new RabbitSupplier( connection, queueName, topic, queueName, new RabbitRPCInvoker( connection, call ), false, null ).
+                start();
+    }
+
+    public static String newCorrelationId()
+    {
+        return String.valueOf( correlationID.incrementAndGet() );
     }
 }
