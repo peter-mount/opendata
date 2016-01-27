@@ -66,7 +66,7 @@ public class RabbitMQ
 {
 
     private static final Logger LOG = Logger.getLogger( RabbitMQ.class.getName() );
-    private static final AtomicInteger correlationID = new AtomicInteger();
+    private static final AtomicInteger CORRELATION_ID = new AtomicInteger();
 
     public static final String DEFAULT_TOPIC = "amq.topic";
     public static final Charset UTF8 = Charset.forName( "UTF-8" );
@@ -357,6 +357,7 @@ public class RabbitMQ
      * @param <T>        Type of message
      * @param connection Broker connection
      * @param queueName  Queue name
+     * @param routingKey
      * @param mapper     Mapping function to form T from a byte[]
      * @param event      CDI Event to fire
      */
@@ -371,6 +372,7 @@ public class RabbitMQ
      * @param <T>        Type of message
      * @param connection Broker connection
      * @param queueName  Queue name
+     * @param topic
      * @param routingKey Routing Key to bind to
      * @param mapper     Mapping function to form T from a byte[]
      * @param event      CDI Event to fire
@@ -621,7 +623,6 @@ public class RabbitMQ
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             MethodArgumentWriter writer = new MethodArgumentWriter( new ValueWriter( new DataOutputStream( buffer ) ) );
 
-            Map<String, Object> table = args == null ? Collections.emptyMap() : fixAMQPTable( args );
             writer.writeTable( fixAMQPTable( args ) );
             writer.flush();
             return buffer.toByteArray();
@@ -726,6 +727,6 @@ public class RabbitMQ
 
     public static String newCorrelationId()
     {
-        return String.valueOf( correlationID.incrementAndGet() );
+        return String.valueOf( CORRELATION_ID.incrementAndGet() );
     }
 }
