@@ -92,10 +92,7 @@ public interface StateEngine
          *
          * @return
          */
-        default boolean isExecutable()
-        {
-            return !isTerminal();
-        }
+        boolean isExecutable();
 
         /**
          * Is this state terminal. True if next() will return this same state,
@@ -159,6 +156,13 @@ public interface StateEngine
         StateBuilder terminal();
 
         /**
+         * Mark this state as executable.
+         *
+         * @return
+         */
+        StateBuilder executable();
+
+        /**
          * Complete this state
          *
          * @return The builder
@@ -196,16 +200,17 @@ public interface StateEngine
             private final String desc;
             private final boolean initial;
             private final boolean terminal;
+            private final boolean executable;
             private State next, fail;
             private StateEngine engine;
 
-            @SuppressWarnings("LeakingThisInConstructor")
-            public StateImpl( String name, String desc, boolean initial, boolean terminal )
+            public StateImpl( String name, String desc, boolean initial, boolean terminal, boolean executable )
             {
                 this.name = name;
                 this.desc = desc;
                 this.initial = initial;
                 this.terminal = terminal;
+                this.executable = executable;
             }
 
             @Override
@@ -230,6 +235,12 @@ public interface StateEngine
             public boolean isTerminal()
             {
                 return terminal;
+            }
+
+            @Override
+            public boolean isExecutable()
+            {
+                return executable;
             }
 
             @Override
@@ -269,7 +280,7 @@ public interface StateEngine
 
             final String name;
             String desc;
-            boolean initial, terminal;
+            boolean initial, terminal, executable;
             String next;
             String fail;
             Entry nextEntry;
@@ -284,7 +295,7 @@ public interface StateEngine
             public StateImpl getState()
             {
                 if( state == null ) {
-                    state = new StateImpl( name, desc, initial, terminal );
+                    state = new StateImpl( name, desc, initial, terminal, executable );
                 }
                 return state;
             }
@@ -423,6 +434,13 @@ public interface StateEngine
                     public StateBuilder terminal()
                     {
                         entry.terminal = true;
+                        return this;
+                    }
+
+                    @Override
+                    public StateBuilder executable()
+                    {
+                        entry.executable = true;
                         return this;
                     }
 

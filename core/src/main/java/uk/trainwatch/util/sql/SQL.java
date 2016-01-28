@@ -470,8 +470,7 @@ public class SQL
             throws SQLException
     {
         PGInterval interval = new PGInterval( n );
-        return Duration.of( interval.getMonths(), ChronoUnit.MONTHS )
-                .plus( interval.getDays(), ChronoUnit.DAYS )
+        return Duration.of( interval.getDays(), ChronoUnit.DAYS )
                 .plus( interval.getHours(), ChronoUnit.HOURS )
                 .plus( interval.getMinutes(), ChronoUnit.MINUTES );
     }
