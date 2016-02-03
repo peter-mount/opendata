@@ -486,4 +486,15 @@ public class SQL
     {
         return getDuration( rs.getString( n ) );
     }
+
+    public static void executeFunction( Connection con, String sql, Object... args )
+            throws SQLException
+    {
+        try( PreparedStatement ps = con.prepareStatement( "SELECT " + sql ) ) {
+            setParameters( ps, args );
+            try( ResultSet rs = ps.executeQuery() ) {
+            }
+        }
+    }
+
 }
