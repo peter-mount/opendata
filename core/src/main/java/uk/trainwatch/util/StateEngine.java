@@ -18,8 +18,10 @@ package uk.trainwatch.util;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -27,8 +29,9 @@ import java.util.stream.Collectors;
  * A simple state engine
  *
  * @author peter
+ * @param <A> Type used in actions
  */
-public interface StateEngine
+public interface StateEngine<A>
 {
 
     /**
@@ -40,30 +43,64 @@ public interface StateEngine
      *
      * @throws NullPointerException if name is not a valid state
      */
-    State lookup( String name );
+    State<A> lookup( String name );
 
     /**
-     * An unmodifiable collection of state names
+     * An unmodifiable collection of state names.
+     * <p>
+     * The order is not guaranteed to be that of the states when they were created.
      *
      * @return
      */
     Collection<String> getNames();
 
     /**
-     * An unmodifiable collection of all States
+     * An unmodifiable collection of all States.
+     * <p>
+     * The order is not guaranteed to be that of the states when they were created.
      *
      * @return
      */
-    Collection<State> getStates();
+    Collection<State<A>> getStates();
 
     /**
-     * An unmodifiable collection of all initial states
+     * An unmodifiable collection of all initial states.
+     * <p>
+     * The order is not guaranteed to be that of the states when they were created.
      *
      * @return
      */
-    Collection<State> getInitialStates();
+    Collection<State<A>> getInitialStates();
 
-    static interface State
+    /**
+     * The initial state.
+     * <p>
+     * When there are more than one initial state this will return the first returned by {@link #getInitialStates()} but this may not necessarily be the first
+     * initial state defined.
+     *
+     * @return initial state
+     *
+     * @throws IllegalStateException if there are no initial states
+     */
+    default State<A> initial()
+    {
+        Collection<State<A>> s = getInitialStates();
+        if( s != null && !s.isEmpty() ) {
+            Iterator<State<A>> it = s.iterator();
+            if( it.hasNext() ) {
+                return it.next();
+            }
+        }
+        throw new IllegalStateException( "No initial states" );
+    }
+
+    /**
+     * An individual state within the state engine
+     *
+     * @param <A> Type used in actions
+     */
+    static interface State<A>
+            extends Function<A, State>
     {
 
         /**
@@ -78,14 +115,14 @@ public interface StateEngine
          *
          * @return
          */
-        State next();
+        State<A> next();
 
         /**
          * Switch state on some failure. If there is no failure state then this returns {@link #next() }
          *
          * @return
          */
-        State fail();
+        State<A> fail();
 
         /**
          * This state is executable. True if next() will return a different state.
@@ -108,10 +145,20 @@ public interface StateEngine
          */
         boolean isInitial();
 
-        StateEngine getStateEngine();
+        /**
+         * The state engine this state belongs to
+         *
+         * @return
+         */
+        StateEngine<A> getStateEngine();
     }
 
-    static interface StateBuilder
+    /**
+     * A builder of each state
+     *
+     * @param <A> Type used in actions
+     */
+    static interface StateBuilder<A>
     {
 
         /**
@@ -121,7 +168,7 @@ public interface StateEngine
          *
          * @return
          */
-        StateBuilder desc( String desc );
+        StateBuilder<A> desc( String desc );
 
         /**
          * The next state. If not defined then this will cause the state to return itself.
@@ -130,7 +177,7 @@ public interface StateEngine
          *
          * @return
          */
-        StateBuilder next( String name );
+        StateBuilder<A> next( String name );
 
         /**
          * The failure state. If not defined then this will use the next state.
@@ -139,38 +186,52 @@ public interface StateEngine
          *
          * @return
          */
-        StateBuilder fail( String name );
+        StateBuilder<A> fail( String name );
 
         /**
          * Mark this state as an initial state
          *
          * @return
          */
-        StateBuilder initial();
+        StateBuilder<A> initial();
 
         /**
          * Mark this state as a terminal state
          *
          * @return
          */
-        StateBuilder terminal();
+        StateBuilder<A> terminal();
 
         /**
          * Mark this state as executable.
          *
          * @return
          */
-        StateBuilder executable();
+        StateBuilder<A> executable();
+
+        /**
+         * Adds an action to this state
+         *
+         * @param action function that accepts an argument and the current state. Returns the new state or null to remain unchanged.
+         *
+         * @return
+         */
+        StateBuilder<A> action( BiFunction<A, State<A>, State<A>> action );
 
         /**
          * Complete this state
          *
          * @return The builder
          */
-        Builder build();
+        Builder<A> build();
     }
 
-    static interface Builder
+    /**
+     * A builder of a state engine
+     *
+     * @param <A> Type used in actions
+     */
+    static interface Builder<A>
     {
 
         /**
@@ -180,20 +241,27 @@ public interface StateEngine
          *
          * @return
          */
-        StateBuilder add( String name );
+        StateBuilder<A> add( String name );
 
         /**
          * Build the StateEngine
          *
          * @return
          */
-        StateEngine build();
+        StateEngine<A> build();
     }
 
-    static Builder builder()
+    /**
+     * Return a new StateEngine Builder instance
+     *
+     * @param <A> Type used in actions
+     *
+     * @return builder instance
+     */
+    static <A> Builder<A> builder()
     {
         class StateImpl
-                implements State
+                implements State<A>
         {
 
             private final String name;
@@ -201,16 +269,18 @@ public interface StateEngine
             private final boolean initial;
             private final boolean terminal;
             private final boolean executable;
+            private final BiFunction<A, State<A>, State<A>> action;
             private State next, fail;
             private StateEngine engine;
 
-            public StateImpl( String name, String desc, boolean initial, boolean terminal, boolean executable )
+            public StateImpl( String name, String desc, boolean initial, boolean terminal, boolean executable, BiFunction<A, State<A>, State<A>> action )
             {
                 this.name = name;
                 this.desc = desc;
                 this.initial = initial;
                 this.terminal = terminal;
                 this.executable = executable;
+                this.action = action;
             }
 
             @Override
@@ -244,21 +314,31 @@ public interface StateEngine
             }
 
             @Override
-            public State next()
+            public State<A> next()
             {
                 return next;
             }
 
             @Override
-            public State fail()
+            public State<A> fail()
             {
                 return fail;
             }
 
             @Override
-            public StateEngine getStateEngine()
+            public StateEngine<A> getStateEngine()
             {
                 return engine;
+            }
+
+            @Override
+            public State<A> apply( A t )
+            {
+                if( action == null ) {
+                    return this;
+                }
+                State s = action.apply( t, this );
+                return s == null ? this : s;
             }
 
             @Override
@@ -286,6 +366,7 @@ public interface StateEngine
             Entry nextEntry;
             Entry failEntry;
             private StateImpl state;
+            BiFunction<A, State<A>, State<A>> action;
 
             public Entry( String name )
             {
@@ -295,7 +376,7 @@ public interface StateEngine
             public StateImpl getState()
             {
                 if( state == null ) {
-                    state = new StateImpl( name, desc, initial, terminal, executable );
+                    state = new StateImpl( name, desc, initial, terminal, executable, action );
                 }
                 return state;
             }
@@ -340,21 +421,21 @@ public interface StateEngine
                         } );
 
                 // Pass 1 create states & the StateEngine
-                Map<String, State> states = entries.values()
+                Map<String, State<A>> states = entries.values()
                         .stream()
                         .map( Entry::getState )
                         .collect( Collectors.toConcurrentMap( State::getName, Function.identity() ) );
 
                 Collection<String> names = Collections.unmodifiableCollection( states.keySet() );
-                Collection<State> allStates = Collections.unmodifiableCollection( states.values() );
-                Collection<State> initialStates = Collections.unmodifiableCollection( allStates.stream()
+                Collection<State<A>> allStates = Collections.unmodifiableCollection( states.values() );
+                Collection<State<A>> initialStates = Collections.unmodifiableCollection( allStates.stream()
                         .filter( State::isInitial )
                         .collect( Collectors.toList() ) );
 
-                StateEngine engine = new StateEngine()
+                StateEngine<A> engine = new StateEngine<A>()
                 {
                     @Override
-                    public State lookup( String name )
+                    public State<A> lookup( String name )
                     {
                         return Objects.requireNonNull( states.get( name ) );
                     }
@@ -366,13 +447,13 @@ public interface StateEngine
                     }
 
                     @Override
-                    public Collection<State> getStates()
+                    public Collection<State<A>> getStates()
                     {
                         return allStates;
                     }
 
                     @Override
-                    public Collection<State> getInitialStates()
+                    public Collection<State<A>> getInitialStates()
                     {
                         return initialStates;
                     }
@@ -392,60 +473,67 @@ public interface StateEngine
             }
 
             @Override
-            public StateBuilder add( String name )
+            public StateBuilder<A> add( String name )
             {
                 if( entries.containsKey( name ) ) {
                     throw new IllegalArgumentException( "State " + name + " already defined" );
                 }
                 Builder builder = this;
                 Entry entry = entries.computeIfAbsent( name, Entry::new );
-                return new StateBuilder()
+                return new StateBuilder<A>()
                 {
 
                     @Override
-                    public StateBuilder desc( String desc )
+                    public StateBuilder<A> desc( String desc )
                     {
                         entry.desc = desc;
                         return this;
                     }
 
                     @Override
-                    public StateBuilder next( String name )
+                    public StateBuilder<A> next( String name )
                     {
                         entry.next = name;
                         return this;
                     }
 
                     @Override
-                    public StateBuilder fail( String name )
+                    public StateBuilder<A> fail( String name )
                     {
                         entry.fail = name;
                         return this;
                     }
 
                     @Override
-                    public StateBuilder initial()
+                    public StateBuilder<A> initial()
                     {
                         entry.initial = true;
                         return this;
                     }
 
                     @Override
-                    public StateBuilder terminal()
+                    public StateBuilder<A> terminal()
                     {
                         entry.terminal = true;
                         return this;
                     }
 
                     @Override
-                    public StateBuilder executable()
+                    public StateBuilder<A> executable()
                     {
                         entry.executable = true;
                         return this;
                     }
 
                     @Override
-                    public Builder build()
+                    public StateBuilder<A> action( BiFunction<A, State<A>, State<A>> action )
+                    {
+                        entry.action = action;
+                        return this;
+                    }
+
+                    @Override
+                    public Builder<A> build()
                     {
                         return builder;
                     }
