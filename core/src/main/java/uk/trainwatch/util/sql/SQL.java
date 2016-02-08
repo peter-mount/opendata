@@ -491,10 +491,22 @@ public class SQL
             throws SQLException
     {
         try( PreparedStatement ps = con.prepareStatement( "SELECT " + sql ) ) {
-            setParameters( ps, args );
-            try( ResultSet rs = ps.executeQuery() ) {
-            }
+            executeFunction( ps, args );
         }
+    }
+
+    public static void executeFunction( PreparedStatement ps, Object... args )
+            throws SQLException
+    {
+        setParameters( ps, args );
+        if( ps.execute() ) {
+            do {
+                try( ResultSet rs = ps.executeQuery() ) {
+                }
+            }
+            while( ps.getMoreResults() );
+        }
+
     }
 
 }
