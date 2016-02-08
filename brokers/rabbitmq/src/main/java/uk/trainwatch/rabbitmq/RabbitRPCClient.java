@@ -54,7 +54,7 @@ public final class RabbitRPCClient
                    ShutdownSignalException,
                    TimeoutException
     {
-        try( RabbitRPCClient client = new RabbitRPCClient( con, "", routingKey, timeout ) ) {
+        try( RabbitRPCClient client = new RabbitRPCClient( con, RabbitMQ.DEFAULT_TOPIC, routingKey, timeout ) ) {
             return client.mapCall( args );
         }
     }
@@ -64,7 +64,7 @@ public final class RabbitRPCClient
                    ShutdownSignalException,
                    TimeoutException
     {
-        try( RabbitRPCClient client = new RabbitRPCClient( con, "", routingKey, timeout ) ) {
+        try( RabbitRPCClient client = new RabbitRPCClient( con, RabbitMQ.DEFAULT_TOPIC, routingKey, timeout ) ) {
             client.execute( args, action );
         }
     }
@@ -184,7 +184,6 @@ public final class RabbitRPCClient
                    TimeoutException
     {
         byte[] reply = primitiveCall( null, RabbitMQ.toAMQPTable( message ) );
-
         return RabbitMQ.fromAMQPTable( reply );
     }
 
