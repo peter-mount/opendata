@@ -366,9 +366,6 @@ public interface MapBuilder<K, V>
             @Override
             public MapBuilder<K, V> key( Function<V, K> keyExtractor )
             {
-                if( this.keyExtractor != null ) {
-                    throw new IllegalStateException( "Key extraction function already defined" );
-                }
                 this.keyExtractor = keyExtractor;
                 return this;
             }
