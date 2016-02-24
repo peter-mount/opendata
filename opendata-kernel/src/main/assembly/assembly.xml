@@ -14,4 +14,22 @@
             <scope>runtime</scope>
         </dependencySet>
     </dependencySets>
+    <fileSets>
+        <fileSet>
+            <directory>src/main/assembly</directory>
+            <outputDirectory>/</outputDirectory>
+            <fileMode>0755</fileMode>
+            <includes>
+                <include>jobshell</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/assembly</directory>
+            <outputDirectory>/</outputDirectory>
+            <fileMode>0644</fileMode>
+            <includes>
+                <include>logging.properties</include>
+            </includes>
+        </fileSet>
+    </fileSets>
 </assembly>

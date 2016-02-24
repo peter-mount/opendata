@@ -1,0 +1,26 @@
+#!/bin/bash
+#
+# Run's the utility application
+#
+# Now this is messy & needs doing right later, but it gets around a problem
+# with using "java -jar" and java.util.ServiceLoader. When used with -jar
+# ServiceLoader only loads the Utility's in the first jar one is found
+# not all of them, but when run with "-cp" it works.
+#
+DIR=$(dirname $0)
+# ============================================================
+
+OPTS="$OPTS -Djava.util.logging.config.file=${DIR}/logging.properties"
+
+# Uncomment to enforce running within GMT
+#OPTS="$OPTS -Duser.timezone=GMT"
+
+# Enable to use debugger
+#OPTS="$OPTS -Xdebug -Xrunjdwp:transport=dt_socket,address=8888,server=y,suspend=y"
+
+# ============================================================
+# Do not edit below this point
+# ============================================================
+OPTS="$OPTS -cp $(echo $(ls $DIR/*.jar)|sed "s/ /:/g")"
+echo java $OPTS onl.area51.job.daemon.Main "$@"
+exec java $OPTS onl.area51.job.daemon.Main "$@"

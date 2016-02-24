@@ -19,9 +19,7 @@
         <module>osgb</module>
         <module>web</module>
         <module>tflod</module>
-        <!--
         <module>opendata-kernel</module>
-        -->
     </modules>
     
     <properties>

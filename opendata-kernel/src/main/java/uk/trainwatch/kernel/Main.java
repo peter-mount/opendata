@@ -15,93 +15,34 @@
  */
 package uk.trainwatch.kernel;
 
-import java.util.concurrent.Semaphore;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Inject;
-import org.glassfish.hk2.api.ServiceLocator;
-import org.glassfish.hk2.runlevel.RunLevelController;
-import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
-import org.jvnet.hk2.annotations.Service;
+import java.util.Arrays;
+import java.util.Collections;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.CDI;
+import uk.trainwatch.util.CDIUtils;
 
 /**
  *
  * @author peter
  */
-@Service
 public class Main
 {
-
-    private static final Logger LOG = Logger.getLogger( Main.class.getName() );
-    private static String args[];
-    private static ServiceLocator serviceLocator;
-
-    private static final Semaphore SEMAPHORE = new Semaphore( 0 );
-
-    @Inject
-    RunLevelController controller;
-
-    public String[] getArgs()
-    {
-        return args;
-    }
-
-    public ServiceLocator getServiceLocator()
-    {
-        return serviceLocator;
-    }
-
-    public void shutdown()
-    {
-        SEMAPHORE.release();
-    }
-
-    @PostConstruct
-    void start()
-    {
-        LOG.log( Level.INFO, "Starting up services" );
-
-        for( int level = 1; level < 5; level++ )
-        {
-            LOG.log( Level.FINE, "Entering Runlevel {0}", level );
-            controller.proceedTo( level );
-        }
-    }
-
-    @PreDestroy
-    void end()
-    {
-        LOG.log( Level.INFO, "Shutting down services" );
-
-    }
 
     public static void main( String... args )
             throws Exception
     {
-        ServiceLocator locator = ServiceLocatorUtilities.createAndPopulateServiceLocator();
+        int returnCode;
 
-        // On VM shutdown, shutdown all services
-        Runtime.getRuntime().addShutdownHook( new Thread( () ->
-        {
-            try
-            {
-                LOG.log( Level.INFO, "Shutting down" );
-                locator.shutdown();
-                LOG.log( Level.INFO, "System shutdown" );
-            }
-            finally
-            {
-                SEMAPHORE.release();
-            }
-        } ) );
+        try( CDI<Object> cdi = CDI.getCDIProvider().initialize() ) {
 
-        // Now locate ourselves. This will then start the lifecycle
-        locator.getService( Main.class );
+            Bean<Kernel> bean = CDIUtils.getBean( Kernel.class.getName() );
+            Kernel kernel = CDIUtils.getInstance( bean, Kernel.class );
 
-        // Now wait until we shutdown
-        SEMAPHORE.acquire( 1 );
+            kernel.init( Collections.unmodifiableList( Arrays.asList( args ) ) );
+
+            returnCode = kernel.run();
+        }
+
+        System.exit( returnCode );
     }
-
 }
