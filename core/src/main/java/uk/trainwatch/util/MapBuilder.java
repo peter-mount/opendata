@@ -15,14 +15,20 @@
  */
 package uk.trainwatch.util;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -164,6 +170,84 @@ public interface MapBuilder<K, V>
      * @return
      */
     Map<K, V> build();
+
+    default <A> MapBuilder<K, V> addSupplier( K key, Supplier<A> f )
+    {
+        return add( key, (V) f );
+    }
+
+    default <A> MapBuilder<K, V> addConsumer( K key, Consumer<A> f )
+    {
+        return add( key, (V) f );
+    }
+
+    default <A, B> MapBuilder<K, V> addFunction( K key, Function<A, B> f )
+    {
+        return add( key, (V) f );
+    }
+
+    default <A, B, C> MapBuilder<K, V> addBiFunction( K key, BiFunction<A, B, C> f )
+    {
+        return add( key, (V) f );
+    }
+
+    default <A, B> MapBuilder<K, V> addBiConsumer( K key, BiConsumer<A, B> f )
+    {
+        return add( key, (V) f );
+    }
+
+    /**
+     * Add all properties from a properties object
+     *
+     * @param p           Properties
+     * @param keyMapper   function to convert key
+     * @param valueMapper function to convert value
+     *
+     * @return
+     */
+    default MapBuilder<K, V> addProperties( Properties p, Function<Object, K> keyMapper, Function<Object, V> valueMapper )
+    {
+        p.forEach( ( k, v ) -> add( keyMapper.apply( k ), valueMapper.apply( v ) ) );
+        return this;
+    }
+
+    /**
+     * Add all properties from a File
+     *
+     * @param f           File
+     * @param keyMapper   function to convert key
+     * @param valueMapper function to convert value
+     *
+     * @return
+     *
+     * @throws IOException
+     */
+    default MapBuilder<K, V> addProperties( File f, Function<Object, K> keyMapper, Function<Object, V> valueMapper )
+            throws IOException
+    {
+        try( Reader r = new FileReader( f ) ) {
+            return addProperties( r, keyMapper, valueMapper );
+        }
+    }
+
+    /**
+     * Add properties from a Reader
+     *
+     * @param r           Reader
+     * @param keyMapper   function to convert key
+     * @param valueMapper function to convert value
+     *
+     * @return
+     *
+     * @throws IOException
+     */
+    default MapBuilder<K, V> addProperties( Reader r, Function<Object, K> keyMapper, Function<Object, V> valueMapper )
+            throws IOException
+    {
+        Properties p = new Properties();
+        p.load( r );
+        return addProperties( p, keyMapper, valueMapper );
+    }
 
     /**
      * Create a builder of an non-concurrent map.

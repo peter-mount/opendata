@@ -6,7 +6,10 @@
 package uk.trainwatch.util;
 
 import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.Objects;
+import java.util.Spliterators;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.SynchronousQueue;
@@ -14,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  *
@@ -235,8 +239,6 @@ public class Streams
      * @param <T>      Type of the stream
      * @param supplier Supplier that will provide
      * @param factory  Consumer that will configure and run the stream
-     * <p>
-     * @return Consumer
      */
     public static <T> void supplierStream( BlockingSupplier<T> supplier, Consumer<Stream<T>> factory )
     {
@@ -359,11 +361,11 @@ public class Streams
     {
         // Guard otherwise the stream fails and the origin will block until queue fills & times out
         Consumer<T> consumer = Consumers.guard( c );
-        
+
         BlockingQueue<T> queue = size > 1 ? new ArrayBlockingQueue<>( size ) : new SynchronousQueue<>();
-        
+
         supplierStream( queue::poll, parallel ? s -> s.parallel().forEach( consumer ) : s -> s.forEach( consumer ) );
-        
+
         return t -> {
             try {
                 if( !queue.offer( t, timeout, unit ) ) {
@@ -374,5 +376,24 @@ public class Streams
                 throw new IllegalStateException( "Offer interrupted", ex );
             }
         };
+    }
+
+    public static <E> Stream<E> of( Enumeration<E> en )
+    {
+        return StreamSupport.stream( Spliterators.spliteratorUnknownSize( new Iterator<E>()
+        {
+            @Override
+            public boolean hasNext()
+            {
+                return en.hasMoreElements();
+            }
+
+            @Override
+            public E next()
+            {
+                return en.nextElement();
+            }
+        }, 0 ),
+                                     false );
     }
 }
