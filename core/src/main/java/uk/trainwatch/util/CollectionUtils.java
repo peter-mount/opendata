@@ -15,6 +15,7 @@
  */
 package uk.trainwatch.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -338,7 +339,7 @@ public class CollectionUtils
      * An unmodifiable list of a generic collection
      *
      * @param <T>
-     * @param c Collection
+     * @param c   Collection
      *
      * @return Empty list if c is null or empty, unmodifiable if c is a list otherwise a simple wrapper around c
      */
@@ -535,5 +536,20 @@ public class CollectionUtils
                 throw new UnsupportedOperationException();
             }
         };
+    }
+
+    /**
+     * Return an Enumeration as a list
+     * @param <E>
+     * @param en
+     * @return 
+     */
+    public static <E> List<E> asList( Enumeration<E> en )
+    {
+        List<E> l = new ArrayList<>();
+        while( en.hasMoreElements() ) {
+            l.add( en.nextElement() );
+        }
+        return l;
     }
 }

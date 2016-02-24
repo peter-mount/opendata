@@ -15,7 +15,13 @@
  */
 package uk.trainwatch.util;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.Properties;
 import java.util.function.Function;
+import uk.trainwatch.util.sql.DataSourceProducer;
 
 /**
  *
@@ -56,22 +62,28 @@ public class ParserUtils
 
     public static <T> T parse( String v, Function<String, T> f, T defaultValue )
     {
-        if( v == null || v.isEmpty() )
-        {
+        if( v == null || v.isEmpty() ) {
             return defaultValue;
         }
         String s = v.trim();
-        if( s.isEmpty() )
-        {
+        if( s.isEmpty() ) {
             return defaultValue;
         }
-        try
-        {
+        try {
             return f.apply( s );
-        } catch( Exception ex )
-        {
+        }
+        catch( Exception ex ) {
             return defaultValue;
         }
     }
 
+    public static Properties readProperties( File file )
+            throws IOException
+    {
+        try( Reader r = new FileReader( file ) ) {
+            Properties p = new Properties();
+            p.load( r );
+            return p;
+        }
+    }
 }

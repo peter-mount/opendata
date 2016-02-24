@@ -92,7 +92,7 @@ public class CDIUtils
         CreationalContext<T> ctx = beanManager.createCreationalContext( bean );
         return (T) beanManager.getReference( bean, clazz, ctx );
     }
-
+    
     /**
      * Ensure we have an annotation present
      * <p>
