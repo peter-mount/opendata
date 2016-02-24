@@ -16,8 +16,13 @@
 package uk.trainwatch.kernel;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
@@ -26,6 +31,7 @@ import uk.trainwatch.util.ParserUtils;
 import uk.trainwatch.util.sql.DataSourceProducer;
 
 /**
+ * The injectable Kernel.
  *
  * @author peter
  */
@@ -42,6 +48,15 @@ public class Kernel
     private CommandArguments commandArguments;
     private File homeDir;
 
+    private final Map<String, Properties> properties = new ConcurrentHashMap<>();
+
+    /**
+     * Called by main to initialise the Kernel
+     *
+     * @param args Command line arguments
+     *
+     * @throws IOException if failed to read property files
+     */
     void init( List<String> args )
             throws IOException
     {
@@ -61,6 +76,13 @@ public class Kernel
         }
     }
 
+    /**
+     * Runs the main Kernel thread. This will not return until one of {@link #exit()} or {@link #exit(int)} is called.
+     *
+     * @return
+     *
+     * @throws InterruptedException
+     */
     int run()
             throws InterruptedException
     {
@@ -72,6 +94,34 @@ public class Kernel
         return returnCode;
     }
 
+    public Properties getProperties( String name )
+            throws IOException
+    {
+        try {
+            return properties.computeIfAbsent( name, this::readProperties );
+        }
+        catch( UncheckedIOException ex ) {
+            throw ex.getCause();
+        }
+    }
+
+    private Properties readProperties( String name )
+    {
+        try {
+            if( name.contains( File.separator ) ) {
+                throw new IOException( "Invalid properties name " + name );
+            }
+            File f = new File( homeDir, name = ".properties" );
+            if( f.exists() && f.isFile() ) {
+                return ParserUtils.readProperties( f );
+            }
+            throw new FileNotFoundException( "Unknown properties " + name );
+        }
+        catch( IOException ex ) {
+            throw new UncheckedIOException( ex );
+        }
+    }
+
     public File getHomeDir()
     {
         return homeDir;
@@ -80,11 +130,6 @@ public class Kernel
     public CommandArguments getCommandArguments()
     {
         return commandArguments;
-    }
-
-    public void exit()
-    {
-        exit( 0 );
     }
 
     public void exit( int returnCode )

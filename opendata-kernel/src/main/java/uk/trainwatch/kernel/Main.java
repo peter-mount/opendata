@@ -17,11 +17,11 @@ package uk.trainwatch.kernel;
 
 import java.util.Arrays;
 import java.util.Collections;
-import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.CDI;
 import uk.trainwatch.util.CDIUtils;
 
 /**
+ * Standalone entry point. This boots the CDI environment and initialises the {@link Kernel}
  *
  * @author peter
  */
@@ -35,8 +35,7 @@ public class Main
 
         try( CDI<Object> cdi = CDI.getCDIProvider().initialize() ) {
 
-            Bean<Kernel> bean = CDIUtils.getBean( Kernel.class.getName() );
-            Kernel kernel = CDIUtils.getInstance( bean, Kernel.class );
+            Kernel kernel = CDIUtils.getInstance( Kernel.class );
 
             kernel.init( Collections.unmodifiableList( Arrays.asList( args ) ) );
 

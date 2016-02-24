@@ -29,5 +29,10 @@ import java.util.List;
 public interface CommandArguments
 {
 
+    /**
+     * Immutable list of command line arguments
+     *
+     * @return
+     */
     List<String> getArguments();
 }

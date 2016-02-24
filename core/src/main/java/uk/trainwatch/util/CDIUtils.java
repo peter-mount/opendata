@@ -72,6 +72,14 @@ public class CDIUtils
         return bean;
     }
 
+    /**
+     * Get the named bean
+     *
+     * @param <T>  type of bean
+     * @param name name of bean
+     *
+     * @return
+     */
     public static <T> Bean<T> getBean( String name )
     {
         BeanManager beanManager = getBeanManager();
@@ -79,6 +87,15 @@ public class CDIUtils
         return beanManager.resolve( beans );
     }
 
+    /**
+     * Get the bean
+     *
+     * @param <T>        type of bean
+     * @param type       type of bean
+     * @param qualifiers qualifiers of bean
+     *
+     * @return
+     */
     public static <T> Bean<T> getBean( Type type, Annotation... qualifiers )
     {
         BeanManager beanManager = getBeanManager();
@@ -86,13 +103,58 @@ public class CDIUtils
         return beanManager.resolve( beans );
     }
 
+    /**
+     * Get the instance of a bean
+     *
+     * @param <T>   type of bean
+     * @param bean  Bean
+     * @param clazz class of bean
+     *
+     * @return
+     */
     public static <T> T getInstance( Bean<T> bean, Class<T> clazz )
     {
         BeanManager beanManager = getBeanManager();
         CreationalContext<T> ctx = beanManager.createCreationalContext( bean );
         return (T) beanManager.getReference( bean, clazz, ctx );
     }
-    
+
+    /**
+     * Return the instance of a bean
+     *
+     * @param <T>        type of bean
+     * @param clazz      class of bean
+     * @param qualifiers qualifiers
+     *
+     * @return
+     */
+    public static <T> T getInstance( Class<T> clazz, Annotation... qualifiers )
+    {
+        BeanManager beanManager = getBeanManager();
+        Set beans = beanManager.getBeans( clazz, qualifiers );
+        Bean<T> bean = beanManager.resolve( beans );
+        CreationalContext<T> ctx = beanManager.createCreationalContext( bean );
+        return (T) beanManager.getReference( bean, clazz, ctx );
+    }
+
+    /**
+     * Return the named instance of a bean
+     *
+     * @param <T>   type of bean
+     * @param name  name of bean
+     * @param clazz class of bean
+     *
+     * @return
+     */
+    public static <T> T getInstance( String name, Class<T> clazz )
+    {
+        BeanManager beanManager = getBeanManager();
+        Set beans = beanManager.getBeans( name );
+        Bean<T> bean = beanManager.resolve( beans );
+        CreationalContext<T> ctx = beanManager.createCreationalContext( bean );
+        return (T) beanManager.getReference( bean, clazz, ctx );
+    }
+
     /**
      * Ensure we have an annotation present
      * <p>
@@ -145,6 +207,14 @@ public class CDIUtils
         return pat.getAnnotatedType().getJavaClass().isInterface();
     }
 
+    /**
+     * Pass an AnnotatedType to a consumer if an annotation is present
+     *
+     * @param <T>
+     * @param pat
+     * @param annotationType
+     * @param c
+     */
     public static <T> void forEachType( ProcessAnnotatedType<T> pat, Class<? extends Annotation> annotationType,
                                         Consumer<? super AnnotatedType<? extends Object>> c )
     {
