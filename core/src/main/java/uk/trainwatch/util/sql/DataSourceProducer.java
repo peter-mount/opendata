@@ -148,8 +148,8 @@ public class DataSourceProducer
             PGPoolingDataSource ds = new PGPoolingDataSource();
             ds.setApplicationName( "OpenData" );
             ds.setDataSourceName( name );
-            ds.setMaxConnections( 10 );
-            ds.setInitialConnections( 0 );
+            ds.setMaxConnections( Integer.parseInt( properties.getProperty( name + ".connections.max", "10" ) ) );
+            ds.setInitialConnections( Integer.parseInt( properties.getProperty( name + ".connections.initial", "0" ) ) );
 
             ds.setUser( Objects.requireNonNull( properties.getProperty( name + ".username" ), "username required for " + name ) );
             ds.setPassword( Objects.requireNonNull( properties.getProperty( name + ".password" ), "password required for " + name ) );
