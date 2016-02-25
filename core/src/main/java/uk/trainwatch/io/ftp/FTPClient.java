@@ -26,6 +26,7 @@ import java.io.UncheckedIOException;
 import java.io.Writer;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.function.Consumer;
@@ -794,6 +795,24 @@ public interface FTPClient
         return !file.exists()
                || file.length() != ftp.getSize()
                || file.lastModified() < ftp.getTimestamp().getTimeInMillis();
+    }
+
+    /**
+     * Simple test to see if a remote file should be retrieved.
+     * <p>
+     * This returns true if file does not exist, if the lengths don't match or the remote file's date is newer than the local file
+     * <p>
+     * @param file
+     * @param ftp
+     *             <p>
+     * @return
+     */
+    default boolean isPathRetrievable( Path file, FTPFile ftp )
+            throws IOException
+    {
+        return !Files.exists( file, LinkOption.NOFOLLOW_LINKS )
+               || Files.size( file ) != ftp.getSize()
+               || Files.getLastModifiedTime( file, LinkOption.NOFOLLOW_LINKS ).toMillis() < ftp.getTimestamp().getTimeInMillis();
     }
 
 }

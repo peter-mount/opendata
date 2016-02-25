@@ -18,10 +18,13 @@ package uk.trainwatch.util;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Properties;
 import java.util.function.Function;
-import uk.trainwatch.util.sql.DataSourceProducer;
 
 /**
  *
@@ -83,6 +86,16 @@ public class ParserUtils
         try( Reader r = new FileReader( file ) ) {
             Properties p = new Properties();
             p.load( r );
+            return p;
+        }
+    }
+
+    public static Properties readProperties( Path path )
+            throws IOException
+    {
+        try( InputStream is = Files.newInputStream( path, StandardOpenOption.READ ) ) {
+            Properties p = new Properties();
+            p.load( is );
             return p;
         }
     }

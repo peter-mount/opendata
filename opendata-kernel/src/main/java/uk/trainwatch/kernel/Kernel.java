@@ -19,14 +19,19 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.URI;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import uk.trainwatch.util.MapBuilder;
 import uk.trainwatch.util.ParserUtils;
 import uk.trainwatch.util.sql.DataSourceProducer;
 
@@ -48,7 +53,7 @@ public class Kernel
     private CommandArguments commandArguments;
     private File homeDir;
 
-    private final Map<String, Properties> properties = new ConcurrentHashMap<>();
+    private FileSystem config;
 
     /**
      * Called by main to initialise the Kernel
@@ -66,13 +71,19 @@ public class Kernel
 
         homeDir = new File( userHome, ".area51" );
 
-        if( homeDir.exists() && homeDir.isDirectory() ) {
+        homeDir.mkdirs();
+
+        config = FileSystems.newFileSystem( URI.create( "local://config" ),
+                                            MapBuilder.<String, Object>builder()
+                                            .add( "baseDirectory", new File( homeDir, "config" ).getAbsolutePath() )
+                                            .build()
+        );
+
+        Path dbProperties = config.getPath( "/database.properties" );
+        if( Files.exists( dbProperties, LinkOption.NOFOLLOW_LINKS ) ) {
             // If database.properties exists then read that for DB config
-            File dbFile = new File( homeDir, "database.properties" );
-            if( dbFile.exists() && dbFile.isFile() ) {
-                DataSourceProducer.setFactory( ParserUtils.readProperties( dbFile ) );
-                DataSourceProducer.setUseJndi( false );
-            }
+            DataSourceProducer.setFactory( ParserUtils.readProperties( dbProperties ) );
+            DataSourceProducer.setUseJndi( false );
         }
     }
 
@@ -94,26 +105,18 @@ public class Kernel
         return returnCode;
     }
 
+    public FileSystem getConfig()
+    {
+        return config;
+    }
+
     public Properties getProperties( String name )
             throws IOException
     {
         try {
-            return properties.computeIfAbsent( name, this::readProperties );
-        }
-        catch( UncheckedIOException ex ) {
-            throw ex.getCause();
-        }
-    }
-
-    private Properties readProperties( String name )
-    {
-        try {
-            if( name.contains( File.separator ) ) {
-                throw new IOException( "Invalid properties name " + name );
-            }
-            File f = new File( homeDir, name = ".properties" );
-            if( f.exists() && f.isFile() ) {
-                return ParserUtils.readProperties( f );
+            Path p = config.getPath( name + ".properties" );
+            if( Files.exists( p, LinkOption.NOFOLLOW_LINKS ) && Files.isRegularFile( p, LinkOption.NOFOLLOW_LINKS ) ) {
+                return ParserUtils.readProperties( p );
             }
             throw new FileNotFoundException( "Unknown properties " + name );
         }
