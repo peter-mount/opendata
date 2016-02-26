@@ -67,3 +67,6 @@
 /web/cms/web-cms-persistence/target/
 /web/cms/web-static/target/
 /core/nbproject/
+/config/target/
+/cluster/target/
+/scheduler/target/
