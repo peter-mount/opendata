@@ -16,24 +16,13 @@
 package uk.trainwatch.kernel;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.net.URI;
 import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.Semaphore;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import uk.trainwatch.util.MapBuilder;
-import uk.trainwatch.util.ParserUtils;
-import uk.trainwatch.util.sql.DataSourceProducer;
 
 /**
  * The injectable Kernel.
@@ -49,7 +38,7 @@ public class Kernel
 
     @Inject
     Event<CommandArguments> startEvent;
-
+    
     private CommandArguments commandArguments;
     private File homeDir;
 
@@ -67,24 +56,12 @@ public class Kernel
     {
         commandArguments = () -> args;
 
-        File userHome = new File( System.getProperty( "user.home" ) );
-
-        homeDir = new File( userHome, ".area51" );
-
-        homeDir.mkdirs();
-
-        config = FileSystems.newFileSystem( URI.create( "local://config" ),
-                                            MapBuilder.<String, Object>builder()
-                                            .add( "baseDirectory", new File( homeDir, "config" ).getAbsolutePath() )
-                                            .build()
-        );
-
-        Path dbProperties = config.getPath( "/database.properties" );
-        if( Files.exists( dbProperties, LinkOption.NOFOLLOW_LINKS ) ) {
-            // If database.properties exists then read that for DB config
-            DataSourceProducer.setFactory( ParserUtils.readProperties( dbProperties ) );
-            DataSourceProducer.setUseJndi( false );
-        }
+//        Path dbProperties = config.getPath( "/database.properties" );
+//        if( Files.exists( dbProperties, LinkOption.NOFOLLOW_LINKS ) ) {
+//            // If database.properties exists then read that for DB config
+//            DataSourceProducer.setFactory( ParserUtils.readProperties( dbProperties ) );
+//            DataSourceProducer.setUseJndi( false );
+//        }
     }
 
     /**
@@ -103,36 +80,6 @@ public class Kernel
         // Now wait on the semaphore
         SEMAPHORE.acquire();
         return returnCode;
-    }
-
-    public FileSystem getConfig()
-    {
-        return config;
-    }
-
-    public Properties getProperties( String name )
-            throws IOException
-    {
-        try {
-            Path p = config.getPath( name + ".properties" );
-            if( Files.exists( p, LinkOption.NOFOLLOW_LINKS ) && Files.isRegularFile( p, LinkOption.NOFOLLOW_LINKS ) ) {
-                return ParserUtils.readProperties( p );
-            }
-            throw new FileNotFoundException( "Unknown properties " + name );
-        }
-        catch( IOException ex ) {
-            throw new UncheckedIOException( ex );
-        }
-    }
-
-    public File getHomeDir()
-    {
-        return homeDir;
-    }
-
-    public CommandArguments getCommandArguments()
-    {
-        return commandArguments;
     }
 
     public void exit( int returnCode )
