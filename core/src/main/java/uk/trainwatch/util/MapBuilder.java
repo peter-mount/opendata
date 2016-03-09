@@ -33,6 +33,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import javax.json.JsonArray;
+import javax.json.JsonNumber;
+import javax.json.JsonObject;
+import javax.json.JsonString;
 
 /**
  * A builder of maps
@@ -314,6 +318,43 @@ public interface MapBuilder<K, V>
                 .keyMapper( keyMapper )
                 .addAll( c.getEnumConstants() )
                 .build();
+    }
+
+    static MapBuilder<String, Object> fromJsonObject( JsonObject o )
+    {
+        MapBuilder<String, Object> b = MapBuilder.<String, Object>builder();
+        o.forEach( ( k, v ) -> {
+            switch( v.getValueType() ) {
+                case STRING:
+                    b.add( k, ((JsonString) v).getString() );
+                    break;
+
+                case NUMBER:
+                    b.add( k, ((JsonNumber) v).bigDecimalValue() );
+                    break;
+
+                case OBJECT:
+                    b.add( k, fromJsonObject( (JsonObject) v ).build() );
+                    break;
+
+                case ARRAY:
+                    b.add( k, CollectionBuilder.fromJsonArray( (JsonArray) v ).build() );
+                    break;
+
+                case FALSE:
+                    b.add( k, false );
+                    break;
+
+                case TRUE:
+                    b.add( k, true );
+                    break;
+
+                case NULL:
+                default:
+                    break;
+            }
+        } );
+        return b;
     }
 
     /**

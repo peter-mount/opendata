@@ -77,6 +77,9 @@ public class JsonUtils
     public static final Function<? super JsonStructure, String> toString = JsonUtils::encode;
     public static final Function<JsonObject, String> jsonObjectToString = JsonUtils::encode;
 
+    public static final JsonNumber ZERO = createJsonNumber( BigDecimal.ZERO );
+    public static final JsonNumber ONE = createJsonNumber( BigDecimal.ONE );
+
     /**
      * Obtain a {@link JsonStructure} from a String.
      * <p>
@@ -655,6 +658,72 @@ public class JsonUtils
     public static JsonValue createJsonValue( final String s )
     {
         return s == null ? JsonValue.NULL : createJsonString( s );
+    }
+
+    public static JsonNumber createJsonNumber( BigDecimal d )
+    {
+        return new JsonNumber()
+        {
+            @Override
+            public boolean isIntegral()
+            {
+                return d.scale() == 0;
+            }
+
+            @Override
+            public int intValue()
+            {
+                return d.intValue();
+            }
+
+            @Override
+            public int intValueExact()
+            {
+                return d.intValueExact();
+            }
+
+            @Override
+            public long longValue()
+            {
+                return d.longValue();
+            }
+
+            @Override
+            public long longValueExact()
+            {
+                return d.longValueExact();
+            }
+
+            @Override
+            public BigInteger bigIntegerValue()
+            {
+                return d.toBigInteger();
+            }
+
+            @Override
+            public BigInteger bigIntegerValueExact()
+            {
+                return d.toBigIntegerExact();
+            }
+
+            @Override
+            public double doubleValue()
+            {
+                return d.doubleValue();
+            }
+
+            @Override
+            public BigDecimal bigDecimalValue()
+            {
+                return d;
+            }
+
+            @Override
+            public JsonValue.ValueType getValueType()
+            {
+                return ValueType.NUMBER;
+            }
+        };
     }
 
     /**
