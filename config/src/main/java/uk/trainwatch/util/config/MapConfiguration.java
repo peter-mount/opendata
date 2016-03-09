@@ -25,8 +25,14 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.json.JsonArray;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonValue;
+import uk.trainwatch.util.CollectionBuilder;
 import uk.trainwatch.util.MapBuilder;
 
 /**
@@ -54,15 +60,66 @@ public class MapConfiguration
     {
         Object o = config.computeIfPresent( key,
                                             ( k, v ) -> {
-                                                if( v instanceof Map ) {
-                                                    return new MapConfiguration( ((Map<String, Object>) v) );
-                                                }
                                                 if( v instanceof JsonObject ) {
                                                     return new MapConfiguration( MapBuilder.fromJsonObject( (JsonObject) v ).build() );
+                                                }
+                                                if( v instanceof Map ) {
+                                                    return new MapConfiguration( ((Map<String, Object>) v) );
                                                 }
                                                 return v;
                                             } );
         return o instanceof Configuration ? (Configuration) o : defaultValue.get();
+    }
+
+    @Override
+    public Stream<Object> collection( String key )
+    {
+        Object o = config.get( key );
+
+        if( o == null ) {
+            return Stream.empty();
+        }
+
+        if( o instanceof JsonArray ) {
+            return ((JsonArray) o).stream().map( this::map );
+        }
+
+        if( o instanceof JsonObject ) {
+            return Stream.of( MapBuilder.fromJsonObject( (JsonObject) o ) );
+        }
+
+        if( o instanceof Collection ) {
+            return ((Collection) o).stream();
+        }
+
+        return Stream.of( o );
+    }
+
+    private Object map( JsonValue v )
+    {
+        switch( v.getValueType() ) {
+            case STRING:
+                return ((JsonString) v).getString();
+
+            case NUMBER:
+                return ((JsonNumber) v).bigDecimalValue();
+
+            case TRUE:
+                return true;
+
+            case FALSE:
+                return false;
+
+            case OBJECT:
+                return MapBuilder.fromJsonObject( (JsonObject) v );
+
+            case ARRAY:
+                return CollectionBuilder.fromJsonArray( (JsonArray) v );
+
+            case NULL:
+            default:
+                return null;
+        }
     }
 
     @Override

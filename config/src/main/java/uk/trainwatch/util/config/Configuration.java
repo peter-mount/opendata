@@ -8,6 +8,7 @@ package uk.trainwatch.util.config;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.json.JsonObject;
 import uk.trainwatch.util.MapBuilder;
@@ -26,6 +27,35 @@ public interface Configuration
     Collection<String> getKeys();
 
     Stream<String> keys();
+
+    default Collection<Object> getCollection( String key )
+    {
+        return collection( key ).collect( Collectors.toList() );
+    }
+
+    default Stream<Object> collection( String key )
+    {
+        return Stream.empty();
+    }
+
+    default <E extends Enum<E>> E getEnum( String key, Class<E> clazz )
+    {
+        return getEnum( key, clazz, null );
+    }
+
+    default <E extends Enum<E>> E getEnum( String key, Class<E> clazz, E defaultValue )
+    {
+        String s = getString( key );
+        if( s == null || s.isEmpty() ) {
+            return defaultValue;
+        }
+        try {
+            return Enum.valueOf( clazz, getString( key ) );
+        }
+        catch( IllegalArgumentException iae ) {
+            return defaultValue;
+        }
+    }
 
     default String getString( String key, String defaultValue )
     {
@@ -49,11 +79,11 @@ public interface Configuration
         if( o instanceof Configuration ) {
             return (Configuration) o;
         }
-        if( o instanceof Map ) {
-            return new MapConfiguration( ((Map<String, Object>) o) );
-        }
         if( o instanceof JsonObject ) {
             return new MapConfiguration( MapBuilder.fromJsonObject( (JsonObject) o ).build() );
+        }
+        if( o instanceof Map ) {
+            return new MapConfiguration( ((Map<String, Object>) o) );
         }
         return defaultValue.get();
     }
