@@ -15,8 +15,19 @@
  */
 package uk.trainwatch.util.config;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+import javax.json.JsonObject;
+import uk.trainwatch.util.MapBuilder;
 
 /**
  *
@@ -26,22 +37,185 @@ public class MapConfiguration
         implements Configuration
 {
 
-    protected final Map<String, String> config = new ConcurrentHashMap<>();
+    protected final Map<String, Object> config;
 
     public MapConfiguration()
     {
+        this( new ConcurrentHashMap<>() );
+    }
+
+    public MapConfiguration( Map<String, Object> config )
+    {
+        this.config = config;
     }
 
     @Override
-    public String get( String key )
+    public Configuration getConfiguration( String key, Supplier<Configuration> defaultValue )
+    {
+        Object o = config.computeIfPresent( key,
+                                            ( k, v ) -> {
+                                                if( v instanceof Map ) {
+                                                    return new MapConfiguration( ((Map<String, Object>) v) );
+                                                }
+                                                if( v instanceof JsonObject ) {
+                                                    return new MapConfiguration( MapBuilder.fromJsonObject( (JsonObject) v ).build() );
+                                                }
+                                                return v;
+                                            } );
+        return o instanceof Configuration ? (Configuration) o : defaultValue.get();
+    }
+
+    @Override
+    public Collection<String> getKeys()
+    {
+        return config.keySet();
+    }
+
+    @Override
+    public Stream<String> keys()
+    {
+        return config.keySet().stream();
+    }
+
+    @Override
+    public String getString( String key )
+    {
+        return Objects.toString( config.get( key ), null );
+    }
+
+    @Override
+    public Object get( Object key )
     {
         return config.get( key );
     }
 
     @Override
-    public String get( String key, String defaultValue )
+    public String getString( String key, String defaultValue )
     {
-        return config.getOrDefault( key, defaultValue );
+        return Objects.toString( config.get( key ), defaultValue );
+    }
+
+    @Override
+    public int size()
+    {
+        return config.size();
+    }
+
+    @Override
+    public boolean isEmpty()
+    {
+        return config.isEmpty();
+    }
+
+    @Override
+    public boolean containsKey( Object key )
+    {
+        return config.containsKey( key );
+    }
+
+    @Override
+    public boolean containsValue( Object value )
+    {
+        return false;
+    }
+
+    @Override
+    public Object put( String key, Object value )
+    {
+        return null;
+    }
+
+    @Override
+    public Object remove( Object key )
+    {
+        return null;
+    }
+
+    @Override
+    public void putAll( Map<? extends String, ? extends Object> m )
+    {
+    }
+
+    @Override
+    public void clear()
+    {
+    }
+
+    @Override
+    public Set<String> keySet()
+    {
+        return config.keySet();
+    }
+
+    @Override
+    public Collection<Object> values()
+    {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Set<Entry<String, Object>> entrySet()
+    {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public void forEach( BiConsumer<? super String, ? super Object> action )
+    {
+        keySet().forEach( k -> action.accept( k, getString( k ) ) );
+    }
+
+    @Override
+    public void replaceAll( BiFunction<? super String, ? super Object, ? extends Object> function )
+    {
+    }
+
+    @Override
+    public Object putIfAbsent( String key, Object value )
+    {
+        return null;
+    }
+
+    @Override
+    public boolean remove( Object key, Object value )
+    {
+        return false;
+    }
+
+    @Override
+    public boolean replace( String key, Object oldValue, Object newValue )
+    {
+        return false;
+    }
+
+    @Override
+    public Object replace( String key, Object value )
+    {
+        return false;
+    }
+
+    @Override
+    public Object computeIfAbsent( String key, Function<? super String, ? extends Object> mappingFunction )
+    {
+        return null;
+    }
+
+    @Override
+    public Object computeIfPresent( String key, BiFunction<? super String, ? super Object, ? extends Object> remappingFunction )
+    {
+        return null;
+    }
+
+    @Override
+    public Object compute( String key, BiFunction<? super String, ? super Object, ? extends Object> remappingFunction )
+    {
+        return null;
+    }
+
+    @Override
+    public Object merge( String key, Object value, BiFunction<? super Object, ? super Object, ? extends Object> remappingFunction )
+    {
+        return null;
     }
 
 }

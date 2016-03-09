@@ -5,21 +5,28 @@
  */
 package uk.trainwatch.util.config;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.util.Iterator;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.inject.Inject;
-import javax.sql.DataSource;
-import org.apache.commons.configuration.AbstractConfiguration;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.DatabaseConfiguration;
-import uk.trainwatch.util.sql.DataSourceProducer;
-import uk.trainwatch.util.sql.Database;
+import javax.json.Json;
+import javax.json.JsonReader;
+import uk.trainwatch.util.MapBuilder;
+import uk.trainwatch.util.URIBuilder;
 
 /**
  *
@@ -29,46 +36,82 @@ import uk.trainwatch.util.sql.Database;
 public class ConfigurationService
 {
 
+    private static final Logger LOG = Logger.getLogger( "Configuration" );
+
     private static volatile ConfigurationService instance;
 
-    private final Map<String, Configuration> publicConfig = new ConcurrentHashMap<>();
-    private final Map<String, Configuration> privateConfig = new ConcurrentHashMap<>();
+    private final Map<String, Configuration> config = new ConcurrentHashMap<>();
 
-    public static ConfigurationService getInstance()
+    @Deprecated
+    public static synchronized ConfigurationService getInstance()
     {
         if( instance == null ) {
-            synchronized( ConfigurationService.class ) {
-                if( instance == null ) {
-                    instance = new ConfigurationService();
-                    instance.dataSource = DataSourceProducer.getInstance().getDataSource( "config" );
-                }
-            }
+            instance = new ConfigurationService();
         }
         return instance;
     }
 
-    @Database("rail")
-    @Inject
-    private DataSource dataSource;
+    /**
+     * The configuration URI, either CONFIGURATION_URI environment or -Darea51.configuration= to application config server.
+     * If none then we will default to the older database configuration
+     */
+    private final String remoteURI = System.getenv().get( "CONFIGURATION_URI" );
+    private final String localConfig = System.getenv().getOrDefault( "CONFIGURATION_DIR", System.getProperty( "area51.configuration" ) );
 
     public Configuration getConfiguration( String name )
     {
-        return publicConfig.computeIfAbsent( name, this::newConfiguration );
-    }
-
-    public Configuration getPrivateConfiguration( String name )
-    {
-        return privateConfig.computeIfAbsent( name, this::newPrivateConfiguration );
+        return config.computeIfAbsent( name, this::newConfiguration );
     }
 
     private Configuration newConfiguration( String name )
     {
-        return new CachedConfiguration( new DatabaseConfiguration( dataSource, "config.config", "name", "key", "value", name, true ) );
+        if( localConfig != null ) {
+            return newLocalConfiguration( name );
+        }
+        else if( remoteURI != null ) {
+            return newRemoteConfiguration( name );
+        }
+        return EmptyConfiguration.INSTANCE;
     }
 
-    private Configuration newPrivateConfiguration( String name )
+    private Configuration newRemoteConfiguration( String name )
     {
-        return new CachedConfiguration( new DatabaseConfiguration( dataSource, "config.prconfig", "name", "key", "value", name, true ) );
+        try {
+            URI uri = new URI( remoteURI );
+            if( uri.getQuery() == null ) {
+                // Append /table/name.json to path
+                return new HttpConfiguration( URIBuilder.create( uri )
+                        .path( String.join( "/", uri.getPath(), name + ".json" ) )
+                        .build() );
+            }
+            else {
+                // Append table=table&name=name to uri
+                return new HttpConfiguration( URIBuilder.create( uri )
+                        .query( uri.getQuery() )
+                        .query()
+                        .add( "name", name )
+                        .endQuery()
+                        .build() );
+            }
+        }
+        catch( URISyntaxException ex ) {
+            throw new IllegalArgumentException( ex );
+        }
+    }
+
+    private Configuration newLocalConfiguration( String name )
+    {
+        LOG.log( Level.INFO, () -> "Reading local config " + name );
+        Path p = Paths.get( localConfig, name + ".json" );
+        if( Files.isRegularFile( p, LinkOption.NOFOLLOW_LINKS ) ) {
+            try( JsonReader r = Json.createReader( Files.newBufferedReader( p, StandardCharsets.UTF_8 ) ) ) {
+                return new MapConfiguration( MapBuilder.fromJsonObject( r.readObject() ).build() );
+            }
+            catch( IOException ex ) {
+                throw new IllegalArgumentException( ex );
+            }
+        }
+        return EmptyConfiguration.INSTANCE;
     }
 
     /**
@@ -80,7 +123,8 @@ public class ConfigurationService
     @Produces
     @GlobalConfiguration("")
     @Dependent
-    Configuration getConfiguration( InjectionPoint injectionPoint )
+    Configuration getConfiguration( InjectionPoint injectionPoint
+    )
     {
         for( Annotation a: injectionPoint.getQualifiers() ) {
             if( a instanceof GlobalConfiguration ) {
@@ -88,94 +132,5 @@ public class ConfigurationService
             }
         }
         return getConfiguration( "default" );
-    }
-
-    /**
-     *
-     * @param injectionPoint
-     *                       <p>
-     * @return
-     */
-    @Produces
-    @PrivateConfiguration("")
-    @Dependent
-    Configuration getPrivateConfiguration( InjectionPoint injectionPoint )
-    {
-        for( Annotation a: injectionPoint.getQualifiers() ) {
-            if( a instanceof PrivateConfiguration ) {
-                return getPrivateConfiguration( ((PrivateConfiguration) a).value() );
-            }
-        }
-        return getConfiguration( "default" );
-    }
-
-    private static class CachedConfiguration
-            extends AbstractConfiguration
-    {
-
-        private final Configuration delegate;
-
-        private final Map<String, Object> map = new ConcurrentHashMap<>();
-
-        public CachedConfiguration( Configuration delegate )
-        {
-            this.delegate = delegate;
-        }
-
-        @Override
-        public boolean isEmpty()
-        {
-            return map.isEmpty();
-        }
-
-        @Override
-        public boolean containsKey( String key )
-        {
-            return map.containsKey( key ) || delegate.containsKey( key );
-        }
-
-        @Override
-        public void clearProperty( String key )
-        {
-            map.remove( key );
-        }
-
-        @Override
-        public void clear()
-        {
-            map.clear();
-        }
-
-        @Override
-        public Object getProperty( String key )
-        {
-            return map.computeIfAbsent( key, delegate::getProperty );
-        }
-
-        @Override
-        public void addProperty( String key, Object value )
-        {
-            // Do not allow the database to be modified
-        }
-
-        @Override
-        protected void addPropertyDirect( String key, Object value )
-        {
-            // Do not allow the database to be modified
-        }
-
-        @Override
-        public void setProperty( String key, Object value )
-        {
-            // Do not allow the database to be modified
-        }
-
-        @Override
-        public Iterator<String> getKeys()
-        {
-            // Only return those in memory
-            return map.keySet().iterator();
-        }
-
     }
 }
