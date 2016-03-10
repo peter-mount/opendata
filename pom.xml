@@ -11,9 +11,6 @@
     <modules>
         <module>applications</module>
         <module>brokers</module>
-        <module>cluster</module>
-        <module>config</module>
-        <module>core</module>
         <module>gis</module>
         <module>nreod</module> 
         <module>nrod</module>
@@ -22,7 +19,6 @@
         <module>scheduler</module>
         <module>web</module>
         <module>tflod</module>
-        <module>opendata-kernel</module>
     </modules>
     
     <properties>

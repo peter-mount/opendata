@@ -604,9 +604,9 @@ public class RabbitMQ
     {
         Configuration config = JNDIConfig.INSTANCE;
         return new RabbitConnection(
-                config.get( jndiPrefix + "/user" ),
-                config.get( jndiPrefix + "/password" ),
-                config.get( jndiPrefix + "/host" )
+                config.getString( jndiPrefix + "/user" ),
+                config.getString( jndiPrefix + "/password" ),
+                config.getString( jndiPrefix + "/host" )
         );
     }
 
