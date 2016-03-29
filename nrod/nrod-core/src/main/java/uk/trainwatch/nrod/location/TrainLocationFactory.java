@@ -17,10 +17,11 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.json.JsonObjectBuilder;
 import javax.sql.DataSource;
+import uk.trainwatch.util.config.Database;
 import uk.trainwatch.util.sql.SQL;
 import uk.trainwatch.util.sql.UncheckedSQLException;
 
@@ -32,23 +33,23 @@ import uk.trainwatch.util.sql.UncheckedSQLException;
 public class TrainLocationFactory
 {
 
-    private static final Logger LOG = Logger.getLogger( TrainLocationFactory.class.getName() );
+    private static final Logger LOG = Logger.getGlobal();
 
     private Map<LocationKey, TrainLocation> map = new ConcurrentHashMap<>();
     private List<String> stationIndex;
     private Map<String, List<TrainLocation>> stations;
 
-    @Resource( name = "jdbc/rail" )
+    @Inject
+    @Database("rail")
     private DataSource dataSource;
 
     @PostConstruct
     void start()
     {
-        try
-        {
+        try {
             reload();
-        } catch( SQLException ex )
-        {
+        }
+        catch( SQLException ex ) {
             LOG.log( Level.SEVERE, "Unable to load initial locations", ex );
             throw new UncheckedSQLException( ex );
         }
@@ -92,19 +93,17 @@ public class TrainLocationFactory
             throws SQLException
     {
         LOG.log( Level.INFO, "Reloading TrainLocations" );
-        try( Connection con = dataSource.getConnection() )
-        {
-            try( Statement s = con.createStatement() )
-            {
+        try( Connection con = dataSource.getConnection() ) {
+            try( Statement s = con.createStatement() ) {
                 Map<LocationKey, TrainLocation> newMap = new ConcurrentHashMap<>();
                 SQL.stream( s.executeQuery( "SELECT * FROM timetable.tiploc" ), TrainLocation.fromSQL ).
-                        forEach( loc ->
-                                {
-                                    newMap.put( new TrainLocationID( loc.getId() ), loc );
-                                    newMap.put( new CRS( loc.getCrs() ), loc );
-                                    newMap.put( new NLC( loc.getNlc() ), loc );
-                                    newMap.put( new Stanox( loc.getStanox() ), loc );
-                                    newMap.put( new Tiploc( loc.getTiploc() ), loc );
+                        forEach( loc
+                                -> {
+                            newMap.put( new TrainLocationID( loc.getId() ), loc );
+                            newMap.put( new CRS( loc.getCrs() ), loc );
+                            newMap.put( new NLC( loc.getNlc() ), loc );
+                            newMap.put( new Stanox( loc.getStanox() ), loc );
+                            newMap.put( new Tiploc( loc.getTiploc() ), loc );
                         } );
                 map = newMap;
 
@@ -132,28 +131,23 @@ public class TrainLocationFactory
      */
     public TrainLocation resolveTrainLocation( String name )
     {
-        if( name == null || name.isEmpty() )
-        {
+        if( name == null || name.isEmpty() ) {
             return null;
         }
 
         TrainLocation loc = getTrainLocationByCrs( name );
-        if( loc == null )
-        {
+        if( loc == null ) {
             loc = getTrainLocationByTiploc( name );
         }
-        if( loc == null )
-        {
+        if( loc == null ) {
             loc = getTrainLocationByNlc( name );
         }
-        if( loc == null )
-        {
-            try
-            {
+        if( loc == null ) {
+            try {
                 loc = getTrainLocationByStanox( Long.parseLong( name ) );
-            } catch( NumberFormatException |
-                     NullPointerException ex )
-            {
+            }
+            catch( NumberFormatException |
+                   NullPointerException ex ) {
                 loc = null;
             }
         }
