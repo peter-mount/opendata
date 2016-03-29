@@ -16,7 +16,7 @@ import javax.xml.stream.XMLStreamWriter;
 import org.apache.tomcat.dbcp.dbcp2.DelegatingConnection;
 import uk.trainwatch.gis.PostGISUtils;
 import uk.trainwatch.gis.svg.SvgRenderer;
-import uk.trainwatch.util.sql.Database;
+import uk.trainwatch.util.config.Database;
 
 /**
  *

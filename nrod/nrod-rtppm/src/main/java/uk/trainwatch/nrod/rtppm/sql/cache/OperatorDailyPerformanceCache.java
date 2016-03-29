@@ -29,7 +29,7 @@ import javax.inject.Inject;
 import javax.sql.DataSource;
 import uk.trainwatch.nrod.rtppm.sql.OperatorDailyPerformance;
 import uk.trainwatch.util.TimeUtils;
-import uk.trainwatch.util.sql.Database;
+import uk.trainwatch.util.config.Database;
 import uk.trainwatch.util.sql.SQL;
 
 /**

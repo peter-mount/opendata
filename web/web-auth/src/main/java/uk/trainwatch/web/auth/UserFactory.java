@@ -17,7 +17,7 @@ import javax.inject.Inject;
 import javax.sql.DataSource;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
-import uk.trainwatch.util.sql.Database;
+import uk.trainwatch.util.config.Database;
 import uk.trainwatch.util.sql.SQL;
 
 /**

@@ -19,8 +19,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.sql.DataSource;
 import uk.trainwatch.nre.darwin.model.ctt.referenceschema.CISSource;
 import uk.trainwatch.nre.darwin.model.ctt.referenceschema.LocationRef;
@@ -28,6 +28,7 @@ import uk.trainwatch.nre.darwin.model.ctt.referenceschema.Reason;
 import uk.trainwatch.nre.darwin.model.ctt.referenceschema.TocRef;
 import uk.trainwatch.nre.darwin.model.ctt.referenceschema.Via;
 import uk.trainwatch.nrod.location.TrainLocation;
+import uk.trainwatch.util.config.Database;
 import uk.trainwatch.util.sql.SQL;
 
 /**
@@ -41,7 +42,8 @@ public class DarwinReferenceManager
 
     private static final Logger LOG = Logger.getLogger( DarwinReferenceManager.class.getName() );
 
-    @Resource( name = "jdbc/rail" )
+    @Inject
+    @Database( "rail" )
     private DataSource dataSource;
 
     /**

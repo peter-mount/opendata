@@ -23,7 +23,7 @@ import javax.servlet.jsp.tagext.BodyTagSupport;
 import javax.sql.DataSource;
 import uk.trainwatch.util.CDIUtils;
 import uk.trainwatch.util.Streams;
-import uk.trainwatch.util.sql.Database;
+import uk.trainwatch.util.config.Database;
 import uk.trainwatch.util.sql.SQL;
 import uk.trainwatch.util.sql.SQLFunction;
 import uk.trainwatch.web.ldb.cache.TrainCache;

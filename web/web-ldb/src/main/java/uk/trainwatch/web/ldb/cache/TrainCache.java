@@ -19,7 +19,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 import uk.trainwatch.util.Predicates;
-import uk.trainwatch.util.sql.Database;
+import uk.trainwatch.util.config.Database;
 import uk.trainwatch.web.ldb.model.Association;
 import uk.trainwatch.web.ldb.model.Forecast;
 import uk.trainwatch.web.ldb.model.ForecastEntry;

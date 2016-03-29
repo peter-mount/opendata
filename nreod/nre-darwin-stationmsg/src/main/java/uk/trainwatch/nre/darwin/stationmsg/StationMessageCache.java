@@ -23,7 +23,7 @@ import javax.inject.Inject;
 import javax.sql.DataSource;
 import uk.trainwatch.nre.darwin.model.ppt.stationmessages.StationMessage;
 import uk.trainwatch.nre.darwin.parser.DarwinJaxbContext;
-import uk.trainwatch.util.sql.Database;
+import uk.trainwatch.util.config.Database;
 import uk.trainwatch.util.sql.SQL;
 
 /**

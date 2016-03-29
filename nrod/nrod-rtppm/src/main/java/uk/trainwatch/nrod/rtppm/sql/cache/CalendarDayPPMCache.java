@@ -27,7 +27,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 import uk.trainwatch.util.MinMaxStatistics;
-import uk.trainwatch.util.sql.Database;
+import uk.trainwatch.util.config.Database;
 
 /**
  * Cache requests for the calendar.

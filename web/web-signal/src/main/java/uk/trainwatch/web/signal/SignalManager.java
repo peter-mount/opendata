@@ -20,7 +20,7 @@ import uk.trainwatch.nrod.td.berth.BerthMap;
 import uk.trainwatch.nrod.td.berth.RecentAreaMap;
 import uk.trainwatch.nrod.td.model.TDMessage;
 import uk.trainwatch.util.RecentList;
-import uk.trainwatch.util.sql.Database;
+import uk.trainwatch.util.config.Database;
 import uk.trainwatch.util.sql.SQL;
 
 /**
