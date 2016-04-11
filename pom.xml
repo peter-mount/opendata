@@ -16,7 +16,6 @@
         <module>nrod</module>
         <module>ogl</module>
         <module>osgb</module>
-        <module>scheduler</module>
         <module>web</module>
         <module>tflod</module>
     </modules>

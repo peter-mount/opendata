@@ -5,7 +5,7 @@
  */
 package uk.trainwatch.gis;
 
-import com.google.common.base.Objects;
+import java.util.Objects;
 
 /**
  * Simple bounds
@@ -54,7 +54,7 @@ public interface Bounds<T>
             @Override
             public int hashCode()
             {
-                return Objects.hashCode( tl, tr, bl, br );
+                return Objects.hash( tl, tr, bl, br );
             }
 
             @Override
