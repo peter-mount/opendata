@@ -5,41 +5,25 @@
  */
 package uk.trainwatch.nre.darwin.reference.tools;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
-import org.apache.commons.cli.CommandLine;
-import org.kohsuke.MetaInfServices;
-import uk.trainwatch.util.app.DBUtility;
-import uk.trainwatch.util.app.Utility;
-import uk.trainwatch.util.counter.RateMonitor;
-import uk.trainwatch.util.sql.SQL;
-import uk.trainwatch.util.sql.UncheckedSQLException;
 
 /**
  *
  * @author peter
  */
-@MetaInfServices(Utility.class)
+//@MetaInfServices(Utility.class)
 public class DarwinImport
-        extends DBUtility
+//        extends DBUtility
 {
 
     protected static final Logger LOG = Logger.getLogger( DarwinReference.class.getName() );
     private static final String SCHEMA = "darwin";
     private List<Path> cifFiles;
     private Consumer<String> monitor;
-
+/*
     @Override
     @SuppressWarnings("ThrowableInstanceNeverThrown")
     public boolean parseArgs( CommandLine cmd )
@@ -89,4 +73,5 @@ public class DarwinImport
             }
         }
     }
+*/
 }

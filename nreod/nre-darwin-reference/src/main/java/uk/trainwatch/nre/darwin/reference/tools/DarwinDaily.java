@@ -5,52 +5,22 @@
  */
 package uk.trainwatch.nre.darwin.reference.tools;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.GZIPInputStream;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
-import org.apache.commons.net.ftp.FTPFile;
-import org.kohsuke.MetaInfServices;
-import uk.trainwatch.io.ftp.FTPClient;
-import uk.trainwatch.io.ftp.FTPClientBuilder;
 import uk.trainwatch.nre.darwin.parser.DarwinJaxbContext;
-import uk.trainwatch.util.LoggingUtils;
-import uk.trainwatch.util.Streams;
-import uk.trainwatch.util.app.DBUtility;
-import uk.trainwatch.util.app.FTPUtilityHelper;
-import uk.trainwatch.util.app.Utility;
-import uk.trainwatch.util.sql.SQL;
 
 /**
  * Handles the daily import of the full darwin schedule
  * <p>
  * @author peter
  */
-@MetaInfServices(Utility.class)
+//@MetaInfServices(Utility.class)
 @ApplicationScoped
 public class DarwinDaily
-        extends DBUtility
+//        extends DBUtility
 {
 
     // The file suffix to retrieve
@@ -71,11 +41,12 @@ public class DarwinDaily
     private int retry;
     private boolean retrieve;
     private Path basePath;
-    private final FTPUtilityHelper ftpHelper;
+  //  private final FTPUtilityHelper ftpHelper;
 
     @Inject
     private DarwinJaxbContext darwinJaxbContext;
 
+    /*
     public DarwinDaily()
     {
         super();
@@ -254,4 +225,5 @@ public class DarwinDaily
             throw new UncheckedIOException( ex );
         }
     }
+*/
 }

@@ -15,69 +15,20 @@
  */
 package uk.trainwatch.nre.darwin.reference.tools;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UncheckedIOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.LongAccumulator;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.xml.bind.JAXBException;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
-import org.apache.commons.net.ftp.FTPFile;
-import org.kohsuke.MetaInfServices;
-import uk.trainwatch.io.ftp.FTPClient;
-import uk.trainwatch.io.ftp.FTPClientBuilder;
-import uk.trainwatch.nre.darwin.model.ctt.referenceschema.CISSource;
-import uk.trainwatch.nre.darwin.model.ctt.referenceschema.LocationRef;
-import uk.trainwatch.nre.darwin.model.ctt.referenceschema.PportTimetableRef;
-import uk.trainwatch.nre.darwin.model.ctt.referenceschema.Reason;
-import uk.trainwatch.nre.darwin.model.ctt.referenceschema.TocRef;
-import uk.trainwatch.nre.darwin.model.ctt.referenceschema.Via;
-import uk.trainwatch.nre.darwin.parser.DarwinJaxbContext;
-import uk.trainwatch.util.LoggingUtils;
-import uk.trainwatch.util.Streams;
-import uk.trainwatch.util.app.DBUtility;
-import uk.trainwatch.util.app.FTPUtilityHelper;
-import uk.trainwatch.util.app.Utility;
-import uk.trainwatch.util.sql.SQL;
-import uk.trainwatch.util.sql.SQLConsumer;
-import uk.trainwatch.util.sql.UncheckedSQLException;
 
 /**
  * Imports/Updates darwin reference data
  * <p>
  * @author peter
  */
-@MetaInfServices(Utility.class)
+//@MetaInfServices(Utility.class)
 @ApplicationScoped
 public class DarwinReference
-        extends DBUtility
+//        extends DBUtility
 {
 
     // The file suffix to retrieve
@@ -100,6 +51,7 @@ public class DarwinReference
     private int retry;
     private boolean retrieve;
     private Path basePath;
+    /*
     private final FTPUtilityHelper ftpHelper;
 
     @Inject
@@ -592,4 +544,5 @@ public class DarwinReference
 
         LOG.log( Level.INFO, () -> "Updated " + updates.size() + " vias" );
     }
+*/
 }
