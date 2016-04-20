@@ -10,7 +10,6 @@
     
     <modules>
         <module>applications</module>
-        <module>brokers</module>
         <module>gis</module>
         <module>nreod</module> 
         <module>nrod</module>
