@@ -26,11 +26,13 @@
             <optional>true</optional>
         </dependency>
 
+<!--
         <dependency>
             <groupId>uk.trainwatch.web</groupId>
             <artifactId>web-core</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        -->
         
         <!-- Servlet api -->
         <dependency>
