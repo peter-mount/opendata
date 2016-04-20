@@ -53,48 +53,48 @@ public class SVGMapGenerator
 //        }
     }
 
-    private void exportMap( Connection con )
-            throws SQLException,
-                   IOException,
-                   ParserConfigurationException,
-                   XMLStreamException
-    {
-        LOG.log( Level.INFO, "Determining map bounds" );
-        Rectangle2D bounds = PostGISUtils.getMapBounds( con,
-                                                        "tpnm",
-                                                        "feat_graphictext",
-                                                        "feat_graphicvector",
-                                                        "feat_signal",
-                                                        "feat_track"
-        );
-
-        // Size of each tile in map units
-        final int tileSize = 256;
-
-        // ox = offset x
-        final int ox = (int) bounds.getMinX();
-
-        // nx = number tile on x axis
-        final int nx = (int) ((bounds.getMaxX() - bounds.getMinX()) / tileSize);
-
-        // ox = offset x
-        final int oy = (int) bounds.getMinY();
-
-        // nx = number tile on x axis
-        final int ny = (int) ((bounds.getMaxY() - bounds.getMinY()) / tileSize);
-
-        // Total tile count
-        final int total = nx * ny;
-        final int logstep = Math.max( 1, total / 100 );
-
-        LOG.log( Level.INFO, () -> "Tile size " + tileSize + " total (" + nx + "," + ny + ") = " + total + " tiles." );
-        LOG.log( Level.INFO, () -> "ox=" + ox + ", oy=" + oy );
-
-//        TileWriter tileWrier = new TileWriter( con, nx );
-//        TileToSVG toSVG = new TileToSVG( con, nx, ox, oy, tileSize );
+//    private void exportMap( Connection con )
+//            throws SQLException,
+//                   IOException,
+//                   ParserConfigurationException,
+//                   XMLStreamException
+//    {
+//        LOG.log( Level.INFO, "Determining map bounds" );
+//        Rectangle2D bounds = PostGISUtils.getMapBounds( con,
+//                                                        "tpnm",
+//                                                        "feat_graphictext",
+//                                                        "feat_graphicvector",
+//                                                        "feat_signal",
+//                                                        "feat_track"
+//        );
 //
-//        IntStream.range( 0, total ).
-//                boxed().
-//                forEach( SQLConsumer.guard( tileId -> tileWrier.accept( tileId, toSVG.apply( tileId ) ) ) );
-    }
+//        // Size of each tile in map units
+//        final int tileSize = 256;
+//
+//        // ox = offset x
+//        final int ox = (int) bounds.getMinX();
+//
+//        // nx = number tile on x axis
+//        final int nx = (int) ((bounds.getMaxX() - bounds.getMinX()) / tileSize);
+//
+//        // ox = offset x
+//        final int oy = (int) bounds.getMinY();
+//
+//        // nx = number tile on x axis
+//        final int ny = (int) ((bounds.getMaxY() - bounds.getMinY()) / tileSize);
+//
+//        // Total tile count
+//        final int total = nx * ny;
+//        final int logstep = Math.max( 1, total / 100 );
+//
+//        LOG.log( Level.INFO, () -> "Tile size " + tileSize + " total (" + nx + "," + ny + ") = " + total + " tiles." );
+//        LOG.log( Level.INFO, () -> "ox=" + ox + ", oy=" + oy );
+//
+////        TileWriter tileWrier = new TileWriter( con, nx );
+////        TileToSVG toSVG = new TileToSVG( con, nx, ox, oy, tileSize );
+////
+////        IntStream.range( 0, total ).
+////                boxed().
+////                forEach( SQLConsumer.guard( tileId -> tileWrier.accept( tileId, toSVG.apply( tileId ) ) ) );
+//    }
 }

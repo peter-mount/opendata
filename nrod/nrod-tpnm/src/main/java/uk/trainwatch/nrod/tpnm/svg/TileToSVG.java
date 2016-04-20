@@ -18,8 +18,8 @@ import java.util.stream.Stream;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import org.postgis.LineString;
-import org.postgis.PGgeometry;
+//import org.postgis.LineString;
+//import org.postgis.PGgeometry;
 import uk.trainwatch.util.sql.SQL;
 
 /**
@@ -100,56 +100,56 @@ public class TileToSVG
             throws SQLException,
                    XMLStreamException
     {
-        gvPS = SQL.prepare( gvPS, con,
-                            "SELECT layer,geom"
-                            + " FROM tpnm.feat_graphicvector"
-                            + " WHERE geom && (tpnm.ST_MakeEnvelope(?,?,?,?,4258)::geometry)",
-                            (int) tileBounds.getMinX(),
-                            (int) tileBounds.getMinY(),
-                            (int) tileBounds.getMaxX(),
-                            (int) tileBounds.getMaxY()
-        );
-
-        // Create a map of each layer
-        Map<Integer, String> layers = SQL.stream( gvPS, rs -> new Object()
-        {
-            int layer = rs.getInt( 1 );
-            LineString line = (LineString) ((PGgeometry) rs.getObject( 2 )).getGeometry();
-        } ).
-                collect( Collectors.toMap( o -> o.layer,
-                                           o -> lineStringToString( o.line, tileBounds ),
-                                           ( a, b ) -> a + b ) );
-
-        // Bail out if nothing to do, notifying caller
-        if( layers.isEmpty() ) {
-            return false;
-        }
-
-        layers.entrySet().
-                forEach( e -> {
-                    try {
-                        int layer = e.getKey();
-
-                        w.writeStartElement( "path" );
-                        w.writeAttribute( "fill", "#ffffff" );
-                        w.writeAttribute( "stroke", "#000000" );
-                        w.writeAttribute( "d", e.getValue() + "Z" );
-                        w.writeEndElement();
-                    }
-                    catch( XMLStreamException ex ) {
-                        throw new RuntimeException( ex );
-                    }
-
-                } );
+//        gvPS = SQL.prepare( gvPS, con,
+//                            "SELECT layer,geom"
+//                            + " FROM tpnm.feat_graphicvector"
+//                            + " WHERE geom && (tpnm.ST_MakeEnvelope(?,?,?,?,4258)::geometry)",
+//                            (int) tileBounds.getMinX(),
+//                            (int) tileBounds.getMinY(),
+//                            (int) tileBounds.getMaxX(),
+//                            (int) tileBounds.getMaxY()
+//        );
+//
+//        // Create a map of each layer
+//        Map<Integer, String> layers = SQL.stream( gvPS, rs -> new Object()
+//        {
+//            int layer = rs.getInt( 1 );
+//            LineString line = (LineString) ((PGgeometry) rs.getObject( 2 )).getGeometry();
+//        } ).
+//                collect( Collectors.toMap( o -> o.layer,
+//                                           o -> lineStringToString( o.line, tileBounds ),
+//                                           ( a, b ) -> a + b ) );
+//
+//        // Bail out if nothing to do, notifying caller
+//        if( layers.isEmpty() ) {
+//            return false;
+//        }
+//
+//        layers.entrySet().
+//                forEach( e -> {
+//                    try {
+//                        int layer = e.getKey();
+//
+//                        w.writeStartElement( "path" );
+//                        w.writeAttribute( "fill", "#ffffff" );
+//                        w.writeAttribute( "stroke", "#000000" );
+//                        w.writeAttribute( "d", e.getValue() + "Z" );
+//                        w.writeEndElement();
+//                    }
+//                    catch( XMLStreamException ex ) {
+//                        throw new RuntimeException( ex );
+//                    }
+//
+//                } );
 
         return true;
     }
 
-    private String lineStringToString( LineString line, Rectangle2D tileBounds )
-    {
-        return Stream.of( line.getPoints() ).
-                map( p -> (int) (p.getX() - tileBounds.getMinX()) + "," + (int) (p.getY() - tileBounds.getMinY()) ).
-                collect( Collectors.joining( "L", "M", "" ) );
-    }
+//    private String lineStringToString( LineString line, Rectangle2D tileBounds )
+//    {
+//        return Stream.of( line.getPoints() ).
+//                map( p -> (int) (p.getX() - tileBounds.getMinX()) + "," + (int) (p.getY() - tileBounds.getMinY()) ).
+//                collect( Collectors.joining( "L", "M", "" ) );
+//    }
 
 }
