@@ -26,8 +26,8 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.configuration.Configuration;
 import uk.trainwatch.util.CDIUtils;
+import uk.trainwatch.util.config.Configuration;
 import uk.trainwatch.util.config.ConfigurationService;
 import uk.trainwatch.web.util.CacheControl;
 import uk.trainwatch.web.util.ImageUtils;
@@ -83,7 +83,7 @@ public enum StaticContentManager
         servletContext = servletConfig.getServletContext();
 
         CDIUtils.inject( this );
-        this.config = configurationService.getPrivateConfiguration( "cms" );
+//        this.config = configurationService.getPrivateConfiguration( "cms" );
 
         hostname = getHostname();
         baseDirectory = new File( getHostString( "basedir" ) );

@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import org.kohsuke.MetaInfServices;
 import uk.trainwatch.nrod.timetable.cif.record.BasicSchedule;
 import uk.trainwatch.nrod.timetable.cif.record.BasicScheduleExtras;
 import uk.trainwatch.nrod.timetable.cif.record.CIFParser;
@@ -38,7 +37,6 @@ import uk.trainwatch.nrod.timetable.util.OperatingCharacteristics;
 import uk.trainwatch.nrod.timetable.util.TimingLoad;
 import uk.trainwatch.util.Consumers;
 import uk.trainwatch.util.Functions;
-import uk.trainwatch.util.app.Utility;
 import uk.trainwatch.util.counter.CounterConsumer;
 
 /**
@@ -46,9 +44,9 @@ import uk.trainwatch.util.counter.CounterConsumer;
  * <p>
  * @author Peter T Mount
  */
-@MetaInfServices( Utility.class )
+//@MetaInfServices( Utility.class )
 public class TimeTableChecker
-        implements Utility
+//        implements Utility
 {
 
     private static final Logger LOG = Logger.getLogger( TimeTableChecker.class.getName() );
@@ -65,13 +63,13 @@ public class TimeTableChecker
                 addOption( null, "operatingcharacteristics", false, "Check for unsupported Operating Characteristics" );
     }
 
-    @Override
+    
     public final Options getOptions()
     {
         return options;
     }
 
-    @Override
+    
     public boolean parseArgs( CommandLine cmd )
     {
 
@@ -112,7 +110,7 @@ public class TimeTableChecker
         return !cifFiles.isEmpty();
     }
 
-    @Override
+    
     public void runUtility()
             throws Exception
     {

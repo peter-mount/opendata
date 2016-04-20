@@ -27,7 +27,7 @@ import uk.trainwatch.nrod.td.model.TDMessage;
 import uk.trainwatch.nrod.td.model.TDMessageFactory;
 import uk.trainwatch.rabbitmq.Rabbit;
 import uk.trainwatch.rabbitmq.RabbitMQ;
-import uk.trainwatch.util.config.JNDIConfig;
+//import uk.trainwatch.util.config.JNDIConfig;
 
 /**
  * Ensures that, if enabled, we start receiving signal messages and populate our caches
@@ -53,10 +53,10 @@ public class SignalContextListener
     @Override
     public void contextInitialized( ServletContextEvent sce )
     {
-        if( JNDIConfig.INSTANCE.getBoolean( "signal.disabled" ) ) {
-            LOG.log( Level.INFO, "Signalling has been disabled for this instance" );
-            return;
-        }
+//        if( JNDIConfig.INSTANCE.getBoolean( "signal.disabled" ) ) {
+//            LOG.log( Level.INFO, "Signalling has been disabled for this instance" );
+//            return;
+//        }
 
         // Now pass all messages to an event
         rabbit.queueDurableEvent( QUEUE_NAME,

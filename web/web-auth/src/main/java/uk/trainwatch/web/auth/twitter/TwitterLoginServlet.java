@@ -34,19 +34,19 @@ public class TwitterLoginServlet
             throws ServletException,
                    IOException
     {
-        try {
-            HttpSession session = request.getRequest().getSession( true );
-
-            Twitter twitter = twitterManager.newTwitter( "trainwatch" );
-            session.setAttribute( "twitter", twitter );
-
-            RequestToken requestToken = twitter.getOAuthRequestToken( "https://" + request.getServerName() + "/login/twitterCallback" );
-            session.setAttribute( "requestToken", requestToken );
-            request.getResponse().sendRedirect( requestToken.getAuthenticationURL() );
-        }
-        catch( TwitterException ex ) {
-            throw new ServletException( ex );
-        }
+//        try {
+//            HttpSession session = request.getRequest().getSession( true );
+//
+//            Twitter twitter = twitterManager.newTwitter( "trainwatch" );
+//            session.setAttribute( "twitter", twitter );
+//
+//            RequestToken requestToken = twitter.getOAuthRequestToken( "https://" + request.getServerName() + "/login/twitterCallback" );
+//            session.setAttribute( "requestToken", requestToken );
+//            request.getResponse().sendRedirect( requestToken.getAuthenticationURL() );
+//        }
+//        catch( TwitterException ex ) {
+//            throw new ServletException( ex );
+//        }
     }
 
 }

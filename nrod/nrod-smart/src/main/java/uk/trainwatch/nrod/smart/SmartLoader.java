@@ -20,14 +20,9 @@ import java.util.logging.Logger;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-import org.apache.commons.cli.CommandLine;
-import org.kohsuke.MetaInfServices;
 import uk.trainwatch.util.Functions;
 import uk.trainwatch.util.JsonUtils;
-import uk.trainwatch.util.app.DBUtility;
-import uk.trainwatch.util.app.Utility;
 import uk.trainwatch.util.counter.CounterConsumer;
-import uk.trainwatch.util.sql.SQL;
 import uk.trainwatch.util.sql.SQLBiConsumer;
 import uk.trainwatch.util.sql.SQLConsumer;
 
@@ -35,9 +30,9 @@ import uk.trainwatch.util.sql.SQLConsumer;
  *
  * @author peter
  */
-@MetaInfServices(Utility.class)
+//@MetaInfServices(Utility.class)
 public class SmartLoader
-        extends DBUtility
+//        extends DBUtility
 {
 
     protected static final Logger LOG = Logger.getLogger( SmartLoader.class.getName() );
@@ -58,33 +53,33 @@ public class SmartLoader
                                   + "?,?,?,?,?,?,?,?)";
     private List<Path> files;
 
-    @Override
-    public boolean parseArgs( CommandLine cmd )
-    {
-        super.parseArgs( cmd );
-
-        files = Utility.getArgFileList( cmd );
-
-        return !files.isEmpty();
-    }
-
-    @Override
-    public void runUtility()
-            throws Exception
-    {
-        importFiles( files, new Parser() );
-    }
-
-    @Override
-    protected void initDB( Connection con )
-            throws SQLException
-    {
-        LOG.log( Level.INFO, "Clearing down SMART database" );
-        SQL.deleteIdTable( con, SCHEMA, "smart" );
-        SQL.deleteIdTable( con, SCHEMA, "smart_area" );
-        SQL.deleteIdTable( con, SCHEMA, "smart_berth" );
-        SQL.deleteIdTable( con, SCHEMA, "smart_line" );
-    }
+//    @Override
+//    public boolean parseArgs( CommandLine cmd )
+//    {
+//        super.parseArgs( cmd );
+//
+//        files = Utility.getArgFileList( cmd );
+//
+//        return !files.isEmpty();
+//    }
+//
+//    @Override
+//    public void runUtility()
+//            throws Exception
+//    {
+//        importFiles( files, new Parser() );
+//    }
+//
+//    @Override
+//    protected void initDB( Connection con )
+//            throws SQLException
+//    {
+//        LOG.log( Level.INFO, "Clearing down SMART database" );
+//        SQL.deleteIdTable( con, SCHEMA, "smart" );
+//        SQL.deleteIdTable( con, SCHEMA, "smart_area" );
+//        SQL.deleteIdTable( con, SCHEMA, "smart_berth" );
+//        SQL.deleteIdTable( con, SCHEMA, "smart_line" );
+//    }
 
     private static class Parser
             implements SQLBiConsumer<Connection, Path>

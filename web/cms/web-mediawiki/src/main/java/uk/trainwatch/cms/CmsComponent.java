@@ -86,7 +86,7 @@ public abstract class CmsComponent
     public boolean init()
     {
         hostname = RabbitMQ.getHostname();
-        config = configurationService.getPrivateConfiguration( "cms" );
+//        config = configurationService.getPrivateConfiguration( "cms" );
         return getHostBoolean( "enabled", true );
     }
 

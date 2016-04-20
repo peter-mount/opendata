@@ -15,11 +15,8 @@
  */
 package uk.trainwatch.nrod.corpus;
 
-import java.sql.SQLException;
-import java.util.logging.Level;
-import javax.servlet.ServletContextEvent;
 import javax.servlet.annotation.WebListener;
-import uk.trainwatch.util.sql.DBContextListener;
+//import uk.trainwatch.util.sql.DBContextListener;
 
 /**
  *
@@ -27,15 +24,15 @@ import uk.trainwatch.util.sql.DBContextListener;
  */
 @WebListener
 public class CorpusContextListener
-        extends DBContextListener
+//        extends DBContextListener
 {
 
-    @Override
-    protected void init( ServletContextEvent sce )
-            throws SQLException
-    {
-        log.log( Level.INFO, "Initialising CorpusManager" );
-        CorpusManager.INSTANCE.setDataSource( getRailDataSource() );
-    }
+//    @Override
+//    protected void init( ServletContextEvent sce )
+//            throws SQLException
+//    {
+//        log.log( Level.INFO, "Initialising CorpusManager" );
+//        CorpusManager.INSTANCE.setDataSource( getRailDataSource() );
+//    }
 
 }

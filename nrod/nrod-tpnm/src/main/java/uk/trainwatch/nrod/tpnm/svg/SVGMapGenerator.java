@@ -7,57 +7,50 @@ package uk.trainwatch.nrod.tpnm.svg;
 
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
-import org.apache.commons.cli.CommandLine;
-import org.kohsuke.MetaInfServices;
 import uk.trainwatch.gis.PostGISUtils;
-import uk.trainwatch.util.app.DBUtility;
-import uk.trainwatch.util.app.Utility;
-import uk.trainwatch.util.sql.SQL;
 
 /**
  *
  * @author peter
  */
-@MetaInfServices(Utility.class)
+//@MetaInfServices(Utility.class)
 public class SVGMapGenerator
-        extends DBUtility
+//        extends DBUtility
 {
 
     private static final Logger LOG = Logger.getLogger( SVGMapGenerator.class.getName() );
 
-    @Override
-    @SuppressWarnings("ThrowableInstanceNeverThrown")
-    public boolean parseArgs( CommandLine cmd )
-    {
-        super.parseArgs( cmd );
+//    @SuppressWarnings("ThrowableInstanceNeverThrown")
+//    public boolean parseArgs( CommandLine cmd )
+//    {
+//  //      super.parseArgs( cmd );
+//
+//        //cifFiles = Utility.getArgFileList( cmd );
+//        //return !cifFiles.isEmpty();
+//        return true;
+//    }
 
-        //cifFiles = Utility.getArgFileList( cmd );
-        //return !cifFiles.isEmpty();
-        return true;
-    }
-
-    @Override
+    //@Override
     public void runUtility()
             throws Exception
     {
-        try( Connection con = PostGISUtils.postgisEnable( getConnection() ) ) {
-
-            SQL.deleteTable( con, "tpnm", "tile" );
-            exportMap( con );
-        }
-        catch( IOException ex ) {
-            throw new UncheckedIOException( ex );
-        }
-        catch( ParserConfigurationException ex ) {
-            throw new IllegalStateException( ex );
-        }
+//        try( Connection con = PostGISUtils.postgisEnable( getConnection() ) ) {
+//
+//            SQL.deleteTable( con, "tpnm", "tile" );
+//            exportMap( con );
+//        }
+//        catch( IOException ex ) {
+//            throw new UncheckedIOException( ex );
+//        }
+//        catch( ParserConfigurationException ex ) {
+//            throw new IllegalStateException( ex );
+//        }
     }
 
     private void exportMap( Connection con )

@@ -15,68 +15,56 @@
  */
 package uk.trainwatch.nrod.rtppm.tools;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.sql.Connection;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.cli.CommandLine;
-import org.kohsuke.MetaInfServices;
-import uk.trainwatch.nrod.rtppm.factory.RTPPMDataMsgFactory;
-import uk.trainwatch.nrod.rtppm.sql.OperatorPPMSQL;
-import uk.trainwatch.util.JsonUtils;
-import uk.trainwatch.util.app.DBUtility;
-import uk.trainwatch.util.app.Utility;
-import uk.trainwatch.util.sql.UncheckedSQLException;
 
 /**
  *
  * @author Peter T Mount
  */
-@MetaInfServices( Utility.class )
+//@MetaInfServices( Utility.class )
 public class ImportRTPPM
-        extends DBUtility
+//        extends DBUtility
 {
 
     private static final Logger LOG = Logger.getLogger( ImportRTPPM.class.getName() );
     private List<String> fileNames;
 
-    @Override
-    public boolean parseArgs( CommandLine cmd )
-    {
-        if( super.parseArgs( cmd ) )
-        {
-            fileNames = cmd.getArgList();
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public void runUtility()
-            throws Exception
-    {
-        for( String fileName : fileNames )
-        {
-            LOG.log( Level.INFO, () -> "Importing " + fileName );
-            try( BufferedReader r = new BufferedReader( new FileReader( fileName ) );
-                 Connection con = getConnection() )
-            {
-                try
-                {
-                    r.lines().
-                            map( JsonUtils.parseJsonObject ).
-                            map( RTPPMDataMsgFactory.INSTANCE ).
-                            forEach( m -> OperatorPPMSQL.INSERT_OPERATORPAGEPPM.accept( con, m ) );
-                }
-                catch( UncheckedSQLException ex )
-                {
-                    LOG.log( Level.SEVERE, ex.getMessage(), ex );
-                }
-            }
-
-        }
-    }
+//    @Override
+//    public boolean parseArgs( CommandLine cmd )
+//    {
+//        if( super.parseArgs( cmd ) )
+//        {
+//            fileNames = cmd.getArgList();
+//            return true;
+//        }
+//        return false;
+//    }
+//
+//    @Override
+//    public void runUtility()
+//            throws Exception
+//    {
+//        for( String fileName : fileNames )
+//        {
+//            LOG.log( Level.INFO, () -> "Importing " + fileName );
+//            try( BufferedReader r = new BufferedReader( new FileReader( fileName ) );
+//                 Connection con = getConnection() )
+//            {
+//                try
+//                {
+//                    r.lines().
+//                            map( JsonUtils.parseJsonObject ).
+//                            map( RTPPMDataMsgFactory.INSTANCE ).
+//                            forEach( m -> OperatorPPMSQL.INSERT_OPERATORPAGEPPM.accept( con, m ) );
+//                }
+//                catch( UncheckedSQLException ex )
+//                {
+//                    LOG.log( Level.SEVERE, ex.getMessage(), ex );
+//                }
+//            }
+//
+//        }
+//    }
 
 }

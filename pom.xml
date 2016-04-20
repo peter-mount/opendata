@@ -9,14 +9,18 @@
     <name>Open Data Parent</name>
     
     <modules>
+        <!--
         <module>applications</module>
+        -->
         <module>gis</module>
         <module>nreod</module> 
         <module>nrod</module>
         <module>ogl</module>
+        <!--
         <module>osgb</module>
         <module>web</module>
         <module>tflod</module>
+        -->
     </modules>
     
     <properties>
@@ -27,6 +31,21 @@
 
     <!-- Global dependencies -->
     <dependencies>
+        <dependency>
+            <groupId>uk.trainwatch</groupId>
+            <artifactId>opendata-core</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>uk.trainwatch</groupId>
+            <artifactId>opendata-config</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>uk.trainwatch</groupId>
+            <artifactId>opendata-cluster</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
         
         <!-- CDI -->
         <dependency>
