@@ -9,8 +9,8 @@ import java.awt.geom.Rectangle2D;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import org.postgis.LineString;
-import org.postgis.Point;
+//import org.postgis.LineString;
+//import org.postgis.Point;
 import uk.trainwatch.util.sql.SQL;
 
 /**
@@ -112,12 +112,12 @@ public class SvgBounds
      *          <p>
      * @return
      */
-    public Point transformPoint( Point p )
-    {
-        p.x = getX( p.x );
-        p.y = getY( p.y );
-        return p;
-    }
+//    public Point transformPoint( Point p )
+//    {
+//        p.x = getX( p.x );
+//        p.y = getY( p.y );
+//        return p;
+//    }
 
     /**
      * Transform a PostGIS {@link LineString} from map to output coordinates
@@ -126,13 +126,13 @@ public class SvgBounds
      * <p>
      * @return l
      */
-    public LineString transformLineString( LineString l )
-    {
-        for( Point p: l.getPoints() ) {
-            transformPoint( p );
-        }
-        return l;
-    }
+//    public LineString transformLineString( LineString l )
+//    {
+//        for( Point p: l.getPoints() ) {
+//            transformPoint( p );
+//        }
+//        return l;
+//    }
 
     public PreparedStatement prepare( PreparedStatement ps, Connection con, String fields, String table, String geom )
             throws SQLException
