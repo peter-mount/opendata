@@ -29,6 +29,19 @@
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>Area51 Releases</name>
+            <url>https://nexus.area51.onl/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>Area51 Snapshots</name>
+            <url>https://nexus.area51.onl/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+    
     <!-- Global dependencies -->
     <dependencies>
         <dependency>
